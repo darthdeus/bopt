@@ -1,3 +1,6 @@
+from collections import Callable
+from typing import NamedTuple, Optional
+
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -11,8 +14,92 @@ from functools import partial
 
 import numpy as np
 
-
+from .plot import plot_gp
 from .kernels import sqexp, k
+
+
+class Posterior(NamedTuple):
+    mu: np.ndarray
+    cov: np.ndarray
+
+    def std(self):
+        return np.sqrt(np.diag(self.cov))
+
+    def plot(self):
+        pass
+
+
+
+class GaussianProcess:
+    X_train: np.ndarray
+    y_train: np.ndarray
+    X_test: Optional[np.ndarray]
+
+    mu: Optional[np.ndarray]
+    cov: Optional[np.ndarray]
+
+    kernel: any #: Callable[[np.ndarray, np.ndarray], np.ndarray]
+
+    K: np.ndarray
+
+    def __init__(self, kernel=sqexp):
+        self.kernel = kernel
+
+    def fit(self, X_train: np.ndarray, y_train: np.ndarray, kernel=None) -> "GaussianProcess":
+        if kernel is not None:
+            self.kernel = kernel
+
+        self.X_train = X_train
+        self.y_train = y_train
+
+        self.K = k(X_train, X_train, self.kernel)
+
+        return self
+
+    def posterior(self, X_test, return_std=False):
+        """
+        p(y_test | X_test, X_train, y_train)
+        """
+        self.X_test = X_test
+        n = len(X_test)
+
+        K = self.K
+        K_s = k(self.X_train, X_test, self.kernel)
+        K_ss = k(X_test, X_test, self.kernel)
+
+        stable_eye = 1e-4 * np.eye(len(K))  # Just for numerical stability?
+
+        K_inv = inv(K + stable_eye)
+
+        # L = cholesky(K + stable_eye)
+        # alpha = solve(L.T, solve(L, y_train))
+        # mu = K_s.T @ alpha
+
+        self.mu = K_s.T @ K_inv @ self.y_train
+        self.cov = K_ss - K_s.T @ K_inv @ K_s
+
+        return self
+
+        # if return_std:
+        #     return mu, np.sqrt(np.diag(cov))
+        # else:
+        #     return mu, cov
+
+    def plot_prior(self, X, num_samples=3):
+        # plot_gp(np.zeros(len(X)), k(X, X), X)
+        plot_gp(np.zeros(len(X)), k(X, X), X) # , num_samples=num_samples)
+
+    def plot_posterior(self, num_samples=3):
+        plot_gp(self.mu, self.cov, self.X_test, self.X_train, self.y_train, num_samples=num_samples)
+
+
+
+# gp = GaussianProcess().fit(X_train, y_train)
+# mu, cov = gp.posterior(X_test)
+
+# gp.plot_prior()
+# gp.plot_posterior()
+
 
 
 def gp_reg(X_train, y_train, X_test, kernel=sqexp, return_std=False):
