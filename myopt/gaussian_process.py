@@ -10,7 +10,9 @@ from scipy.stats import norm
 from functools import partial
 
 import numpy as np
-from kernels import sqexp, k
+
+
+from .kernels import sqexp, k
 
 
 def gp_reg(X_train, y_train, X_test, kernel=sqexp, return_std=False):
@@ -38,8 +40,6 @@ def gp_reg(X_train, y_train, X_test, kernel=sqexp, return_std=False):
 
 
 def optimize_kernel(X_train, y_train, X):
-    i = 0
-
     def nll_fn(X_train, y_train, noise, kernel=sqexp):
         def step(theta):
             K = k(X_train, X_train, kernel=partial(sqexp, l=theta[0])) + noise ** 2 * np.eye(len(X_train))
@@ -48,8 +48,6 @@ def optimize_kernel(X_train, y_train, X):
             t2 = 0.5 * np.linalg.det(K)
             t3 = 0.5 * len(X_train) * np.log(2 * np.pi)
 
-            global i
-            i += 1
             return t1 + t2 + t3
 
         return step
@@ -63,4 +61,4 @@ def optimize_kernel(X_train, y_train, X):
 
     k_opt = partial(sqexp, l=l_opt)
 
-    plot_gp(*gp_reg(X_train, y_train, X, kernel=k_opt), X, X_train, y_train, figure=False)
+    return k_opt

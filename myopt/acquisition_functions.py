@@ -1,6 +1,7 @@
-from gaussian_process import gp_reg
 import numpy as np
-from numpy.linalg import norm
+from scipy.stats import norm
+
+from .gaussian_process import gp_reg
 
 
 def expected_improvement(X, X_sample, y_sample, xi=0.01):

@@ -1,7 +1,8 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from gaussian_process import gp_reg
 from scipy.optimize import minimize
+
+from .gaussian_process import gp_reg
 
 
 def plot_approximation(X, Y, X_sample, y_sample, X_next=None, show_legend=False):
