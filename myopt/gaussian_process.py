@@ -1,19 +1,11 @@
-from collections import Callable
-from typing import NamedTuple, Optional, Tuple
+from typing import Optional, Tuple
 
 import numpy as np
-import matplotlib.pyplot as plt
-
-from numpy.linalg import solve, cholesky, inv
-from numpy.random import multivariate_normal
-
+from numpy.linalg import inv
 from scipy.optimize import minimize
-from scipy.stats import norm
 
-from functools import partial
-
-from .plot import plot_gp
 from .kernels import Kernel, SquaredExp
+from .plot import plot_gp
 
 
 def compute_optimized_kernel(kernel, X_train, y_train):

@@ -2,6 +2,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 from numpy.random import multivariate_normal
 
+from .gaussian_process import GaussianProcess
+
 
 def plots(*plots, n_row=3, figsize=(15, 4)):
     num_rows = len(plots) // n_row + 1
@@ -49,3 +51,52 @@ def plot_gp(mu, cov, X, X_train=None, y_train=None, kernel=None, num_samples=3, 
         plt.plot(X_train, y_train, "rx", lw=2)
 
     plt.legend()
+
+
+def plot_approximation(ax, ei_y, kernel, X, Y, X_sample, y_sample, X_next=None, show_legend=False):
+    # mu, std = gp_reg(X_sample, y_sample, X, return_std=True)
+    mu, std = GaussianProcess(kernel=kernel).fit(X_sample, y_sample).posterior(X).mu_std()
+
+    ax.fill_between(X.ravel(),
+                     mu.ravel() + 1.96 * std,
+                     mu.ravel() - 1.96 * std,
+                     alpha=0.1)
+    l1 = ax.plot(X, Y, 'g--', lw=1, label='Objective')
+    l2 = ax.plot(X, mu, 'b-', lw=1, label='GP mean')
+    l3 = ax.plot(X_sample, y_sample, 'kx', mew=3, label='Samples')
+    if X_next:
+        ax.axvline(x=X_next, ls='--', c='k', lw=1)
+
+    ax2 = ax.twinx()
+
+    l4 = ax2.plot(X, ei_y, 'r-', lw=1, label='Acquisition fn')
+    ax2.axvline(x=X_next, ls='--', c='k', lw=1)
+
+    lns = l1 + l2 + l3 + l4
+    labs = [l.get_label() for l in lns]
+
+    if show_legend:
+        plt.legend(lns, labs)
+
+
+def plot_convergence(X_sample, y_sample, n_init=2):
+    plt.figure(figsize=(12, 3))
+
+    x = X_sample[n_init:].ravel()
+    y = y_sample[n_init:].ravel()
+    r = range(1, len(x) + 1)
+
+    x_neighbor_dist = [np.abs(a - b) for a, b in zip(x, x[1:])]
+    y_max_watermark = np.maximum.accumulate(y)
+
+    plt.subplot(1, 2, 1)
+    plt.plot(r[1:], x_neighbor_dist, 'bo-')
+    plt.xlabel('Iteration')
+    plt.ylabel('Distance')
+    plt.title('Distance between consecutive x\'s')
+
+    plt.subplot(1, 2, 2)
+    plt.plot(r, y_max_watermark, 'ro-')
+    plt.xlabel('Iteration')
+    plt.ylabel('Best Y')
+    plt.title('Value of best selected sample')

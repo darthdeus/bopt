@@ -5,8 +5,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.optimize import minimize
 
+from .plot import plot_approximation, plot_convergence
 from .acquisition_functions import expected_improvement
-from .gaussian_process import GaussianProcess
 from .kernels import SquaredExp
 
 
@@ -15,9 +15,12 @@ def bo_minimize(f: Callable, noise: float, bounds: np.ndarray,
                 X_true: np.ndarray = None, y_true: np.ndarray= None,
                 kernel=SquaredExp(),
                 acquisition_function=expected_improvement,
-                n_iter: int=8, plot=True):
+                n_iter: int=8, plot=True, plot_every: int=1):
+
+    num_plots = (n_iter // plot_every)
+
     if plot:
-        plt.figure(figsize=(14, n_iter * 2))
+        plt.figure(figsize=(14, num_plots * 2))
         plt.subplots_adjust(hspace=0.4)
 
     X_sample = X_init
@@ -34,67 +37,20 @@ def bo_minimize(f: Callable, noise: float, bounds: np.ndarray,
 
         ei_y = bound_acquisition_function(X_true, X_sample, y_sample)
 
-        # Plot samples, surrogate function, noise-free objective and next sampling location
-        ax1 = plt.subplot(n_iter // 2 + 1, 2, i + 1)
+        if plot:
+            if i % plot_every == 0:
+                # Plot samples, surrogate function, noise-free objective and next sampling location
+                ax1 = plt.subplot(num_plots // 2 + 1, 2, i // plot_every + 1)
 
-        plot_approximation(ax1, ei_y, kernel, X_true, y_true, X_sample, y_sample, X_next, show_legend=i == 0)
+                plot_approximation(ax1, ei_y, kernel, X_true, y_true, X_sample, y_sample, X_next, show_legend=i == 0)
 
-        plt.title(f'Iteration {i+1}')
+                plt.title(f'Iteration {i+1}')
 
         X_sample = np.vstack((X_sample, X_next))
         y_sample = np.vstack((y_sample, y_next))
 
-    plot_convergence(X_sample, y_sample)
-    plt.show()
-
-
-def plot_approximation(ax, ei_y, kernel, X, Y, X_sample, y_sample, X_next=None, show_legend=False):
-    # mu, std = gp_reg(X_sample, y_sample, X, return_std=True)
-    mu, std = GaussianProcess(kernel=kernel).fit(X_sample, y_sample).posterior(X).mu_std()
-
-    ax.fill_between(X.ravel(),
-                     mu.ravel() + 1.96 * std,
-                     mu.ravel() - 1.96 * std,
-                     alpha=0.1)
-    l1 = ax.plot(X, Y, 'g--', lw=1, label='Objective')
-    l2 = ax.plot(X, mu, 'b-', lw=1, label='GP mean')
-    l3 = ax.plot(X_sample, y_sample, 'kx', mew=3, label='Samples')
-    if X_next:
-        ax.axvline(x=X_next, ls='--', c='k', lw=1)
-
-    ax2 = ax.twinx()
-
-    l4 = ax2.plot(X, ei_y, 'r-', lw=1, label='Acquisition fn')
-    ax2.axvline(x=X_next, ls='--', c='k', lw=1)
-
-    lns = l1 + l2 + l3 + l4
-    labs = [l.get_label() for l in lns]
-
-    if show_legend:
-        plt.legend(lns, labs)
-
-
-def plot_convergence(X_sample, y_sample, n_init=2):
-    plt.figure(figsize=(12, 3))
-
-    x = X_sample[n_init:].ravel()
-    y = y_sample[n_init:].ravel()
-    r = range(1, len(x) + 1)
-
-    x_neighbor_dist = [np.abs(a - b) for a, b in zip(x, x[1:])]
-    y_max_watermark = np.maximum.accumulate(y)
-
-    plt.subplot(1, 2, 1)
-    plt.plot(r[1:], x_neighbor_dist, 'bo-')
-    plt.xlabel('Iteration')
-    plt.ylabel('Distance')
-    plt.title('Distance between consecutive x\'s')
-
-    plt.subplot(1, 2, 2)
-    plt.plot(r, y_max_watermark, 'ro-')
-    plt.xlabel('Iteration')
-    plt.ylabel('Best Y')
-    plt.title('Value of best selected sample')
+    if plot:
+        plot_convergence(X_sample, y_sample)
 
 
 def propose_location(acquisition, X_sample, y_sample, bounds, n_restarts=25,):

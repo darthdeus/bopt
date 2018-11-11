@@ -31,17 +31,17 @@ class Kernel(abc.ABC):
 
         output = np.zeros((len(x), len(y)), dtype=np.float64)
 
-        for i in range(len(x)):
-            for j in range(len(y)):
-                output[i, j] = self.kernel(x[i], y[j])
-
-                if i == j:
-                    output[i, j] += 1e-12
-
-        return output
+        # for i in range(len(x)):
+        #     for j in range(len(y)):
+        #         output[i, j] = self.kernel(x[i], y[j])
+        #
+        #         if i == j:
+        #             output[i, j] += 1e-12
+        #
+        # return output
 
         # return self.kernel(x, y)
-        # return self.kernel(*np.meshgrid(y, x)) + 1e-12 * np.eye(x.shape[0], y.shape[0])
+        return self.kernel(*np.meshgrid(y, x)) + 1e-12 * np.eye(x.shape[0], y.shape[0])
 
     @abc.abstractmethod
     def kernel(self, x: np.ndarray, y: np.ndarray) -> np.ndarray:
