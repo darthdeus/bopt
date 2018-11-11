@@ -15,9 +15,9 @@ def bo_minimize(f: Callable, noise: float, bounds: np.ndarray,
                 X_true: np.ndarray = None, y_true: np.ndarray= None,
                 kernel=SquaredExp(),
                 acquisition_function=expected_improvement,
-                n_iter: int=7, plot=True):
+                n_iter: int=8, plot=True):
     if plot:
-        plt.figure(figsize=(12, n_iter * 3))
+        plt.figure(figsize=(14, n_iter * 2))
         plt.subplots_adjust(hspace=0.4)
 
     X_sample = X_init
@@ -32,42 +32,46 @@ def bo_minimize(f: Callable, noise: float, bounds: np.ndarray,
         # Obtain next noisy sample from the objective function
         y_next = f(X_next, noise)
 
+        ei_y = bound_acquisition_function(X_true, X_sample, y_sample)
+
         # Plot samples, surrogate function, noise-free objective and next sampling location
-        plt.subplot(n_iter, 2, 2 * i + 1)
-        plot_approximation(kernel, X_true, y_true, X_sample, y_sample, X_next, show_legend=i == 0)
+        ax1 = plt.subplot(n_iter // 2 + 1, 2, i + 1)
+
+        plot_approximation(ax1, ei_y, kernel, X_true, y_true, X_sample, y_sample, X_next, show_legend=i == 0)
+
         plt.title(f'Iteration {i+1}')
-
-        plt.subplot(n_iter, 2, 2 * i + 2)
-        future_location = bound_acquisition_function(X_true, X_sample, y_sample)
-
-        plot_acquisition(X_true, future_location, X_next, show_legend=i == 0)
 
         X_sample = np.vstack((X_sample, X_next))
         y_sample = np.vstack((y_sample, y_next))
 
+    plot_convergence(X_sample, y_sample)
+    plt.show()
 
-def plot_approximation(kernel, X, Y, X_sample, y_sample, X_next=None, show_legend=False):
+
+def plot_approximation(ax, ei_y, kernel, X, Y, X_sample, y_sample, X_next=None, show_legend=False):
     # mu, std = gp_reg(X_sample, y_sample, X, return_std=True)
     mu, std = GaussianProcess(kernel=kernel).fit(X_sample, y_sample).posterior(X).mu_std()
 
-    plt.fill_between(X.ravel(),
+    ax.fill_between(X.ravel(),
                      mu.ravel() + 1.96 * std,
                      mu.ravel() - 1.96 * std,
                      alpha=0.1)
-    plt.plot(X, Y, 'y--', lw=1, label='Noise-free objective')
-    plt.plot(X, mu, 'b-', lw=1, label='Surrogate function')
-    plt.plot(X_sample, y_sample, 'kx', mew=3, label='Noisy samples')
+    l1 = ax.plot(X, Y, 'g--', lw=1, label='Objective')
+    l2 = ax.plot(X, mu, 'b-', lw=1, label='GP mean')
+    l3 = ax.plot(X_sample, y_sample, 'kx', mew=3, label='Samples')
     if X_next:
-        plt.axvline(x=X_next, ls='--', c='k', lw=1)
-    if show_legend:
-        plt.legend()
+        ax.axvline(x=X_next, ls='--', c='k', lw=1)
 
+    ax2 = ax.twinx()
 
-def plot_acquisition(X, y, X_next, show_legend=False):
-    plt.plot(X, y, 'r-', lw=1, label='Acquisition function')
-    plt.axvline(x=X_next, ls='--', c='k', lw=1, label='Next sampling location')
+    l4 = ax2.plot(X, ei_y, 'r-', lw=1, label='Acquisition fn')
+    ax2.axvline(x=X_next, ls='--', c='k', lw=1)
+
+    lns = l1 + l2 + l3 + l4
+    labs = [l.get_label() for l in lns]
+
     if show_legend:
-        plt.legend()
+        plt.legend(lns, labs)
 
 
 def plot_convergence(X_sample, y_sample, n_init=2):
