@@ -5,9 +5,13 @@ from scipy.optimize import minimize
 from .gaussian_process import GaussianProcess
 
 
+def bo_minimize(f):
+    pass
+
+
 def plot_approximation(X, Y, X_sample, y_sample, X_next=None, show_legend=False):
     # mu, std = gp_reg(X_sample, y_sample, X, return_std=True)
-    mu, std = GaussianProcess().posterior(X, X_sample, y_sample).mu_std()
+    mu, std = GaussianProcess().fit(X_sample, y_sample).posterior(X).mu_std()
 
     plt.fill_between(X.ravel(),
                      mu.ravel() + 1.96 * std,

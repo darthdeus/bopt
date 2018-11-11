@@ -16,15 +16,29 @@ from .plot import plot_gp
 from .kernels import Kernel, SquaredExp
 
 
-class Posterior(NamedTuple):
-    mu: np.ndarray
-    cov: np.ndarray
+def compute_optimized_kernel(kernel, X_train, y_train):
+    noise_level = 0.1
 
-    def std(self):
-        return np.sqrt(np.diag(self.cov))
+    def step(theta):
+        noise = noise_level ** 2 * np.eye(len(X_train))
+        K = kernel.with_params(theta)(X_train, X_train) + noise
 
-    def plot(self):
-        pass
+        t1 = 0.5 * y_train @ inv(K) @ y_train
+        t2 = 0.5 * np.linalg.det(K)
+        t3 = 0.5 * len(X_train) * np.log(2 * np.pi)
+
+        return t1 + t2 + t3
+
+    default_params = kernel.default_params()
+
+    if len(default_params) == 0:
+        return kernel
+
+    res = minimize(step,
+                   default_params,
+                   bounds=kernel.param_bounds(), method="L-BFGS-B")
+
+    return kernel.with_params(res.x)
 
 
 class GaussianProcess:
@@ -39,8 +53,6 @@ class GaussianProcess:
 
     kernel: Kernel
 
-    K: np.ndarray
-
     def __init__(self, noise=0, kernel=SquaredExp()):
         self.noise = noise
         self.kernel = kernel
@@ -53,22 +65,12 @@ class GaussianProcess:
         self.cov = None
         self.std = None
 
-        self.K = None
-
-    def refit(self):
-        if self.X_train is not None and self.y_train is not None:
-            noise = self.noise * np.eye(len(self.X_train))
-
-            self.K = self.kernel(self.X_train, self.X_train) + noise
-
     def fit(self, X_train: np.ndarray, y_train: np.ndarray, kernel=None) -> "GaussianProcess":
         if kernel is not None:
             self.kernel = kernel
 
         self.X_train = X_train
         self.y_train = y_train
-
-        self.refit()
 
         return self
 
@@ -85,12 +87,15 @@ class GaussianProcess:
 
         self.X_test = X_test
 
+        noise = self.noise * np.eye(len(self.X_train))
+
+        K = self.kernel(self.X_train, self.X_train) + noise
         K_s = self.kernel(self.X_train, X_test)
         K_ss = self.kernel(X_test, X_test)
 
-        stable_eye = 1e-4 * np.eye(len(self.K))  # Just for numerical stability?
+        stable_eye = 1e-4 * np.eye(len(K))  # Just for numerical stability?
 
-        K_inv = inv(self.K + stable_eye)
+        K_inv = inv(K + stable_eye)
 
         # L = cholesky(K + stable_eye)
         # alpha = solve(L.T, solve(L, self.y_train))
@@ -102,46 +107,28 @@ class GaussianProcess:
 
         return self
 
-    def optimize_kernel(self):
-        noise_level = 0.1
-
+    def optimize_kernel(self) -> "GaussianProcess":
         assert self.X_train is not None, "X_train is None, call `fit` first"
         assert self.y_train is not None, "y_train is None, call `fit` first"
 
-        def step(theta):
-            noise = noise_level ** 2 * np.eye(len(self.X_train))
-            K = self.kernel.with_params(theta)(self.X_train, self.X_train) + noise
-
-            t1 = 0.5 * self.y_train @ inv(K) @ self.y_train
-            t2 = 0.5 * np.linalg.det(K)
-            t3 = 0.5 * len(self.X_train) * np.log(2 * np.pi)
-
-            return t1 + t2 + t3
-
-        default_params = self.kernel.default_params()
-
-        if len(default_params) == 0:
-            return self
-
-        res = minimize(step,
-                       default_params,
-                       bounds=self.kernel.param_bounds(), method="L-BFGS-B")
-
-        self.kernel = self.kernel.with_params(res.x)
-        self.refit()
+        self.kernel = compute_optimized_kernel(self.kernel, self.X_train, self.y_train)
 
         return self
 
     def plot_prior(self, X, **kwargs):
-        plot_gp(np.zeros(len(X)), self.kernel(X, X), X, **kwargs)
+        plot_gp(np.zeros(len(X)), self.kernel(X, X), X, kernel=self.kernel, **kwargs)
+
+        return self
 
     def plot_posterior(self, **kwargs):
         assert self.X_test is not None, "X_test was not provided, call `.posterior(X_test)` first"
-        plot_gp(self.mu, self.cov, self.X_test, self.X_train, self.y_train, **kwargs)
+        plot_gp(self.mu, self.cov, self.X_test, self.X_train, self.y_train, kernel=self.kernel, **kwargs)
+
+        return self
 
     def copy(self) -> "GaussianProcess":
         gp = GaussianProcess()
-        gp.kernel = self.kernel
+        gp.kernel = self.kernel.copy()
         gp.noise = self.noise
 
         gp.X_train = self.X_train
@@ -152,15 +139,11 @@ class GaussianProcess:
         gp.cov = self.cov
         gp.std = self.std
 
-        gp.K = self.K
-
         return gp
 
     def with_kernel(self, kernel: Kernel) -> "GaussianProcess":
         gp = self.copy()
         gp.kernel = kernel
-
-        gp.refit()
 
         return gp
 
@@ -168,15 +151,11 @@ class GaussianProcess:
         gp = self.copy()
         gp.kernel = self.kernel.with_params(theta)
 
-        gp.refit()
-
         return gp
 
     def with_noise(self, noise: float) -> "GaussianProcess":
         gp = self.copy()
         gp.noise = noise
-
-        gp.refit()
 
         return gp
 

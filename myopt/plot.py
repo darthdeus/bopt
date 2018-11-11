@@ -15,8 +15,12 @@ def plots(*plots, n_row=3, figsize=(15, 4)):
     plt.show()
 
 
-def plot_gp_prior(mu, cov, X, num_samples=3):
+def plot_gp_prior(mu, cov, X, kernel=None, num_samples=3):
     std = 2 * np.sqrt(np.diag(cov))  # 1.96?
+
+    if kernel is not None:
+        plt.title(kernel)
+
     plt.fill_between(X, mu + std, mu - std, alpha=0.1)
     plt.plot(X, mu, label="Mean")
 
@@ -25,11 +29,14 @@ def plot_gp_prior(mu, cov, X, num_samples=3):
         plt.plot(X, sample, lw=0.7, ls="--", label=f"Sample {i+1}", color="black")
 
 
-def plot_gp(mu, cov, X, X_train=None, y_train=None, num_samples=3, figsize=(7, 4), figure=True):
+def plot_gp(mu, cov, X, X_train=None, y_train=None, kernel=None, num_samples=3, figsize=(7, 4), figure=True):
     std = 2 * np.sqrt(np.diag(cov))  # 1.96?
 
     if figure:
         plt.figure(figsize=figsize)
+
+    if kernel is not None:
+        plt.title(kernel)
 
     plt.fill_between(X, mu + std, mu - std, alpha=0.1)
     plt.plot(X, mu, label="Mean")

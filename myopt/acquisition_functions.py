@@ -5,10 +5,12 @@ from .gaussian_process import GaussianProcess
 
 
 def expected_improvement(X, X_sample, y_sample, xi=0.01):
-    mu, sigma = GaussianProcess().posterior(X, X_sample, y_sample).mu_std()
+    gp = GaussianProcess().fit(X_sample, y_sample) # .optimize_kernel()
+
+    mu, sigma = gp.posterior(X).mu_std()
     # mu, sigma = gp_reg(X_sample, y_sample, X, return_std=True)
 
-    mu_sample, sigma_sample = GaussianProcess().posterior(X_sample, y_sample, X_sample)
+    mu_sample, sigma_sample = gp.posterior(X_sample).mu_std()
     # mu_sample, sigma_sample = gp_reg(X_sample, y_sample, X_sample, return_std=True)
 
     sigma = sigma.reshape(-1, X_sample.shape[1])

@@ -60,6 +60,10 @@ class Kernel(abc.ABC):
     def with_params(self, theta: list) -> "Kernel":
         pass
 
+    @abc.abstractmethod
+    def copy(self) -> "Kernel":
+        pass
+
 
 class Linear(Kernel):
     def kernel(self, x: np.ndarray, y: np.ndarray) -> np.ndarray:
@@ -74,14 +78,21 @@ class Linear(Kernel):
     def with_params(self, theta: list) -> "Kernel":
         return self
 
+    def copy(self) -> "Kernel":
+        return Linear()
+
+    def __repr__(self):
+        return f"Linear()"
+
 
 class SquaredExp(Kernel):
-    def __init__(self, l: float = 1) -> None:
+    def __init__(self, l: float = 1, sigma: float = 1) -> None:
         super().__init__()
         self.l = l
+        self.sigma = sigma
 
     def kernel(self, x: np.ndarray, y: np.ndarray) -> np.ndarray:
-        return np.exp(-.5 * self.l * (x * x + y * y - 2 * x * y))
+        return self.sigma**2 * np.exp(- (1 / 2 * self.l ** 2) * (x * x + y * y - 2 * x * y))
 
     def default_params(self) -> np.ndarray:
         return np.ndarray([1])
@@ -92,8 +103,37 @@ class SquaredExp(Kernel):
     def with_params(self, theta) -> "Kernel":
         return SquaredExp(theta[0])
 
+    # def default_params(self) -> np.ndarray:
+    #     return np.ndarray([2])
+    #
+    # def param_bounds(self) -> list:
+    #     return [(1e-5, None), (1e-5, None)]
+    #
+    # def with_params(self, theta) -> "Kernel":
+    #     return SquaredExp(theta[0], theta[1])
+
+    def copy(self) -> "Kernel":
+        return SquaredExp(l=self.l, sigma=self.sigma)
+
     def __repr__(self):
-        return f"SquaredExp(l={self.l})"
+        return f"SquaredExp(l={round(self.l, 2)}, sigma={round(self.sigma, 2)})"
+
+
+class RationalQuadratic(Kernel):
+    def kernel(self, x: np.ndarray, y: np.ndarray) -> np.ndarray:
+        pass
+
+    def default_params(self) -> np.ndarray:
+        pass
+
+    def param_bounds(self) -> list:
+        pass
+
+    def with_params(self, theta: list) -> "Kernel":
+        pass
+
+    def copy(self) -> "Kernel":
+        pass
 
 
 def k(x, y=None, kernel=sqexp):
