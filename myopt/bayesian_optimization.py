@@ -1,12 +1,42 @@
+from collections import Callable
+
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.optimize import minimize
 
+from .acquisition_functions import expected_improvement
 from .gaussian_process import GaussianProcess
 
 
-def bo_minimize(f):
-    pass
+def bo_minimize(f: Callable, noise: float, bounds: np.ndarray,
+                X_init: np.ndarray, y_init: np.ndarray,
+                X_true: np.ndarray = None, y_true: np.ndarray= None,
+                acquisition_function=expected_improvement,
+                n_iter: int=10, plot=True):
+    if plot:
+        plt.figure(figsize=(12, n_iter * 3))
+        plt.subplots_adjust(hspace=0.4)
+
+    X_sample = X_init
+    y_sample = y_init
+
+    for i in range(n_iter):
+        # Obtain next sampling point from the acquisition function (expected_improvement)
+        X_next = propose_location(acquisition_function, X_sample, y_sample, bounds)
+
+        # Obtain next noisy sample from the objective function
+        y_next = f(X_next, noise)
+
+        # Plot samples, surrogate function, noise-free objective and next sampling location
+        plt.subplot(n_iter, 2, 2 * i + 1)
+        plot_approximation(X_true, y_true, X_sample, y_sample, X_next, show_legend=i == 0)
+        plt.title(f'Iteration {i+1}')
+
+        plt.subplot(n_iter, 2, 2 * i + 2)
+        plot_acquisition(X_true, acquisition_function(X_true, X_sample, y_sample), X_next, show_legend=i == 0)
+
+        X_sample = np.vstack((X_sample, X_next))
+        y_sample = np.vstack((y_sample, y_next))
 
 
 def plot_approximation(X, Y, X_sample, y_sample, X_next=None, show_legend=False):
@@ -26,8 +56,8 @@ def plot_approximation(X, Y, X_sample, y_sample, X_next=None, show_legend=False)
         plt.legend()
 
 
-def plot_acquisition(X, Y, X_next, show_legend=False):
-    plt.plot(X, Y, 'r-', lw=1, label='Acquisition function')
+def plot_acquisition(X, y, X_next, show_legend=False):
+    plt.plot(X, y, 'r-', lw=1, label='Acquisition function')
     plt.axvline(x=X_next, ls='--', c='k', lw=1, label='Next sampling location')
     if show_legend:
         plt.legend()
