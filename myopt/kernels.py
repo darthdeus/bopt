@@ -3,7 +3,6 @@ from typing import Union
 
 import numpy as np
 
-
 # TODO: handle floats for extra laziness?
 Arrayable = Union[list, np.ndarray]
 
@@ -92,7 +91,7 @@ class SquaredExp(Kernel):
         self.sigma = sigma
 
     def kernel(self, x: np.ndarray, y: np.ndarray) -> np.ndarray:
-        return self.sigma**2 * np.exp(- (1 / 2 * self.l ** 2) * (x * x + y * y - 2 * x * y))
+        return self.sigma ** 2 * np.exp(- (1 / 2 * self.l ** 2) * (x * x + y * y - 2 * x * y))
 
     def default_params(self) -> np.ndarray:
         return np.ndarray([1])
@@ -120,21 +119,28 @@ class SquaredExp(Kernel):
 
 
 class RationalQuadratic(Kernel):
+    def __init__(self, sigma: float = 1, l: float = 1, alpha: float = 1) -> None:
+        self.sigma = sigma
+        self.l = l
+        self.alpha = alpha
+
     def kernel(self, x: np.ndarray, y: np.ndarray) -> np.ndarray:
-        pass
+        return self.sigma**2 * (1 + (x - y)**2 / (2 * self.alpha * self.l**2)) **(-self.alpha)
 
     def default_params(self) -> np.ndarray:
-        pass
+        return np.ndarray([1])
 
     def param_bounds(self) -> list:
-        pass
+        return [(1e-5, None)]
 
     def with_params(self, theta: list) -> "Kernel":
-        pass
+        return RationalQuadratic(l=theta[0])
 
     def copy(self) -> "Kernel":
-        pass
+        return RationalQuadratic(sigma=self.sigma, l=self.l, alpha=self.alpha)
 
+    def __repr__(self):
+        return f"RationalQuadratic(sigma={self.sigma}, l={self.l}, alpha={self.alpha})"
 
 def k(x, y=None, kernel=sqexp):
     if y is None:

@@ -4,8 +4,8 @@ from scipy.stats import norm
 from .gaussian_process import GaussianProcess
 
 
-def expected_improvement(X, X_sample, y_sample, xi=0.01):
-    gp = GaussianProcess().fit(X_sample, y_sample) # .optimize_kernel()
+def expected_improvement(X, X_sample, y_sample, kernel, xi=0.01):
+    gp = GaussianProcess(kernel=kernel).fit(X_sample, y_sample) # .optimize_kernel()
 
     mu, sigma = gp.posterior(X).mu_std()
     # mu, sigma = gp_reg(X_sample, y_sample, X, return_std=True)

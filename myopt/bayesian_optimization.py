@@ -1,3 +1,4 @@
+import functools
 from collections import Callable
 
 import numpy as np
@@ -6,13 +7,15 @@ from scipy.optimize import minimize
 
 from .acquisition_functions import expected_improvement
 from .gaussian_process import GaussianProcess
+from .kernels import SquaredExp
 
 
 def bo_minimize(f: Callable, noise: float, bounds: np.ndarray,
                 X_init: np.ndarray, y_init: np.ndarray,
                 X_true: np.ndarray = None, y_true: np.ndarray= None,
+                kernel=SquaredExp(),
                 acquisition_function=expected_improvement,
-                n_iter: int=10, plot=True):
+                n_iter: int=7, plot=True):
     if plot:
         plt.figure(figsize=(12, n_iter * 3))
         plt.subplots_adjust(hspace=0.4)
@@ -20,28 +23,32 @@ def bo_minimize(f: Callable, noise: float, bounds: np.ndarray,
     X_sample = X_init
     y_sample = y_init
 
+    bound_acquisition_function = functools.partial(acquisition_function, kernel=kernel)
+
     for i in range(n_iter):
         # Obtain next sampling point from the acquisition function (expected_improvement)
-        X_next = propose_location(acquisition_function, X_sample, y_sample, bounds)
+        X_next = propose_location(bound_acquisition_function, X_sample, y_sample, bounds)
 
         # Obtain next noisy sample from the objective function
         y_next = f(X_next, noise)
 
         # Plot samples, surrogate function, noise-free objective and next sampling location
         plt.subplot(n_iter, 2, 2 * i + 1)
-        plot_approximation(X_true, y_true, X_sample, y_sample, X_next, show_legend=i == 0)
+        plot_approximation(kernel, X_true, y_true, X_sample, y_sample, X_next, show_legend=i == 0)
         plt.title(f'Iteration {i+1}')
 
         plt.subplot(n_iter, 2, 2 * i + 2)
-        plot_acquisition(X_true, acquisition_function(X_true, X_sample, y_sample), X_next, show_legend=i == 0)
+        future_location = bound_acquisition_function(X_true, X_sample, y_sample)
+
+        plot_acquisition(X_true, future_location, X_next, show_legend=i == 0)
 
         X_sample = np.vstack((X_sample, X_next))
         y_sample = np.vstack((y_sample, y_next))
 
 
-def plot_approximation(X, Y, X_sample, y_sample, X_next=None, show_legend=False):
+def plot_approximation(kernel, X, Y, X_sample, y_sample, X_next=None, show_legend=False):
     # mu, std = gp_reg(X_sample, y_sample, X, return_std=True)
-    mu, std = GaussianProcess().fit(X_sample, y_sample).posterior(X).mu_std()
+    mu, std = GaussianProcess(kernel=kernel).fit(X_sample, y_sample).posterior(X).mu_std()
 
     plt.fill_between(X.ravel(),
                      mu.ravel() + 1.96 * std,
@@ -86,7 +93,7 @@ def plot_convergence(X_sample, y_sample, n_init=2):
     plt.title('Value of best selected sample')
 
 
-def propose_location(acquisition, X_sample, y_sample, bounds, n_restarts=25):
+def propose_location(acquisition, X_sample, y_sample, bounds, n_restarts=25,):
     """
     Proposes the next sampling point by optimizing the acquisition function.
 
