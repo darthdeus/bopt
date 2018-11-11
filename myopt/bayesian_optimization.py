@@ -2,11 +2,12 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.optimize import minimize
 
-from .gaussian_process import gp_reg
+from .gaussian_process import GaussianProcess
 
 
 def plot_approximation(X, Y, X_sample, y_sample, X_next=None, show_legend=False):
-    mu, std = gp_reg(X_sample, y_sample, X, return_std=True)
+    # mu, std = gp_reg(X_sample, y_sample, X, return_std=True)
+    mu, std = GaussianProcess().posterior(X, X_sample, y_sample).mu_std()
 
     plt.fill_between(X.ravel(),
                      mu.ravel() + 1.96 * std,
@@ -52,7 +53,7 @@ def plot_convergence(X_sample, y_sample, n_init=2):
 
 
 def propose_location(acquisition, X_sample, y_sample, bounds, n_restarts=25):
-    '''
+    """
     Proposes the next sampling point by optimizing the acquisition function.
 
     Args:
@@ -62,7 +63,7 @@ def propose_location(acquisition, X_sample, y_sample, bounds, n_restarts=25):
     y_sample: Sample values (n x 1).
 
     Returns: Location of the acquisition function maximum.
-    '''
+    """
     dim = X_sample.shape[1]
     min_val = 1
     min_x = None

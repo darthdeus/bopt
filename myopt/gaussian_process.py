@@ -1,5 +1,5 @@
 from collections import Callable
-from typing import NamedTuple, Optional
+from typing import NamedTuple, Optional, Tuple
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -27,7 +27,6 @@ class Posterior(NamedTuple):
         pass
 
 
-
 class GaussianProcess:
     X_train: np.ndarray
     y_train: np.ndarray
@@ -36,13 +35,31 @@ class GaussianProcess:
     mu: np.ndarray
     cov: np.ndarray
     std: np.ndarray
+    noise: float
 
     kernel: Kernel
 
     K: np.ndarray
 
-    def __init__(self, kernel=SquaredExp()):
+    def __init__(self, noise=0, kernel=SquaredExp()):
+        self.noise = noise
         self.kernel = kernel
+
+        self.X_train = None
+        self.y_train = None
+        self.X_test = None
+
+        self.mu = None
+        self.cov = None
+        self.std = None
+
+        self.K = None
+
+    def refit(self):
+        if self.X_train is not None and self.y_train is not None:
+            noise = self.noise * np.eye(len(self.X_train))
+
+            self.K = self.kernel(self.X_train, self.X_train) + noise
 
     def fit(self, X_train: np.ndarray, y_train: np.ndarray, kernel=None) -> "GaussianProcess":
         if kernel is not None:
@@ -51,17 +68,7 @@ class GaussianProcess:
         self.X_train = X_train
         self.y_train = y_train
 
-        self.K = self.kernel(X_train, X_train)
-
-        return self
-
-    # TODO: copy
-    def with_kernel(self, kernel):
-        self.kernel = kernel
-        return self
-
-    def with_kernel_params(self, theta):
-        self.kernel = self.kernel.with_params(theta)
+        self.refit()
 
         return self
 
@@ -73,16 +80,17 @@ class GaussianProcess:
         if (X_train is not None) and (y_train is not None):
             self.fit(X_train, y_train)
 
-        self.X_test = X_test
-        n = len(X_test)
+        assert self.X_train is not None, "X_train is None, call `fit` first, or provide X_train directly"
+        assert self.y_train is not None, "y_train is None, call `fit` first, or provide y_train directly"
 
-        K = self.K
+        self.X_test = X_test
+
         K_s = self.kernel(self.X_train, X_test)
         K_ss = self.kernel(X_test, X_test)
 
-        stable_eye = 1e-4 * np.eye(len(K))  # Just for numerical stability?
+        stable_eye = 1e-4 * np.eye(len(self.K))  # Just for numerical stability?
 
-        K_inv = inv(K + stable_eye)
+        K_inv = inv(self.K + stable_eye)
 
         # L = cholesky(K + stable_eye)
         # alpha = solve(L.T, solve(L, self.y_train))
@@ -94,24 +102,33 @@ class GaussianProcess:
 
         return self
 
-    def optimize_kernel(self, X_train, y_train):
+    def optimize_kernel(self):
         noise_level = 0.1
 
-        def step(theta):
-            noise = noise_level ** 2 * np.eye(len(X_train))
-            K = self.kernel.with_params(theta)(X_train, X_train) + noise
+        assert self.X_train is not None, "X_train is None, call `fit` first"
+        assert self.y_train is not None, "y_train is None, call `fit` first"
 
-            t1 = 0.5 * y_train @ inv(K) @ y_train
+        def step(theta):
+            noise = noise_level ** 2 * np.eye(len(self.X_train))
+            K = self.kernel.with_params(theta)(self.X_train, self.X_train) + noise
+
+            t1 = 0.5 * self.y_train @ inv(K) @ self.y_train
             t2 = 0.5 * np.linalg.det(K)
-            t3 = 0.5 * len(X_train) * np.log(2 * np.pi)
+            t3 = 0.5 * len(self.X_train) * np.log(2 * np.pi)
 
             return t1 + t2 + t3
 
+        default_params = self.kernel.default_params()
+
+        if len(default_params) == 0:
+            return self
+
         res = minimize(step,
-                       self.kernel.default_params(),
+                       default_params,
                        bounds=self.kernel.param_bounds(), method="L-BFGS-B")
 
         self.kernel = self.kernel.with_params(res.x)
+        self.refit()
 
         return self
 
@@ -119,37 +136,49 @@ class GaussianProcess:
         plot_gp(np.zeros(len(X)), self.kernel(X, X), X, **kwargs)
 
     def plot_posterior(self, **kwargs):
+        assert self.X_test is not None, "X_test was not provided, call `.posterior(X_test)` first"
         plot_gp(self.mu, self.cov, self.X_test, self.X_train, self.y_train, **kwargs)
 
+    def copy(self) -> "GaussianProcess":
+        gp = GaussianProcess()
+        gp.kernel = self.kernel
+        gp.noise = self.noise
 
-# gp = GaussianProcess().fit(X_train, y_train)
-# mu, cov = gp.posterior(X_test)
+        gp.X_train = self.X_train
+        gp.y_train = self.y_train
+        gp.X_test = self.X_test
 
-# gp.plot_prior()
-# gp.plot_posterior()
+        gp.mu = self.mu
+        gp.cov = self.cov
+        gp.std = self.std
 
-#
-# def gp_reg(X_train, y_train, X_test, kernel=sqexp, return_std=False):
-#     n = len(X_test)
-#
-#     K = k(X_train, X_train, kernel)
-#     K_s = k(X_train, X_test, kernel)
-#     K_ss = k(X_test, X_test, kernel)
-#
-#     stable_eye = 1e-4 * np.eye(len(K))  # Just for numerical stability?
-#
-#     K_inv = inv(K + stable_eye)
-#
-#     # L = cholesky(K + stable_eye)
-#     # alpha = solve(L.T, solve(L, y_train))
-#     # mu = K_s.T @ alpha
-#
-#     mu = K_s.T @ K_inv @ y_train
-#     cov = K_ss - K_s.T @ K_inv @ K_s
-#
-#     if return_std:
-#         return mu, np.sqrt(np.diag(cov))
-#     else:
-#         return mu, cov
-#
-#
+        gp.K = self.K
+
+        return gp
+
+    def with_kernel(self, kernel: Kernel) -> "GaussianProcess":
+        gp = self.copy()
+        gp.kernel = kernel
+
+        gp.refit()
+
+        return gp
+
+    def with_kernel_params(self, theta) -> "GaussianProcess":
+        gp = self.copy()
+        gp.kernel = self.kernel.with_params(theta)
+
+        gp.refit()
+
+        return gp
+
+    def with_noise(self, noise: float) -> "GaussianProcess":
+        gp = self.copy()
+        gp.noise = noise
+
+        gp.refit()
+
+        return gp
+
+    def mu_std(self) -> Tuple[np.ndarray, np.ndarray]:
+        return self.mu, self.std
