@@ -29,8 +29,8 @@ class Kernel(abc.ABC):
         x = x.reshape(len(x), -1)
         y = y.reshape(len(y), -1)
 
-        output = np.zeros((len(x), len(y)), dtype=np.float64)
-
+        # output = np.zeros((len(x), len(y)), dtype=np.float64)
+        #
         # for i in range(len(x)):
         #     for j in range(len(y)):
         #         output[i, j] = self.kernel(x[i], y[j])

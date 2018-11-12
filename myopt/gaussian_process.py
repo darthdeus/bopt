@@ -15,7 +15,7 @@ def compute_optimized_kernel(kernel, X_train, y_train):
         noise = noise_level ** 2 * np.eye(len(X_train))
         K = kernel.with_params(theta)(X_train, X_train) + noise
 
-        t1 = 0.5 * y_train @ inv(K) @ y_train
+        t1 = 0.5 * y_train.T @ inv(K) @ y_train
         t2 = 0.5 * np.linalg.det(K)
         t3 = 0.5 * len(X_train) * np.log(2 * np.pi)
 
