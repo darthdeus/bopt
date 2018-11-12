@@ -47,7 +47,8 @@ def bo_minimize(f: Callable, noise: float, bounds: np.ndarray,
                 # Plot samples, surrogate function, noise-free objective and next sampling location
                 ax1 = plt.subplot(num_plots // 2 + 1, 2, i // plot_every + 1)
 
-                plot_approximation(ax1, ei_y, gp.kernel, X_true, y_true, X_sample, y_sample, X_next, show_legend=i == 0)
+                plot_approximation(ax1, ei_y, gp.kernel, X_true, y_true, gp, X_sample, y_sample,
+                                   X_next, show_legend=i == 0)
 
                 plt.title(f'Iteration {i+1}, {gp.kernel}')
 

@@ -2,8 +2,6 @@ import matplotlib.pyplot as plt
 import numpy as np
 from numpy.random import multivariate_normal
 
-from .gaussian_process import GaussianProcess
-
 
 def plots(*plots, n_row=3, figsize=(15, 4)):
     num_rows = len(plots) // n_row + 1
@@ -31,7 +29,7 @@ def plot_gp_prior(mu, cov, X, kernel=None, num_samples=3):
         plt.plot(X, sample, lw=0.7, ls="--", label=f"Sample {i+1}", color="black")
 
 
-def plot_gp(mu, cov, X, X_train=None, y_train=None, kernel=None, num_samples=3, figsize=(7, 4), figure=True):
+def plot_gp(mu, cov, X, X_train=None, y_train=None, kernel=None, num_samples=3, figsize=(7, 3), figure=True):
     std = 2 * np.sqrt(np.diag(cov))  # 1.96?
 
     if figure:
@@ -53,15 +51,15 @@ def plot_gp(mu, cov, X, X_train=None, y_train=None, kernel=None, num_samples=3, 
     plt.legend()
 
 
-def plot_approximation(ax, ei_y, kernel, X, Y, X_sample, y_sample, X_next=None, show_legend=False):
+def plot_approximation(ax, ei_y, kernel, X, y, gp, X_sample, y_sample, X_next=None, show_legend=False):
     # mu, std = gp_reg(X_sample, y_sample, X, return_std=True)
-    mu, std = GaussianProcess(kernel=kernel).fit(X_sample, y_sample).posterior(X).mu_std()
+    mu, std = gp.posterior(X).mu_std()
 
     ax.fill_between(X.ravel(),
                      mu.ravel() + 1.96 * std,
                      mu.ravel() - 1.96 * std,
                      alpha=0.1)
-    l1 = ax.plot(X, Y, 'g--', lw=1, label='Objective')
+    l1 = ax.plot(X, y, 'g--', lw=1, label='Objective')
     l2 = ax.plot(X, mu, 'b-', lw=1, label='GP mean')
     l3 = ax.plot(X_sample, y_sample, 'kx', mew=3, label='Samples')
     if X_next:
