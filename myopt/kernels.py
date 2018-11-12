@@ -94,7 +94,7 @@ class SquaredExp(Kernel):
         return self.sigma ** 2 * np.exp(- (1 / 2 * self.l ** 2) * (x * x + y * y - 2 * x * y))
 
     def default_params(self) -> np.ndarray:
-        return np.ndarray([1])
+        return np.array([1])
 
     def param_bounds(self) -> list:
         return [(1e-5, None)]
