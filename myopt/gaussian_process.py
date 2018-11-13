@@ -118,6 +118,7 @@ class GaussianProcess:
 
         self.mu = K_s.T @ K_inv @ self.y_train
         self.cov = K_ss - K_s.T @ K_inv @ K_s
+
         self.std = np.sqrt(np.diag(self.cov))
 
         return self
