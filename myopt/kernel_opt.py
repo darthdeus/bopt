@@ -34,7 +34,8 @@ def plot_kernel_loss(kernel: Kernel, X_train: np.ndarray, y_train: np.ndarray, x
     thetas = []
 
     for theta in X:
-        thetas.append(step(np.array([theta])))
+        # TODO: plot all params
+        thetas.append(step(np.array([theta, 1])))
 
     thetas = np.array(thetas)
 
