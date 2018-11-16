@@ -1,47 +1,52 @@
 import abc
-from typing import Union
-
 import numpy as np
 
-# TODO: handle floats for extra laziness?
-Arrayable = Union[list, np.ndarray]
 
-
-def ensure_array(arrayable: Arrayable) -> np.ndarray:
-    if isinstance(arrayable, np.ndarray):
-        return arrayable
-    else:
-        return np.array(arrayable)
-
-
-def sqexp(x: np.ndarray, y: np.ndarray, l: float = 1):
-    return np.exp(-.5 * l * (x * x + y * y - 2 * x * y))
+FAST_KERNEL = False
 
 
 class Kernel(abc.ABC):
-    def __call__(self, x: Arrayable, y: Arrayable = None) -> np.ndarray:
-        if y is None:
-            y = x
+    def __call__(self, x_init: np.ndarray, y_init: np.ndarray = None) -> np.ndarray:
+        if y_init is None:
+            y_init = x_init
 
-        x = ensure_array(x)
-        y = ensure_array(y)
+        if FAST_KERNEL:
+            x = x_init
+            y = y_init
 
-        x = x.reshape(len(x), -1)
-        y = y.reshape(len(y), -1)
+            if x.ndim > 2 or y.ndim > 2:
+                raise RuntimeError(f"Invalid input, can only handle rank 1 or 2 tensors, got {x.ndim}, {y.ndim}.")
 
-        # output = np.zeros((len(x), len(y)), dtype=np.float64)
-        #
-        # for i in range(len(x)):
-        #     for j in range(len(y)):
-        #         output[i, j] = self.kernel(x[i], y[j])
-        #
-        #         if i == j:
-        #             output[i, j] += 1e-12
-        #
-        # return output
+            if x.ndim == 1:
+                x = x.reshape(-1, 1)
+            if y.ndim == 1:
+                y = y.reshape(-1, 1)
+
+            x = x.reshape(x.shape[0], 1, x.shape[1])
+            y = y.reshape(1, y.shape[0], y.shape[1])
+
+            output = self.kernel(x, y) + 1e-12 * np.eye(x.shape[0], y.shape[1])
+        else:
+            #
+            # # <a,1,h>
+            # # <1,b,h>
+            x = x_init
+            y = y_init
+
+            output = np.zeros((len(x), len(y)), dtype=np.float64)
+
+            for i in range(len(x)):
+                for j in range(len(y)):
+                    output[i, j] = self.kernel(x[i], y[j])
+
+                    if i == j:
+                        output[i, j] += 1e-12
+
+        assert output.shape == (x_init.shape[0], y_init.shape[0])
+        return output
 
         # return self.kernel(x, y)
-        return self.kernel(*np.meshgrid(y, x)) + 1e-12 * np.eye(x.shape[0], y.shape[0])
+        # return self.kernel(*np.meshgrid(y, x)) + 1e-12 * np.eye(x.shape[0], y.shape[0])
 
     @abc.abstractmethod
     def kernel(self, x: np.ndarray, y: np.ndarray) -> np.ndarray:
@@ -62,26 +67,6 @@ class Kernel(abc.ABC):
     @abc.abstractmethod
     def copy(self) -> "Kernel":
         pass
-
-
-class Linear(Kernel):
-    def kernel(self, x: np.ndarray, y: np.ndarray) -> np.ndarray:
-        return x @ y
-
-    def default_params(self) -> np.ndarray:
-        return np.array([])
-
-    def param_bounds(self) -> list:
-        return []
-
-    def with_params(self, theta: list) -> "Kernel":
-        return self
-
-    def copy(self) -> "Kernel":
-        return Linear()
-
-    def __repr__(self):
-        return f"Linear()"
 
 
 class SquaredExp(Kernel):
@@ -91,19 +76,30 @@ class SquaredExp(Kernel):
         self.sigma = sigma
 
     def kernel(self, x: np.ndarray, y: np.ndarray) -> np.ndarray:
-        return self.sigma ** 2 * np.exp(- (1 / 2 * self.l ** 2) * (x * x + y * y - 2 * x * y))
+        if FAST_KERNEL:
+            sqnorm = ((x - y) ** 2).sum(axis=2)
+
+            assert x.shape[1] == 1
+            assert y.shape[0] == 1
+            assert sqnorm.shape[0] == x.shape[0]
+            assert sqnorm.shape[1] == y.shape[1]
+
+            return self.sigma ** 2 * np.exp(- (1 / (2*self.l**2)) * sqnorm)
+
+        else:
+            return self.sigma ** 2 * np.exp(- (1 / (2 * self.l ** 2)) * (x * x + y * y - 2 * x * y))
 
     def default_params(self) -> np.ndarray:
         return np.array([1])
 
     def param_bounds(self) -> list:
-        return [(1e-5, None)]
+        return [(1e-3, None)]
 
     def with_params(self, theta) -> "Kernel":
         return SquaredExp(theta[0])
 
     # def default_params(self) -> np.ndarray:
-    #     return np.ndarray([2])
+    #     return np.array([2])
     #
     # def param_bounds(self) -> list:
     #     return [(1e-5, None), (1e-5, None)]
@@ -125,10 +121,11 @@ class RationalQuadratic(Kernel):
         self.alpha = alpha
 
     def kernel(self, x: np.ndarray, y: np.ndarray) -> np.ndarray:
-        return self.sigma**2 * (1 + (x - y)**2 / (2 * self.alpha * self.l**2)) **(-self.alpha)
+        sqnorm = ((x - y) ** 2).sum(axis=2)
+        return self.sigma**2 * (1 + sqnorm / (2 * self.alpha * self.l**2)) **(-self.alpha)
 
     def default_params(self) -> np.ndarray:
-        return np.ndarray([1])
+        return np.array([1])
 
     def param_bounds(self) -> list:
         return [(1e-5, None)]
@@ -142,11 +139,29 @@ class RationalQuadratic(Kernel):
     def __repr__(self):
         return f"RationalQuadratic(sigma={self.sigma}, l={self.l}, alpha={self.alpha})"
 
-def k(x, y=None, kernel=sqexp):
-    if y is None:
-        y = x
 
-    x = x.reshape(-1, 1)
-    y = y.reshape(-1, 1)
+class Linear(Kernel):
+    def kernel(self, x: np.ndarray, y: np.ndarray) -> np.ndarray:
+        yy = y.T
 
-    return kernel(*np.meshgrid(y, x)) + 1e-12 * np.eye(x.shape[0], y.shape[0])
+        rows = []
+
+        for i in range(x.shape[0]):
+            rows.append(x[i] @ yy)
+
+        return np.array(rows)
+
+    def default_params(self) -> np.ndarray:
+        return np.array([])
+
+    def param_bounds(self) -> list:
+        return []
+
+    def with_params(self, theta: list) -> "Kernel":
+        return self
+
+    def copy(self) -> "Kernel":
+        return Linear()
+
+    def __repr__(self):
+        return f"Linear()"

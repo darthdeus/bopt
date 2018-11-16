@@ -1,59 +1,13 @@
-from typing import Optional, Tuple
+from typing import Optional, Tuple, Callable
 
 import numpy as np
+import matplotlib.pyplot as plt
 from numpy.linalg import inv
 from scipy.optimize import minimize
 
+from .kernel_opt import compute_optimized_kernel
 from .kernels import Kernel, SquaredExp
 from .plot import plot_gp
-
-
-def plot_kernel_loss(kernel, X_train, y_train):
-    noise_level = 0.1
-
-    def step(theta):
-        noise = noise_level ** 2 * np.eye(len(X_train))
-        K = kernel.with_params(theta)(X_train, X_train) + noise
-
-        t1 = 0.5 * y_train.T @ inv(K) @ y_train
-        t2 = 0.5 * np.linalg.det(K)
-        t3 = 0.5 * len(X_train) * np.log(2 * np.pi)
-
-        return t1 + t2 + t3
-
-    X = np.arange(0.001, 60, step=0.1)
-    thetas = []
-
-    for theta in X:
-        thetas.append(step(theta))
-
-    thetas = np.array(thetas)
-
-    return X, thetas
-
-def compute_optimized_kernel(kernel, X_train, y_train):
-    noise_level = 0.1
-
-    def step(theta):
-        noise = noise_level ** 2 * np.eye(len(X_train))
-        K = kernel.with_params(theta)(X_train, X_train) + noise
-
-        t1 = 0.5 * y_train.T @ inv(K) @ y_train
-        t2 = 0.5 * np.linalg.det(K)
-        t3 = 0.5 * len(X_train) * np.log(2 * np.pi)
-
-        return t1 + t2 + t3
-
-    default_params = kernel.default_params()
-
-    if len(default_params) == 0:
-        return kernel
-
-    res = minimize(step,
-                   default_params,
-                   bounds=kernel.param_bounds(), method="L-BFGS-B")
-
-    return kernel.with_params(res.x)
 
 
 class GaussianProcess:

@@ -1,0 +1,62 @@
+* DONE Noisy
+  CLOSED: [2018-11-16 Fri 15:14]
+
+  Staci jenom pricist ~sigma * np.eye(n)~ ke ~k(X_train, X_train)~
+
+* TODO bugs [/]
+
+  - [ ] nefunguje rychlejsi kernel
+  - [ ] kernel_plot nedava smysl
+  - [ ] nefunguje opt. vice kernel parametru
+
+* TODO optimalizace diskretnich hyperparam - https://arxiv.org/pdf/1706.03673.pdf
+
+  Melo by stacit zaokrouhlovat kernel na integery.
+
+* TODO benchmark + proc approx?
+
+* TODO paralelni
+
+* TODO expected imrpovement per second (vetsi hyperaram me stoji vic trenovani)
+
+* TODO v prubehu zjistim ze se mi to nelibi
+
+* TODO kernely [1/25]
+
+  Examples: http://crsouza.com/2010/03/17/kernel-functions-for-machine-learning-applications/
+
+  - [ ] Linear
+  - [ ] Polynomial
+  - [X] Gaussian (RBF)
+  - [ ] Exponential
+  - [ ] Laplacian
+  - [ ] ANOVA
+  - [ ] tanh (sigmoid)
+  - [ ] Rational Quadratic
+  - [ ] Multiquadratic
+  - [ ] Inverse Multiquadratic
+  - [ ] Circular
+  - [ ] Spherical
+  - [ ] Wave
+  - [ ] Power
+  - [ ] Log
+  - [ ] Spline
+  - [ ] B-Spline
+  - [ ] Bessel
+  - [ ] Cauchy
+  - [ ] Chi-Square
+  - [ ] Histogram intersection
+  - [ ] Generalized histogram intersection
+  - [ ] Generalized t-student
+  - [ ] Bayesian
+  - [ ] Wavelet
+
+  Zatim nevime jak delat Matern kernel.
+
+* TODO acquisition funkce
+
+  Zatim umime jenom Expected Improvement.
+
+* TODO matern kernel wtf???
+
+* TODO zkusit jestli torch.lbfgs je rychlejsi?

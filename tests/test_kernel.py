@@ -5,6 +5,17 @@ from kernels import Linear
 
 
 class TestKernel(unittest.TestCase):
+    def test_meshgrid_replacement(self):
+        a = np.array([1,2])
+        b = np.array([4,5])
+
+        c = a.reshape(-1, 1) + b.reshape(1, -1)
+
+        aa, bb = np.meshgrid(a, b)
+        d = aa + bb
+
+        self.assertAlmostEqual(c, d)
+
     def test_linear(self):
         linear = Linear()
         self.assertAlmostEqual(6, linear([2], [3])[0].item())

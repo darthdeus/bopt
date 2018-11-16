@@ -1,5 +1,6 @@
 import matplotlib.pyplot as plt
 import numpy as np
+from matplotlib import cm
 from numpy.random import multivariate_normal
 
 
@@ -56,9 +57,9 @@ def plot_approximation(ax, ei_y, kernel, X, y, gp, X_sample, y_sample, X_next=No
     mu, std = gp.posterior(X).mu_std()
 
     ax.fill_between(X.ravel(),
-                     mu.ravel() + 1.96 * std,
-                     mu.ravel() - 1.96 * std,
-                     alpha=0.1)
+                    mu.ravel() + 1.96 * std,
+                    mu.ravel() - 1.96 * std,
+                    alpha=0.1)
     l1 = ax.plot(X, y, 'g--', lw=1, label='Objective')
     l2 = ax.plot(X, mu, 'b-', lw=1, label='GP mean')
     l3 = ax.plot(X_sample, y_sample, 'kx', mew=3, label='Samples')
@@ -98,3 +99,10 @@ def plot_convergence(X_sample, y_sample, n_init=2):
     plt.xlabel('Iteration')
     plt.ylabel('Best Y')
     plt.title('Value of best selected sample')
+
+
+def plot_gp_2D(gx, gy, mu, X_train, y_train, title, i):
+    ax = plt.gcf().add_subplot(1, 2, i, projection='3d')
+    ax.plot_surface(gx, gy, mu.reshape(gx.shape), cmap=cm.coolwarm, linewidth=0, alpha=0.2, antialiased=False)
+    ax.scatter(X_train[:, 0], X_train[:, 1], y_train, c=y_train, cmap=cm.coolwarm)
+    ax.set_title(title)
