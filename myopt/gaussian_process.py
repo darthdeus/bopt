@@ -2,7 +2,7 @@ from typing import Optional, Tuple, Callable
 
 import numpy as np
 import matplotlib.pyplot as plt
-from numpy.linalg import inv
+from numpy.linalg import inv, cholesky, solve
 from scipy.optimize import minimize
 
 from .kernel_opt import compute_optimized_kernel
@@ -21,8 +21,9 @@ class GaussianProcess:
     noise: float
 
     kernel: Kernel
+    stable_computation: bool
 
-    def __init__(self, noise=0, kernel=SquaredExp()):
+    def __init__(self, noise=0, kernel=SquaredExp(), stable_computation=True):
         self.noise = noise
         self.kernel = kernel
 
@@ -33,6 +34,8 @@ class GaussianProcess:
         self.mu = None
         self.cov = None
         self.std = None
+
+        self.stable_computation = stable_computation
 
     def fit(self, X_train: np.ndarray, y_train: np.ndarray, kernel=None) -> "GaussianProcess":
         if kernel is not None:
@@ -62,18 +65,22 @@ class GaussianProcess:
         K_s = self.kernel(self.X_train, X_test)
         K_ss = self.kernel(X_test, X_test)
 
-        stable_eye = 1e-4 * np.eye(len(K))  # Just for numerical stability?
+        K_stable_eye = 1e-6 * np.eye(len(K))  # Just for numerical stability?
+        Kss_stable_eye = 1e-6 * np.eye(len(K_ss))  # Just for numerical stability?
 
-        K_inv = inv(K + stable_eye)
+        if self.stable_computation:
+            L = cholesky(K + K_stable_eye)
+            alpha = solve(L.T, solve(L, self.y_train))
+            L_k = solve(L, K_s)
 
-        # L = cholesky(K + stable_eye)
-        # alpha = solve(L.T, solve(L, self.y_train))
-        # mu = K_s.T @ alpha
-
-        self.mu = K_s.T @ K_inv @ self.y_train
-        self.cov = K_ss - K_s.T @ K_inv @ K_s
-
-        self.std = np.sqrt(np.diag(self.cov))
+            self.mu = K_s.T @ alpha
+            self.cov = K_ss + Kss_stable_eye - L_k.T @ L_k
+            self.std = np.sqrt(np.diag(K_ss) - np.sum(L_k ** 2, axis=0))
+        else:
+            K_inv = inv(K + K_stable_eye)
+            self.mu = K_s.T @ K_inv @ self.y_train
+            self.cov = K_ss + Kss_stable_eye - K_s.T @ K_inv @ K_s
+            self.std = np.sqrt(np.diag(self.cov))
 
         return self
 

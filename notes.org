@@ -1,13 +1,12 @@
 * DONE Noisy
-  CLOSED: [2018-11-16 Fri 15:14]
 
   Staci jenom pricist ~sigma * np.eye(n)~ ke ~k(X_train, X_train)~
 
-* TODO bugs [/]
+* DONE bugs [3/3]
 
-  - [ ] nefunguje rychlejsi kernel
-  - [ ] kernel_plot nedava smysl
-  - [ ] nefunguje opt. vice kernel parametru
+  - [X] nefunguje rychlejsi kernel
+  - [X] kernel_plot nedava smysl
+  - [X] nefunguje opt. vice kernel parametru
 
 * TODO optimalizace diskretnich hyperparam - https://arxiv.org/pdf/1706.03673.pdf
 

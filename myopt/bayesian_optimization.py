@@ -1,5 +1,5 @@
 import functools
-from collections import Callable
+from typing import Callable
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -11,18 +11,19 @@ from .acquisition_functions import expected_improvement
 from .kernels import SquaredExp
 
 
-def bo_minimize(f: Callable, noise: float, bounds: np.ndarray,
+def bo_minimize(f: Callable[[np.ndarray], np.ndarray],
+                bounds: np.ndarray,
                 X_init: np.ndarray, y_init: np.ndarray,
                 X_true: np.ndarray = None, y_true: np.ndarray= None,
                 kernel=SquaredExp(),
                 acquisition_function=expected_improvement,
-                n_iter: int=8, plot=True, plot_every: int=1, optimize_kernel=False,
-                gp_noise=0):
+                n_iter: int=8, plot=True, plot_every: int=1,
+                optimize_kernel=True, gp_noise=0):
 
     num_plots = (n_iter // plot_every)
 
     if plot:
-        plt.figure(figsize=(14, num_plots * 2))
+        plt.figure(figsize=(15, num_plots * 2))
         plt.subplots_adjust(hspace=0.4)
 
     X_sample = X_init
@@ -39,14 +40,16 @@ def bo_minimize(f: Callable, noise: float, bounds: np.ndarray,
         X_next = propose_location(bound_acquisition_function, X_sample, bounds)
 
         # Obtain next noisy sample from the objective function
-        y_next = f(X_next, noise)
+        y_next = f(X_next)
 
         ei_y = bound_acquisition_function(X_true)
+
+        per_row = 2
 
         if plot:
             if i % plot_every == 0:
                 # Plot samples, surrogate function, noise-free objective and next sampling location
-                ax1 = plt.subplot(num_plots // 2 + 1, 2, i // plot_every + 1)
+                ax1 = plt.subplot(num_plots // per_row + 1, per_row, i // plot_every + 1)
 
                 plot_approximation(ax1, ei_y, gp.kernel, X_true, y_true, gp, X_sample, y_sample,
                                    X_next, show_legend=i == 0)
