@@ -16,7 +16,8 @@ def bo_minimize(f: Callable, noise: float, bounds: np.ndarray,
                 X_true: np.ndarray = None, y_true: np.ndarray= None,
                 kernel=SquaredExp(),
                 acquisition_function=expected_improvement,
-                n_iter: int=8, plot=True, plot_every: int=1, optimize_kernel=False):
+                n_iter: int=8, plot=True, plot_every: int=1, optimize_kernel=False,
+                gp_noise=0):
 
     num_plots = (n_iter // plot_every)
 
@@ -28,7 +29,7 @@ def bo_minimize(f: Callable, noise: float, bounds: np.ndarray,
     y_sample = y_init
 
     for i in range(n_iter):
-        gp = GaussianProcess(kernel=kernel).fit(X_sample, y_sample)
+        gp = GaussianProcess(kernel=kernel, noise=gp_noise).fit(X_sample, y_sample)
         if optimize_kernel:
             gp = gp.optimize_kernel()
 

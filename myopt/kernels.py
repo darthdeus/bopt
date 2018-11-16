@@ -2,7 +2,7 @@ import abc
 import numpy as np
 
 
-FAST_KERNEL = False
+FAST_KERNEL = True
 
 
 class Kernel(abc.ABC):
