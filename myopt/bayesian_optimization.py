@@ -80,7 +80,7 @@ def bo_minimize(f: Callable[[np.array], float], bounds: List[Bound],
         for i, bound in enumerate(bounds):
             assert bound.low <= x_0[i] <= bound.high, f"x_0 not in bounds, {bound} at {i}"
 
-    kernel.round_indexes = np.array([i for i, bound in enumerate(bounds) if bound.type == "int"])
+    kernel = kernel.with_bounds(bounds)
 
     y_0 = f(x_0)
 
@@ -204,7 +204,7 @@ def bo_plot_exploration(f: Callable[[np.ndarray], np.ndarray],
 #     # plot_convergence(X_sample, y_sample)
 
 
-def plot_2d_optim_result(result: OptimizationResult, resolution: float = 0.1):
+def plot_2d_optim_result(result: OptimizationResult, resolution: float = 0.1, figsize=(8,7)):
     assert len(result.bounds) == 2
 
     b1 = result.bounds[0]
@@ -217,12 +217,12 @@ def plot_2d_optim_result(result: OptimizationResult, resolution: float = 0.1):
 
     X_2d = np.c_[gx.ravel(), gy.ravel()]
 
-    mu, _ = GaussianProcess(kernel=result.kernel).fit(result.X_sample, result.y_sample).posterior(X_2d).mu_std()
+    mu, _ = GaussianProcess(kernel=result.kernel.with_bounds(result.bounds))\
+                            .fit(result.X_sample, result.y_sample).posterior(X_2d).mu_std()
 
-    plt.figure(figsize=(12, 4))
-    plt.subplot(121)
+    plt.figure(figsize=figsize)
     plt.title("GP posterior")
-    plt.imshow(mu.reshape(gx.shape[0], gy.shape[0]),
+    plt.imshow(mu.reshape(gx.shape[0], gx.shape[1]),
                extent=[b1.low, b1.high, b2.low, b2.high])
     plt.scatter(result.X_sample[:,0], result.X_sample[:,1], c="k")
     plt.scatter([result.best_x[0]], [result.best_x[1]], c="r")

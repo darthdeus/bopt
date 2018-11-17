@@ -32,9 +32,9 @@ class Kernel(abc.ABC):
             x = x.copy()
             y = y.copy()
 
-            # if self.round_indexes is not None:
-            #     x[:, self.round_indexes] = np.round(x[:, self.round_indexes])
-            #     y[:, self.round_indexes] = np.round(y[:, self.round_indexes])
+            if self.round_indexes is not None:
+                x[:, self.round_indexes] = np.round(x[:, self.round_indexes])
+                y[:, self.round_indexes] = np.round(y[:, self.round_indexes])
 
             x = x.reshape(x.shape[0], 1, x.shape[1])
             y = y.reshape(1, y.shape[0], y.shape[1])
@@ -83,6 +83,11 @@ class Kernel(abc.ABC):
         kernel.round_indexes = indexes
         return kernel
 
+    def with_bounds(self, bounds) -> "Kernel":
+        kernel = self.copy()
+        kernel.round_indexes = np.array([i for i, bound in enumerate(bounds) if bound.type == "int"])
+        return kernel
+
     @abc.abstractmethod
     def copy(self) -> "Kernel":
         pass
@@ -124,7 +129,9 @@ class SquaredExp(Kernel):
         return [(1e-5, None), (1e-5, None)]
 
     def with_params(self, theta) -> "Kernel":
-        return SquaredExp(theta[0], theta[1])
+        copy = SquaredExp(theta[0], theta[1])
+        copy.round_indexes = self.round_indexes
+        return copy
 
     def copy(self) -> "Kernel":
         copy = SquaredExp(l=self.l, sigma=self.sigma)

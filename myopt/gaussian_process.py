@@ -73,7 +73,6 @@ class GaussianProcess:
         Kss_stable_eye = 1e-6 * np.eye(len(K_ss))  # Just for numerical stability?
 
         if self.stable_computation:
-
             L = cholesky(K + K_stable_eye)
             alpha = solve(L.T, solve(L, self.y_train))
             L_k = solve(L, K_s)
