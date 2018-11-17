@@ -1,23 +1,25 @@
 from typing import Callable
 
-from scipy.optimize import minimize
-
-import numpy as np
-from numpy.linalg import inv, cholesky
 import matplotlib.pyplot as plt
+import numpy as np
+from numpy.linalg import inv, cholesky, det
+from scipy.optimize import minimize
 
 from .kernels import Kernel
 
 
 def kernel_step(kernel: Kernel, noise_level: float, X_train: np.ndarray, y_train: np.ndarray) \
         -> Callable[[np.ndarray], np.ndarray]:
-
     def step(theta):
         noise = noise_level ** 2 * np.eye(len(X_train))
         K = kernel.with_params(theta)(X_train, X_train) + noise
 
+        # print(det(K))
+
         t1 = 0.5 * y_train.T @ inv(K) @ y_train
-        t2 = 0.5 * np.linalg.det(K)
+        # t2 = 0.5 * det(cholesky(K)) ** 2
+        t2 = 0.5 * det(K + 1e-6 * np.eye(len(K)))
+        # t2 = 0.5 * np.linalg.eigvals(K).prod()
         t3 = 0.5 * len(X_train) * np.log(2 * np.pi)
 
         return t1 + t2 + t3

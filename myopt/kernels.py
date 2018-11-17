@@ -1,4 +1,6 @@
 import abc
+from typing import Optional
+
 import numpy as np
 
 
@@ -6,6 +8,11 @@ FAST_KERNEL = True
 
 
 class Kernel(abc.ABC):
+    round_indexes: Optional[np.ndarray]
+
+    def __init__(self):
+        self.round_indexes = None
+
     def __call__(self, x_init: np.ndarray, y_init: np.ndarray = None) -> np.ndarray:
         if y_init is None:
             y_init = x_init
@@ -21,6 +28,13 @@ class Kernel(abc.ABC):
                 x = x.reshape(-1, 1)
             if y.ndim == 1:
                 y = y.reshape(-1, 1)
+
+            x = x.copy()
+            y = y.copy()
+
+            # if self.round_indexes is not None:
+            #     x[:, self.round_indexes] = np.round(x[:, self.round_indexes])
+            #     y[:, self.round_indexes] = np.round(y[:, self.round_indexes])
 
             x = x.reshape(x.shape[0], 1, x.shape[1])
             y = y.reshape(1, y.shape[0], y.shape[1])
@@ -63,6 +77,11 @@ class Kernel(abc.ABC):
     @abc.abstractmethod
     def with_params(self, theta: list) -> "Kernel":
         pass
+
+    def with_round_indexes(self, indexes: np.ndarray) -> "Kernel":
+        kernel = self.copy()
+        kernel.round_indexes = indexes
+        return kernel
 
     @abc.abstractmethod
     def copy(self) -> "Kernel":
@@ -116,6 +135,7 @@ class SquaredExp(Kernel):
 
 class RationalQuadratic(Kernel):
     def __init__(self, sigma: float = 1, l: float = 1, alpha: float = 1) -> None:
+        super().__init__()
         self.sigma = sigma
         self.l = l
         self.alpha = alpha
