@@ -7,7 +7,7 @@ from scipy.optimize import minimize
 from .acquisition_functions import expected_improvement
 from .gaussian_process import GaussianProcess
 from .kernels import SquaredExp, Kernel
-from .plot import plot_approximation, plot_convergence
+from .plot import plot_approximation
 
 
 class Integer:
@@ -83,6 +83,8 @@ def bo_minimize(f: Callable[[np.array], float], bounds: List[Bound],
 
     y_0 = f(x_0)
 
+    assert type(y_0) == float, "f(x) must return a float"
+
     X_sample = np.array([x_0])
     y_sample = np.array([y_0])
 
@@ -137,9 +139,8 @@ def propose_location(acquisition: Callable, gp: GaussianProcess, y_max: float, b
     return min_x
 
 
-def bo_plot_exploration(f: Callable[[np.ndarray], np.ndarray],
+def bo_plot_exploration(f: Callable[[np.ndarray], float],
                         bounds: List[Bound],
-                        X_init: np.ndarray, y_init: np.ndarray,
                         X_true: np.ndarray = None, y_true: np.ndarray = None,
                         kernel=SquaredExp(),
                         acquisition_function=expected_improvement,
@@ -158,7 +159,7 @@ def bo_plot_exploration(f: Callable[[np.ndarray], np.ndarray],
             # Plot samples, surrogate function, noise-free objective and next sampling location
             ax1 = plt.subplot(num_plots // per_row + 1, per_row, i // plot_every + 1)
 
-            plot_approximation(ax1, ei_y, gp.kernel, X_true, y_true, gp, X_sample, y_sample,
+            plot_approximation(ax1, ei_y, X_true, y_true, gp, X_sample, y_sample,
                                x_next, show_legend=i == 0)
 
             plt.title(f'Iteration {i+1}, {gp.kernel}')
@@ -203,7 +204,7 @@ def bo_plot_exploration(f: Callable[[np.ndarray], np.ndarray],
 #     # plot_convergence(X_sample, y_sample)
 
 
-def plot_2d_optim_result(result: OptimizationResult, resolution: float = 0.1, figsize=(8,7)):
+def plot_2d_optim_result(result: OptimizationResult, resolution: float = 0.3, figsize=(8,7)):
     assert len(result.bounds) == 2
 
     b1 = result.bounds[0]
@@ -211,6 +212,7 @@ def plot_2d_optim_result(result: OptimizationResult, resolution: float = 0.1, fi
 
     x1 = np.arange(b1.low, b1.high, resolution)
     x2 = np.arange(b2.low, b2.high, resolution)
+
 
     gx, gy = np.meshgrid(x1, x2)
 

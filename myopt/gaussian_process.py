@@ -1,9 +1,7 @@
-from typing import Optional, Tuple, Callable
+from typing import Optional, Tuple
 
 import numpy as np
-import matplotlib.pyplot as plt
 from numpy.linalg import inv, cholesky, solve
-from scipy.optimize import minimize
 
 from .kernel_opt import compute_optimized_kernel
 from .kernels import Kernel, SquaredExp
@@ -61,7 +59,8 @@ class GaussianProcess:
 
         assert self.y_train.ndim == 1
         assert self.y_train.shape[0] == self.X_train.shape[0]
-        assert self.X_train.shape[1] == self.X_test.shape[1]
+        if self.X_train.ndim > 1:
+            assert self.X_train.shape[1] == self.X_test.shape[1]
 
         noise = self.noise * np.eye(len(self.X_train))
 

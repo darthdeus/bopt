@@ -3,8 +3,6 @@ import numpy as np
 from matplotlib import cm
 from numpy.random import multivariate_normal
 
-from bayesian_optimization import OptimizationResult
-
 
 def plots(*plots, n_row=3, figsize=(15, 4)):
     num_rows = len(plots) // n_row + 1
@@ -54,8 +52,7 @@ def plot_gp(mu, cov, X, X_train=None, y_train=None, kernel=None, num_samples=3, 
     plt.legend()
 
 
-def plot_approximation(ax, ei_y, kernel, X, y, gp, X_sample, y_sample, X_next=None, show_legend=False):
-    # mu, std = gp_reg(X_sample, y_sample, X, return_std=True)
+def plot_approximation(ax, ei_y, X, y, gp, X_sample, y_sample, X_next=None, show_legend=False):
     mu, std = gp.posterior(X).mu_std()
 
     ax.fill_between(X.ravel(),

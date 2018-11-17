@@ -32,7 +32,7 @@ class Kernel(abc.ABC):
             x = x.copy()
             y = y.copy()
 
-            if self.round_indexes is not None:
+            if self.round_indexes is not None and len(self.round_indexes) > 0:
                 x[:, self.round_indexes] = np.round(x[:, self.round_indexes])
                 y[:, self.round_indexes] = np.round(y[:, self.round_indexes])
 
@@ -59,9 +59,6 @@ class Kernel(abc.ABC):
         assert output.shape == (x_init.shape[0], y_init.shape[0])
         return output
 
-        # return self.kernel(x, y)
-        # return self.kernel(*np.meshgrid(y, x)) + 1e-12 * np.eye(x.shape[0], y.shape[0])
-
     @abc.abstractmethod
     def kernel(self, x: np.ndarray, y: np.ndarray) -> np.ndarray:
         pass
@@ -75,7 +72,7 @@ class Kernel(abc.ABC):
         pass
 
     @abc.abstractmethod
-    def set_params(self, theta: list) -> "Kernel":
+    def set_params(self, theta: list) -> None:
         pass
 
     def with_params(self, theta: list) -> "Kernel":
@@ -118,15 +115,6 @@ class SquaredExp(Kernel):
         else:
             return self.sigma ** 2 * np.exp(- (1 / (2 * self.l ** 2)) * (x * x + y * y - 2 * x * y))
 
-    # def default_params(self) -> np.ndarray:
-    #     return np.array([1])
-    #
-    # def param_bounds(self) -> list:
-    #     return [(1e-3, None)]
-    #
-    # def with_params(self, theta) -> "Kernel":
-    #     return SquaredExp(theta[0])
-
     def default_params(self) -> np.ndarray:
         return np.array([1, 1])
 
@@ -144,6 +132,47 @@ class SquaredExp(Kernel):
 
     def __repr__(self):
         return f"SquaredExp(l={round(self.l, 2)}, sigma={round(self.sigma, 2)})"
+
+
+class Matern(Kernel):
+    def __init__(self, sigma: float = 1, ro: float = 1):
+        super().__init__()
+        self.sigma = sigma
+        self.ro = ro
+
+    def kernel(self, x: np.ndarray, y: np.ndarray) -> np.ndarray:
+        sqnorm = ((x - y) ** 2).sum(axis=2)
+
+        assert x.shape[1] == 1
+        assert y.shape[0] == 1
+        assert sqnorm.shape[0] == x.shape[0]
+        assert sqnorm.shape[1] == y.shape[1]
+
+        d = np.sqrt(sqnorm)
+
+        # zavorka = (np.sqrt(2 * self.v) * sqnorm / ro)
+        # e1 = sigma**2 * (2 ** (1 - self.v))/(gamma(self.v))
+        # e2 = zavorka ** self.v
+        # e3 = kv(self.v, zavorka)
+        #
+        # return e1 * e2 * e3
+        sigma = self.sigma
+        ro = self.ro
+
+        return sigma**2 * (1 + (np.sqrt(5) * d) / ro + (5*d**2)/(3*ro**2)) * np.exp(-(np.sqrt(5)*d)/(ro))
+
+    def default_params(self) -> np.ndarray:
+        return np.array([1, 1])
+
+    def param_bounds(self) -> list:
+        return [(1e-5, None), (1e-5, None)]
+
+    def set_params(self, theta: list) -> None:
+        self.sigma = theta[0]
+        self.ro = theta[1]
+
+    def copy(self) -> "Kernel":
+        return Matern(self.sigma, self.ro)
 
 
 class RationalQuadratic(Kernel):
