@@ -12,7 +12,8 @@ def kernel_step(kernel: Kernel, noise_level: float, X_train: np.ndarray, y_train
         -> Callable[[np.ndarray], np.ndarray]:
     def step(theta):
         noise = noise_level ** 2 * np.eye(len(X_train))
-        K = kernel.with_params(theta)(X_train, X_train) + noise
+        kernel.set_params(theta)
+        K = kernel(X_train, X_train) + noise
 
         # print(det(K))
 
@@ -60,4 +61,6 @@ def compute_optimized_kernel(kernel, X_train, y_train):
 
     print(f"Found optimal params {res.x}")
 
-    return kernel.with_params(res.x)
+    kernel.set_params(res.x)
+    return kernel
+    # return kernel.with_params(res.x)

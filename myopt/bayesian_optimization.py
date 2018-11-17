@@ -1,4 +1,3 @@
-import functools
 from typing import Callable, List, Union
 
 import matplotlib.pyplot as plt

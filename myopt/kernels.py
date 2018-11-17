@@ -75,8 +75,13 @@ class Kernel(abc.ABC):
         pass
 
     @abc.abstractmethod
-    def with_params(self, theta: list) -> "Kernel":
+    def set_params(self, theta: list) -> "Kernel":
         pass
+
+    def with_params(self, theta: list) -> "Kernel":
+        kernel = self.copy()
+        kernel.set_params(theta)
+        return kernel
 
     def with_round_indexes(self, indexes: np.ndarray) -> "Kernel":
         kernel = self.copy()
@@ -128,10 +133,9 @@ class SquaredExp(Kernel):
     def param_bounds(self) -> list:
         return [(1e-5, None), (1e-5, None)]
 
-    def with_params(self, theta) -> "Kernel":
-        copy = SquaredExp(theta[0], theta[1])
-        copy.round_indexes = self.round_indexes
-        return copy
+    def set_params(self, theta) -> None:
+        self.l = theta[0]
+        self.sigma = theta[1]
 
     def copy(self) -> "Kernel":
         copy = SquaredExp(l=self.l, sigma=self.sigma)
@@ -159,8 +163,8 @@ class RationalQuadratic(Kernel):
     def param_bounds(self) -> list:
         return [(1e-5, None)]
 
-    def with_params(self, theta: list) -> "Kernel":
-        return RationalQuadratic(l=theta[0])
+    def set_params(self, theta: list) -> None:
+        self.l = theta[0]
 
     def copy(self) -> "Kernel":
         return RationalQuadratic(sigma=self.sigma, l=self.l, alpha=self.alpha)
