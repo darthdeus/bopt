@@ -3,6 +3,8 @@ import numpy as np
 from matplotlib import cm
 from numpy.random import multivariate_normal
 
+from bayesian_optimization import OptimizationResult
+
 
 def plots(*plots, n_row=3, figsize=(15, 4)):
     num_rows = len(plots) // n_row + 1

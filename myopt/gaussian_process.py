@@ -59,6 +59,10 @@ class GaussianProcess:
 
         self.X_test = X_test
 
+        assert self.y_train.ndim == 1
+        assert self.y_train.shape[0] == self.X_train.shape[0]
+        assert self.X_train.shape[1] == self.X_test.shape[1]
+
         noise = self.noise * np.eye(len(self.X_train))
 
         K = self.kernel(self.X_train, self.X_train) + noise
@@ -69,6 +73,7 @@ class GaussianProcess:
         Kss_stable_eye = 1e-6 * np.eye(len(K_ss))  # Just for numerical stability?
 
         if self.stable_computation:
+
             L = cholesky(K + K_stable_eye)
             alpha = solve(L.T, solve(L, self.y_train))
             L_k = solve(L, K_s)
@@ -81,6 +86,10 @@ class GaussianProcess:
             self.mu = K_s.T @ K_inv @ self.y_train
             self.cov = K_ss + Kss_stable_eye - K_s.T @ K_inv @ K_s
             self.std = np.sqrt(np.diag(self.cov))
+
+        assert self.mu.ndim == 1
+        assert self.mu.shape[0] == X_test.shape[0]
+        assert self.cov.shape == (X_test.shape[0], X_test.shape[0])
 
         return self
 

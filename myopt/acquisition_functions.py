@@ -7,6 +7,9 @@ from .gaussian_process import GaussianProcess
 def expected_improvement(gp: GaussianProcess, X: np.ndarray, f_s: float, xi: float=0.01) -> np.ndarray:
     mu, sigma = gp.posterior(X).mu_std()
 
+    # print("mu", mu.shape, "sigma", sigma.shape)
+
+    mu = mu.reshape(-1)
     sigma = sigma.reshape(-1, 1)
 
     improvement = mu - f_s - xi

@@ -127,7 +127,9 @@ class SquaredExp(Kernel):
         return SquaredExp(theta[0], theta[1])
 
     def copy(self) -> "Kernel":
-        return SquaredExp(l=self.l, sigma=self.sigma)
+        copy = SquaredExp(l=self.l, sigma=self.sigma)
+        copy.round_indexes = self.round_indexes
+        return copy
 
     def __repr__(self):
         return f"SquaredExp(l={round(self.l, 2)}, sigma={round(self.sigma, 2)})"

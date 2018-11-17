@@ -40,6 +40,27 @@ class Float:
 Bound = Union[Integer, Float]
 
 
+class OptimizationResult:
+    X_sample: np.ndarray
+    y_sample: np.ndarray
+    best_x: np.ndarray
+    best_y: float
+    bounds: List[Bound]
+    kernel: Kernel
+
+    def __init__(self, X_sample: np.ndarray, y_sample: np.ndarray, best_x: np.ndarray, best_y: float,
+                 bounds: List[Bound], kernel: Kernel) -> None:
+        self.X_sample = X_sample
+        self.y_sample = y_sample
+        self.best_x = best_x
+        self.best_y = best_y
+        self.bounds = bounds
+        self.kernel = kernel
+
+    def __repr__(self) -> str:
+        return f"OptimizationResult(best_x={self.best_x}, best_y={self.best_y})"
+
+
 def bo_minimize(f: Callable[[np.array], float], bounds: List[Bound],
                 kernel: Kernel = SquaredExp(), acquisition_function=expected_improvement,
                 x_0: np.ndarray = None, gp_noise: float = 0,
@@ -79,12 +100,17 @@ def bo_minimize(f: Callable[[np.array], float], bounds: List[Bound],
             callback(iter, acquisition_function, gp, X_sample, y_sample, x_next, y_next)
 
         X_sample = np.vstack((X_sample, x_next))
-        y_sample = np.vstack((y_sample, y_next))
+        y_sample = np.hstack((y_sample, y_next))
 
     max_y_ind = y_sample.argmax()
     print("max_x", X_sample[max_y_ind], "max max", y_sample.max())
 
-    return X_sample[y_sample.argmax()]
+    return OptimizationResult(X_sample,
+                              y_sample,
+                              best_x=X_sample[y_sample.argmax()],
+                              best_y=y_sample.max(),
+                              bounds=bounds,
+                              kernel=kernel.copy())
 
 
 def propose_location(acquisition: Callable, gp: GaussianProcess, y_max: float, bounds: List[Bound], n_restarts: int=25):
@@ -93,7 +119,8 @@ def propose_location(acquisition: Callable, gp: GaussianProcess, y_max: float, b
 
     def min_obj(X):
         # Minimization objective is the negative acquisition function
-        return -acquisition(gp, X, y_max)
+        val = -acquisition(gp, X.reshape(1, -1), y_max)
+        return val
 
     starting_points = []
     for _ in range(n_restarts):
@@ -175,3 +202,27 @@ def bo_plot_exploration(f: Callable[[np.ndarray], np.ndarray],
 #                 callback=plot_iteration, optimize_kernel=optimize_kernel)
 #
 #     # plot_convergence(X_sample, y_sample)
+
+
+def plot_2d_optim_result(result: OptimizationResult, resolution: float = 0.1):
+    assert len(result.bounds) == 2
+
+    b1 = result.bounds[0]
+    b2 = result.bounds[1]
+
+    x1 = np.arange(b1.low, b1.high, resolution)
+    x2 = np.arange(b2.low, b2.high, resolution)
+
+    gx, gy = np.meshgrid(x1, x2)
+
+    X_2d = np.c_[gx.ravel(), gy.ravel()]
+
+    mu, _ = GaussianProcess(kernel=result.kernel).fit(result.X_sample, result.y_sample).posterior(X_2d).mu_std()
+
+    plt.figure(figsize=(12, 4))
+    plt.subplot(121)
+    plt.title("GP posterior")
+    plt.imshow(mu.reshape(gx.shape[0], gy.shape[0]),
+               extent=[b1.low, b1.high, b2.low, b2.high])
+    plt.scatter(result.X_sample[:,0], result.X_sample[:,1], c="k")
+    plt.scatter([result.best_x[0]], [result.best_x[1]], c="r")
