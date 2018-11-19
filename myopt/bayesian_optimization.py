@@ -1,10 +1,13 @@
+from tqdm import tqdm
+import concurrent.futures
+from concurrent.futures import Future
 from typing import Callable, List, Union
 
 import matplotlib.pyplot as plt
 import numpy as np
 from scipy.optimize import minimize
 
-from .acquisition_functions import expected_improvement
+from .acquisition_functions import expected_improvement, AcquisitionFunction
 from .gaussian_process import GaussianProcess
 from .kernels import SquaredExp, Kernel
 from .plot import plot_approximation
@@ -57,6 +60,8 @@ class OptimizationResult:
         self.kernel = kernel
 
     def __repr__(self) -> str:
+        # TODO: name bounds
+        # [f"{name}={round(val, 3)}" for name, val in zip(self.bounds, self.best_x)]
         return f"OptimizationResult(best_x={self.best_x}, best_y={self.best_y})"
 
 
@@ -74,7 +79,7 @@ def default_from_bounds(bounds: List[Bound]) -> np.ndarray:
     return x_0
 
 
-def bo_minimize_parallel(f: Callable[[np.array], float], bounds: List[Bound],
+def bo_minimize_parallel(f: Callable[[np.array], Future], bounds: List[Bound],
                          kernel: Kernel = SquaredExp(), acquisition_function=expected_improvement,
                          x_0: np.ndarray = None, gp_noise: float = 0,
                          n_iter: int = 8, callback: Callable = None,
@@ -87,30 +92,35 @@ def bo_minimize_parallel(f: Callable[[np.array], float], bounds: List[Bound],
 
     kernel = kernel.with_bounds(bounds)
 
-    y_0 = f(x_0)
+    y_0 = f(x_0).result()
 
     assert type(y_0) == float, "f(x) must return a float"
 
     X_sample = np.array([x_0])
     y_sample = np.array([y_0])
 
-    for iter in range(n_iter - 1):
-        gp = GaussianProcess(kernel=kernel, noise=gp_noise).fit(X_sample, y_sample)
-        if optimize_kernel:
-            gp = gp.optimize_kernel()
+    for iter in tqdm(range((n_iter - 1) // n_parallel + 1)):
+        gp = GaussianProcess(kernel=kernel, noise=gp_noise)
 
         multiple_x_next: List[np.ndarray] = \
-            propose_multiple_locations(acquisition_function, gp, y_sample.max(), bounds)
+            propose_multiple_locations(acquisition_function, gp, X_sample, y_sample, bounds, n_parallel,
+                                       optimize_kernel)
 
-        x_next = propose_location(acquisition_function, gp, y_sample.max(), bounds)
+        futures = [f(x_next) for x_next in multiple_x_next]
 
-        y_next = f(x_next)
+        completed, timeouted = concurrent.futures.wait(futures)
+
+        # We don't timeout, so this should be obvious
+        assert len(timeouted) == 0
+
+        multiple_y_next = [future.result() for future in futures]
 
         if callback is not None:
-            callback(iter, acquisition_function, gp, X_sample, y_sample, x_next, y_next)
+            callback(iter, acquisition_function, gp, X_sample, y_sample, multiple_x_next, multiple_y_next)
 
-        X_sample = np.vstack((X_sample, x_next))
-        y_sample = np.hstack((y_sample, y_next))
+        for x_next, y_next in zip(multiple_x_next, multiple_y_next):
+            X_sample = np.vstack((X_sample, x_next))
+            y_sample = np.hstack((y_sample, y_next))
 
     max_y_ind = y_sample.argmax()
     print("max_x", X_sample[max_y_ind], "max max", y_sample.max())
@@ -144,7 +154,7 @@ def bo_minimize(f: Callable[[np.array], float], bounds: List[Bound],
     X_sample = np.array([x_0])
     y_sample = np.array([y_0])
 
-    for iter in range(n_iter - 1):
+    for iter in tqdm(range(n_iter - 1)):
         gp = GaussianProcess(kernel=kernel, noise=gp_noise).fit(X_sample, y_sample)
         if optimize_kernel:
             gp = gp.optimize_kernel()
@@ -170,11 +180,32 @@ def bo_minimize(f: Callable[[np.array], float], bounds: List[Bound],
                               kernel=kernel.copy())
 
 
-AcquisitionFunction = Callable[[GaussianProcess, np.ndarray, float], np.ndarray]
+def propose_multiple_locations(acquisition: AcquisitionFunction, gp: GaussianProcess,
+                               X_sample: np.ndarray, y_sample: np.ndarray,
+                               bounds: List[Bound], n_locations: int, n_restarts: int = 25,
+                               optimize_kernel: bool = True) -> List[np.ndarray]:
+    result = []
+
+    for _ in range(n_locations):
+        gp.fit(X_sample, y_sample)
+        if optimize_kernel:
+            gp = gp.optimize_kernel()
+
+        y_max = y_sample.max()
+
+        x_next = propose_location(acquisition, gp, y_max, bounds, n_restarts)
+        y_next, _ = gp.posterior(np.array([x_next])).mu_std()
+
+        result.append(x_next)
+
+        X_sample = np.vstack((X_sample, x_next))
+        y_sample = np.hstack((y_sample, y_next))
+
+    return result
 
 
 def propose_location(acquisition: AcquisitionFunction, gp: GaussianProcess, y_max: float,
-                     bounds: List[Bound], n_restarts: int = 25):
+                     bounds: List[Bound], n_restarts: int = 25) -> np.ndarray:
     def min_obj(X):
         return -acquisition(gp, X.reshape(1, -1), y_max)
 
@@ -217,48 +248,42 @@ def bo_plot_exploration(f: Callable[[np.ndarray], float],
             ax1 = plt.subplot(num_plots // per_row + 1, per_row, i // plot_every + 1)
 
             plot_approximation(ax1, ei_y, X_true, y_true, gp, X_sample, y_sample,
-                               x_next, show_legend=i == 0)
+                               [x_next], show_legend=i == 0)
 
             plt.title(f'Iteration {i+1}, {gp.kernel}')
 
     return bo_minimize(f, bounds, kernel, acquisition_function, gp_noise=gp_noise, n_iter=n_iter,
                        callback=plot_iteration, optimize_kernel=optimize_kernel)
 
-    # plot_convergence(X_sample, y_sample)
 
+def bo_plot_exploration_parallel(f: Callable[[np.ndarray], Future],
+                                 bounds: List[Bound],
+                                 X_true: np.ndarray = None, y_true: np.ndarray = None,
+                                 kernel=SquaredExp(),
+                                 acquisition_function=expected_improvement,
+                                 n_iter: int = 8, plot_every: int = 1,
+                                 optimize_kernel=True, gp_noise: float = 0,
+                                 n_parallel: int = 3):
+    num_plots = (n_iter // plot_every)
 
-#
-#
-# def bo_plot_exploration(f: Callable[[np.ndarray], np.ndarray],
-#                         bounds: List[Bound],
-#                         X_init: np.ndarray, y_init: np.ndarray,
-#                         X_true: np.ndarray = None, y_true: np.ndarray = None,
-#                         kernel=SquaredExp(),
-#                         acquisition_function=expected_improvement,
-#                         n_iter: int = 8, plot_every: int = 1,
-#                         optimize_kernel=True, gp_noise: float = 0):
-#     num_plots = (n_iter // plot_every)
-#
-#     plt.figure(figsize=(15, num_plots * 2))
-#     plt.subplots_adjust(hspace=0.4)
-#
-#     def plot_iteration(i, acquisition_function, gp, X_sample, y_sample, x_next, y_next):
-#         ei_y = acquisition_function(gp, X, X_true)
-#         per_row = 2
-#
-#         if i % plot_every == 0:
-#             # Plot samples, surrogate function, noise-free objective and next sampling location
-#             ax1 = plt.subplot(num_plots // per_row + 1, per_row, i // plot_every + 1)
-#
-#             plot_approximation(ax1, ei_y, gp.kernel, X_true, y_true, gp, X_sample, y_sample,
-#                                x_next, show_legend=i == 0)
-#
-#             plt.title(f'Iteration {i+1}, {gp.kernel}')
-#
-#     bo_minimize(f, bounds, kernel, acquisition_function, gp_noise=gp_noise, n_iter=n_iter,
-#                 callback=plot_iteration, optimize_kernel=optimize_kernel)
-#
-#     # plot_convergence(X_sample, y_sample)
+    plt.figure(figsize=(15, num_plots * 2))
+    plt.subplots_adjust(hspace=0.4)
+
+    def plot_iteration(i, acquisition_function, gp, X_sample, y_sample, multiple_x_next, multiple_y_next):
+        ei_y = acquisition_function(gp, X_true, y_sample.max())
+        per_row = 2
+
+        if i % plot_every == 0:
+            # Plot samples, surrogate function, noise-free objective and next sampling location
+            ax1 = plt.subplot(num_plots // per_row + 1, per_row, i // plot_every + 1)
+
+            plot_approximation(ax1, ei_y, X_true, y_true, gp, X_sample, y_sample,
+                               multiple_x_next, show_legend=i == 0)
+
+            plt.title(f'Iteration {i+1}, {gp.kernel}')
+
+    return bo_minimize_parallel(f, bounds, kernel, acquisition_function, gp_noise=gp_noise, n_iter=n_iter,
+                                callback=plot_iteration, optimize_kernel=optimize_kernel, n_parallel=n_parallel)
 
 
 def plot_2d_optim_result(result: OptimizationResult, resolution: float = 0.3, figsize=(8, 7)):

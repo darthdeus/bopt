@@ -59,7 +59,7 @@ def compute_optimized_kernel(kernel, X_train, y_train):
                    default_params,
                    bounds=kernel.param_bounds(), method="L-BFGS-B")
 
-    print(f"Found optimal params {res.x}")
+    # print(f"Kernel optimal params {res.x}")
 
     kernel.set_params(res.x)
     return kernel

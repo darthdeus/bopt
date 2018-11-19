@@ -1,3 +1,5 @@
+from typing import List
+
 import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib import cm
@@ -52,7 +54,7 @@ def plot_gp(mu, cov, X, X_train=None, y_train=None, kernel=None, num_samples=3, 
     plt.legend()
 
 
-def plot_approximation(ax, ei_y, X, y, gp, X_sample, y_sample, X_next=None, show_legend=False):
+def plot_approximation(ax, ei_y, X, y, gp, X_sample, y_sample, multiple_x_next: List[np.ndarray], show_legend=False):
     mu, std = gp.posterior(X).mu_std()
 
     ax.fill_between(X.ravel(),
@@ -62,13 +64,16 @@ def plot_approximation(ax, ei_y, X, y, gp, X_sample, y_sample, X_next=None, show
     l1 = ax.plot(X, y, 'g--', lw=1, label='Objective')
     l2 = ax.plot(X, mu, 'b-', lw=1, label='GP mean')
     l3 = ax.plot(X_sample, y_sample, 'kx', mew=3, label='Samples')
-    if X_next:
-        ax.axvline(x=X_next, ls='--', c='k', lw=1)
+
+    for x_next in multiple_x_next:
+        ax.axvline(x=x_next, ls='--', c='k', lw=1)
 
     ax2 = ax.twinx()
 
     l4 = ax2.plot(X, ei_y, 'r-', lw=1, label='Acquisition fn')
-    ax2.axvline(x=X_next, ls='--', c='k', lw=1)
+
+    for x_next in multiple_x_next:
+        ax2.axvline(x=x_next, ls='--', c='k', lw=1)
 
     lns = l1 + l2 + l3 + l4
     labs = [l.get_label() for l in lns]
