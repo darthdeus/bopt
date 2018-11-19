@@ -60,6 +60,7 @@ class OptimizationResult:
         return f"OptimizationResult(best_x={self.best_x}, best_y={self.best_y})"
 
 
+# TODO: should be bo_maximize :)
 def bo_minimize(f: Callable[[np.array], float], bounds: List[Bound],
                 kernel: Kernel = SquaredExp(), acquisition_function=expected_improvement,
                 x_0: np.ndarray = None, gp_noise: float = 0,
