@@ -302,9 +302,9 @@ def plot_2d_optim_result(result: OptimizationResult, resolution: float = 0.3, fi
     mu, _ = GaussianProcess(kernel=result.kernel.with_bounds(result.bounds)) \
         .fit(result.X_sample, result.y_sample).posterior(X_2d).mu_std()
 
-    plt.figure(figsize=figsize)
-    plt.title("GP posterior")
+    # plt.figure(figsize=figsize)
+    plt.title(f"GP posterior {result.best_y}")
     plt.imshow(mu.reshape(gx.shape[0], gx.shape[1]),
-               extent=[b1.low, b1.high, b2.low, b2.high])
+               extent=[b1.low, b1.high, b2.high, b2.low])
     plt.scatter(result.X_sample[:, 0], result.X_sample[:, 1], c="k")
     plt.scatter([result.best_x[0]], [result.best_x[1]], c="r")

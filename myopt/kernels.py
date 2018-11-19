@@ -131,7 +131,7 @@ class SquaredExp(Kernel):
         return copy
 
     def __repr__(self):
-        return f"SquaredExp(l={round(self.l, 2)}, sigma={round(self.sigma, 2)})"
+        return f"SquaredExp(l={round(self.l, 5)}, sigma={round(self.sigma, 2)})"
 
 
 class Matern(Kernel):

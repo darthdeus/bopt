@@ -15,20 +15,33 @@ def kernel_step(kernel: Kernel, noise_level: float, X_train: np.ndarray, y_train
         kernel.set_params(theta)
         K = kernel(X_train, X_train) + noise
 
-        # print(det(K))
+        # print(theta, det(K))
 
         t1 = 0.5 * y_train.T @ inv(K) @ y_train
         # t2 = 0.5 * det(cholesky(K)) ** 2
-        t2 = 0.5 * det(K + 1e-6 * np.eye(len(K)))
-        # t2 = 0.5 * np.linalg.eigvals(K).prod()
+        # t2 = 0.5 * det(K + 1e-6 * np.eye(len(K)))
+
+        # e = np.log(np.linalg.eigvals(K))
+        # t2 = 0.5 * e.sum()
+
+        s, tt2 = np.linalg.slogdet(K)
+
+        t2 = 0.5 * tt2
+
         t3 = 0.5 * len(X_train) * np.log(2 * np.pi)
 
-        return t1 + t2 + t3
+        loglikelihood = t1 + t2 + t3
+
+        assert s == 1
+        assert loglikelihood >= 0
+
+        # print(t1, t2, t3)
+        return loglikelihood
 
     return step
 
 
-def plot_kernel_loss(kernel: Kernel, X_train: np.ndarray, y_train: np.ndarray, xmax=5) -> None:
+def plot_kernel_loss(kernel: Kernel, X_train: np.ndarray, y_train: np.ndarray, xmax=20) -> None:
     noise_level = 0.1
 
     step = kernel_step(kernel, noise_level, X_train, y_train)
@@ -57,7 +70,7 @@ def compute_optimized_kernel(kernel, X_train, y_train):
 
     res = minimize(step,
                    default_params,
-                   bounds=kernel.param_bounds(), method="L-BFGS-B")
+                   bounds=kernel.param_bounds(), method="L-BFGS-B", tol=0, options={"maxiter": 100})
 
     # print(f"Kernel optimal params {res.x}")
 
