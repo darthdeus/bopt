@@ -174,6 +174,9 @@ class Matern(Kernel):
     def copy(self) -> "Kernel":
         return Matern(self.sigma, self.ro)
 
+    def __repr__(self):
+        return f"Matern(sigma={self.sigma}, ro={self.ro})"
+
 
 class RationalQuadratic(Kernel):
     def __init__(self, sigma: float = 1, l: float = 1, alpha: float = 1) -> None:

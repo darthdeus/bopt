@@ -14,9 +14,9 @@
 
 * DONE optimalizace vice dimenzi
 
-* TODO paralelni
+* DONE paralelni
 
-* TODO benchmark + proc approx?
+* DONE benchmark + proc approx?
 
 * TODO expected imrpovement per second (vetsi hyperaram me stoji vic trenovani)
 

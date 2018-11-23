@@ -33,7 +33,7 @@ def kernel_step(kernel: Kernel, noise_level: float, X_train: np.ndarray, y_train
         loglikelihood = t1 + t2 + t3
 
         assert s == 1
-        assert loglikelihood >= 0
+        # assert loglikelihood >= 0
 
         # print(t1, t2, t3)
         return loglikelihood
