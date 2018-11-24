@@ -1,5 +1,5 @@
 import sys
-from myopt.bayesian_optimization import Float, Integer, bo_minimize_parallel
+from myopt.bayesian_optimization import Float, Integer, bo_maximize_parallel
 
 arg_bounds = [
     ("alpha", Float(0.05, 1)),
@@ -47,7 +47,7 @@ def parallel_f(x):
 
 
 if __name__ == '__main__':
-    result = bo_minimize_parallel(parallel_f, [bound for _, bound in arg_bounds], n_iter=30, n_parallel=8)
+    result = bo_maximize_parallel(parallel_f, [bound for _, bound in arg_bounds], n_iter=30, n_parallel=8)
 
     print("\n\n\n\n****************************")
     print(result)

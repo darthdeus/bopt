@@ -79,7 +79,7 @@ def default_from_bounds(bounds: List[Bound]) -> np.ndarray:
     return x_0
 
 
-def bo_minimize_parallel(f: Callable[[np.array], Future], bounds: List[Bound],
+def bo_maximize_parallel(f: Callable[[np.array], Future], bounds: List[Bound],
                          kernel: Kernel = SquaredExp(), acquisition_function=expected_improvement,
                          x_0: np.ndarray = None, gp_noise: float = 0,
                          n_iter: int = 8, callback: Callable = None,
@@ -134,7 +134,7 @@ def bo_minimize_parallel(f: Callable[[np.array], Future], bounds: List[Bound],
 
 
 # TODO: should be bo_maximize :)
-def bo_minimize(f: Callable[[np.array], float], bounds: List[Bound],
+def bo_maximize(f: Callable[[np.array], float], bounds: List[Bound],
                 kernel: Kernel = SquaredExp(), acquisition_function=expected_improvement,
                 x_0: np.ndarray = None, gp_noise: float = 0,
                 n_iter: int = 8, callback: Callable = None,
@@ -252,7 +252,7 @@ def bo_plot_exploration(f: Callable[[np.ndarray], float],
 
             plt.title(f'Iteration {i+1}, {gp.kernel}')
 
-    return bo_minimize(f, bounds, kernel, acquisition_function, gp_noise=gp_noise, n_iter=n_iter,
+    return bo_maximize(f, bounds, kernel, acquisition_function, gp_noise=gp_noise, n_iter=n_iter,
                        callback=plot_iteration, optimize_kernel=optimize_kernel)
 
 
@@ -282,7 +282,7 @@ def bo_plot_exploration_parallel(f: Callable[[np.ndarray], Future],
 
             plt.title(f'Iteration {i+1}, {gp.kernel}')
 
-    return bo_minimize_parallel(f, bounds, kernel, acquisition_function, gp_noise=gp_noise, n_iter=n_iter,
+    return bo_maximize_parallel(f, bounds, kernel, acquisition_function, gp_noise=gp_noise, n_iter=n_iter,
                                 callback=plot_iteration, optimize_kernel=optimize_kernel, n_parallel=n_parallel)
 
 
@@ -294,6 +294,10 @@ def plot_2d_optim_result(result: OptimizationResult, resolution: float = 0.3, fi
 
     x1 = np.arange(b1.low, b1.high, resolution)
     x2 = np.arange(b2.low, b2.high, resolution)
+
+    # TODO: issue a warning instead
+    assert len(x1) < 80
+    assert len(x2) < 80
 
     gx, gy = np.meshgrid(x1, x2)
 

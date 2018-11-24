@@ -1,5 +1,5 @@
 import sys
-from myopt.bayesian_optimization import Float, Integer, bo_minimize
+from myopt.bayesian_optimization import Float, Integer, bo_maximize
 
 arg_bounds = [
     ("alpha", Float(0.05, 1)),
@@ -39,7 +39,7 @@ def f(x):
 
 
 if __name__ == '__main__':
-    result = bo_minimize(f, [bound for _, bound in arg_bounds], n_iter=30)
+    result = bo_maximize(f, [bound for _, bound in arg_bounds], n_iter=30)
 
     print("\n\n\n\n****************************")
     print(result)
