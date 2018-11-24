@@ -1,5 +1,15 @@
+from typing import NamedTuple, Callable, List
+
 import numpy as np
-from bayesian_optimization import Float, Integer
+from .bayesian_optimization import Float, Integer, Bound
+
+
+class OptFunction(NamedTuple):
+    name: str
+    max: float
+    f: Callable
+    parallel_f: Callable
+    bounds: List[Bound]
 
 
 def beale(executor):
@@ -20,13 +30,13 @@ def beale(executor):
     rng = 4.5
     bounds = [Float(-rng, rng), Float(-rng, rng)]
 
-    return f, parallel_f, bounds
+    return OptFunction("Beale", 0.0, f, parallel_f, bounds)
 
 
 def easom(executor):
     """
     https://en.wikipedia.org/wiki/File:Easom_function.pdf
-    Max: 0
+    Max: 1
     """
     def f(x):
         y = x[1]
@@ -41,7 +51,7 @@ def easom(executor):
     rng = 100
     bounds = [Float(-rng, rng), Float(-rng, rng)]
 
-    return f, parallel_f, bounds
+    return OptFunction("Easom", 1.0, f, parallel_f, bounds)
 
 
 def eggholder(executor):
@@ -62,7 +72,7 @@ def eggholder(executor):
     rng = 512
     bounds = [Float(-rng, rng), Float(-rng, rng)]
 
-    return f, parallel_f, bounds
+    return OptFunction("Eggholder", 959.6407, f, parallel_f, bounds)
 
 
 def mccormick(executor):
@@ -82,7 +92,11 @@ def mccormick(executor):
 
     bounds = [Float(-1.5, 4), Float(-3, 4)]
 
-    return f, parallel_f, bounds
+    return OptFunction("McCormick", 19.2085, f, parallel_f, bounds)
 
 
-test_functions = [beale, eggholder, mccormick]
+def get_opt_test_functions(executor):
+    test_functions = [beale, easom, eggholder, mccormick]
+
+    return [f(executor) for f in test_functions]
+
