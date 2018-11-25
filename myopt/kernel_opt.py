@@ -5,7 +5,7 @@ import numpy as np
 from numpy.linalg import inv, cholesky, det
 from scipy.optimize import minimize
 
-from .kernels import Kernel
+from myopt.kernels import Kernel
 
 
 def kernel_step(kernel: Kernel, noise_level: float, X_train: np.ndarray, y_train: np.ndarray) \
@@ -17,7 +17,12 @@ def kernel_step(kernel: Kernel, noise_level: float, X_train: np.ndarray, y_train
 
         # print(theta, det(K))
 
+        # L = cholesky(K)
+        # Lk = L.T @ y_train
+
+        # t1 = 0.5 * Lk.T @ Lk
         t1 = 0.5 * y_train.T @ inv(K) @ y_train
+
         # t2 = 0.5 * det(cholesky(K)) ** 2
         # t2 = 0.5 * det(K + 1e-6 * np.eye(len(K)))
 
@@ -32,8 +37,8 @@ def kernel_step(kernel: Kernel, noise_level: float, X_train: np.ndarray, y_train
 
         loglikelihood = t1 + t2 + t3
 
+        # assert loglikelihood >= 0, f"got negative log likelihood={loglikelihood}, t1={t1}, t2={t2}, t3={t3}"
         assert s == 1
-        # assert loglikelihood >= 0
 
         # print(t1, t2, t3)
         return loglikelihood
@@ -63,7 +68,7 @@ def compute_optimized_kernel(kernel, X_train, y_train):
 
     step = kernel_step(kernel, noise_level, X_train, y_train)
 
-    default_params = kernel.default_params()
+    default_params = kernel.default_params(X_train, y_train)
 
     if len(default_params) == 0:
         return kernel

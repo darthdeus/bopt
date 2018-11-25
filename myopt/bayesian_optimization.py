@@ -7,10 +7,10 @@ import matplotlib.pyplot as plt
 import numpy as np
 from scipy.optimize import minimize
 
-from .acquisition_functions import expected_improvement, AcquisitionFunction
-from .gaussian_process import GaussianProcess
-from .kernels import SquaredExp, Kernel
-from .plot import plot_approximation
+from myopt.acquisition_functions import expected_improvement, AcquisitionFunction
+from myopt.gaussian_process import GaussianProcess
+from myopt.kernels import SquaredExp, Kernel
+from myopt.plot import plot_approximation
 
 
 class Integer:
@@ -133,7 +133,6 @@ def bo_maximize_parallel(f: Callable[[np.array], Future], bounds: List[Bound],
                               kernel=kernel.copy())
 
 
-# TODO: should be bo_maximize :)
 def bo_maximize(f: Callable[[np.array], float], bounds: List[Bound],
                 kernel: Kernel = SquaredExp(), acquisition_function=expected_improvement,
                 x_0: np.ndarray = None, gp_noise: float = 0,
@@ -286,7 +285,7 @@ def bo_plot_exploration_parallel(f: Callable[[np.ndarray], Future],
                                 callback=plot_iteration, optimize_kernel=optimize_kernel, n_parallel=n_parallel)
 
 
-def plot_2d_optim_result(result: OptimizationResult, resolution: float = 0.3, figsize=(8, 7)):
+def plot_2d_optim_result(result: OptimizationResult, resolution: float = 30, figsize=(8, 7)):
     assert len(result.bounds) == 2
 
     b1 = result.bounds[0]
@@ -296,8 +295,8 @@ def plot_2d_optim_result(result: OptimizationResult, resolution: float = 0.3, fi
     x2 = np.arange(b2.low, b2.high, resolution)
 
     # TODO: issue a warning instead
-    assert len(x1) < 80
-    assert len(x2) < 80
+    assert len(x1) < 80, f"too large x1, len = {len(x1)}"
+    assert len(x2) < 80, f"too large x1, len = {len(x2)}"
 
     gx, gy = np.meshgrid(x1, x2)
 
@@ -307,7 +306,7 @@ def plot_2d_optim_result(result: OptimizationResult, resolution: float = 0.3, fi
         .fit(result.X_sample, result.y_sample).posterior(X_2d).mu_std()
 
     # plt.figure(figsize=figsize)
-    plt.title(f"GP posterior {result.best_y}")
+    plt.title(f"GP posterior {round(result.best_y,2)}, {result.kernel}")
     plt.imshow(mu.reshape(gx.shape[0], gx.shape[1]),
                extent=[b1.low, b1.high, b2.high, b2.low])
     plt.scatter(result.X_sample[:, 0], result.X_sample[:, 1], c="k")

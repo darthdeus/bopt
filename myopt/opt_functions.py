@@ -1,7 +1,7 @@
 from typing import NamedTuple, Callable, List
 
 import numpy as np
-from .bayesian_optimization import Float, Integer, Bound
+from myopt.bayesian_optimization import Float, Integer, Bound
 
 
 class OptFunction(NamedTuple):

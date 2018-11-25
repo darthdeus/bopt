@@ -3,9 +3,9 @@ from typing import Optional, Tuple
 import numpy as np
 from numpy.linalg import inv, cholesky, solve
 
-from .kernel_opt import compute_optimized_kernel
-from .kernels import Kernel, SquaredExp
-from .plot import plot_gp
+from myopt.kernel_opt import compute_optimized_kernel
+from myopt.kernels import Kernel, SquaredExp
+from myopt.plot import plot_gp
 
 
 class GaussianProcess:

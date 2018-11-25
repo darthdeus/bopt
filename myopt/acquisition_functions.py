@@ -3,7 +3,7 @@ from typing import Callable
 import numpy as np
 from scipy.stats import norm
 
-from .gaussian_process import GaussianProcess
+from myopt.gaussian_process import GaussianProcess
 
 
 AcquisitionFunction = Callable[[GaussianProcess, np.ndarray, float], np.ndarray]
@@ -15,7 +15,7 @@ def expected_improvement(gp: GaussianProcess, X: np.ndarray, f_s: float, xi: flo
     mu, sigma = gp.posterior(X).mu_std()
 
     mu = mu.reshape(-1, 1)
-    sigma = sigma.reshape(-1, 1)
+    sigma = sigma.reshape(-1, 1) + 1e-6
 
     improvement = mu - f_s - xi
     Z = improvement / sigma

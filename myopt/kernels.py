@@ -64,7 +64,7 @@ class Kernel(abc.ABC):
         pass
 
     @abc.abstractmethod
-    def default_params(self) -> np.ndarray:
+    def default_params(self, X_train, y_train) -> np.ndarray:
         pass
 
     @abc.abstractmethod
@@ -100,6 +100,7 @@ class SquaredExp(Kernel):
         super().__init__()
         self.l = l
         self.sigma = sigma
+        self.name = "sqexp"
 
     def kernel(self, x: np.ndarray, y: np.ndarray) -> np.ndarray:
         if FAST_KERNEL:
@@ -115,8 +116,13 @@ class SquaredExp(Kernel):
         else:
             return self.sigma ** 2 * np.exp(- (1 / (2 * self.l ** 2)) * (x * x + y * y - 2 * x * y))
 
-    def default_params(self) -> np.ndarray:
-        return np.array([1, 1])
+    def default_params(self, X_train, y_train) -> np.ndarray:
+        if len(X_train) > 1:
+            scale = np.linalg.norm(X_train[0] - X_train[-1])
+        else:
+            scale = 1
+
+        return np.array([scale, 1])
 
     def param_bounds(self) -> list:
         return [(1e-5, None), (1e-5, None)]
@@ -139,6 +145,7 @@ class Matern(Kernel):
         super().__init__()
         self.sigma = sigma
         self.ro = ro
+        self.name = "matern"
 
     def kernel(self, x: np.ndarray, y: np.ndarray) -> np.ndarray:
         sqnorm = ((x - y) ** 2).sum(axis=2)
@@ -150,18 +157,12 @@ class Matern(Kernel):
 
         d = np.sqrt(sqnorm)
 
-        # zavorka = (np.sqrt(2 * self.v) * sqnorm / ro)
-        # e1 = sigma**2 * (2 ** (1 - self.v))/(gamma(self.v))
-        # e2 = zavorka ** self.v
-        # e3 = kv(self.v, zavorka)
-        #
-        # return e1 * e2 * e3
         sigma = self.sigma
         ro = self.ro
 
         return sigma**2 * (1 + (np.sqrt(5) * d) / ro + (5*d**2)/(3*ro**2)) * np.exp(-(np.sqrt(5)*d)/(ro))
 
-    def default_params(self) -> np.ndarray:
+    def default_params(self, X_train, y_train) -> np.ndarray:
         return np.array([1, 1])
 
     def param_bounds(self) -> list:
@@ -175,7 +176,7 @@ class Matern(Kernel):
         return Matern(self.sigma, self.ro)
 
     def __repr__(self):
-        return f"Matern(sigma={self.sigma}, ro={self.ro})"
+        return f"Matern(sigma={round(self.sigma, 5)}, ro={round(self.ro, 5)})"
 
 
 class RationalQuadratic(Kernel):
