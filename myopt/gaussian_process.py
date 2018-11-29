@@ -70,21 +70,35 @@ class GaussianProcess:
         K_s = self.kernel(self.X_train, X_test)
         K_ss = self.kernel(X_test, X_test)
 
+        # Symmetrization hack
+        K = (K + K.T) / 2.0
+        K_ss = (K_ss + K_ss.T) / 2.0
+
         K_stable_eye = 1e-6 * np.eye(len(K))  # Just for numerical stability?
         Kss_stable_eye = 1e-6 * np.eye(len(K_ss))  # Just for numerical stability?
 
+        K += K_stable_eye
+        K_ss += Kss_stable_eye
+
+        assert np.allclose(K, K.T, atol=1e-7), "K is not symmetric"
+        assert np.allclose(K_ss, K_ss.T, atol=1e-7), "K_ss is not symmetric"
+
+        eigs = np.linalg.eigvals(K)
+        if np.any(eigs <= 0):
+            print("Got negative eigs", eigs)
+
         if self.stable_computation:
-            L = cholesky(K + K_stable_eye)
+            L = cholesky(K)
             alpha = solve(L.T, solve(L, self.y_train))
             L_k = solve(L, K_s)
 
             self.mu = K_s.T @ alpha
-            self.cov = K_ss + Kss_stable_eye - L_k.T @ L_k
+            self.cov = K_ss - L_k.T @ L_k
             self.std = np.sqrt(np.diag(K_ss) - np.sum(L_k ** 2, axis=0))
         else:
-            K_inv = inv(K + K_stable_eye)
+            K_inv = inv(K)
             self.mu = K_s.T @ K_inv @ self.y_train
-            self.cov = K_ss + Kss_stable_eye - K_s.T @ K_inv @ K_s
+            self.cov = K_ss - K_s.T @ K_inv @ K_s
             self.std = np.sqrt(np.diag(self.cov))
 
         assert self.mu.ndim == 1

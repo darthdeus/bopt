@@ -3,6 +3,8 @@ from typing import NamedTuple, Callable, List
 import numpy as np
 from myopt.bayesian_optimization import Float, Integer, Bound
 
+# https://www.sfu.ca/~ssurjano/franke2d.html
+
 
 class OptFunction(NamedTuple):
     name: str

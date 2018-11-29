@@ -2,7 +2,7 @@ from typing import Callable
 
 import matplotlib.pyplot as plt
 import numpy as np
-from numpy.linalg import inv, cholesky, det
+from numpy.linalg import inv, cholesky, det, solve
 from scipy.optimize import minimize
 
 from myopt.kernels import Kernel
@@ -18,10 +18,10 @@ def kernel_step(kernel: Kernel, noise_level: float, X_train: np.ndarray, y_train
         # print(theta, det(K))
 
         # L = cholesky(K)
-        # Lk = L.T @ y_train
 
-        # t1 = 0.5 * Lk.T @ Lk
-        t1 = 0.5 * y_train.T @ inv(K) @ y_train
+        t1 = 0.5 * y_train.T @ solve(K, y_train)
+        # t1 = 0.5 * y_train.T @ solve(L.T, solve(L, y_train))
+        # t1 = 0.5 * y_train.T @ inv(K) @ y_train
 
         # t2 = 0.5 * det(cholesky(K)) ** 2
         # t2 = 0.5 * det(K + 1e-6 * np.eye(len(K)))
@@ -38,7 +38,7 @@ def kernel_step(kernel: Kernel, noise_level: float, X_train: np.ndarray, y_train
         loglikelihood = t1 + t2 + t3
 
         # assert loglikelihood >= 0, f"got negative log likelihood={loglikelihood}, t1={t1}, t2={t2}, t3={t3}"
-        assert s == 1
+        # assert s == 1
 
         # print(t1, t2, t3)
         return loglikelihood
