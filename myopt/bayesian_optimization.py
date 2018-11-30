@@ -3,6 +3,8 @@ import concurrent.futures
 from concurrent.futures import Future
 from typing import Callable, List, Union
 
+from sklearn.externals.joblib import Parallel, delayed
+
 import matplotlib.pyplot as plt
 import numpy as np
 from scipy.optimize import minimize
@@ -49,15 +51,19 @@ class OptimizationResult:
     best_y: float
     bounds: List[Bound]
     kernel: Kernel
+    n_iter: int
+    opt_fun: any
 
     def __init__(self, X_sample: np.ndarray, y_sample: np.ndarray, best_x: np.ndarray, best_y: float,
-                 bounds: List[Bound], kernel: Kernel) -> None:
+            bounds: List[Bound], kernel: Kernel, n_iter: int, opt_fun: any) -> None:
         self.X_sample = X_sample
         self.y_sample = y_sample
         self.best_x = best_x
         self.best_y = best_y
         self.bounds = bounds
         self.kernel = kernel
+        self.n_iter = n_iter
+        self.opt_fun = opt_fun
 
     def __repr__(self) -> str:
         # TODO: name bounds
@@ -137,7 +143,7 @@ def bo_maximize(f: Callable[[np.array], float], bounds: List[Bound],
                 kernel: Kernel = SquaredExp(), acquisition_function=expected_improvement,
                 x_0: np.ndarray = None, gp_noise: float = 0,
                 n_iter: int = 8, callback: Callable = None,
-                optimize_kernel=True) -> OptimizationResult:
+                optimize_kernel=True, use_tqdm=True) -> OptimizationResult:
     if x_0 is None:
         x_0 = default_from_bounds(bounds)
     else:
@@ -153,7 +159,12 @@ def bo_maximize(f: Callable[[np.array], float], bounds: List[Bound],
     X_sample = np.array([x_0])
     y_sample = np.array([y_0])
 
-    for iter in tqdm(range(n_iter - 1)):
+    iter_target = range(n_iter - 1)
+    if use_tqdm:
+        from tqdm import tqdm
+        iter_target = tqdm(iter_target)
+
+    for iter in iter_target:
         gp = GaussianProcess(kernel=kernel, noise=gp_noise).fit(X_sample, y_sample)
         if optimize_kernel:
             gp = gp.optimize_kernel()
@@ -169,14 +180,16 @@ def bo_maximize(f: Callable[[np.array], float], bounds: List[Bound],
         y_sample = np.hstack((y_sample, y_next))
 
     max_y_ind = y_sample.argmax()
-    print("max_x", X_sample[max_y_ind], "max max", y_sample.max())
+    # print("max_x", X_sample[max_y_ind], "max max", y_sample.max())
 
     return OptimizationResult(X_sample,
                               y_sample,
                               best_x=X_sample[y_sample.argmax()],
                               best_y=y_sample.max(),
                               bounds=bounds,
-                              kernel=kernel.copy())
+                              kernel=kernel.copy(),
+                              n_iter=n_iter,
+                              opt_fun=f)
 
 
 def propose_multiple_locations(acquisition: AcquisitionFunction, gp: GaussianProcess,
@@ -217,13 +230,30 @@ def propose_location(acquisition: AcquisitionFunction, gp: GaussianProcess, y_ma
     min_val = 1
     min_x = None
 
-    for x0 in starting_points:
-        res = minimize(min_obj, x0=x0, bounds=scipy_bounds, method='L-BFGS-B')
-        if res.fun < min_val:
-            min_val = res.fun[0]
-            min_x = res.x
+    RUN_PARALLEL = True
 
-    return min_x
+    if RUN_PARALLEL:
+        results = Parallel(n_jobs=1)(
+            delayed(minimize)(
+                min_obj,
+                x0=x0, bounds=scipy_bounds, method="L-BFGS-B")
+            for x0 in starting_points)
+
+        for res in results:
+            if res.fun < min_val:
+                min_val = res.fun[0]
+                min_x = res.x
+
+        return min_x
+
+    else:
+        for x0 in starting_points:
+            res = minimize(min_obj, x0=x0, bounds=scipy_bounds, method='L-BFGS-B')
+            if res.fun < min_val:
+                min_val = res.fun[0]
+                min_x = res.x
+
+        return min_x
 
 
 def bo_plot_exploration(f: Callable[[np.ndarray], float],

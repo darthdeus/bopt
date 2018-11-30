@@ -13,6 +13,9 @@ class OptFunction(NamedTuple):
     parallel_f: Callable
     bounds: List[Bound]
 
+    def __call__(self, *args, **kwargs):
+        return self.f(*args, **kwargs)
+
 
 def beale(executor):
     """
@@ -32,7 +35,7 @@ def beale(executor):
     rng = 4.5
     bounds = [Float(-rng, rng), Float(-rng, rng)]
 
-    return OptFunction("Beale", 0.0, f, parallel_f, bounds)
+    return OptFunction("Beale", 0.0, f, None, bounds)
 
 
 def easom(executor):
@@ -53,7 +56,7 @@ def easom(executor):
     rng = 100
     bounds = [Float(-rng, rng), Float(-rng, rng)]
 
-    return OptFunction("Easom", 1.0, f, parallel_f, bounds)
+    return OptFunction("Easom", 1.0, f, None, bounds)
 
 
 def eggholder(executor):
@@ -74,7 +77,7 @@ def eggholder(executor):
     rng = 512
     bounds = [Float(-rng, rng), Float(-rng, rng)]
 
-    return OptFunction("Eggholder", 959.6407, f, parallel_f, bounds)
+    return OptFunction("Eggholder", 959.6407, f, None, bounds)
 
 
 def mccormick(executor):
@@ -94,7 +97,7 @@ def mccormick(executor):
 
     bounds = [Float(-1.5, 4), Float(-3, 4)]
 
-    return OptFunction("McCormick", 19.2085, f, parallel_f, bounds)
+    return OptFunction("McCormick", 19.2085, f, None, bounds)
 
 
 def get_opt_test_functions(executor):
