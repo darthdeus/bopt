@@ -1,6 +1,6 @@
 import matplotlib.pyplot as plt
-from bayesian_optimization import bo_maximize_parallel, plot_2d_optim_result
-from kernels import RationalQuadratic, Matern, SquaredExp
+from myopt.bayesian_optimization import bo_maximize_parallel, plot_2d_optim_result
+from myopt.kernels import RationalQuadratic, Matern, SquaredExp
 from myopt.opt_functions import get_opt_test_functions
 from concurrent.futures import ThreadPoolExecutor
 

@@ -12,11 +12,11 @@ gp = GaussianProcess()
 
 X = np.arange(-200, 200, 0.4)
 
-t1 = timeit.Timer(lambda: gp.fit(X_train, y_train).posterior(X))
+t1 = timeit.Timer(lambda: gp.fit(X_train, y_train).optimize_kernel().posterior(X))
 print(t1.timeit(number=10))
 
 
-X = np.arange(-200, 200, 0.2)
-
-t2 = timeit.Timer(lambda: gp.fit(X_train, y_train).posterior(X))
-print(t2.timeit(number=10))
+# X = np.arange(-200, 200, 0.2)
+#
+# t2 = timeit.Timer(lambda: gp.fit(X_train, y_train).optimize_kernel().posterior(X))
+# print(t2.timeit(number=10))

@@ -111,7 +111,14 @@ class SquaredExp(Kernel):
             assert sqnorm.shape[0] == x.shape[0]
             assert sqnorm.shape[1] == y.shape[1]
 
-            return self.sigma ** 2 * np.exp(- (1 / (2*self.l**2)) * sqnorm)
+            epsmin = 1e-5
+            epsmax = 1e5
+
+            ls = np.clip(self.l**2, epsmin, epsmax)
+            var = np.clip(self.sigma**2, epsmin, epsmax)
+
+            exp = - (0.5 / self.l**2) * sqnorm
+            return var * np.exp(exp)
 
         else:
             return self.sigma ** 2 * np.exp(- (1 / (2 * self.l ** 2)) * (x * x + y * y - 2 * x * y))
