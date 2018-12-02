@@ -77,7 +77,7 @@ mccormick.name = "McCormick"
 mccormick.bounds = [Float(-1.5, 4), Float(-3, 4)]
 
 
-def get_fn_by_name(name: str):
+def get_fun_by_name(name: str):
     funs = get_opt_test_functions()
 
     return [fun for fun in funs if fun.name == name][0]

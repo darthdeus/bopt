@@ -1,21 +1,27 @@
-import numpy as np
+#!/usr/bin/env python
+import argparse
 from myopt.bayesian_optimization import bo_maximize
-from myopt.opt_functions import get_opt_test_functions
-from myopt.kernels import SquaredExp, Matern
+from myopt.kernels import get_kernel_by_name
+from myopt.opt_functions import get_fun_by_name
 
-from joblib import Parallel, delayed
+parser = argparse.ArgumentParser()
+parser.add_argument("--fun", type=str, help="Function to optimize")
+parser.add_argument("--n_iter", type=int, help="Number of iterations")
+parser.add_argument("--kernel", type=str, help="Kernel")
+args = parser.parse_args()
 
 
-opt_functions = get_opt_test_functions()
-kernels = [SquaredExp(), Matern()]
+print(f"Running: {args}")
 
 
-for opt_fun in opt_functions:
-    for n_iter in [10, 25, 50]:
-        for kernel in kernels:
-            print(f"--fun={opt_fun.name} --n_iter={n_iter} --kernel={kernel.name}")
 
-#
+fun = get_fun_by_name(args.fun)
+kernel = get_kernel_by_name(args.kernel)
+
+result = bo_maximize(fun, fun.bounds, kernel, use_tqdm=False, n_iter=args.n_iter)
+
+print(result)
+
 # results = Parallel(n_jobs=-1)(
 #         delayed(bo_maximize)(opt_fun, opt_fun.bounds, kernel, use_tqdm=False, n_iter=n_iter)
 #         for (opt_fun, n_iter, kernel) in combinations

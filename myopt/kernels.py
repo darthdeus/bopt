@@ -193,7 +193,7 @@ class RationalQuadratic(Kernel):
         sqnorm = ((x - y) ** 2).sum(axis=2)
         return self.sigma**2 * (1 + sqnorm / (2 * self.alpha * self.l**2)) **(-self.alpha)
 
-    def default_params(self) -> np.ndarray:
+    def default_params(self, X_train, y_train) -> np.ndarray:
         return np.array([1])
 
     def param_bounds(self) -> list:
@@ -220,7 +220,7 @@ class Linear(Kernel):
 
         return np.array(rows)
 
-    def default_params(self) -> np.ndarray:
+    def default_params(self, X_train, y_train) -> np.ndarray:
         return np.array([])
 
     def param_bounds(self) -> list:
@@ -234,3 +234,12 @@ class Linear(Kernel):
 
     def __repr__(self):
         return f"Linear()"
+
+
+def get_kernel_by_name(name):
+    mapping = {
+            "sqexp": SquaredExp,
+            "matern": Matern
+            }
+
+    return mapping[name]()
