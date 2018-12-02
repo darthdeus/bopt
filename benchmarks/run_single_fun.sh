@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# VENV=../venv
-VENV=~/.venv/tf-gpu
+VENV=${VENV:-~/.venv/tf-gpu}
+REL=${BASH_SOURCE%/*}
 
-PYTHONPATH=.. "$VENV/bin/python" run_single_fun.py $(sed "${SGE_TASK_ID}q;d" args.txt)
+PYTHONPATH="$REL/.." "$VENV/bin/python" "$REL/run_single_fun.py" $(sed "${SGE_TASK_ID}q;d" "$REL/args.txt")
