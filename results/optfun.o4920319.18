@@ -1,0 +1,8 @@
+Running 18 with '--fun=Eggholder --n_iter=50 --kernel=matern'
+Running: Namespace(fun='Eggholder', kernel='matern', n_iter=50)
+OptimizationResult(best_x=[414.03694603 430.28903063], best_y=820.3284893131892)
+======= EPILOG: Sun Dec 2 23:28:52 CET 2018
+== Limits:   
+== Usage:    cpu=04:22:58, mem=984.41864 GB s, io=0.13366 GB, vmem=708.492M, maxvmem=708.492M
+== Duration: 00:09:09 (549 s)
+== Server name: achilles5

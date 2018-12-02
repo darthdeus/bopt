@@ -1,0 +1,8 @@
+Running 12 with '--fun=Easom --n_iter=50 --kernel=matern'
+Running: Namespace(fun='Easom', kernel='matern', n_iter=50)
+OptimizationResult(best_x=[9.70243861 4.29542125], best_y=2.0807637271908902e-20)
+======= EPILOG: Sun Dec 2 23:20:49 CET 2018
+== Limits:   
+== Usage:    cpu=00:17:59, mem=66.09055 GB s, io=0.13235 GB, vmem=704.742M, maxvmem=704.742M
+== Duration: 00:01:06 (66 s)
+== Server name: hector2

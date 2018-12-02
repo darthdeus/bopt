@@ -1,0 +1,8 @@
+Running 11 with '--fun=Easom --n_iter=50 --kernel=sqexp'
+Running: Namespace(fun='Easom', kernel='sqexp', n_iter=50)
+OptimizationResult(best_x=[ 26.80801731 -10.03204757], best_y=2.065e-320)
+======= EPILOG: Sun Dec 2 23:20:42 CET 2018
+== Limits:   
+== Usage:    cpu=00:24:03, mem=88.88420 GB s, io=0.13309 GB, vmem=707.324M, maxvmem=707.324M
+== Duration: 00:00:59 (59 s)
+== Server name: paris3
