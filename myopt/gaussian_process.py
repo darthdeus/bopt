@@ -149,7 +149,8 @@ class GaussianProcess:
 
     def with_kernel_params(self, theta) -> "GaussianProcess":
         gp = self.copy()
-        gp.kernel = self.kernel.with_params(theta)
+        gp.kernel = gp.kernel.copy()
+        gp.kernel.set_params(theta)
 
         return gp
 

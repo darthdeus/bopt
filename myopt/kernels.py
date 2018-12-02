@@ -56,7 +56,8 @@ class Kernel(abc.ABC):
                     if i == j:
                         output[i, j] += 1e-12
 
-        assert output.shape == (x_init.shape[0], y_init.shape[0])
+        input_shape = (x_init.shape[0], y_init.shape[0])
+        assert output.shape == input_shape, f"{output.shape} != {input_shape}"
         return output
 
     @abc.abstractmethod
@@ -74,11 +75,6 @@ class Kernel(abc.ABC):
     @abc.abstractmethod
     def set_params(self, theta: list) -> None:
         pass
-
-    def with_params(self, theta: list) -> "Kernel":
-        kernel = self.copy()
-        kernel.set_params(theta)
-        return kernel
 
     def with_round_indexes(self, indexes: np.ndarray) -> "Kernel":
         kernel = self.copy()
@@ -230,11 +226,11 @@ class Linear(Kernel):
     def param_bounds(self) -> list:
         return []
 
-    def with_params(self, theta: list) -> "Kernel":
-        return self
-
     def copy(self) -> "Kernel":
         return Linear()
+
+    def set_params(self, theta: list) -> None:
+        pass
 
     def __repr__(self):
         return f"Linear()"
