@@ -56,7 +56,8 @@ class Kernel(abc.ABC):
                     if i == j:
                         output[i, j] += 1e-12
 
-        assert output.shape == (x_init.shape[0], y_init.shape[0])
+        input_shape = (x_init.shape[0], y_init.shape[0])
+        assert output.shape == input_shape, f"{output.shape} != {input_shape}"
         return output
 
     @abc.abstractmethod
@@ -235,6 +236,9 @@ class Linear(Kernel):
 
     def copy(self) -> "Kernel":
         return Linear()
+
+    def set_params(self, theta: list) -> None:
+        pass
 
     def __repr__(self):
         return f"Linear()"
