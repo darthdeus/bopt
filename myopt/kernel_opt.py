@@ -74,4 +74,3 @@ def compute_optimized_kernel(kernel, X_train, y_train):
 
     kernel.set_params(res.x)
     return kernel
-    # return kernel.with_params(res.x)

@@ -1,7 +1,7 @@
 from tqdm import tqdm
 import concurrent.futures
 from concurrent.futures import Future
-from typing import Callable, List, Union
+from typing import Callable, List, Union, Any
 
 from sklearn.externals.joblib import Parallel, delayed
 
@@ -52,10 +52,10 @@ class OptimizationResult:
     bounds: List[Bound]
     kernel: Kernel
     n_iter: int
-    opt_fun: any
+    opt_fun: Any
 
     def __init__(self, X_sample: np.ndarray, y_sample: np.ndarray, best_x: np.ndarray, best_y: float,
-            bounds: List[Bound], kernel: Kernel, n_iter: int, opt_fun: any) -> None:
+            bounds: List[Bound], kernel: Kernel, n_iter: int, opt_fun: Any) -> None:
         self.X_sample = X_sample
         self.y_sample = y_sample
         self.best_x = best_x
@@ -233,7 +233,7 @@ def propose_location(acquisition: AcquisitionFunction, gp: GaussianProcess, y_ma
     RUN_PARALLEL = True
 
     if RUN_PARALLEL:
-        results = Parallel(n_jobs=1)(
+        results = Parallel(n_jobs=8)(
             delayed(minimize)(
                 min_obj,
                 x0=x0, bounds=scipy_bounds, method="L-BFGS-B")
@@ -324,7 +324,6 @@ def plot_2d_optim_result(result: OptimizationResult, resolution: float = 30, fig
     x1 = np.arange(b1.low, b1.high, resolution)
     x2 = np.arange(b2.low, b2.high, resolution)
 
-    # TODO: issue a warning instead
     assert len(x1) < 80, f"too large x1, len = {len(x1)}"
     assert len(x2) < 80, f"too large x1, len = {len(x2)}"
 
@@ -335,7 +334,6 @@ def plot_2d_optim_result(result: OptimizationResult, resolution: float = 30, fig
     mu, _ = GaussianProcess(kernel=result.kernel.with_bounds(result.bounds)) \
         .fit(result.X_sample, result.y_sample).posterior(X_2d).mu_std()
 
-    # plt.figure(figsize=figsize)
     plt.title(f"GP posterior {round(result.best_y,2)}, {result.kernel}")
     plt.imshow(mu.reshape(gx.shape[0], gx.shape[1]),
                extent=[b1.low, b1.high, b2.high, b2.low])

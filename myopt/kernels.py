@@ -76,11 +76,6 @@ class Kernel(abc.ABC):
     def set_params(self, theta: list) -> None:
         pass
 
-    def with_params(self, theta: list) -> "Kernel":
-        kernel = self.copy()
-        kernel.set_params(theta)
-        return kernel
-
     def with_round_indexes(self, indexes: np.ndarray) -> "Kernel":
         kernel = self.copy()
         kernel.round_indexes = indexes
@@ -230,9 +225,6 @@ class Linear(Kernel):
 
     def param_bounds(self) -> list:
         return []
-
-    def with_params(self, theta: list) -> "Kernel":
-        return self
 
     def copy(self) -> "Kernel":
         return Linear()

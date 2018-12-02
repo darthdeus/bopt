@@ -10,8 +10,6 @@ opt_functions = get_opt_test_functions()
 kernels = [SquaredExp(), Matern()]
 
 
-combinations = []
-
 for opt_fun in opt_functions:
     for n_iter in [10, 25, 50]:
         for kernel in kernels:
