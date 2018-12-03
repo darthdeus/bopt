@@ -31,6 +31,8 @@ def kernel_step(kernel: Kernel, noise_level: float, X_train: np.ndarray, y_train
 
         loglikelihood = t1 + t2 + t3
 
+        # print(loglikelihood, theta)
+
         # assert loglikelihood >= 0, f"got negative log likelihood={loglikelihood}, t1={t1}, t2={t2}, t3={t3}"
         # assert s == 1
 
@@ -44,12 +46,12 @@ def plot_kernel_loss(kernel: Kernel, X_train: np.ndarray, y_train: np.ndarray, x
 
     step = kernel_step(kernel, noise_level, X_train, y_train)
 
-    X = np.arange(0.001, xmax, step=0.1)
+    X = np.arange(0.00001, xmax, step=0.1)
     thetas = []
 
     for theta in X:
         # TODO: plot all params
-        thetas.append(step(np.array([theta, 1])))
+        thetas.append(step(np.array([theta, kernel.sigma])))
 
     thetas = np.array(thetas)
 

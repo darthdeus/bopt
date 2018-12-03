@@ -53,6 +53,33 @@ def plot_gp(mu, cov, X, X_train=None, y_train=None, kernel=None, num_samples=3, 
 
     plt.legend()
 
+# def plot_gp(mu, cov, X, X_train=None, y_train=None, kernel=None, num_samples=3, figsize=(7, 3), figure=True):
+#     std = 2 * np.sqrt(np.diag(cov))  # 1.96?
+#
+#     if figure:
+#         plt.figure(figsize=figsize)
+#
+#     if kernel is not None:
+#         plt.title(kernel)
+#
+#     X = X
+#     X_train = X_train[:4]
+#     y_train = y_train[:4]
+#     mu = mu
+#
+#     # plt.fill_between(X, mu + std, mu - std, alpha=0.1)
+#     plt.plot(X, mu, label="Mean")
+#
+#     # samples = multivariate_normal(mu, cov, size=num_samples)
+#     # for i, sample in enumerate(samples):
+#     #     plt.plot(X, sample, lw=0.7, ls="--", label=f"Sample {i+1}", color="black")
+#
+#     if X_train is not None:
+#         plt.plot(X_train, y_train, "rx", lw=2)
+#
+#     plt.legend()
+#
+
 
 def plot_approximation(ax, ei_y, X, y, gp, X_sample, y_sample, multiple_x_next: List[np.ndarray], show_legend=False):
     mu, std = gp.posterior(X).mu_std()
