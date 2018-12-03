@@ -83,9 +83,9 @@ class GaussianProcess:
         assert np.allclose(K, K.T, atol=1e-7), "K is not symmetric"
         assert np.allclose(K_ss, K_ss.T, atol=1e-7), "K_ss is not symmetric"
 
-        eigs = np.linalg.eigvals(K)
-        if np.any(eigs <= 0):
-            print("Got negative eigs", eigs)
+        # eigs = np.linalg.eigvals(K)
+        # if np.any(eigs <= 0):
+        #     print("Got negative eigs", eigs)
 
         if self.stable_computation:
             L = cholesky(K)

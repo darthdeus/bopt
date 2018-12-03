@@ -230,7 +230,7 @@ def propose_location(acquisition: AcquisitionFunction, gp: GaussianProcess, y_ma
     min_val = 1
     min_x = None
 
-    RUN_PARALLEL = True
+    RUN_PARALLEL = False
 
     if RUN_PARALLEL:
         results = Parallel(n_jobs=8)(
