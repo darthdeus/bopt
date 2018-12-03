@@ -1,24 +1,48 @@
---fun=Beale --n_iter=10 --kernel=sqexp
---fun=Beale --n_iter=10 --kernel=matern
---fun=Beale --n_iter=25 --kernel=sqexp
---fun=Beale --n_iter=25 --kernel=matern
---fun=Beale --n_iter=50 --kernel=sqexp
---fun=Beale --n_iter=50 --kernel=matern
---fun=Easom --n_iter=10 --kernel=sqexp
---fun=Easom --n_iter=10 --kernel=matern
---fun=Easom --n_iter=25 --kernel=sqexp
---fun=Easom --n_iter=25 --kernel=matern
---fun=Easom --n_iter=50 --kernel=sqexp
---fun=Easom --n_iter=50 --kernel=matern
---fun=Eggholder --n_iter=10 --kernel=sqexp
---fun=Eggholder --n_iter=10 --kernel=matern
---fun=Eggholder --n_iter=25 --kernel=sqexp
---fun=Eggholder --n_iter=25 --kernel=matern
---fun=Eggholder --n_iter=50 --kernel=sqexp
---fun=Eggholder --n_iter=50 --kernel=matern
---fun=McCormick --n_iter=10 --kernel=sqexp
---fun=McCormick --n_iter=10 --kernel=matern
---fun=McCormick --n_iter=25 --kernel=sqexp
---fun=McCormick --n_iter=25 --kernel=matern
---fun=McCormick --n_iter=50 --kernel=sqexp
---fun=McCormick --n_iter=50 --kernel=matern
+--acquisition-fn=ei --fun=Beale --n_iter=10 --kernel=sqexp
+--acquisition-fn=ei --fun=Beale --n_iter=10 --kernel=matern
+--acquisition-fn=ei --fun=Beale --n_iter=25 --kernel=sqexp
+--acquisition-fn=ei --fun=Beale --n_iter=25 --kernel=matern
+--acquisition-fn=ei --fun=Beale --n_iter=50 --kernel=sqexp
+--acquisition-fn=ei --fun=Beale --n_iter=50 --kernel=matern
+--acquisition-fn=ei --fun=Easom --n_iter=10 --kernel=sqexp
+--acquisition-fn=ei --fun=Easom --n_iter=10 --kernel=matern
+--acquisition-fn=ei --fun=Easom --n_iter=25 --kernel=sqexp
+--acquisition-fn=ei --fun=Easom --n_iter=25 --kernel=matern
+--acquisition-fn=ei --fun=Easom --n_iter=50 --kernel=sqexp
+--acquisition-fn=ei --fun=Easom --n_iter=50 --kernel=matern
+--acquisition-fn=ei --fun=Eggholder --n_iter=10 --kernel=sqexp
+--acquisition-fn=ei --fun=Eggholder --n_iter=10 --kernel=matern
+--acquisition-fn=ei --fun=Eggholder --n_iter=25 --kernel=sqexp
+--acquisition-fn=ei --fun=Eggholder --n_iter=25 --kernel=matern
+--acquisition-fn=ei --fun=Eggholder --n_iter=50 --kernel=sqexp
+--acquisition-fn=ei --fun=Eggholder --n_iter=50 --kernel=matern
+--acquisition-fn=ei --fun=McCormick --n_iter=10 --kernel=sqexp
+--acquisition-fn=ei --fun=McCormick --n_iter=10 --kernel=matern
+--acquisition-fn=ei --fun=McCormick --n_iter=25 --kernel=sqexp
+--acquisition-fn=ei --fun=McCormick --n_iter=25 --kernel=matern
+--acquisition-fn=ei --fun=McCormick --n_iter=50 --kernel=sqexp
+--acquisition-fn=ei --fun=McCormick --n_iter=50 --kernel=matern
+--acquisition-fn=pi --fun=Beale --n_iter=10 --kernel=sqexp
+--acquisition-fn=pi --fun=Beale --n_iter=10 --kernel=matern
+--acquisition-fn=pi --fun=Beale --n_iter=25 --kernel=sqexp
+--acquisition-fn=pi --fun=Beale --n_iter=25 --kernel=matern
+--acquisition-fn=pi --fun=Beale --n_iter=50 --kernel=sqexp
+--acquisition-fn=pi --fun=Beale --n_iter=50 --kernel=matern
+--acquisition-fn=pi --fun=Easom --n_iter=10 --kernel=sqexp
+--acquisition-fn=pi --fun=Easom --n_iter=10 --kernel=matern
+--acquisition-fn=pi --fun=Easom --n_iter=25 --kernel=sqexp
+--acquisition-fn=pi --fun=Easom --n_iter=25 --kernel=matern
+--acquisition-fn=pi --fun=Easom --n_iter=50 --kernel=sqexp
+--acquisition-fn=pi --fun=Easom --n_iter=50 --kernel=matern
+--acquisition-fn=pi --fun=Eggholder --n_iter=10 --kernel=sqexp
+--acquisition-fn=pi --fun=Eggholder --n_iter=10 --kernel=matern
+--acquisition-fn=pi --fun=Eggholder --n_iter=25 --kernel=sqexp
+--acquisition-fn=pi --fun=Eggholder --n_iter=25 --kernel=matern
+--acquisition-fn=pi --fun=Eggholder --n_iter=50 --kernel=sqexp
+--acquisition-fn=pi --fun=Eggholder --n_iter=50 --kernel=matern
+--acquisition-fn=pi --fun=McCormick --n_iter=10 --kernel=sqexp
+--acquisition-fn=pi --fun=McCormick --n_iter=10 --kernel=matern
+--acquisition-fn=pi --fun=McCormick --n_iter=25 --kernel=sqexp
+--acquisition-fn=pi --fun=McCormick --n_iter=25 --kernel=matern
+--acquisition-fn=pi --fun=McCormick --n_iter=50 --kernel=sqexp
+--acquisition-fn=pi --fun=McCormick --n_iter=50 --kernel=matern

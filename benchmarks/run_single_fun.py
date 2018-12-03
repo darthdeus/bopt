@@ -3,22 +3,24 @@ import argparse
 from myopt.bayesian_optimization import bo_maximize
 from myopt.kernels import get_kernel_by_name
 from myopt.opt_functions import get_fun_by_name
+from myopt.acquisition_functions import get_acquisition_fn_by_name
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--fun", type=str, help="Function to optimize")
 parser.add_argument("--n_iter", type=int, help="Number of iterations")
 parser.add_argument("--kernel", type=str, help="Kernel")
+parser.add_argument("--acquisition-fn", type=str, default="ei", help="Acquisition function")
 args = parser.parse_args()
 
 
 print(f"Running: {args}")
 
-
-
 fun = get_fun_by_name(args.fun)
 kernel = get_kernel_by_name(args.kernel)
+acquisition_function = get_acquisition_fn_by_name(args.acquisition_fn)
 
-result = bo_maximize(fun, fun.bounds, kernel, use_tqdm=False, n_iter=args.n_iter)
+result = bo_maximize(fun, fun.bounds, kernel, use_tqdm=False, n_iter=args.n_iter,
+                     acquisition_function=acquisition_function)
 
 print(result)
 
