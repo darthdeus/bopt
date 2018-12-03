@@ -13,8 +13,6 @@ parser.add_argument("--acquisition-fn", type=str, default="ei", help="Acquisitio
 args = parser.parse_args()
 
 
-print(f"Running: {args}")
-
 fun = get_fun_by_name(args.fun)
 kernel = get_kernel_by_name(args.kernel)
 acquisition_function = get_acquisition_fn_by_name(args.acquisition_fn)
@@ -22,7 +20,7 @@ acquisition_function = get_acquisition_fn_by_name(args.acquisition_fn)
 result = bo_maximize(fun, fun.bounds, kernel, use_tqdm=False, n_iter=args.n_iter,
                      acquisition_function=acquisition_function)
 
-print(result)
+print(f"DONE\t{args}\t{result}")
 
 # results = Parallel(n_jobs=-1)(
 #         delayed(bo_maximize)(opt_fun, opt_fun.bounds, kernel, use_tqdm=False, n_iter=n_iter)

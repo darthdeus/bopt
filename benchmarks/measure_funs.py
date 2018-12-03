@@ -10,10 +10,11 @@ opt_functions = get_opt_test_functions()
 kernels = [SquaredExp(), Matern()]
 
 
-for opt_fun in opt_functions:
-    for n_iter in [10, 25, 50]:
-        for kernel in kernels:
-            print(f"--fun={opt_fun.name} --n_iter={n_iter} --kernel={kernel.name}")
+for ei in ["ei", "pi"]:
+    for opt_fun in opt_functions:
+        for n_iter in [10, 25, 50, 100]:
+            for kernel in kernels:
+                print(f"--acquisition-fn={ei} --fun={opt_fun.name} --n_iter={n_iter} --kernel={kernel.name}")
 
 #
 # results = Parallel(n_jobs=-1)(
