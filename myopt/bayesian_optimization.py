@@ -13,32 +13,7 @@ from myopt.acquisition_functions import expected_improvement, AcquisitionFunctio
 from myopt.gaussian_process import GaussianProcess
 from myopt.kernels import SquaredExp, Kernel
 from myopt.plot import plot_approximation
-
-
-class Integer:
-    low: int
-    high: int
-
-    def __init__(self, low: int, high: int):
-        self.low = low
-        self.high = high
-        self.type = "int"
-
-    def sample(self) -> float:
-        return np.random.randint(self.low, self.high)
-
-
-class Float:
-    low: float
-    high: float
-
-    def __init__(self, low: float, high: float):
-        self.low = low
-        self.high = high
-        self.type = "float"
-
-    def sample(self) -> float:
-        return np.random.uniform(self.low, self.high)
+from myopt.hyperparameters import Integer, Float
 
 
 Bound = Union[Integer, Float]
