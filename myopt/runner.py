@@ -17,16 +17,16 @@ class Job(abc.ABC):
     final_result: Optional[Value]
 
     @abc.abstractmethod
-    def state(): pass
+    def state(self): pass
 
     @abc.abstractmethod
-    def kill(): pass
+    def kill(self): pass
 
     @abc.abstractmethod
-    def serialize(): pass
+    def serialize(self): pass
 
     @abc.abstractmethod
-    def deserialize(): pass
+    def deserialize(self): pass
 
 
 class Runner(abc.ABC):
