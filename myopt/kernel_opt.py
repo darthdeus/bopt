@@ -20,22 +20,17 @@ def kernel_log_likelihood(kernel: Kernel, X_train: np.ndarray,
 
     t1 = 0.5 * y_train.T @ solve(K, y_train)
     # t1 = 0.5 * y_train.T @ solve(L.T, solve(L, y_train))
-    # t1 = 0.5 * y_train.T @ inv(K) @ y_train
 
-    # t2 = 0.5 * det(cholesky(K)) ** 2
-    # t2 = 0.5 * det(K + 1e-6 * np.eye(len(K)))
+    # https://blogs.sas.com/content/iml/2012/10/31/compute-the-log-determinant-of-a-matrix.html
+    t2 = np.sum(np.log(np.diagonal(cholesky(K))))
 
-    s, tt2 = np.linalg.slogdet(K)
-
-    t2 = 0.5 * tt2
     t3 = 0.5 * len(X_train) * np.log(2 * np.pi)
 
     loglikelihood = t1 + t2 + t3
 
-    # print(loglikelihood, theta)
+    # print(loglikelihood, kernel.l, kernel.sigma)
 
     assert loglikelihood >= 0, f"got negative log likelihood={loglikelihood}, t1={t1}, t2={t2}, t3={t3}"
-    assert s == 1
 
     return loglikelihood
 
@@ -62,7 +57,7 @@ def plot_kernel_loss_2d(kernel: Kernel, X_train: np.ndarray, y_train: np.ndarray
     amax = 5
 
     bmin = 1
-    bmax = 4
+    bmax = 10
 
     a_values = np.linspace(amin, amax, num=num_points)
     b_values = np.linspace(bmin, bmax, num=num_points)

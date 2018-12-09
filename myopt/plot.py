@@ -11,7 +11,7 @@ def imshow(data: np.ndarray, a_values: np.ndarray, b_values: np.ndarray,
     plt.figure(figsize=(5,5))
     plt.xlabel(xlabel)
     plt.ylabel(ylabel)
-    im = plt.imshow(data, extent=[min(b_values), max(b_values), min(a_values), max(a_values)], aspect="auto")
+    im = plt.imshow(data, extent=[min(b_values), max(b_values), max(a_values), min(a_values)], aspect="auto")
     plt.colorbar(im)
     plt.title(title)
 
