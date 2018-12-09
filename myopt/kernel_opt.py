@@ -5,63 +5,81 @@ import numpy as np
 from numpy.linalg import inv, cholesky, det, solve
 from scipy.optimize import minimize
 
+from functools import partial
+
 from myopt.kernels import Kernel
+from myopt.plot import imshow
 
 
-def kernel_step(kernel: Kernel, noise_level: float, X_train: np.ndarray, y_train: np.ndarray) \
-        -> Callable[[np.ndarray], np.ndarray]:
-    def step(theta):
-        noise = noise_level ** 2 * np.eye(len(X_train))
-        kernel.set_params(theta)
-        K = kernel(X_train, X_train) + noise
+def kernel_log_likelihood(kernel: Kernel, X_train: np.ndarray,
+                          y_train: np.ndarray, noise_level: float = 0) -> float:
+    noise = noise_level ** 2 * np.eye(len(X_train))
+    K = kernel(X_train, X_train) + noise
 
-        # L = cholesky(K)
+    # L = cholesky(K)
 
-        t1 = 0.5 * y_train.T @ solve(K, y_train)
-        # t1 = 0.5 * y_train.T @ solve(L.T, solve(L, y_train))
-        # t1 = 0.5 * y_train.T @ inv(K) @ y_train
+    t1 = 0.5 * y_train.T @ solve(K, y_train)
+    # t1 = 0.5 * y_train.T @ solve(L.T, solve(L, y_train))
+    # t1 = 0.5 * y_train.T @ inv(K) @ y_train
 
-        # t2 = 0.5 * det(cholesky(K)) ** 2
-        # t2 = 0.5 * det(K + 1e-6 * np.eye(len(K)))
+    # t2 = 0.5 * det(cholesky(K)) ** 2
+    # t2 = 0.5 * det(K + 1e-6 * np.eye(len(K)))
 
-        s, tt2 = np.linalg.slogdet(K)
+    s, tt2 = np.linalg.slogdet(K)
 
-        t2 = 0.5 * tt2
-        t3 = 0.5 * len(X_train) * np.log(2 * np.pi)
+    t2 = 0.5 * tt2
+    t3 = 0.5 * len(X_train) * np.log(2 * np.pi)
 
-        loglikelihood = t1 + t2 + t3
+    loglikelihood = t1 + t2 + t3
 
-        # print(loglikelihood, theta)
+    # print(loglikelihood, theta)
 
-        # assert loglikelihood >= 0, f"got negative log likelihood={loglikelihood}, t1={t1}, t2={t2}, t3={t3}"
-        # assert s == 1
+    assert loglikelihood >= 0, f"got negative log likelihood={loglikelihood}, t1={t1}, t2={t2}, t3={t3}"
+    assert s == 1
 
-        return loglikelihood
-
-    return step
+    return loglikelihood
 
 
-def plot_kernel_loss(kernel: Kernel, X_train: np.ndarray, y_train: np.ndarray, xmax=20) -> None:
-    noise_level = 0.1
+def plot_kernel_loss(kernel: Kernel, X_train: np.ndarray, y_train: np.ndarray,
+                     noise_level: float = 0.1, xmax: int = 5, sigma: float = 1) -> None:
+    X = np.linspace(0.00001, xmax, num=50)
 
-    step = kernel_step(kernel, noise_level, X_train, y_train)
+    likelihood = lambda l: kernel_log_likelihood(kernel.set_params(np.array([l, sigma])),
+                                                 X_train, y_train, noise_level)
 
-    X = np.arange(0.00001, xmax, step=0.1)
-    thetas = []
+    data = np.vectorize(likelihood)(X)
 
-    for theta in X:
-        # TODO: plot all params
-        thetas.append(step(np.array([theta, kernel.sigma])))
+    plt.plot(X, data)
+    plt.title(f"Kernel marginal likelihood, $\sigma = {sigma}$")
 
-    thetas = np.array(thetas)
 
-    plt.plot(X, thetas)
+def plot_kernel_loss_2d(kernel: Kernel, X_train: np.ndarray, y_train: np.ndarray,
+                        noise_level: float = 0.1) -> None:
+    num_points = 10
+    data = np.zeros((num_points, num_points))
+
+    amin = 0.3
+    amax = 5
+
+    bmin = 1
+    bmax = 4
+
+    a_values = np.linspace(amin, amax, num=num_points)
+    b_values = np.linspace(bmin, bmax, num=num_points)
+
+    for i, a in enumerate(a_values):
+        for j, b in enumerate(b_values):
+            theta = np.array([a, b])
+            data[i, j] = kernel_log_likelihood(kernel.set_params(theta), X_train, y_train, noise_level)
+
+    imshow(data, a_values, b_values)
 
 
 def compute_optimized_kernel(kernel, X_train, y_train):
     noise_level = 0.1
 
-    step = kernel_step(kernel, noise_level, X_train, y_train)
+    def step(theta):
+        return kernel_log_likelihood(kernel.set_params(theta), X_train, y_train, noise_level)
 
     default_params = kernel.default_params(X_train, y_train)
 
@@ -71,8 +89,6 @@ def compute_optimized_kernel(kernel, X_train, y_train):
     res = minimize(step,
                    default_params,
                    bounds=kernel.param_bounds(), method="L-BFGS-B", tol=0, options={"maxiter": 100})
-
-    # print(f"Kernel optimal params {res.x}")
 
     kernel.set_params(res.x)
     return kernel

@@ -6,6 +6,17 @@ from matplotlib import cm
 from numpy.random import multivariate_normal
 
 
+def imshow(data: np.ndarray, a_values: np.ndarray, b_values: np.ndarray,
+           xlabel="sigma", ylabel="lengthscale", title="Kernel marginal likelihood"):
+    plt.figure(figsize=(5,5))
+    plt.xlabel(xlabel)
+    plt.ylabel(ylabel)
+    im = plt.imshow(data, extent=[min(b_values), max(b_values), min(a_values), max(a_values)], aspect="auto")
+    plt.colorbar(im)
+    plt.title(title)
+
+
+
 def plots(*plots, n_row=3, figsize=(15, 4)):
     num_rows = len(plots) // n_row + 1
 
