@@ -22,7 +22,7 @@ def kernel_log_likelihood(kernel: Kernel, X_train: np.ndarray,
     # t1 = 0.5 * y_train.T @ solve(L.T, solve(L, y_train))
 
     # https://blogs.sas.com/content/iml/2012/10/31/compute-the-log-determinant-of-a-matrix.html
-    t2 = np.sum(np.log(np.diagonal(cholesky(K))))
+    t2 = 0.5 * 2 * np.sum(np.log(np.diagonal(cholesky(K))))
 
     t3 = 0.5 * len(X_train) * np.log(2 * np.pi)
 
@@ -39,8 +39,9 @@ def plot_kernel_loss(kernel: Kernel, X_train: np.ndarray, y_train: np.ndarray,
                      noise_level: float = 0.1, xmax: int = 5, sigma: float = 1) -> None:
     X = np.linspace(0.00001, xmax, num=50)
 
-    likelihood = lambda l: kernel_log_likelihood(kernel.set_params(np.array([l, sigma])),
-                                                 X_train, y_train, noise_level)
+    def likelihood(l):
+        return kernel_log_likelihood(kernel.set_params(np.array([l, sigma])),
+                                                         X_train, y_train, noise_level)
 
     data = np.vectorize(likelihood)(X)
 
