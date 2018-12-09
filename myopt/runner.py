@@ -14,6 +14,7 @@ Value = float
 
 class Job(abc.ABC):
     # is_finished:
+    job_id: int
     is_finished: bool
     intermediate_results : List[Tuple[Timestamp, Value]]
     final_result: Optional[Value]
@@ -37,6 +38,10 @@ class Runner(abc.ABC):
 
 
 class SGEJob(Job):
+    is_finished: bool
+    intermediate_results : List[Tuple[Timestamp, Value]]
+    final_result: Optional[Value]
+
     def __init__(self, meta_dir: str, job_id: int) -> None:
         self.meta_dir = meta_dir
         self.job_id = job_id
@@ -46,11 +51,6 @@ class SGEJob(Job):
         self.final_result = None
 
         self.serialize()
-
-
-    is_finished: bool
-    intermediate_results : List[Tuple[Timestamp, Value]]
-    final_result: Optional[Value]
 
     def state(self) -> str:
         return subprocess.check_output(["qstat"])
@@ -77,7 +77,7 @@ class SGEJob(Job):
             self.final_result = obj.final_result
 
     def filename(self) -> str:
-        return os.path.join(self.meta_dir, str(self.job_id), ".yml")
+        return os.path.join(self.meta_dir, "job-", str(self.job_id), ".yml")
 
 
 QSUB_JOBID_PATTERN = "Your job (\d+) \(\".*\"\) has been submitted"
@@ -96,9 +96,12 @@ class SGERunner(Runner):
     def start(self, run_parameters: dict) -> Job:
         run_params = [f"--{name}={value}" for name, value in run_parameters.items()]
 
-        cmd = [self.script_path, *self.arguments, *run_params]
+        qsub_params: List[str] = [] # TODO
+        cmd = ["qsub", *qsub_params, self.script_path, *self.arguments, *run_params]
 
-        output = subprocess.check_output(["qsub", *cmd], stderr=subprocess.STDOUT)
+        print(f"Starting a new job: {cmd}")
+        output = subprocess.check_output(cmd, stderr=subprocess.STDOUT)
+        print(output)
 
         matches = re.match(pattern=QSUB_JOBID_PATTERN, string=output)
 
@@ -113,23 +116,52 @@ META_FILENAME = "meta.yml"
 
 
 class Experiment:
+    meta_dir: str
     hyperparameters: List[Hyperparameter]
     runner: Runner
     evaluations: List[Job]
 
-    def __init__(self, hyperparameters: List[Hyperparameter], runner: Runner):
+    def __init__(self, meta_dir: str, hyperparameters: List[Hyperparameter], runner: Runner):
+        self.meta_dir = meta_dir
         self.hyperparameters = hyperparameters
         self.runner = runner
+        self.evaluations = []
 
-    def serialize(self, directory: str) -> None:
+    def iterate(self):
+        eval_params = [param.sample() for param in self.hyperparameters]
+
+        job = self.runner.start(eval_params)
+
+        self.evaluations.append(job)
+
+    @staticmethod
+    def filename(directory) -> str:
+        return os.path.join(directory, META_FILENAME)
+
+    def serialize(self) -> None:
+        evals = self.evaluations
+        self.evaluations = [job.job_id for job in evals]
         dump = yaml.dump(self)
+        self.evaluations = evals
 
-        with open(os.path.join(directory, META_FILENAME), "w") as f:
+        with open(Experiment.filename(self.meta_dir), "w") as f:
             f.write(dump)
+
+        for job in self.evaluations:
+            job.serialize()
 
     @staticmethod
     def deserialize(directory: str) -> "Experiment":
-        with open(os.path.join(directory, META_FILENAME), "r") as f:
+        with open(Experiment.filename(directory), "r") as f:
             contents = f.read()
-            return yaml.load(contents)
+            obj = yaml.load(contents)
 
+        jobs = []
+        for job_id in obj.evaluations:
+            job = SGEJob(obj.meta_dir, job_id)
+            job.deserialize()
+
+            jobs.append(job)
+        obj.evaluations = jobs
+
+        return obj
