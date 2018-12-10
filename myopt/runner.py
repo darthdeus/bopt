@@ -3,6 +3,7 @@ import os
 import yaml
 import re
 import subprocess
+import pathlib
 
 from typing import Union, List, Optional, Tuple
 from myopt.hyperparameters import Hyperparameter
@@ -53,10 +54,10 @@ class SGEJob(Job):
         self.serialize()
 
     def state(self) -> str:
-        return subprocess.check_output(["qstat"])
+        return subprocess.check_output(["qstat"]).decode("ascii")
 
     def kill(self):
-        output = subprocess.check_output(["qdel", str(self.job_id)])
+        output = subprocess.check_output(["qdel", str(self.job_id)]).decode("ascii")
 
         assert re.match(pattern=".*has registered.*", string=output) is not None
 
@@ -64,20 +65,25 @@ class SGEJob(Job):
         with open(self.filename(), "w") as f:
             f.write(yaml.dump(self))
 
-    def deserialize(self) -> None:
+    def deserialize(self) -> "SGEJob":
         with open(self.filename(), "r") as f:
             content = f.read()
             obj = yaml.load(content)
 
-            assert self.meta_dir == obj.dir
+            assert self.meta_dir == obj.meta_dir
             assert self.job_id == obj.job_id
 
             self.is_finished = obj.is_finished
             self.intermediate_results = obj.intermediate_results
             self.final_result = obj.final_result
 
+        return self
+
     def filename(self) -> str:
-        return os.path.join(self.meta_dir, "job-", str(self.job_id), ".yml")
+        return os.path.join(self.meta_dir, f"job-{self.job_id}.yml")
+
+    def job_output_filename(self) -> str:
+        return os.path.join(self.meta_dir, f"job.o{self.job_id}")
 
 
 QSUB_JOBID_PATTERN = "Your job (\d+) \(\".*\"\) has been submitted"
@@ -96,18 +102,19 @@ class SGERunner(Runner):
     def start(self, run_parameters: dict) -> Job:
         run_params = [f"--{name}={value}" for name, value in run_parameters.items()]
 
-        qsub_params: List[str] = [] # TODO
+        output_dir = os.path.join(self.meta_dir, "outputs")
+        qsub_params: List[str] = ["-N", "job", "-o", output_dir]
         cmd = ["qsub", *qsub_params, self.script_path, *self.arguments, *run_params]
 
-        print(f"Starting a new job: {cmd}")
-        output = subprocess.check_output(cmd, stderr=subprocess.STDOUT)
+        print(f"Starting a new job: {' '.join(cmd)}")
+        output = subprocess.check_output(cmd, stderr=subprocess.STDOUT).decode("ascii")
         print(output)
 
         matches = re.match(pattern=QSUB_JOBID_PATTERN, string=output)
 
         assert matches is not None
 
-        job_id = int(matches.group(0))
+        job_id = int(matches.group(1))
 
         return SGEJob(self.meta_dir, job_id)
 
@@ -126,6 +133,11 @@ class Experiment:
         self.hyperparameters = hyperparameters
         self.runner = runner
         self.evaluations = []
+
+        pathlib.Path(os.path.join(self.meta_dir, "outputs"))\
+                .mkdir(parents=True, exist_ok=True)
+
+        self.serialize()
 
     def iterate(self):
         eval_params = [param.sample() for param in self.hyperparameters]
