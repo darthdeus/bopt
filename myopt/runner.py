@@ -158,7 +158,6 @@ class Experiment:
     def serialize(self) -> None:
         evals = self.evaluations
         del self.evaluations
-        # self.evaluations = [job.job_id for job in evals]
         dump = yaml.dump(self)
         self.evaluations = evals
 

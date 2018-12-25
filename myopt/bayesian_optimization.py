@@ -1,3 +1,4 @@
+import pickle
 from tqdm import tqdm
 import concurrent.futures
 from concurrent.futures import Future
@@ -44,6 +45,18 @@ class OptimizationResult:
         # TODO: name bounds
         # [f"{name}={round(val, 3)}" for name, val in zip(self.bounds, self.best_x)]
         return f"OptimizationResult(best_x={self.best_x}, best_y={self.best_y})"
+
+    def dump(self, filename) -> None:
+        with open(filename, "wb") as f:
+            opt_fun = self.opt_fun
+            self.opt_fun = None
+            pickle.dump(self, filename)
+            self.opt_fun = opt_fun
+
+    @staticmethod
+    def load(filename) -> "OptimizationResult":
+        with open(filename, "rb") as f:
+            return pickle.load(f)
 
 
 def default_from_bounds(bounds: List[Bound]) -> np.ndarray:
@@ -106,8 +119,10 @@ def bo_maximize_parallel(f: Callable[[np.array], Future], bounds: List[Bound],
     max_y_ind = y_sample.argmax()
     print("max_x", X_sample[max_y_ind], "max max", y_sample.max())
 
-    return OptimizationResult(X_sample,
-                              y_sample,
+    return OptimizationResult(X_sample=X_sample,
+                              y_sample=y_sample,
+                              opt_fun=f,
+                              n_iter=n_iter,
                               best_x=X_sample[y_sample.argmax()],
                               best_y=y_sample.max(),
                               bounds=bounds,
@@ -129,7 +144,8 @@ def bo_maximize(f: Callable[[np.array], float], bounds: List[Bound],
 
     y_0 = f(x_0)
 
-    assert type(y_0) == float, "f(x) must return a float"
+    # TODO: handle numpy rank-0 tensors
+    assert type(y_0) == float, f"f(x) must return a float, got type {type(y_0)}, value: {y_0}"
 
     X_sample = np.array([x_0])
     y_sample = np.array([y_0])
@@ -296,8 +312,11 @@ def plot_2d_optim_result(result: OptimizationResult, resolution: float = 30, fig
     b1 = result.bounds[0]
     b2 = result.bounds[1]
 
-    x1 = np.arange(b1.low, b1.high, resolution)
-    x2 = np.arange(b2.low, b2.high, resolution)
+    x1 = np.linspace(b1.low, b1.high, resolution)
+    x2 = np.linspace(b2.low, b2.high, resolution)
+
+    # import pdb
+    # pdb.set_trace()
 
     assert len(x1) < 80, f"too large x1, len = {len(x1)}"
     assert len(x2) < 80, f"too large x1, len = {len(x2)}"
@@ -311,6 +330,8 @@ def plot_2d_optim_result(result: OptimizationResult, resolution: float = 30, fig
 
     plt.title(f"GP posterior {round(result.best_y,2)}, {result.kernel}")
     plt.imshow(mu.reshape(gx.shape[0], gx.shape[1]),
-               extent=[b1.low, b1.high, b2.high, b2.low])
+               extent=[b1.low, b1.high, b2.high, b2.low],
+               aspect="auto")
     plt.scatter(result.X_sample[:, 0], result.X_sample[:, 1], c="k")
     plt.scatter([result.best_x[0]], [result.best_x[1]], c="r")
+    plt.show()
