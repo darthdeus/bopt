@@ -12,3 +12,4 @@ pyyaml
 GPy
 tangent
 flask
+psutil
