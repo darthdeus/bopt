@@ -1,64 +1,64 @@
---acquisition-fn=ei --fun=Beale --n_iter=10 --kernel=sqexp
---acquisition-fn=ei --fun=Beale --n_iter=10 --kernel=matern
---acquisition-fn=ei --fun=Beale --n_iter=25 --kernel=sqexp
---acquisition-fn=ei --fun=Beale --n_iter=25 --kernel=matern
---acquisition-fn=ei --fun=Beale --n_iter=50 --kernel=sqexp
---acquisition-fn=ei --fun=Beale --n_iter=50 --kernel=matern
---acquisition-fn=ei --fun=Beale --n_iter=100 --kernel=sqexp
---acquisition-fn=ei --fun=Beale --n_iter=100 --kernel=matern
---acquisition-fn=ei --fun=Easom --n_iter=10 --kernel=sqexp
---acquisition-fn=ei --fun=Easom --n_iter=10 --kernel=matern
---acquisition-fn=ei --fun=Easom --n_iter=25 --kernel=sqexp
---acquisition-fn=ei --fun=Easom --n_iter=25 --kernel=matern
---acquisition-fn=ei --fun=Easom --n_iter=50 --kernel=sqexp
---acquisition-fn=ei --fun=Easom --n_iter=50 --kernel=matern
---acquisition-fn=ei --fun=Easom --n_iter=100 --kernel=sqexp
---acquisition-fn=ei --fun=Easom --n_iter=100 --kernel=matern
---acquisition-fn=ei --fun=Eggholder --n_iter=10 --kernel=sqexp
---acquisition-fn=ei --fun=Eggholder --n_iter=10 --kernel=matern
---acquisition-fn=ei --fun=Eggholder --n_iter=25 --kernel=sqexp
---acquisition-fn=ei --fun=Eggholder --n_iter=25 --kernel=matern
---acquisition-fn=ei --fun=Eggholder --n_iter=50 --kernel=sqexp
---acquisition-fn=ei --fun=Eggholder --n_iter=50 --kernel=matern
---acquisition-fn=ei --fun=Eggholder --n_iter=100 --kernel=sqexp
---acquisition-fn=ei --fun=Eggholder --n_iter=100 --kernel=matern
---acquisition-fn=ei --fun=McCormick --n_iter=10 --kernel=sqexp
---acquisition-fn=ei --fun=McCormick --n_iter=10 --kernel=matern
---acquisition-fn=ei --fun=McCormick --n_iter=25 --kernel=sqexp
---acquisition-fn=ei --fun=McCormick --n_iter=25 --kernel=matern
---acquisition-fn=ei --fun=McCormick --n_iter=50 --kernel=sqexp
---acquisition-fn=ei --fun=McCormick --n_iter=50 --kernel=matern
---acquisition-fn=ei --fun=McCormick --n_iter=100 --kernel=sqexp
---acquisition-fn=ei --fun=McCormick --n_iter=100 --kernel=matern
---acquisition-fn=pi --fun=Beale --n_iter=10 --kernel=sqexp
---acquisition-fn=pi --fun=Beale --n_iter=10 --kernel=matern
---acquisition-fn=pi --fun=Beale --n_iter=25 --kernel=sqexp
---acquisition-fn=pi --fun=Beale --n_iter=25 --kernel=matern
---acquisition-fn=pi --fun=Beale --n_iter=50 --kernel=sqexp
---acquisition-fn=pi --fun=Beale --n_iter=50 --kernel=matern
---acquisition-fn=pi --fun=Beale --n_iter=100 --kernel=sqexp
---acquisition-fn=pi --fun=Beale --n_iter=100 --kernel=matern
---acquisition-fn=pi --fun=Easom --n_iter=10 --kernel=sqexp
---acquisition-fn=pi --fun=Easom --n_iter=10 --kernel=matern
---acquisition-fn=pi --fun=Easom --n_iter=25 --kernel=sqexp
---acquisition-fn=pi --fun=Easom --n_iter=25 --kernel=matern
---acquisition-fn=pi --fun=Easom --n_iter=50 --kernel=sqexp
---acquisition-fn=pi --fun=Easom --n_iter=50 --kernel=matern
---acquisition-fn=pi --fun=Easom --n_iter=100 --kernel=sqexp
---acquisition-fn=pi --fun=Easom --n_iter=100 --kernel=matern
---acquisition-fn=pi --fun=Eggholder --n_iter=10 --kernel=sqexp
---acquisition-fn=pi --fun=Eggholder --n_iter=10 --kernel=matern
---acquisition-fn=pi --fun=Eggholder --n_iter=25 --kernel=sqexp
---acquisition-fn=pi --fun=Eggholder --n_iter=25 --kernel=matern
---acquisition-fn=pi --fun=Eggholder --n_iter=50 --kernel=sqexp
---acquisition-fn=pi --fun=Eggholder --n_iter=50 --kernel=matern
---acquisition-fn=pi --fun=Eggholder --n_iter=100 --kernel=sqexp
---acquisition-fn=pi --fun=Eggholder --n_iter=100 --kernel=matern
---acquisition-fn=pi --fun=McCormick --n_iter=10 --kernel=sqexp
---acquisition-fn=pi --fun=McCormick --n_iter=10 --kernel=matern
---acquisition-fn=pi --fun=McCormick --n_iter=25 --kernel=sqexp
---acquisition-fn=pi --fun=McCormick --n_iter=25 --kernel=matern
---acquisition-fn=pi --fun=McCormick --n_iter=50 --kernel=sqexp
---acquisition-fn=pi --fun=McCormick --n_iter=50 --kernel=matern
---acquisition-fn=pi --fun=McCormick --n_iter=100 --kernel=sqexp
---acquisition-fn=pi --fun=McCormick --n_iter=100 --kernel=matern
+./.venv/bin/python ./benchmarks/run_single_fun.py --acquisition-fn=ei --fun=Beale --n_iter=10 --kernel=sqexp
+./.venv/bin/python ./benchmarks/run_single_fun.py --acquisition-fn=ei --fun=Beale --n_iter=10 --kernel=matern
+./.venv/bin/python ./benchmarks/run_single_fun.py --acquisition-fn=ei --fun=Beale --n_iter=25 --kernel=sqexp
+./.venv/bin/python ./benchmarks/run_single_fun.py --acquisition-fn=ei --fun=Beale --n_iter=25 --kernel=matern
+./.venv/bin/python ./benchmarks/run_single_fun.py --acquisition-fn=ei --fun=Beale --n_iter=50 --kernel=sqexp
+./.venv/bin/python ./benchmarks/run_single_fun.py --acquisition-fn=ei --fun=Beale --n_iter=50 --kernel=matern
+./.venv/bin/python ./benchmarks/run_single_fun.py --acquisition-fn=ei --fun=Beale --n_iter=100 --kernel=sqexp
+./.venv/bin/python ./benchmarks/run_single_fun.py --acquisition-fn=ei --fun=Beale --n_iter=100 --kernel=matern
+./.venv/bin/python ./benchmarks/run_single_fun.py --acquisition-fn=ei --fun=Easom --n_iter=10 --kernel=sqexp
+./.venv/bin/python ./benchmarks/run_single_fun.py --acquisition-fn=ei --fun=Easom --n_iter=10 --kernel=matern
+./.venv/bin/python ./benchmarks/run_single_fun.py --acquisition-fn=ei --fun=Easom --n_iter=25 --kernel=sqexp
+./.venv/bin/python ./benchmarks/run_single_fun.py --acquisition-fn=ei --fun=Easom --n_iter=25 --kernel=matern
+./.venv/bin/python ./benchmarks/run_single_fun.py --acquisition-fn=ei --fun=Easom --n_iter=50 --kernel=sqexp
+./.venv/bin/python ./benchmarks/run_single_fun.py --acquisition-fn=ei --fun=Easom --n_iter=50 --kernel=matern
+./.venv/bin/python ./benchmarks/run_single_fun.py --acquisition-fn=ei --fun=Easom --n_iter=100 --kernel=sqexp
+./.venv/bin/python ./benchmarks/run_single_fun.py --acquisition-fn=ei --fun=Easom --n_iter=100 --kernel=matern
+./.venv/bin/python ./benchmarks/run_single_fun.py --acquisition-fn=ei --fun=Eggholder --n_iter=10 --kernel=sqexp
+./.venv/bin/python ./benchmarks/run_single_fun.py --acquisition-fn=ei --fun=Eggholder --n_iter=10 --kernel=matern
+./.venv/bin/python ./benchmarks/run_single_fun.py --acquisition-fn=ei --fun=Eggholder --n_iter=25 --kernel=sqexp
+./.venv/bin/python ./benchmarks/run_single_fun.py --acquisition-fn=ei --fun=Eggholder --n_iter=25 --kernel=matern
+./.venv/bin/python ./benchmarks/run_single_fun.py --acquisition-fn=ei --fun=Eggholder --n_iter=50 --kernel=sqexp
+./.venv/bin/python ./benchmarks/run_single_fun.py --acquisition-fn=ei --fun=Eggholder --n_iter=50 --kernel=matern
+./.venv/bin/python ./benchmarks/run_single_fun.py --acquisition-fn=ei --fun=Eggholder --n_iter=100 --kernel=sqexp
+./.venv/bin/python ./benchmarks/run_single_fun.py --acquisition-fn=ei --fun=Eggholder --n_iter=100 --kernel=matern
+./.venv/bin/python ./benchmarks/run_single_fun.py --acquisition-fn=ei --fun=McCormick --n_iter=10 --kernel=sqexp
+./.venv/bin/python ./benchmarks/run_single_fun.py --acquisition-fn=ei --fun=McCormick --n_iter=10 --kernel=matern
+./.venv/bin/python ./benchmarks/run_single_fun.py --acquisition-fn=ei --fun=McCormick --n_iter=25 --kernel=sqexp
+./.venv/bin/python ./benchmarks/run_single_fun.py --acquisition-fn=ei --fun=McCormick --n_iter=25 --kernel=matern
+./.venv/bin/python ./benchmarks/run_single_fun.py --acquisition-fn=ei --fun=McCormick --n_iter=50 --kernel=sqexp
+./.venv/bin/python ./benchmarks/run_single_fun.py --acquisition-fn=ei --fun=McCormick --n_iter=50 --kernel=matern
+./.venv/bin/python ./benchmarks/run_single_fun.py --acquisition-fn=ei --fun=McCormick --n_iter=100 --kernel=sqexp
+./.venv/bin/python ./benchmarks/run_single_fun.py --acquisition-fn=ei --fun=McCormick --n_iter=100 --kernel=matern
+./.venv/bin/python ./benchmarks/run_single_fun.py --acquisition-fn=pi --fun=Beale --n_iter=10 --kernel=sqexp
+./.venv/bin/python ./benchmarks/run_single_fun.py --acquisition-fn=pi --fun=Beale --n_iter=10 --kernel=matern
+./.venv/bin/python ./benchmarks/run_single_fun.py --acquisition-fn=pi --fun=Beale --n_iter=25 --kernel=sqexp
+./.venv/bin/python ./benchmarks/run_single_fun.py --acquisition-fn=pi --fun=Beale --n_iter=25 --kernel=matern
+./.venv/bin/python ./benchmarks/run_single_fun.py --acquisition-fn=pi --fun=Beale --n_iter=50 --kernel=sqexp
+./.venv/bin/python ./benchmarks/run_single_fun.py --acquisition-fn=pi --fun=Beale --n_iter=50 --kernel=matern
+./.venv/bin/python ./benchmarks/run_single_fun.py --acquisition-fn=pi --fun=Beale --n_iter=100 --kernel=sqexp
+./.venv/bin/python ./benchmarks/run_single_fun.py --acquisition-fn=pi --fun=Beale --n_iter=100 --kernel=matern
+./.venv/bin/python ./benchmarks/run_single_fun.py --acquisition-fn=pi --fun=Easom --n_iter=10 --kernel=sqexp
+./.venv/bin/python ./benchmarks/run_single_fun.py --acquisition-fn=pi --fun=Easom --n_iter=10 --kernel=matern
+./.venv/bin/python ./benchmarks/run_single_fun.py --acquisition-fn=pi --fun=Easom --n_iter=25 --kernel=sqexp
+./.venv/bin/python ./benchmarks/run_single_fun.py --acquisition-fn=pi --fun=Easom --n_iter=25 --kernel=matern
+./.venv/bin/python ./benchmarks/run_single_fun.py --acquisition-fn=pi --fun=Easom --n_iter=50 --kernel=sqexp
+./.venv/bin/python ./benchmarks/run_single_fun.py --acquisition-fn=pi --fun=Easom --n_iter=50 --kernel=matern
+./.venv/bin/python ./benchmarks/run_single_fun.py --acquisition-fn=pi --fun=Easom --n_iter=100 --kernel=sqexp
+./.venv/bin/python ./benchmarks/run_single_fun.py --acquisition-fn=pi --fun=Easom --n_iter=100 --kernel=matern
+./.venv/bin/python ./benchmarks/run_single_fun.py --acquisition-fn=pi --fun=Eggholder --n_iter=10 --kernel=sqexp
+./.venv/bin/python ./benchmarks/run_single_fun.py --acquisition-fn=pi --fun=Eggholder --n_iter=10 --kernel=matern
+./.venv/bin/python ./benchmarks/run_single_fun.py --acquisition-fn=pi --fun=Eggholder --n_iter=25 --kernel=sqexp
+./.venv/bin/python ./benchmarks/run_single_fun.py --acquisition-fn=pi --fun=Eggholder --n_iter=25 --kernel=matern
+./.venv/bin/python ./benchmarks/run_single_fun.py --acquisition-fn=pi --fun=Eggholder --n_iter=50 --kernel=sqexp
+./.venv/bin/python ./benchmarks/run_single_fun.py --acquisition-fn=pi --fun=Eggholder --n_iter=50 --kernel=matern
+./.venv/bin/python ./benchmarks/run_single_fun.py --acquisition-fn=pi --fun=Eggholder --n_iter=100 --kernel=sqexp
+./.venv/bin/python ./benchmarks/run_single_fun.py --acquisition-fn=pi --fun=Eggholder --n_iter=100 --kernel=matern
+./.venv/bin/python ./benchmarks/run_single_fun.py --acquisition-fn=pi --fun=McCormick --n_iter=10 --kernel=sqexp
+./.venv/bin/python ./benchmarks/run_single_fun.py --acquisition-fn=pi --fun=McCormick --n_iter=10 --kernel=matern
+./.venv/bin/python ./benchmarks/run_single_fun.py --acquisition-fn=pi --fun=McCormick --n_iter=25 --kernel=sqexp
+./.venv/bin/python ./benchmarks/run_single_fun.py --acquisition-fn=pi --fun=McCormick --n_iter=25 --kernel=matern
+./.venv/bin/python ./benchmarks/run_single_fun.py --acquisition-fn=pi --fun=McCormick --n_iter=50 --kernel=sqexp
+./.venv/bin/python ./benchmarks/run_single_fun.py --acquisition-fn=pi --fun=McCormick --n_iter=50 --kernel=matern
+./.venv/bin/python ./benchmarks/run_single_fun.py --acquisition-fn=pi --fun=McCormick --n_iter=100 --kernel=sqexp
+./.venv/bin/python ./benchmarks/run_single_fun.py --acquisition-fn=pi --fun=McCormick --n_iter=100 --kernel=matern
