@@ -5,6 +5,7 @@ import re
 import subprocess
 import pathlib
 
+from glob import glob
 from typing import Union, List, Optional, Tuple
 from myopt.hyperparameters import Hyperparameter
 
@@ -83,7 +84,11 @@ class SGEJob(Job):
         return os.path.join(self.meta_dir, f"job-{self.job_id}.yml")
 
     def job_output_filename(self) -> str:
-        return os.path.join(self.meta_dir, f"job.o{self.job_id}")
+        return os.path.join(self.meta_dir, "outputs", f"job.o{self.job_id}")
+
+    def get_job_output(self) -> str:
+        with open(self.job_output_filename(), "r") as f:
+            return f.read()
 
 
 QSUB_JOBID_PATTERN = "Your job (\d+) \(\".*\"\) has been submitted"
@@ -152,7 +157,8 @@ class Experiment:
 
     def serialize(self) -> None:
         evals = self.evaluations
-        self.evaluations = [job.job_id for job in evals]
+        del self.evaluations
+        # self.evaluations = [job.job_id for job in evals]
         dump = yaml.dump(self)
         self.evaluations = evals
 
@@ -169,7 +175,8 @@ class Experiment:
             obj = yaml.load(contents)
 
         jobs = []
-        for job_id in obj.evaluations:
+        for path in glob(os.path.join(directory, "job-*")):
+            job_id = int(re.match('.*?(\d+).*?', path).group(1))
             job = SGEJob(obj.meta_dir, job_id)
             job.deserialize()
 
