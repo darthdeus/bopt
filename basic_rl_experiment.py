@@ -16,8 +16,15 @@ sge_runner = opt.LocalRunner(
 experiment = opt.Experiment(meta_dir, params, sge_runner)
 
 
-for gamma in [.1, .3, .5, .7, .9, .95, .99]:
-    for epsilon in [.1, .3, .5, .7, .9, .95, .99]:
+# for gamma in [.1, .3, .5, .7, .9, .95, .99]:
+#     for epsilon in [.1, .3, .5, .7, .9, .95, .99]:
+#         experiment.runner.start({
+#             "gamma": gamma,
+#             "epsilon": epsilon
+#             })
+
+for gamma in [.1, .99]:
+    for epsilon in [.1, .5, .9]:
         experiment.runner.start({
             "gamma": gamma,
             "epsilon": epsilon

@@ -15,23 +15,20 @@ from myopt.runner.parser import ResultParser
 
 
 class LocalJob(Job):
-    is_finished: bool
-    intermediate_results : List[Tuple[Timestamp, Value]]
-    final_result: Optional[Value]
-
-    def __init__(self, meta_dir: str, job_id: int, result_parser: ResultParser) -> None:
+    def __init__(self, meta_dir: str, job_id: int, result_parser: ResultParser,
+                 run_parameters: dict) -> None:
         self.meta_dir = meta_dir
         self.job_id = job_id
         self.result_parser = result_parser
-
-        self.is_finished = False
-        self.intermediate_results = []
-        self.final_result = None
+        self.run_parameters = run_parameters
 
         self.serialize()
 
-    def state(self) -> bool:
+    def is_finished(self) -> bool:
         return psutil.pid_exists(self.job_id)
+
+    def state(self) -> bool:
+        pass
 
     def kill(self):
         if psutil.pid_exists(self.job_id):
@@ -53,10 +50,10 @@ class LocalRunner(Runner):
         self.result_parser = result_parser
 
     def start(self, run_parameters: dict) -> Job:
-        run_params = [f"--{name}={value}" for name, value in run_parameters.items()]
+        cmdline_run_params = [f"--{name}={value}" for name, value in run_parameters.items()]
 
         output_dir = os.path.join(self.meta_dir, "outputs")
-        cmd = [self.script_path, *self.arguments, *run_params]
+        cmd = [self.script_path, *self.arguments, *cmdline_run_params]
 
         print(f"Starting a new job: {' '.join(cmd)}")
 
@@ -69,7 +66,10 @@ class LocalRunner(Runner):
 
             os.rename(temp_fname, job_fname)
 
-            return LocalJob(self.meta_dir, job_id, self.result_parser)
+            return LocalJob(self.meta_dir, job_id, self.result_parser, run_parameters)
 
     def deserialize_job(self, meta_dir: str, job_id: int) -> Job:
-        return LocalJob(meta_dir, job_id, self.result_parser)
+        fname = Job.compute_job_filename(meta_dir, job_id)
+
+        with open(fname, "r") as f:
+            return yaml.load(f.read())

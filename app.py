@@ -10,7 +10,7 @@ app = Flask(__name__)
 
 @app.route("/")
 def hello():
-    experiment = Experiment.deserialize("results/meta-dir")
+    experiment = Experiment.deserialize("results/rl-monte-carlo")
     x = np.arange(0, 2*np.pi, step=0.01)
     y = np.sin(x)
 
