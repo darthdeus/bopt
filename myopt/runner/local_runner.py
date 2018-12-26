@@ -11,6 +11,7 @@ from typing import Union, List, Optional, Tuple, Callable
 
 from myopt.hyperparameters import Hyperparameter
 from myopt.runner.abstract import Job, Runner, Timestamp, Value
+from myopt.runner.parser import ResultParser
 
 
 class LocalJob(Job):
@@ -18,9 +19,10 @@ class LocalJob(Job):
     intermediate_results : List[Tuple[Timestamp, Value]]
     final_result: Optional[Value]
 
-    def __init__(self, meta_dir: str, job_id: int) -> None:
+    def __init__(self, meta_dir: str, job_id: int, result_parser: ResultParser) -> None:
         self.meta_dir = meta_dir
         self.job_id = job_id
+        self.result_parser = result_parser
 
         self.is_finished = False
         self.intermediate_results = []
@@ -36,19 +38,19 @@ class LocalJob(Job):
             psutil.Process(self.job_id).kill()
 
 
-QSUB_JOBID_PATTERN = "Your job (\d+) \(\".*\"\) has been submitted"
-
-
 class LocalRunner(Runner):
+    hidden_fields = ["result_parser"]
+
     meta_dir: str
     script_path: str
     arguments: List[str]
 
     def __init__(self, meta_dir: str, script_path: str, arguments: List[str],
-                 result_parser: Callable[[LocalJob], float]) -> None:
+                 result_parser: ResultParser) -> None:
         self.script_path = script_path
         self.arguments = arguments
         self.meta_dir = meta_dir
+        self.result_parser = result_parser
 
     def start(self, run_parameters: dict) -> Job:
         run_params = [f"--{name}={value}" for name, value in run_parameters.items()]
@@ -67,7 +69,7 @@ class LocalRunner(Runner):
 
             os.rename(temp_fname, job_fname)
 
-            return LocalJob(self.meta_dir, job_id)
+            return LocalJob(self.meta_dir, job_id, self.result_parser)
 
     def deserialize_job(self, meta_dir: str, job_id: int) -> Job:
-        return LocalJob(meta_dir, job_id)
+        return LocalJob(meta_dir, job_id, self.result_parser)
