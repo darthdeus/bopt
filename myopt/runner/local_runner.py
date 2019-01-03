@@ -25,12 +25,12 @@ class LocalJob(Job):
         self.serialize()
 
     def is_finished(self) -> bool:
-        return psutil.pid_exists(self.job_id)
+        return not psutil.pid_exists(self.job_id)
 
     def state(self) -> bool:
         pass
 
-    def kill(self):
+    def kill(self) -> None:
         if psutil.pid_exists(self.job_id):
             psutil.Process(self.job_id).kill()
 

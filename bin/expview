@@ -1,0 +1,35 @@
+#!/usr/bin/env python
+import sys
+sys.path.append(".") # TODO: temporary hack
+import myopt
+
+
+if __name__ == "__main__":
+    import argparse
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument("meta_dir", type=str, help="Directory with the results.")
+    args = parser.parse_args()
+
+    experiment = myopt.Experiment.deserialize(args.meta_dir)
+
+    print("Hyperparameters:")
+    for param in experiment.hyperparameters:
+        print(f"\t{param}")
+
+    print("Evaluations:")
+    for job in experiment.evaluations:
+        s = f"{job.job_id}\t"
+        is_finished = job.is_finished()
+
+        if is_finished:
+            try:
+                final_result = job.final_result()
+                s += f"{is_finished}\t{final_result}\t{job.run_parameters}"
+            except ValueError as e:
+                s += str(e)
+        else:
+            s += "RUNNING"
+
+        print(s)
+

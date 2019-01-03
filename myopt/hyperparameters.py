@@ -22,6 +22,8 @@ class Integer:
     def sample(self) -> float:
         return np.random.randint(self.low, self.high)
 
+    def __repr__(self) -> str:
+        return f"Int({self.low}, {self.high})"
 
 class Float:
     low: float
@@ -35,6 +37,8 @@ class Float:
     def sample(self) -> float:
         return np.random.uniform(self.low, self.high)
 
+    def __repr__(self) -> str:
+        return f"Float({self.low}, {self.high})"
 
 Range = Union[Integer, Float]
 

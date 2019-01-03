@@ -1,3 +1,5 @@
+# just to make sure the jobs don't fail on missing imports
+import gym
 import myopt as opt
 
 params = [
@@ -8,8 +10,8 @@ params = [
 meta_dir = "results/rl-monte-carlo"
 sge_runner = opt.LocalRunner(
         meta_dir,
-        "/home/darth/projects/npfl122/.venv/bin/python",
-        ["/home/darth/projects/npfl122/labs/02/monte_carlo.py"],
+        "./.venv/bin/python",
+        ["./experiments/monte_carlo.py"],
         opt.LastLineLastWordParser()
         )
 
