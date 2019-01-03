@@ -11,13 +11,13 @@ import myopt
 if __name__ == "__main__":
     import argparse
 
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--recursive", type=bool, default=True, help="Search subdirectories for job files")
-    parser.add_argument("meta_dir", type=str, default=".", help="Directory with the results.")
-    parser.add_argument("job_id", type=int, default=".", help="Job id.")
+    parser = argparse.ArgumentParser(description="Search for JOB_ID in META_DIR and display its status.")
+    parser.add_argument("--recursive", type=bool, default=True, help="Search subdirectories for job files", required=False)
+    parser.add_argument("META_DIR", type=str, default=".", help="Directory with the results.", nargs="?")
+    parser.add_argument("JOB_ID", type=int, default=".", help="Job to search for.")
     args = parser.parse_args()
 
-    job_files = glob.glob(os.path.join(args.meta_dir, "**", "job-*.yml"), recursive=True)
+    job_files = glob.glob(os.path.join(args.META_DIR, "**", "job-*.yml"), recursive=True)
 
     pattern = ".*job-(\\d+).yml"
 
@@ -25,21 +25,38 @@ if __name__ == "__main__":
     job_ids = [(fname, int(m.groups()[0])) for fname, m in matches if m is not None and len(m.groups()) == 1]
 
     if len(job_ids) == 0:
-        print(f"No jobs found. Check that {args.meta_dir} contains job results.")
+        print(f"No jobs found. Check that {args.META_DIR} contains job results.")
         sys.exit(1)
 
-    matched_job_ids = [(fname, job_id) for fname, job_id in job_ids if job_id == args.job_id]
+    matched_job_ids = [(fname, job_id) for fname, job_id in job_ids if job_id == args.JOB_ID]
 
     if len(matched_job_ids) == 0:
-        print(f"Job with id {args.job_id} not found in '{args.meta_dir}'.")
+        print(f"Job with id {args.JOB_ID} not found in '{args.META_DIR}'.")
         sys.exit(1)
     elif len(matched_job_ids) > 1:
-        print(f"Found more than one job with id {args.job_id} in '{args.meta_dir}'.")
+        print(f"Found more than one job with id {args.JOB_ID} in '{args.META_DIR}'.")
         sys.exit(1)
 
     assert len(matched_job_ids) == 1
 
     fname, job_id = matched_job_ids[0]
 
-    print(f"Found job {job_id} in {fname}")
+    meta_dir = os.path.dirname(fname)
+    experiment = myopt.Experiment.deserialize(meta_dir)
+
+    # TODO: this is most likely not needed.
+    job = experiment.runner.deserialize_job(meta_dir, job_id)
+
+    is_finished = job.is_finished()
+    print(f"Status:\t\t{job.status_str()}")
+    if is_finished:
+        try:
+            print(f"Final result:\t{job.final_result()}")
+        except ValueError as e:
+            print(e)
+
+    print()
+    print(f"Parameters:")
+    for key, value in job.run_parameters.items():
+        print(f"\t{key}: {value}")
 

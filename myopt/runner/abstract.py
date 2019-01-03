@@ -42,10 +42,6 @@ class Job(abc.ABC):
             assert self.meta_dir == obj.meta_dir
             assert self.job_id == obj.job_id
 
-            self.is_finished = obj.is_finished
-            self.intermediate_results = obj.intermediate_results
-            self.final_result = obj.final_result
-
         return self
 
     def filename(self) -> str:
@@ -65,6 +61,29 @@ class Job(abc.ABC):
     @staticmethod
     def compute_job_output_filename(meta_dir, job_id) -> str:
         return os.path.join(meta_dir, "outputs", f"job.o{job_id}")
+
+    def status_str(self) -> str:
+        if self.is_finished():
+            return "FINISHED"
+        else:
+            return "RUNNING"
+        # TODO: failed status
+
+
+    def __str__(self) -> str:
+        s = f"{self.job_id}\t"
+        is_finished = self.is_finished()
+
+        if is_finished:
+            try:
+                final_result = self.final_result()
+                s += f"{is_finished}\t{final_result}\t{self.run_parameters}"
+            except ValueError as e:
+                s += str(e)
+        else:
+            s += "RUNNING"
+
+        return s
 
 class Runner(abc.ABC):
     @abc.abstractmethod

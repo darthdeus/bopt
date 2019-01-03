@@ -19,17 +19,5 @@ if __name__ == "__main__":
 
     print("Evaluations:")
     for job in experiment.evaluations:
-        s = f"{job.job_id}\t"
-        is_finished = job.is_finished()
-
-        if is_finished:
-            try:
-                final_result = job.final_result()
-                s += f"{is_finished}\t{final_result}\t{job.run_parameters}"
-            except ValueError as e:
-                s += str(e)
-        else:
-            s += "RUNNING"
-
-        print(s)
+        print(job)
 
