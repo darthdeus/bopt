@@ -6,6 +6,7 @@ import re
 import os
 import glob
 import myopt
+import traceback
 
 
 if __name__ == "__main__":
@@ -48,12 +49,13 @@ if __name__ == "__main__":
     job = experiment.runner.deserialize_job(meta_dir, job_id)
 
     is_finished = job.is_finished()
+
     print(f"Status:\t\t{job.status_str()}")
     if is_finished:
         try:
             print(f"Final result:\t{job.final_result()}")
         except ValueError as e:
-            print(e)
+            traceback.print_exc()
 
     print()
     print(f"Parameters:")

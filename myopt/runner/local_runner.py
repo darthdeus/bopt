@@ -57,7 +57,7 @@ class LocalRunner(Runner):
 
         print(f"Starting a new job: {' '.join(cmd)}")
 
-        temp_fname = tempfile.mktemp()
+        temp_fname = tempfile.mktemp(dir=".")
         with open(temp_fname, "w") as f:
             process = psutil.Popen(cmd, stdout=f, stderr=subprocess.STDOUT)
 
