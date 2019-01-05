@@ -1,0 +1,4 @@
+- parallel coords graph
+- marginal & conditional plots
+- outer loop for optimization
+- display last line in error in parser when it fails?

@@ -1,5 +1,5 @@
 import abc
-from typing import List
+from typing import List, Union
 
 
 class ResultParser(abc.ABC):
@@ -7,7 +7,7 @@ class ResultParser(abc.ABC):
     def intermediate_results(self, job) -> List[float]: pass
 
     @abc.abstractmethod
-    def final_result(self, job) -> float: pass
+    def final_result(self, job) -> Union[float, str]: pass
 
 
 def is_float(s):
@@ -32,7 +32,12 @@ class LastLineLastWordParser(ResultParser):
 
         return [float(word) for word in last_words if is_float(word)]
 
-    def final_result(self, job) -> float:
-        last_line = job.get_job_output().split("\n")[-1].strip()
-        return float(last_line.split(" ")[-1])
+    def final_result(self, job) -> Union[float, str]:
+        output = job.get_job_output()
+        last_line = output.split("\n")[-1].strip()
+        last_word = last_line.split(" ")[-1]
+        try:
+            return float(last_word)
+        except ValueError:
+            return f"Last line not ending with float: '{last_line}'"
 

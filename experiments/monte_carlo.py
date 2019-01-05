@@ -131,7 +131,3 @@ if __name__ == "__main__":
     else:
         x = [0.471958418783538, 0.06929413737303698, 0.5808494337551399]
         target_fn(x)
-
-    import time
-    import random
-    time.sleep(random.randint(1, 1000)

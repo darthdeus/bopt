@@ -1,5 +1,4 @@
 import pickle
-from tqdm import tqdm
 import concurrent.futures
 from concurrent.futures import Future
 from typing import Callable, List, Union, Any
@@ -14,49 +13,7 @@ from myopt.acquisition_functions import expected_improvement, AcquisitionFunctio
 from myopt.gaussian_process import GaussianProcess
 from myopt.kernels import SquaredExp, Kernel
 from myopt.plot import plot_approximation
-from myopt.hyperparameters import Integer, Float
-
-
-Bound = Union[Integer, Float]
-
-
-class OptimizationResult:
-    X_sample: np.ndarray
-    y_sample: np.ndarray
-    best_x: np.ndarray
-    best_y: float
-    bounds: List[Bound]
-    kernel: Kernel
-    n_iter: int
-    opt_fun: Any
-
-    def __init__(self, X_sample: np.ndarray, y_sample: np.ndarray, best_x: np.ndarray, best_y: float,
-            bounds: List[Bound], kernel: Kernel, n_iter: int, opt_fun: Any) -> None:
-        self.X_sample = X_sample
-        self.y_sample = y_sample
-        self.best_x = best_x
-        self.best_y = best_y
-        self.bounds = bounds
-        self.kernel = kernel
-        self.n_iter = n_iter
-        self.opt_fun = opt_fun
-
-    def __repr__(self) -> str:
-        # TODO: name bounds
-        # [f"{name}={round(val, 3)}" for name, val in zip(self.bounds, self.best_x)]
-        return f"OptimizationResult(best_x={self.best_x}, best_y={self.best_y})"
-
-    def dump(self, filename) -> None:
-        with open(filename, "wb") as f:
-            opt_fun = self.opt_fun
-            self.opt_fun = None
-            pickle.dump(self, filename)
-            self.opt_fun = opt_fun
-
-    @staticmethod
-    def load(filename) -> "OptimizationResult":
-        with open(filename, "rb") as f:
-            return pickle.load(f)
+from myopt.hyperparameters import Integer, Float, Bound, OptimizationResult
 
 
 def default_from_bounds(bounds: List[Bound]) -> np.ndarray:
@@ -93,6 +50,7 @@ def bo_maximize_parallel(f: Callable[[np.array], Future], bounds: List[Bound],
     X_sample = np.array([x_0])
     y_sample = np.array([y_0])
 
+    from tqdm import tqdm
     for iter in tqdm(range((n_iter - 1) // n_parallel + 1)):
         gp = GaussianProcess(kernel=kernel, noise=gp_noise)
 
@@ -315,9 +273,6 @@ def plot_2d_optim_result(result: OptimizationResult, resolution: float = 30, fig
     x1 = np.linspace(b1.low, b1.high, resolution)
     x2 = np.linspace(b2.low, b2.high, resolution)
 
-    # import pdb
-    # pdb.set_trace()
-
     assert len(x1) < 80, f"too large x1, len = {len(x1)}"
     assert len(x2) < 80, f"too large x1, len = {len(x2)}"
 
@@ -334,4 +289,3 @@ def plot_2d_optim_result(result: OptimizationResult, resolution: float = 30, fig
                aspect="auto")
     plt.scatter(result.X_sample[:, 0], result.X_sample[:, 1], c="k")
     plt.scatter([result.best_x[0]], [result.best_x[1]], c="r")
-    plt.show()

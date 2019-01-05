@@ -1,9 +1,19 @@
 from typing import List
 
+import io
+import base64
 import matplotlib.pyplot as plt
 import numpy as np
+
 from matplotlib import cm
 from numpy.random import multivariate_normal
+
+
+def base64_plot():
+    image = io.BytesIO()
+    plt.savefig(image, format='png')
+    image.seek(0)
+    return base64.encodestring(image.getvalue()).decode("ascii")
 
 
 def imshow(data: np.ndarray, a_values: np.ndarray, b_values: np.ndarray,
@@ -14,7 +24,6 @@ def imshow(data: np.ndarray, a_values: np.ndarray, b_values: np.ndarray,
     im = plt.imshow(data, extent=[min(b_values), max(b_values), max(a_values), min(a_values)], aspect="auto")
     plt.colorbar(im)
     plt.title(title)
-
 
 
 def plots(*plots, n_row=3, figsize=(15, 4)):
