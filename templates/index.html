@@ -15,21 +15,79 @@
     <link rel="stylesheet" href="//cdn.datatables.net/1.10.19/css/jquery.dataTables.min.css">
     <script src="//cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js"></script>
 
+    <style type="text/css" media="all">
+      .modebar{
+        display: none !important;
+      }
+    </style>
+
     <script type="text/javascript">
       $(document).ready( function () {
         $("table").DataTable();
       });
+
     </script>
 
+    <script type="text/javascript">
+      window.exp_data = {{json_data|safe}};
+    </script>
   </head>
   <body>
     <div class="container">
       <h2>Experiment: {{experiment.meta_dir}}</h2>
 
-      <div>
-        <img src="data:image/png;base64, {{data.experiment_gp}}"/>
+      <div class="row">
+        <div class="col-sm">
+          <img width="100%" src="data:image/png;base64, {{data.experiment_gp}}"/>
+        </div>
+
+        <!-- <div class="col&#45;sm"> -->
+        <!--   <img width="100%" src="data:image/png;base64, {{data.exp2}}"/> -->
+        <!-- </div> -->
       </div>
 
+      <div id="heatmap">
+      </div>
+
+      <script type="text/javascript">
+        var m = 20;
+        Plotly.plot("heatmap", [
+          {
+            type: "heatmap",
+            z: exp_data.heatmap.z,
+            x: exp_data.heatmap.x,
+            y: exp_data.heatmap.y,
+            colorscale: "Jet",
+          },
+          {
+            x: exp_data.heatmap.sx,
+            y: exp_data.heatmap.sy,
+            mode: "markers",
+            type: "scatter",
+            marker: { size: 15, color: "#000000" },
+          }
+        ], {
+          margin: { t: m, b: m, l: m, r: m }
+        });
+      </script>
+
+
+      <div id="parallel-coord">
+      </div>
+
+      <script type="text/javascript">
+        var trace = {
+          type: 'parcoords',
+          line: {
+            color: exp_data.colors,
+            showscale: true
+          },
+
+          dimensions: exp_data.dimensions,
+        };
+
+        Plotly.plot('parallel-coord', [trace]);
+      </script>
 
       <div class="row">
 
@@ -80,7 +138,7 @@
             </thead>
 
             <tbody>
-              {% for job in experiment.evaluations %}
+              {% for job in experiment.evaluations[:5] %}
               <tr>
                 <td>{{job.job_id}}</td>
                 <td>{{job.run_parameters}}</td>
@@ -106,7 +164,7 @@
             </tbody>
           </table>
         </div>
-        <div class="col-md-10">
+        <div class="col-md-2">
         he
         </div>
       </div>

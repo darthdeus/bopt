@@ -8,61 +8,22 @@ import pickle
 from glob import glob
 from typing import Union, NamedTuple, List, Any
 
+from myopt.basic_types import Hyperparameter
 from myopt.kernels import SquaredExp, Kernel
 from myopt.runner.abstract import Job, Runner
-
-class Integer:
-    low: int
-    high: int
-
-    def __init__(self, low: int, high: int):
-        self.low = low
-        self.high = high
-        self.type = "int"
-
-    def sample(self) -> float:
-        return np.random.randint(self.low, self.high)
-
-    def __repr__(self) -> str:
-        return f"Int({self.low}, {self.high})"
-
-class Float:
-    low: float
-    high: float
-
-    def __init__(self, low: float, high: float):
-        self.low = low
-        self.high = high
-        self.type = "float"
-
-    def sample(self) -> float:
-        return np.random.uniform(self.low, self.high)
-
-    def __repr__(self) -> str:
-        return f"Float({self.low}, {self.high})"
-
-# TODO: hehe
-Range = Union[Integer, Float]
-Bound = Union[Integer, Float]
-
-
-class Hyperparameter(NamedTuple):
-  name: str
-  range: Range
-
 
 class OptimizationResult:
     X_sample: np.ndarray
     y_sample: np.ndarray
     best_x: np.ndarray
     best_y: float
-    bounds: List[Bound]
+    bounds: List[Hyperparameter]
     kernel: Kernel
     n_iter: int
     opt_fun: Any
 
     def __init__(self, X_sample: np.ndarray, y_sample: np.ndarray, best_x: np.ndarray, best_y: float,
-            bounds: List[Bound], kernel: Kernel, n_iter: int, opt_fun: Any) -> None:
+            bounds: List[Hyperparameter], kernel: Kernel, n_iter: int, opt_fun: Any) -> None:
         self.X_sample = X_sample
         self.y_sample = y_sample
         self.best_x = best_x
@@ -153,8 +114,10 @@ class Experiment:
         return obj
 
     def current_optim_result(self) -> OptimizationResult:
-        X_sample = np.array([list(e.run_parameters.values()) for e in self.evaluations])
-        y_sample = np.array([e.final_result() for e in self.evaluations])
+        finished_evaluations = [e for e in self.evaluations if e.is_finished()]
+
+        X_sample = np.array([list(e.run_parameters.values()) for e in finished_evaluations])
+        y_sample = np.array([e.final_result() for e in finished_evaluations])
 
         best_y = np.max(y_sample)
         best_x = X_sample[np.argmax(best_y)]
@@ -162,14 +125,12 @@ class Experiment:
         kernel = SquaredExp()
         n_iter = len(X_sample)
 
-        bounds = [h.range for h in self.hyperparameters]
-
         return OptimizationResult(
                 X_sample,
                 y_sample,
                 best_x,
                 best_y,
-                bounds,
+                self.hyperparameters,
                 kernel,
                 n_iter,
                 opt_fun=None)

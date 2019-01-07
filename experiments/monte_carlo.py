@@ -1,23 +1,14 @@
 #!/usr/bin/env python3
 
-OPTIMIZE_HYPERPARAMS = False
-
+import time
 import random
 # from argparse import Namespace
 # from typing import NamedTuple, List
-# if OPTIMIZE_HYPERPARAMS:
-#     from skopt import gp_minimize
 
 import numpy as np
 
 import cart_pole_evaluator
 # from gym_evaluator import GymEnvironment
-
-
-# class SAR:
-#     state: int
-#     action: int
-#     reward: float
 
 
 def update_timestep(sar, G: float, Q: np.ndarray, C: np.ndarray) -> float:
@@ -52,7 +43,7 @@ def train(args, env, Q, C) -> None:
             sar_tups.append((state, action, reward))
             state = next_state
 
-        G = 0
+        G = 0.0
 
         for t in reversed(range(len(sar_tups))):
             G = update_timestep(sar_tups[t], G, Q, C)
@@ -76,6 +67,8 @@ def evaluate(args, env, Q) -> float:
 
             state = next_state
 
+    raise ValueError()
+
 
 if __name__ == "__main__":
     # Fix random seed
@@ -87,6 +80,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--episodes", default=200, type=int, help="Training episodes.")
     parser.add_argument("--render_each", default=None, type=int, help="Render some episodes.")
+    parser.add_argument("--sleep_when_done", default=0, type=int, help="Time to sleep at the end.")
 
     parser.add_argument("--epsilon", default=0.45, type=float, help="Exploration factor.")
     parser.add_argument("--epsilon_final", default=None, type=float, help="Final exploration factor.")
@@ -100,13 +94,8 @@ if __name__ == "__main__":
     # The overall structure of the code follows.
 
 
-    def target_fn(x) -> float:
+    def target_fn() -> float:
         env = cart_pole_evaluator.environment()
-
-        epsilon, epsilon_final, gamma = x
-        args.epsilon = epsilon
-        args.epsilon_final = epsilon_final
-        args.gamma = gamma
 
         Q = np.zeros((env.states, env.actions), dtype=np.float32)
         C = np.zeros_like(Q)
@@ -116,18 +105,9 @@ if __name__ == "__main__":
         # Perform last 100 evaluation episodes
         mean_value = evaluate(args, env, Q)
 
-        return -mean_value
+        return mean_value
 
+    num_runs = 5
+    print(np.mean([target_fn() for i in range(num_runs)]).item())
 
-    if OPTIMIZE_HYPERPARAMS:
-        pass
-        # best = gp_minimize(target_fn, [
-        #     (0.001, 1),
-        #     (0.001, 1),
-        #     (0.001, 1)
-        # ], n_calls=20)
-        #
-        # print(best)
-    else:
-        x = [0.471958418783538, 0.06929413737303698, 0.5808494337551399]
-        target_fn(x)
+    time.sleep(args.sleep_when_done)

@@ -3,8 +3,6 @@ from myopt.bayesian_optimization import bo_maximize
 from myopt.opt_functions import get_opt_test_functions
 from myopt.kernels import SquaredExp, Matern
 
-from joblib import Parallel, delayed
-
 
 opt_functions = get_opt_test_functions()
 kernels = [SquaredExp(), Matern()]

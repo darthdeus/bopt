@@ -25,9 +25,21 @@ experiment = opt.Experiment(meta_dir, params, sge_runner)
 #             "epsilon": epsilon
 #             })
 
-for gamma in [.1, .99]:
-    for epsilon in [.1, .5, .9]:
+
+import time
+import numpy as np
+for gamma in np.arange(0.01, 0.99, step=0.25):
+    for epsilon in np.arange(0.01, 0.99, step=0.25):
         experiment.runner.start({
             "gamma": gamma,
             "epsilon": epsilon
             })
+        time.sleep(1)
+
+# for gamma in [.1, .2, .4, .6, .8, .99]:
+#     for epsilon in [.1, .4, .7, .9]:
+#         experiment.runner.start({
+#             "gamma": gamma,
+#             "epsilon": epsilon
+#             })
+#         time.sleep(1)

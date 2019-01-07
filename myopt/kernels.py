@@ -1,7 +1,8 @@
 import abc
-from typing import Optional
+from typing import Optional, List
 
 import numpy as np
+from myopt.basic_types import Bound
 
 
 FAST_KERNEL = True
@@ -81,9 +82,10 @@ class Kernel(abc.ABC):
         kernel.round_indexes = indexes
         return kernel
 
-    def with_bounds(self, bounds) -> "Kernel":
+    def with_bounds(self, bounds: List[Bound]) -> "Kernel":
         kernel = self.copy()
-        kernel.round_indexes = np.array([i for i, bound in enumerate(bounds) if bound.type == "int"])
+        kernel.round_indexes = np.array([i for i, bound in enumerate(bounds)
+                                         if bound.type == "int"])
         return kernel
 
     @abc.abstractmethod

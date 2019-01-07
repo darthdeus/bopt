@@ -11,7 +11,10 @@ from numpy.random import multivariate_normal
 
 def base64_plot():
     image = io.BytesIO()
+    plt.tight_layout()
     plt.savefig(image, format='png')
+    plt.gcf().clear()
+    plt.close()
     image.seek(0)
     return base64.encodestring(image.getvalue()).decode("ascii")
 

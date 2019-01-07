@@ -26,7 +26,7 @@ class Job(abc.ABC):
     def intermediate_results(self) -> List[float]:
         return self.result_parser.intermediate_results(self)
 
-    def final_result(self) -> float:
+    def final_result(self) -> Union[float, str]:
         return self.result_parser.final_result(self)
 
     def serialize(self) -> None:
@@ -77,7 +77,9 @@ class Job(abc.ABC):
         if is_finished:
             try:
                 final_result = self.final_result()
-                s += f"{is_finished}\t{final_result}\t{self.run_parameters}"
+
+                rounded_params = {name: round(value, 4) for name, value in self.run_parameters.items()}
+                s += f"{is_finished}\t{round(final_result, 3)}\t{rounded_params}"
             except ValueError as e:
                 s += str(e)
         else:

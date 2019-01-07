@@ -13,10 +13,34 @@ from myopt import Experiment
 app = Flask(__name__)
 app.debug = True
 
+def he():
+    plt.figure()
+    bounds = [myopt.Hyperparameter("a", myopt.Float(-1.0, 2.0))]
+    noise = 0.2
+
+    def f(X):
+        return -np.sin(3*X) - X**2 + 0.7*X
+
+    X_init = np.array([[-0.9], [1.1]])
+    y_init = f(X_init)
+
+    X_true = np.arange(bounds[0].range.low, bounds[0].range.high, 0.01).reshape(-1, 1)
+
+    y_true = f(X_true)
+    import random
+    noisy_f = lambda x: f(x).item() + random.random()*0.01
+
+    plt.figure()
+    myopt.bo_plot_exploration(noisy_f, bounds, X_true=X_true, y_true=y_true,
+            n_iter=4, gp_noise=0.02)
+
+    return myopt.plot.base64_plot()
+
 def experiment_gp(experiment: Experiment) -> str:
     X_train = np.array([list(e.run_parameters.values()) for e in experiment.evaluations])
     y_train = np.array([e.final_result() for e in experiment.evaluations])
 
+    plt.figure()
     myopt.GaussianProcess().fit(X_train, y_train).plot_prior(np.linspace(0, 1))
 
     return myopt.plot.base64_plot()
@@ -29,16 +53,42 @@ def index():
     y = np.sin(x)
     image = np.random.randn(100, 100)
 
-    myopt.bayesian_optimization.plot_2d_optim_result(experiment.current_optim_result())
+    optim_result = experiment.current_optim_result()
+
+    dimensions = []
+
+    for i, param in enumerate(optim_result.bounds):
+        dimensions.append({
+            "values": optim_result.X_sample[:, i].tolist(),
+            "range": [param.range.low, param.range.high],
+            "label": param.name,
+        })
+
+    mu_mat, extent, gx, gy = myopt.bayesian_optimization.plot_2d_optim_result(optim_result)
     exp_gp = myopt.plot.base64_plot()
 
+    heatmap = []
+    for i in range(len(mu_mat)):
+        heatmap.append(mu_mat[i, :].tolist())
+
     data = {
-        "experiment_gp": exp_gp
+        "experiment_gp": exp_gp,
+        # "exp2": he()
     }
 
     json_data = json.dumps({
         "x": x.tolist(),
-        "y": y.tolist()
+        "y": y.tolist(),
+        "colors": optim_result.y_sample.tolist(),
+        "dimensions": dimensions,
+        "heatmap": {
+            "z": heatmap,
+            "x": gx.tolist(),
+            "y": gy.tolist(),
+            "sx": optim_result.X_sample[:, 0].tolist(),
+            "sy": optim_result.X_sample[:, 1].tolist(),
+            "sz": optim_result.y_sample.tolist(),
+        }
     })
 
     return render_template("index.html", data=data, json_data=json_data, experiment=experiment)

@@ -64,6 +64,8 @@ class LocalRunner(Runner):
             job_id = process.pid
             job_fname = Job.compute_job_output_filename(self.meta_dir, job_id)
 
+            print(f"... started with job id: {job_id}")
+
             os.rename(temp_fname, job_fname)
 
             return LocalJob(self.meta_dir, job_id, self.result_parser, run_parameters)

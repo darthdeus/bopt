@@ -62,7 +62,8 @@ class GaussianProcess:
         assert self.X_test is not None
 
         if self.X_train.ndim > 1:
-            assert self.X_train.shape[1] == self.X_test.shape[1]
+            assert self.X_train.shape[1] == self.X_test.shape[1], \
+                    f"got {self.X_train.shape} and {self.X_test.shape}"
 
         noise = self.noise * np.eye(len(self.X_train))
 
