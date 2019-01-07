@@ -1,0 +1,15 @@
+!!python/object:myopt.runner.local_runner.LocalJob
+job_id: 23327
+meta_dir: results/rl-monte-carlo
+result_parser: !!python/object:myopt.runner.parser.LastLineLastWordParser {}
+run_parameters:
+  epsilon: !!python/object/apply:numpy.core.multiarray.scalar
+  - &id001 !!python/object/apply:numpy.dtype
+    args: [f8, 0, 1]
+    state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+  - !!binary |
+    MXaIvRDD6D8=
+  gamma: !!python/object/apply:numpy.core.multiarray.scalar
+  - *id001
+  - !!binary |
+    DeiVg+8r7z8=
