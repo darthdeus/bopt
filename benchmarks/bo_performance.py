@@ -1,7 +1,7 @@
 import numpy as np
 import random
 import concurrent.futures
-from myopt.bayesian_optimization import bo_maximize, Float, Integer
+from bopt.bayesian_optimization import bo_maximize, Float, Integer
 
 
 executor = concurrent.futures.ThreadPoolExecutor(1)

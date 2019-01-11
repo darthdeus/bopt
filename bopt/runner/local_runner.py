@@ -9,9 +9,9 @@ import tempfile
 from glob import glob
 from typing import Union, List, Optional, Tuple, Callable
 
-from myopt.hyperparameters import Hyperparameter
-from myopt.runner.abstract import Job, Runner, Timestamp, Value
-from myopt.runner.parser import ResultParser
+from bopt.hyperparameters import Hyperparameter
+from bopt.runner.abstract import Job, Runner, Timestamp, Value
+from bopt.runner.parser import ResultParser
 
 
 class LocalJob(Job):

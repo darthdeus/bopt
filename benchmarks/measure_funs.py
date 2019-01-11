@@ -1,7 +1,7 @@
 import numpy as np
-from myopt.bayesian_optimization import bo_maximize
-from myopt.opt_functions import get_opt_test_functions
-from myopt.kernels import SquaredExp, Matern
+from bopt.bayesian_optimization import bo_maximize
+from bopt.opt_functions import get_opt_test_functions
+from bopt.kernels import SquaredExp, Matern
 
 
 opt_functions = get_opt_test_functions()

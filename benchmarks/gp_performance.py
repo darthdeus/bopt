@@ -1,6 +1,6 @@
 import timeit
 import numpy as np
-from myopt.gaussian_process import GaussianProcess
+from bopt.gaussian_process import GaussianProcess
 
 noise = 0.2
 

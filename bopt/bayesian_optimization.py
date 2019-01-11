@@ -7,12 +7,12 @@ import matplotlib.pyplot as plt
 import numpy as np
 from scipy.optimize import minimize
 
-from myopt.acquisition_functions import expected_improvement, AcquisitionFunction
-from myopt.gaussian_process import GaussianProcess
-from myopt.kernels import SquaredExp, Kernel
-from myopt.plot import plot_approximation
-from myopt.basic_types import Integer, Float, Bound, Hyperparameter
-from myopt.hyperparameters import OptimizationResult
+from bopt.acquisition_functions import expected_improvement, AcquisitionFunction
+from bopt.gaussian_process import GaussianProcess
+from bopt.kernels import SquaredExp, Kernel
+from bopt.plot import plot_approximation
+from bopt.basic_types import Integer, Float, Bound, Hyperparameter
+from bopt.hyperparameters import OptimizationResult
 
 
 def assert_in_bounds(x: np.ndarray, bounds: List[Bound]) -> None:

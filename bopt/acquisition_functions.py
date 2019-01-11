@@ -3,7 +3,7 @@ from typing import Callable
 import numpy as np
 from scipy.stats import norm
 
-from myopt.gaussian_process import GaussianProcess
+from bopt.gaussian_process import GaussianProcess
 
 
 AcquisitionFunction = Callable[[GaussianProcess, np.ndarray, float], np.ndarray]

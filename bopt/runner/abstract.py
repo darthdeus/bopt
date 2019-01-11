@@ -2,7 +2,7 @@ import abc
 import os
 import yaml
 from typing import Union, List, Optional, Tuple
-from myopt.runner.parser import ResultParser
+from bopt.runner.parser import ResultParser
 
 Timestamp = int
 Value = float

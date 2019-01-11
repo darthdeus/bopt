@@ -7,8 +7,8 @@ from scipy.optimize import minimize
 
 from functools import partial
 
-from myopt.kernels import Kernel
-from myopt.plot import imshow
+from bopt.kernels import Kernel
+from bopt.plot import imshow
 
 
 def kernel_log_likelihood(kernel: Kernel, X_train: np.ndarray,

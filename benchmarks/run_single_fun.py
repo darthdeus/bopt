@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 import argparse
-from myopt.bayesian_optimization import bo_maximize
-from myopt.kernels import get_kernel_by_name
-from myopt.opt_functions import get_fun_by_name
-from myopt.acquisition_functions import get_acquisition_fn_by_name
+from bopt.bayesian_optimization import bo_maximize
+from bopt.kernels import get_kernel_by_name
+from bopt.opt_functions import get_fun_by_name
+from bopt.acquisition_functions import get_acquisition_fn_by_name
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--fun", type=str, help="Function to optimize")

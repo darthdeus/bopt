@@ -1,21 +1,21 @@
 import json
 import numpy as np
 
-import myopt
 import matplotlib.pyplot as plt
 
 from livereload import Server
 from flask import Flask
 from flask import render_template
 
-from myopt import Experiment
+import bopt
+from bopt import Experiment
 
 app = Flask(__name__)
 app.debug = True
 
 def he():
     plt.figure()
-    bounds = [myopt.Hyperparameter("a", myopt.Float(-1.0, 2.0))]
+    bounds = [bopt.Hyperparameter("a", bopt.Float(-1.0, 2.0))]
     noise = 0.2
 
     def f(X):
@@ -31,19 +31,19 @@ def he():
     noisy_f = lambda x: f(x).item() + random.random()*0.01
 
     plt.figure()
-    myopt.bo_plot_exploration(noisy_f, bounds, X_true=X_true, y_true=y_true,
+    bopt.bo_plot_exploration(noisy_f, bounds, X_true=X_true, y_true=y_true,
             n_iter=4, gp_noise=0.02)
 
-    return myopt.plot.base64_plot()
+    return bopt.plot.base64_plot()
 
 def experiment_gp(experiment: Experiment) -> str:
     X_train = np.array([list(e.run_parameters.values()) for e in experiment.evaluations])
     y_train = np.array([e.final_result() for e in experiment.evaluations])
 
     plt.figure()
-    myopt.GaussianProcess().fit(X_train, y_train).plot_prior(np.linspace(0, 1))
+    bopt.GaussianProcess().fit(X_train, y_train).plot_prior(np.linspace(0, 1))
 
-    return myopt.plot.base64_plot()
+    return bopt.plot.base64_plot()
 
 
 @app.route("/")
@@ -64,8 +64,8 @@ def index():
             "label": param.name,
         })
 
-    mu_mat, extent, gx, gy = myopt.bayesian_optimization.plot_2d_optim_result(optim_result)
-    exp_gp = myopt.plot.base64_plot()
+    mu_mat, extent, gx, gy = bopt.bayesian_optimization.plot_2d_optim_result(optim_result)
+    exp_gp = bopt.plot.base64_plot()
 
     heatmap = []
     for i in range(len(mu_mat)):

@@ -7,8 +7,8 @@ import pathlib
 from glob import glob
 from typing import Union, List, Optional, Tuple
 
-from myopt.hyperparameters import Hyperparameter
-from myopt.runner.abstract import Job, Runner, Timestamp, Value
+from bopt.hyperparameters import Hyperparameter
+from bopt.runner.abstract import Job, Runner, Timestamp, Value
 
 
 class SGEJob(Job):

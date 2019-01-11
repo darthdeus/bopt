@@ -3,28 +3,28 @@ import gym
 import time
 
 import psutil
-import myopt as opt
+import bopt
 
 hyperparameters = [
-    opt.Hyperparameter("gamma", opt.Float(0, 1)),
-    opt.Hyperparameter("epsilon", opt.Float(0, 1)),
+    bopt.Hyperparameter("gamma", bopt.Float(0, 1)),
+    bopt.Hyperparameter("epsilon", bopt.Float(0, 1)),
 ]
 
 meta_dir = "results/rl-monte-carlo"
-sge_runner = opt.LocalRunner(
+sge_runner = bopt.LocalRunner(
         meta_dir,
         "./.venv/bin/python",
         ["./experiments/monte_carlo.py"],
-        opt.LastLineLastWordParser()
+        bopt.LastLineLastWordParser()
         )
 
 
 n_iter = 20
 done = 0
 
-experiment = opt.Experiment(meta_dir, hyperparameters, sge_runner)
-loop = opt.OptimizationLoop(opt.SquaredExp(), hyperparameters, n_iter, None, True, 0,
-                            opt.expected_improvement)
+experiment = bopt.Experiment(meta_dir, hyperparameters, sge_runner)
+loop = bopt.OptimizationLoop(bopt.SquaredExp(), hyperparameters, n_iter, None, True, 0,
+                            bopt.expected_improvement)
 
 experiment.runner.start({
     "gamma": 1,

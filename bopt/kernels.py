@@ -2,7 +2,7 @@ import abc
 from typing import Optional, List
 
 import numpy as np
-from myopt.basic_types import Bound
+from bopt.basic_types import Bound
 
 
 FAST_KERNEL = True

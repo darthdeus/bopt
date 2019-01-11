@@ -8,9 +8,9 @@ import pickle
 from glob import glob
 from typing import Union, NamedTuple, List, Any
 
-from myopt.basic_types import Hyperparameter
-from myopt.kernels import SquaredExp, Kernel
-from myopt.runner.abstract import Job, Runner
+from bopt.basic_types import Hyperparameter
+from bopt.kernels import SquaredExp, Kernel
+from bopt.runner.abstract import Job, Runner
 
 class OptimizationResult:
     X_sample: np.ndarray

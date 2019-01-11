@@ -1,8 +1,8 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
-from myopt.kernel import Matern, SquaredExp, RationalQuadratic
-from myopt.gaussian_process import GaussianProcess
+from bopt.kernel import Matern, SquaredExp, RationalQuadratic
+from bopt.gaussian_process import GaussianProcess
 
 # Basic images
 

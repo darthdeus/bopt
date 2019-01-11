@@ -1,21 +1,21 @@
 # just to make sure the jobs don't fail on missing imports
 import gym
-import myopt as opt
+import bopt
 
 params = [
-    opt.Hyperparameter("gamma", opt.Float(0, 1)),
-    opt.Hyperparameter("epsilon", opt.Float(0, 1)),
+    bopt.Hyperparameter("gamma", bopt.Float(0, 1)),
+    bopt.Hyperparameter("epsilon", bopt.Float(0, 1)),
 ]
 
 meta_dir = "results/rl-monte-carlo"
-sge_runner = opt.LocalRunner(
+sge_runner = bopt.LocalRunner(
         meta_dir,
         "./.venv/bin/python",
         ["./experiments/monte_carlo.py"],
-        opt.LastLineLastWordParser()
+        bopt.LastLineLastWordParser()
         )
 
-experiment = opt.Experiment(meta_dir, params, sge_runner)
+experiment = bopt.Experiment(meta_dir, params, sge_runner)
 
 
 # for gamma in [.1, .3, .5, .7, .9, .95, .99]:

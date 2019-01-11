@@ -1,5 +1,5 @@
 import sys
-from myopt.bayesian_optimization import Float, Integer, bo_maximize_parallel
+from bopt.bayesian_optimization import Float, Integer, bo_maximize_parallel
 
 arg_bounds = [
     ("alpha", Float(0.05, 1)),

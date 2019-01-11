@@ -5,7 +5,7 @@ sys.path.append(".") # TODO: temporary hack
 import re
 import os
 import glob
-import myopt
+import bopt
 import traceback
 
 
@@ -43,7 +43,7 @@ if __name__ == "__main__":
     fname, job_id = matched_job_ids[0]
 
     meta_dir = os.path.dirname(fname)
-    experiment = myopt.Experiment.deserialize(meta_dir)
+    experiment = bopt.Experiment.deserialize(meta_dir)
 
     # TODO: this is most likely not needed.
     job = experiment.runner.deserialize_job(meta_dir, job_id)
