@@ -1,4 +1,4 @@
-default: rl-experiment
+default: mypy
 
 watch:
 	watch -n1 expstat results/rl-monte-carlo
@@ -18,3 +18,6 @@ rl-experiment:
 
 benchmarks:
 	PYTHONPATH=. python -m cProfile -s cumtime "benchmarks/$1.py" 2>&1 > "results/be-$1.txt"
+
+mypy:
+	mypy --ignore-missing-imports bopt

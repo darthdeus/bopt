@@ -52,7 +52,6 @@
 
 ## Runner notes
 
-
 ```
 - start_script(args)
 - intermediate_results

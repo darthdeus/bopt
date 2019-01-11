@@ -19,13 +19,13 @@ def assert_in_bounds(x: np.ndarray, bounds: List[Bound]) -> None:
 
 
 class OptimizationLoop:
-    def __init__(self, kernel: Kernel, bounds: List[Hyperparameter], n_iter: int,
+    def __init__(self, kernel: Kernel, params: List[Hyperparameter], n_iter: int,
                  f: Any, optimize_kernel: bool, gp_noise: float,
                  acquisition_function: AcquisitionFunction) -> None:
         self.X_sample = np.array([], dtype=np.float32)
         self.y_sample = np.array([], dtype=np.float32)
-        self.kernel = kernel.with_bounds([p.range for p in bounds])
-        self.bounds = bounds
+        self.kernel = kernel.with_bounds([p.range for p in params])
+        self.params = params
         self.n_iter = n_iter
         self.done_iter = 0
         self.f = f
@@ -38,7 +38,7 @@ class OptimizationLoop:
 
     def next(self):
         if len(self.X_sample) == 0:
-            return default_from_bounds([b.range for b in self.bounds])
+            return default_from_bounds([b.range for b in self.params])
 
         gp = GaussianProcess(kernel=self.kernel, noise=self.gp_noise)
         gp.fit(self.X_sample, self.y_sample)
@@ -46,7 +46,7 @@ class OptimizationLoop:
         if self.optimize_kernel:
             gp = gp.optimize_kernel()
 
-        x_next = propose_location(self.acquisition_function, gp, self.y_sample.max(), self.bounds)
+        x_next = propose_location(self.acquisition_function, gp, self.y_sample.max(), self.params)
 
         return x_next
 
@@ -70,7 +70,7 @@ class OptimizationLoop:
             y_sample,
             best_x=X_sample[max_y_ind],
             best_y=y_sample[max_y_ind],
-            bounds=self.bounds,
+            params=self.params,
             kernel=self.kernel.copy(),
             n_iter=self.n_iter,
             opt_fun=self.f,
@@ -169,7 +169,7 @@ def bo_maximize(f: Callable[[np.array], float], params: List[Hyperparameter],
                               y_sample,
                               best_x=X_sample[y_sample.argmax()],
                               best_y=y_sample.max(),
-                              bounds=params,
+                              params=params,
                               kernel=kernel.copy(),
                               n_iter=n_iter,
                               opt_fun=f)
@@ -253,10 +253,10 @@ def bo_plot_exploration(f: Callable[[np.ndarray], float],
 
 def plot_2d_optim_result(result: OptimizationResult, resolution: float = 30,
                         figsize=(8, 7)):
-    assert len(result.bounds) == 2
+    assert len(result.params) == 2
 
-    b1 = result.bounds[0].range
-    b2 = result.bounds[1].range
+    b1 = result.params[0].range
+    b2 = result.params[1].range
 
     x1 = np.linspace(b1.low, b1.high, resolution)
     x2 = np.linspace(b2.low, b2.high, resolution)
@@ -268,7 +268,7 @@ def plot_2d_optim_result(result: OptimizationResult, resolution: float = 30,
 
     X_2d = np.c_[gx.ravel(), gy.ravel()]
 
-    bounds = [p.range for p in result.bounds]
+    bounds = [p.range for p in result.params]
     # TODO: optimize kernel
 
     mu, _ = GaussianProcess(kernel=result.kernel.with_bounds(bounds)) \

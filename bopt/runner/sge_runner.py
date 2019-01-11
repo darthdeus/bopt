@@ -12,19 +12,14 @@ from bopt.runner.abstract import Job, Runner, Timestamp, Value
 
 
 class SGEJob(Job):
-    is_finished: bool
-    intermediate_results : List[Tuple[Timestamp, Value]]
-    final_result: Optional[Value]
-
     def __init__(self, meta_dir: str, job_id: int) -> None:
         self.meta_dir = meta_dir
         self.job_id = job_id
 
-        self.is_finished = False
-        self.intermediate_results = []
-        self.final_result = None
-
         self.serialize()
+
+    def is_finished(self) -> bool:
+        raise NotImplemented()
 
     def state(self) -> str:
         return subprocess.check_output(["qstat"]).decode("ascii")

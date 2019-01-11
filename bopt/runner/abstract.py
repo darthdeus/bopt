@@ -79,7 +79,8 @@ class Job(abc.ABC):
                 final_result = self.final_result()
 
                 rounded_params = {name: round(value, 4) for name, value in self.run_parameters.items()}
-                s += f"{is_finished}\t{round(final_result, 3)}\t{rounded_params}"
+                assert isinstance(final_result, float)
+                s += f"{is_finished}\t{final_result:.3f}\t{rounded_params}"
             except ValueError as e:
                 s += str(e)
         else:

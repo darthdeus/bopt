@@ -12,23 +12,24 @@ from bopt.basic_types import Hyperparameter
 from bopt.kernels import SquaredExp, Kernel
 from bopt.runner.abstract import Job, Runner
 
+
 class OptimizationResult:
     X_sample: np.ndarray
     y_sample: np.ndarray
     best_x: np.ndarray
     best_y: float
-    bounds: List[Hyperparameter]
+    params: List[Hyperparameter]
     kernel: Kernel
     n_iter: int
     opt_fun: Any
 
     def __init__(self, X_sample: np.ndarray, y_sample: np.ndarray, best_x: np.ndarray, best_y: float,
-            bounds: List[Hyperparameter], kernel: Kernel, n_iter: int, opt_fun: Any) -> None:
+            params: List[Hyperparameter], kernel: Kernel, n_iter: int, opt_fun: Any) -> None:
         self.X_sample = X_sample
         self.y_sample = y_sample
         self.best_x = best_x
         self.best_y = best_y
-        self.bounds = bounds
+        self.params = params
         self.kernel = kernel
         self.n_iter = n_iter
         self.opt_fun = opt_fun
