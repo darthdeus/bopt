@@ -6,6 +6,9 @@ watch:
 bo-exp:
 	PYTHONPATH=. python experiments/bo_rl_experiment.py
 
+clean:
+	rm -rf results/rl-monte-carlo
+
 setup-venv:
 	python -m virtualenv venv
 	./venv/bin/pip install -r requirements.txt
