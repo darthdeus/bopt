@@ -43,7 +43,7 @@ def experiment_gp(experiment: Experiment) -> str:
     plt.figure()
     bopt.GaussianProcess().fit(X_train, y_train).plot_prior(np.linspace(0, 1))
 
-    return bopt.plot.base64_plot()
+    return bopt.base64_plot()
 
 
 @app.route("/")
@@ -64,8 +64,8 @@ def index():
             "label": param.name,
         })
 
-    mu_mat, extent, gx, gy = bopt.bayesian_optimization.plot_2d_optim_result(optim_result)
-    exp_gp = bopt.plot.base64_plot()
+    mu_mat, extent, gx, gy = bopt.plot_2d_optim_result(optim_result)
+    exp_gp = bopt.base64_plot()
 
     heatmap = []
     for i in range(len(mu_mat)):
@@ -92,6 +92,7 @@ def index():
     })
 
     return render_template("index.html", data=data, json_data=json_data, experiment=experiment)
+
 
 server = Server(app.wsgi_app)
 server.watch("**/*")

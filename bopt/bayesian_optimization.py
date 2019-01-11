@@ -40,12 +40,7 @@ class OptimizationLoop:
         if len(self.X_sample) == 0:
             return default_from_bounds([b.range for b in self.params])
 
-        gp = GaussianProcess(kernel=self.kernel, noise=self.gp_noise)
-        gp.fit(self.X_sample, self.y_sample)
-
-        if self.optimize_kernel:
-            gp = gp.optimize_kernel()
-
+        gp = self.create_gp()
         x_next = propose_location(self.acquisition_function, gp, self.y_sample.max(), self.params)
 
         return x_next
@@ -59,6 +54,15 @@ class OptimizationLoop:
         else:
             self.X_sample = np.vstack((self.X_sample, x_next))
             self.y_sample = np.hstack((self.y_sample, y_next))
+
+    def create_gp(self) -> GaussianProcess:
+        gp = GaussianProcess(kernel=self.kernel, noise=self.gp_noise)
+        gp.fit(self.X_sample, self.y_sample)
+
+        if self.optimize_kernel:
+            gp = gp.optimize_kernel()
+
+        return gp
 
     def result(self) -> OptimizationResult:
         X_sample = self.X_sample
@@ -91,11 +95,6 @@ def default_from_bounds(bounds: List[Bound]) -> np.ndarray:
     return x_0
 
 
-# def bo_maximize(f: Callable[[np.array], float], bounds: List[Bound],
-#                 kernel: Kernel = SquaredExp(), acquisition_function=expected_improvement,
-#                 x_0: np.ndarray = None, gp_noise: float = 0,
-#                 n_iter: int = 8, callback: Callable = None,
-#                 optimize_kernel=True, use_tqdm=True) -> OptimizationResult:
 def bo_maximize_loop(
     f: Callable[[np.array], float],
     bounds: List[Hyperparameter],
@@ -105,74 +104,26 @@ def bo_maximize_loop(
     n_iter: int = 8,
     optimize_kernel=True,
     use_tqdm=True,
+    callback: Callable = None
 ) -> OptimizationResult:
     loop = OptimizationLoop(kernel, bounds, n_iter, f, optimize_kernel, gp_noise, acquisition_function)
 
-    from tqdm import tqdm
-    for i in tqdm(range(n_iter)):
+    if use_tqdm:
+        from tqdm import tqdm
+        iter = tqdm(range(n_iter))
+    else:
+        iter = range(n_iter)
+
+    for i in iter:
         x_next = loop.next()
         y_next = f(x_next)
 
         loop.add_sample(x_next, y_next)
 
-    return loop.result()
-
-
-def bo_maximize(f: Callable[[np.array], float], params: List[Hyperparameter],
-                kernel: Kernel = SquaredExp(), acquisition_function=expected_improvement,
-                x_0: np.ndarray = None, gp_noise: float = 0,
-                n_iter: int = 8, callback: Callable = None,
-                optimize_kernel=True, use_tqdm=True) -> OptimizationResult:
-
-    bounds = [p.range for p in params]
-
-    if x_0 is None:
-        x_0 = default_from_bounds(bounds)
-    else:
-        for i, bound in enumerate(bounds):
-            assert bound.low <= x_0[i] <= bound.high, f"x_0 not in bounds, {bound} at {i}"
-
-    kernel = kernel.with_bounds(bounds)
-
-    y_0 = f(x_0)
-
-    # TODO: handle numpy rank-0 tensors
-    assert type(y_0) == float, f"f(x) must return a float, got type {type(y_0)}, value: {y_0}"
-
-    X_sample = np.array([x_0])
-    y_sample = np.array([y_0])
-
-    iter_target = range(n_iter - 1)
-    if use_tqdm:
-        from tqdm import tqdm
-        iter_target = tqdm(iter_target)
-
-    for iter in iter_target:
-        gp = GaussianProcess(kernel=kernel, noise=gp_noise).fit(X_sample, y_sample)
-        if optimize_kernel:
-            gp = gp.optimize_kernel()
-
-        x_next = propose_location(acquisition_function, gp, y_sample.max(), bounds)
-
-        y_next = f(x_next)
-
         if callback is not None:
-            callback(iter, acquisition_function, gp, X_sample, y_sample, x_next, y_next)
+            callback(iter, acquisition_function, loop.create_gp(), loop.X_sample, loop.y_sample, x_next, y_next)
 
-        X_sample = np.vstack((X_sample, x_next))
-        y_sample = np.hstack((y_sample, y_next))
-
-    max_y_ind = y_sample.argmax()
-    # print("max_x", X_sample[max_y_ind], "max max", y_sample.max())
-
-    return OptimizationResult(X_sample,
-                              y_sample,
-                              best_x=X_sample[y_sample.argmax()],
-                              best_y=y_sample.max(),
-                              params=params,
-                              kernel=kernel.copy(),
-                              n_iter=n_iter,
-                              opt_fun=f)
+    return loop.result()
 
 
 def propose_multiple_locations(acquisition: AcquisitionFunction, gp: GaussianProcess,
@@ -247,12 +198,11 @@ def bo_plot_exploration(f: Callable[[np.ndarray], float],
 
             plt.title(f'Iteration {i+1}, {gp.kernel}')
 
-    return bo_maximize(f, bounds, kernel, acquisition_function, gp_noise=gp_noise, n_iter=n_iter,
-                       callback=plot_iteration, optimize_kernel=optimize_kernel)
+    return bo_maximize_loop(f, bounds, kernel, acquisition_function, gp_noise=gp_noise, n_iter=n_iter,
+                            callback=plot_iteration, optimize_kernel=optimize_kernel)
 
 
-def plot_2d_optim_result(result: OptimizationResult, resolution: float = 30,
-                        figsize=(8, 7)):
+def plot_2d_optim_result(result: OptimizationResult, resolution: float = 30):
     assert len(result.params) == 2
 
     b1 = result.params[0].range

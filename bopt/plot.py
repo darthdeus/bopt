@@ -7,7 +7,8 @@ import numpy as np
 
 from matplotlib import cm
 from numpy.random import multivariate_normal
-from bopt.kernel import Kernel, kernel_log_likelihood
+from bopt.kernels import Kernel
+from bopt.kernel_opt import kernel_log_likelihood
 
 
 def base64_plot():

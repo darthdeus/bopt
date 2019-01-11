@@ -21,3 +21,6 @@ benchmarks:
 
 mypy:
 	mypy --ignore-missing-imports bopt
+
+web:
+	PYTHONPATH=. python app.py
