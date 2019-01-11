@@ -9,8 +9,8 @@ pytest==4.0.1
 tqdm==4.28.1
 pyyaml
 GPy
-tangent
 flask
 psutil
 ipdb
 gym
+livereload
