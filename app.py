@@ -57,7 +57,7 @@ def index():
 
     dimensions = []
 
-    for i, param in enumerate(optim_result.bounds):
+    for i, param in enumerate(optim_result.params):
         dimensions.append({
             "values": optim_result.X_sample[:, i].tolist(),
             "range": [param.range.low, param.range.high],
@@ -73,7 +73,6 @@ def index():
 
     data = {
         "experiment_gp": exp_gp,
-        # "exp2": he()
     }
 
     json_data = json.dumps({

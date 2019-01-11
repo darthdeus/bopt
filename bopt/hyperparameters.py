@@ -6,7 +6,7 @@ import numpy as np
 import pickle
 
 from glob import glob
-from typing import Union, NamedTuple, List, Any
+from typing import Union, NamedTuple, List, Any, Optional
 
 from bopt.basic_types import Hyperparameter
 from bopt.kernels import SquaredExp, Kernel
@@ -16,14 +16,15 @@ from bopt.runner.abstract import Job, Runner
 class OptimizationResult:
     X_sample: np.ndarray
     y_sample: np.ndarray
-    best_x: np.ndarray
-    best_y: float
+    best_x: Optional[np.ndarray]
+    best_y: Optional[float]
     params: List[Hyperparameter]
     kernel: Kernel
     n_iter: int
     opt_fun: Any
 
-    def __init__(self, X_sample: np.ndarray, y_sample: np.ndarray, best_x: np.ndarray, best_y: float,
+    def __init__(self, X_sample: np.ndarray, y_sample: np.ndarray,
+            best_x: Optional[np.ndarray], best_y: Optional[float],
             params: List[Hyperparameter], kernel: Kernel, n_iter: int, opt_fun: Any) -> None:
         self.X_sample = X_sample
         self.y_sample = y_sample
@@ -115,14 +116,16 @@ class Experiment:
         return obj
 
     def current_optim_result(self) -> OptimizationResult:
-        finished_evaluations = [e for e in self.evaluations if e.is_finished()]
+        finished_evaluations = [e for e in self.evaluations if e.is_success()]
 
         X_sample = np.array([list(e.run_parameters.values()) for e in finished_evaluations])
         y_sample = np.array([e.final_result() for e in finished_evaluations])
 
-        best_y = np.max(y_sample)
-
-        best_x = X_sample[np.argmax(best_y)]
+        best_y = None
+        best_x = None
+        if len(y_sample) > 0:
+            best_y = np.max(y_sample)
+            best_x = X_sample[np.argmax(best_y)]
 
         kernel = SquaredExp()
         n_iter = len(X_sample)

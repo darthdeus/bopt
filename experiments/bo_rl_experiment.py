@@ -14,7 +14,7 @@ meta_dir = "results/rl-monte-carlo"
 sge_runner = bopt.LocalRunner(
         meta_dir,
         "./.venv/bin/python",
-        ["./experiments/monte_carlo.py"],
+        ["./experiments/rl/monte_carlo.py"],
         bopt.LastLineLastWordParser()
         )
 
@@ -44,6 +44,8 @@ while done < n_iter:
         #
         # print(multiprocessing.active_children())
         # time.sleep(1)
+
+
 
 
 

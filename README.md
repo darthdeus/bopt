@@ -2,6 +2,8 @@
 
 ## TODO:
 
+- [ ] doublefork children so they don't need to be awaited & can survive crash of parent
+
 - [x] discrete hyperparameters
   - [ ] https://arxiv.org/pdf/1706.03673.pdf
 - [ ] priors

@@ -29,6 +29,9 @@ class Job(abc.ABC):
         else:
             return False
 
+    def err(self) -> str:
+        return self.result_parser.safe_final_result(self).err()
+
     def intermediate_results(self) -> List[float]:
         return self.result_parser.intermediate_results(self)
 
@@ -80,15 +83,16 @@ class Job(abc.ABC):
         s = f"{self.job_id}\t"
         is_finished = self.is_finished()
 
-        if is_finished:
-            try:
+        if self.is_finished():
+            if self.is_success():
                 final_result = self.final_result()
 
-                rounded_params = {name: round(value, 4) for name, value in self.run_parameters.items()}
+                rounded_params = {name: round(value, 4)
+                        for name, value in self.run_parameters.items()}
                 assert isinstance(final_result, float)
                 s += f"{is_finished}\t{final_result:.3f}\t{rounded_params}"
-            except ValueError as e:
-                s += str(e)
+            else:
+                s += f"FAILED: {self.err()}"
         else:
             s += "RUNNING"
 
