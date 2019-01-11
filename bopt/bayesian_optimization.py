@@ -17,18 +17,17 @@ def assert_in_bounds(x: np.ndarray, bounds: List[Bound]) -> None:
         assert bound.low <= x[i] <= bound.high, f"x_0 not in bounds, {bound} at {i}"
 
 
-
 class OptimizationLoop:
-    def __init__(self, kernel: Kernel, params: List[Hyperparameter], n_iter: int,
-                 f: Any, optimize_kernel: bool, gp_noise: float,
-                 acquisition_function: AcquisitionFunction) -> None:
+    def __init__(self, params: List[Hyperparameter], n_iter: int,
+                 kernel: Kernel = SquaredExp(), optimize_kernel: bool = True,
+                 gp_noise: float = 0.0,
+                 acquisition_function: AcquisitionFunction = expected_improvement) -> None:
         self.X_sample = np.array([], dtype=np.float32)
         self.y_sample = np.array([], dtype=np.float32)
         self.kernel = kernel.with_bounds([p.range for p in params])
         self.params = params
         self.n_iter = n_iter
         self.done_iter = 0
-        self.f = f
         self.optimize_kernel = optimize_kernel
         self.gp_noise = gp_noise
         self.acquisition_function = acquisition_function
@@ -45,7 +44,7 @@ class OptimizationLoop:
 
         return x_next
 
-    def add_sample(self, x_next, y_next):
+    def add_sample(self, x_next, y_next) -> None:
         assert type(y_next) == float, f"f(x) must return a float, got type {type(y_next)}, value: {y_next}"
 
         if len(self.X_sample) == 0 and len(self.y_sample) == 0:
@@ -77,7 +76,7 @@ class OptimizationLoop:
             params=self.params,
             kernel=self.kernel.copy(),
             n_iter=self.n_iter,
-            opt_fun=self.f,
+            opt_fun=None
         )
 
 

@@ -23,8 +23,7 @@ n_iter = 20
 done = 0
 
 experiment = bopt.Experiment(meta_dir, hyperparameters, sge_runner)
-loop = bopt.OptimizationLoop(bopt.SquaredExp(), hyperparameters, n_iter, None, True, 0,
-                            bopt.expected_improvement)
+loop = bopt.OptimizationLoop(hyperparameters, n_iter)
 
 experiment.runner.start({
     "gamma": 1,
