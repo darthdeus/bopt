@@ -2,7 +2,7 @@ import abc
 import os
 import yaml
 from typing import Union, List, Optional, Tuple
-from bopt.runner.parser import ResultParser
+from bopt.runner.result_parser import ResultParser, JobResult
 
 Timestamp = int
 Value = float
@@ -23,10 +23,16 @@ class Job(abc.ABC):
     @abc.abstractmethod
     def is_finished(self) -> bool: pass
 
+    def is_success(self) -> bool:
+        if self.is_finished():
+            return self.result_parser.safe_final_result(self).is_ok()
+        else:
+            return False
+
     def intermediate_results(self) -> List[float]:
         return self.result_parser.intermediate_results(self)
 
-    def final_result(self) -> Union[float, str]:
+    def final_result(self) -> float:
         return self.result_parser.final_result(self)
 
     def serialize(self) -> None:

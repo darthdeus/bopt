@@ -11,7 +11,7 @@ from typing import Union, List, Optional, Tuple, Callable
 
 from bopt.hyperparameters import Hyperparameter
 from bopt.runner.abstract import Job, Runner, Timestamp, Value
-from bopt.runner.parser import ResultParser
+from bopt.runner.result_parser import ResultParser
 
 
 class LocalJob(Job):

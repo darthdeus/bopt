@@ -121,6 +121,7 @@ class Experiment:
         y_sample = np.array([e.final_result() for e in finished_evaluations])
 
         best_y = np.max(y_sample)
+
         best_x = X_sample[np.argmax(best_y)]
 
         kernel = SquaredExp()

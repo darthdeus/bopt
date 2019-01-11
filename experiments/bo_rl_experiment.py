@@ -25,11 +25,6 @@ done = 0
 experiment = bopt.Experiment(meta_dir, hyperparameters, sge_runner)
 loop = bopt.OptimizationLoop(hyperparameters, n_iter)
 
-experiment.runner.start({
-    "gamma": 1,
-    "epsilon": 1,
-    # "sleep_when_done": 0
-})
 
 while done < n_iter:
     gamma, epsilon = loop.next()

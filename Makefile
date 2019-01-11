@@ -1,4 +1,4 @@
-default: mypy
+default: bo-exp
 
 watch:
 	watch -n1 expstat results/rl-monte-carlo
