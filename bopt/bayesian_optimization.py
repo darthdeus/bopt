@@ -105,7 +105,8 @@ def bo_maximize_loop(
     use_tqdm=True,
     callback: Callable = None
 ) -> OptimizationResult:
-    loop = OptimizationLoop(kernel, bounds, n_iter, f, optimize_kernel, gp_noise, acquisition_function)
+    loop = OptimizationLoop(bounds, n_iter, kernel, optimize_kernel,
+                            gp_noise, acquisition_function)
 
     if use_tqdm:
         from tqdm import tqdm
@@ -197,7 +198,8 @@ def bo_plot_exploration(f: Callable[[np.ndarray], float],
 
             plt.title(f'Iteration {i+1}, {gp.kernel}')
 
-    return bo_maximize_loop(f, bounds, kernel, acquisition_function, gp_noise=gp_noise, n_iter=n_iter,
+    return bo_maximize_loop(f, bounds, kernel, acquisition_function,
+                            gp_noise=gp_noise, n_iter=n_iter,
                             callback=plot_iteration, optimize_kernel=optimize_kernel)
 
 
