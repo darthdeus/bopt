@@ -1,5 +1,0 @@
-!!python/object:myopt.runner.local_runner.LocalJob
-job_id: 21032
-meta_dir: results/rl-monte-carlo
-result_parser: !!python/object:myopt.runner.parser.LastLineLastWordParser {}
-run_parameters: {epsilon: 1, gamma: 1}
