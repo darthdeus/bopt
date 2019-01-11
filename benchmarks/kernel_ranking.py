@@ -1,3 +1,4 @@
+# TODO: deprecated
 import matplotlib.pyplot as plt
 from bopt.bayesian_optimization import bo_maximize_parallel, plot_2d_optim_result
 from bopt.kernels import RationalQuadratic, Matern, SquaredExp

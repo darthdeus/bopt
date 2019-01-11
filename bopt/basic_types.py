@@ -31,13 +31,10 @@ class Float:
     def __repr__(self) -> str:
         return f"Float({self.low}, {self.high})"
 
-# TODO: hehe
-Range = Union[Integer, Float]
 Bound = Union[Integer, Float]
 
 
 class Hyperparameter(NamedTuple):
   name: str
-  range: Range
-
+  range: Bound
 
