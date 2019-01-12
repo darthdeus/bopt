@@ -36,15 +36,7 @@
     <div class="container">
       <h2>Experiment: {{experiment.meta_dir}}</h2>
 
-      <div class="row">
-        <div class="col-sm">
-          <img width="100%" src="data:image/png;base64, {{data.experiment_gp}}"/>
-        </div>
-
-        <!-- <div class="col&#45;sm"> -->
-        <!--   <img width="100%" src="data:image/png;base64, {{data.exp2}}"/> -->
-        <!-- </div> -->
-      </div>
+      {{data.minval}} - {{data.maxval}}
 
       <div id="heatmap">
       </div>
@@ -58,13 +50,20 @@
             x: exp_data.heatmap.x,
             y: exp_data.heatmap.y,
             colorscale: "Jet",
+            showscale: true,
+            zauto: false,
+            zmin: {{data.minval}},
+            zmax: {{data.maxval}}
           },
           {
             x: exp_data.heatmap.sx,
             y: exp_data.heatmap.sy,
             mode: "markers",
             type: "scatter",
-            marker: { size: 15, color: "#000000" },
+            marker: {
+              size: 15,
+              color: "#000000",
+            },
           }
         ], {
           margin: { t: m, b: m, l: m, r: m }
@@ -80,7 +79,10 @@
           type: 'parcoords',
           line: {
             color: exp_data.colors,
-            showscale: true
+            showscale: true,
+            colorscale: "Jet",
+            cmin: {{data.minval}},
+            cmax: {{data.maxval}}
           },
 
           dimensions: exp_data.dimensions,
@@ -142,7 +144,7 @@
               <tr>
                 <td>{{job.job_id}}</td>
                 <td>{{job.run_parameters}}</td>
-                <td>{{job.final_result()}}</td>
+                <td>{{job.result_or_err()}}</td>
                 <td>
                   <div id="job-{{job.job_id}}" style="width:400px;height:75px;"></div>
                   <script>
@@ -169,19 +171,6 @@
         </div>
       </div>
 
-      <div id="tester" style="width:600px;height:250px;"></div>
-
-      <script>
-        var data = {{json_data|safe}};
-
-        TESTER = document.getElementById('tester');
-        Plotly.plot( TESTER, [{
-          x: data.x,
-          y: data.y
-        }], {
-          margin: { t: 0  }
-        }  );
-      </script>
     </div>
   </body>
 </html>

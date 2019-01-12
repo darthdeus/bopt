@@ -49,10 +49,6 @@ def experiment_gp(experiment: Experiment) -> str:
 @app.route("/")
 def index():
     experiment = Experiment.deserialize("results/rl-monte-carlo")
-    x = np.arange(0, 2*np.pi, step=0.01)
-    y = np.sin(x)
-    image = np.random.randn(100, 100)
-
     optim_result = experiment.current_optim_result()
 
     dimensions = []
@@ -71,13 +67,12 @@ def index():
     for i in range(len(mu_mat)):
         heatmap.append(mu_mat[i, :].tolist())
 
-    data = {
-        "experiment_gp": exp_gp,
-    }
+    minval = min(np.min(heatmap), np.min(optim_result.y_sample))
+    maxval = max(np.max(heatmap), np.max(optim_result.y_sample))
 
-    json_data = json.dumps({
-        "x": x.tolist(),
-        "y": y.tolist(),
+    data = {
+        "minval": minval,
+        "maxval": maxval,
         "colors": optim_result.y_sample.tolist(),
         "dimensions": dimensions,
         "heatmap": {
@@ -88,7 +83,8 @@ def index():
             "sy": optim_result.X_sample[:, 1].tolist(),
             "sz": optim_result.y_sample.tolist(),
         }
-    })
+    }
+    json_data = json.dumps(data)
 
     return render_template("index.html", data=data, json_data=json_data, experiment=experiment)
 

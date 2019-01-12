@@ -29,6 +29,15 @@ class Job(abc.ABC):
         else:
             return False
 
+    def result_or_err(self) -> str:
+        if self.is_finished():
+            if self.is_success():
+                return str(self.final_result())
+            else:
+                return self.err()
+        else:
+            return "RUNNING"
+
     def err(self) -> str:
         return self.result_parser.safe_final_result(self).err()
 

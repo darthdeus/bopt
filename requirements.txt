@@ -13,4 +13,4 @@ flask
 psutil
 ipdb
 gym
-livereload
+livereload==2.5.1

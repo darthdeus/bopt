@@ -2,6 +2,7 @@
 
 ## TODO:
 
+- [ ] share z-axis in plots
 - [ ] doublefork children so they don't need to be awaited & can survive crash of parent
 
 - [x] discrete hyperparameters
