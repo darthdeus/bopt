@@ -16,9 +16,9 @@
     <script src="//cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js"></script>
 
     <style type="text/css" media="all">
-      .modebar{
-        display: none !important;
-      }
+      /* .modebar{ */
+      /*   display: none !important; */
+      /* } */
     </style>
 
     <script type="text/javascript">
@@ -38,8 +38,15 @@
 
       {{data.minval}} - {{data.maxval}}
 
-      <div id="heatmap">
+      <div class="row">
+        <div class="col-md">
+          <div id="heatmap"></div>
+        </div>
+        <div class="col-md">
+          <div id="parallel-coord"></div>
+        </div>
       </div>
+
 
       <script type="text/javascript">
         var m = 20;
@@ -64,15 +71,25 @@
               size: 15,
               color: "#000000",
             },
+          },
+          {
+            x: [exp_data.best_x[0]],
+            y: [exp_data.best_x[1]],
+            // y: [exp_data.best_y],
+            mode: "markers",
+            type: "scatter",
+            marker: {
+              size: 15,
+              color: "#FAFAFA",
+            },
           }
-        ], {
-          margin: { t: m, b: m, l: m, r: m }
-        });
+        ],
+        // {
+        //   margin: { t: m, b: m, l: m, r: m }
+        // }
+        );
       </script>
 
-
-      <div id="parallel-coord">
-      </div>
 
       <script type="text/javascript">
         var trace = {
@@ -91,85 +108,100 @@
         Plotly.plot('parallel-coord', [trace]);
       </script>
 
+      <h3>Hyperparameters</h3>
+
+      <div id="all-param-slices">
+      </div>
+
+      <script type="text/javascript">
+        Plotly.plot("all-param-slices", [
+          {% for param in experiment.hyperparameters %}
+            {
+              x: {{data.posterior_slices[loop.index - 1][0]}},
+              y: {{data.posterior_slices[loop.index - 1][1]}},
+              name: "{{param.name}}: ({{param.range.low}}, {{param.range.high}})"
+            },
+          {% endfor %}
+        ], {
+          yaxis: {
+            range: [0, 500]
+          }
+        });
+      </script>
+
       <div class="row">
+        {% for param in experiment.hyperparameters %}
+          <div class="col-md">
+            <div id="param-{{param.name}}"></div>
+          </div>
+        {% endfor %}
+      </div>
 
-        <div class="col-sm">
-          <h3>Hyperparameters</h3>
-
-          <ul>
-            {% for param in experiment.hyperparameters %}
-              <li>{{param.name}}: ({{param.range.low}}, {{param.range.high}})</li>
-            {% endfor %}
-          </ul>
-
-          <pre>
-            {{e}}
-          </pre>
-        </div>
-
-        <div class="col-sm">
-          <div id="job-all" style="width:600px;height:200px;"></div>
-          <script>
-            TESTER = document.querySelector("#job-all");
-            Plotly.plot( TESTER, [
-              {% for job in experiment.evaluations %}
+      {% for param in experiment.hyperparameters %}
+          <script type="text/javascript">
+            Plotly.plot("param-{{param.name}}", [
               {
-                y: {{job.intermediate_results()|safe}}
-              },
-              {% endfor %}
+                x: {{data.posterior_slices[loop.index - 1][0]}},
+                y: {{data.posterior_slices[loop.index - 1][1]}}
+              }
             ], {
+              title: { text: "{{param.name}}: ({{param.range.low}}, {{param.range.high}})" },
               yaxis: {
                 range: [0, 500]
-              },
-              margin: { t: 10, b: 10 }
+              }
             });
           </script>
-        </div>
-      </div>
+      {% endfor %}
 
-      <div class="row">
-        <div class="col-md-10">
-          <table data-toggle="table" class="table table-bordered table-striped">
-            <thead>
-              <tr>
-                <th>JobID</th>
-                <th>Hyperparams</th>
-                <th>Final value</th>
-                <th>Intermediate</th>
-              </tr>
-            </thead>
+      <div id="job-all"></div>
+      <script>
+        Plotly.plot("job-all", [
+          {% for job in experiment.evaluations %}
+          {
+            y: {{job.intermediate_results()|safe}}
+          },
+          {% endfor %}
+        ], {
+          yaxis: {
+            range: [0, 500]
+          }
+        });
+      </script>
 
-            <tbody>
-              {% for job in experiment.evaluations[:5] %}
-              <tr>
-                <td>{{job.job_id}}</td>
-                <td>{{job.run_parameters}}</td>
-                <td>{{job.result_or_err()}}</td>
-                <td>
-                  <div id="job-{{job.job_id}}" style="width:400px;height:75px;"></div>
-                  <script>
-                    TESTER = document.querySelector("#job-{{job.job_id}}");
-                    Plotly.plot( TESTER, [
-                      {
-                        y: {{job.intermediate_results()|safe}}
-                      }
-                    ], {
-                      yaxis: {
-                        range: [0, 500]
-                      },
-                      margin: { t: 10, b: 10 }
-                    });
-                  </script>
-                </td>
-              </tr>
-              {% endfor %}
-            </tbody>
-          </table>
-        </div>
-        <div class="col-md-2">
-        he
-        </div>
-      </div>
+      <table data-toggle="table" class="table table-bordered table-striped">
+        <thead>
+          <tr>
+            <th>JobID</th>
+            <th>Hyperparams</th>
+            <th>Final value</th>
+            <th>Intermediate</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          {% for job in experiment.evaluations[:5] %}
+          <tr>
+            <td>{{job.job_id}}</td>
+            <td>{{job.run_parameters}}</td>
+            <td>{{job.result_or_err()}}</td>
+            <td>
+              <div id="job-{{job.job_id}}" style="width:400px;height:75px;"></div>
+              <script>
+                Plotly.plot("job-{{job.job_id}}", [
+                  {
+                    y: {{job.intermediate_results()|safe}}
+                  }
+                ], {
+                  yaxis: {
+                    range: [0, 500]
+                  }
+                });
+              </script>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
 
     </div>
   </body>

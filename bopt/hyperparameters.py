@@ -6,8 +6,9 @@ import numpy as np
 import pickle
 
 from glob import glob
-from typing import Union, NamedTuple, List, Any, Optional
+from typing import Union, NamedTuple, List, Any, Optional, Tuple
 
+from bopt.gaussian_process import GaussianProcess
 from bopt.basic_types import Hyperparameter
 from bopt.kernels import SquaredExp, Kernel
 from bopt.runner.abstract import Job, Runner
@@ -46,6 +47,21 @@ class OptimizationResult:
             self.opt_fun = None
             pickle.dump(self, filename)
             self.opt_fun = opt_fun
+
+    def slice_at(self, i: int) -> Tuple[np.ndarray, np.ndarray]:
+        gp = GaussianProcess(kernel=self.kernel.copy())
+        gp.fit(self.X_sample, self.y_sample)
+
+        bound = self.params[i].range
+        resolution = 30
+        x_i = np.linspace(bound.low, bound.high, resolution)
+
+        X_test = np.tile(self.best_x, (resolution, 1))
+        X_test[:, i] = x_i
+
+        mu, _ = gp.posterior(X_test).mu_std()
+
+        return x_i, mu
 
     @staticmethod
     def load(filename) -> "OptimizationResult":
@@ -118,7 +134,7 @@ class Experiment:
     def current_optim_result(self) -> OptimizationResult:
         finished_evaluations = [e for e in self.evaluations if e.is_success()]
 
-        X_sample = np.array([list(e.run_parameters.values()) for e in finished_evaluations])
+        X_sample = np.array([e.sorted_parameter_values() for e in finished_evaluations])
         y_sample = np.array([e.final_result() for e in finished_evaluations])
 
         best_y = None

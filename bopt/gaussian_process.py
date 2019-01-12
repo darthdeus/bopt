@@ -44,7 +44,7 @@ class GaussianProcess:
 
         return self
 
-    def posterior(self, X_test: np.ndarray, X_train: np.ndarray = None, y_train: np.ndarray = None):
+    def posterior(self, X_test: np.ndarray, X_train: np.ndarray = None, y_train: np.ndarray = None) -> "GaussianProcess":
         """
         Computes the posterior `p(y_test | X_test, X_train, y_train)`
         and stores the result.

@@ -8,6 +8,7 @@ import bopt
 hyperparameters = [
     bopt.Hyperparameter("gamma", bopt.Float(0, 1)),
     bopt.Hyperparameter("epsilon", bopt.Float(0, 1)),
+    bopt.Hyperparameter("epsilon_final", bopt.Float(-1, 2)),
 ]
 
 meta_dir = "results/rl-monte-carlo"
@@ -27,11 +28,12 @@ loop = bopt.OptimizationLoop(hyperparameters, n_iter)
 
 
 while done < n_iter:
-    gamma, epsilon = loop.next()
+    gamma, epsilon, epsilon_final = loop.next()
 
     job = experiment.runner.start({
         "gamma": gamma,
         "epsilon": epsilon,
+        "epsilon_final": epsilon_final
         # "sleep_when_done": 1
         })
 

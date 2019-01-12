@@ -2,7 +2,8 @@
 
 ## TODO:
 
-- [ ] share z-axis in plots
+- [ ] marginal & conditional plots
+- [x] share z-axis in plots
 - [ ] doublefork children so they don't need to be awaited & can survive crash of parent
 
 - [x] discrete hyperparameters
@@ -10,7 +11,6 @@
 - [ ] priors
 - [ ] noise optimization
 - [x] parallel coords graph
-- [ ] marginal & conditional plots
 - [ ] outer loop for optimization
 - [ ] display last line in error in parser when it fails?
 - [ ] UCB acquisition function

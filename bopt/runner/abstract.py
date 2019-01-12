@@ -1,6 +1,8 @@
 import abc
 import os
 import yaml
+
+import numpy as np
 from typing import Union, List, Optional, Tuple
 from bopt.runner.result_parser import ResultParser, JobResult
 
@@ -22,6 +24,10 @@ class Job(abc.ABC):
 
     @abc.abstractmethod
     def is_finished(self) -> bool: pass
+
+    def sorted_parameter_values(self) -> List[float]:
+        idx = np.argsort(list(self.run_parameters.keys()))
+        return np.array(list(self.run_parameters.values()))[idx]
 
     def is_success(self) -> bool:
         if self.is_finished():

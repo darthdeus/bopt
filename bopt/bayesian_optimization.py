@@ -204,7 +204,7 @@ def bo_plot_exploration(f: Callable[[np.ndarray], float],
 
 
 def plot_2d_optim_result(result: OptimizationResult, resolution: float = 30):
-    assert len(result.params) == 2
+    # assert len(result.params) == 2
 
     b1 = result.params[0].range
     b2 = result.params[1].range
@@ -222,17 +222,21 @@ def plot_2d_optim_result(result: OptimizationResult, resolution: float = 30):
     bounds = [p.range for p in result.params]
     # TODO: optimize kernel
 
+    X_sample = result.X_sample[:, :2]
+
     mu, _ = GaussianProcess(kernel=result.kernel.with_bounds(bounds)) \
-        .fit(result.X_sample, result.y_sample).posterior(X_2d).mu_std()
+        .fit(X_sample, result.y_sample).posterior(X_2d).mu_std()
 
     mu_mat = mu.reshape(gx.shape[0], gx.shape[1])
     extent = [b1.low, b1.high, b2.high, b2.low]
 
-    plt.title(f"GP posterior {round(result.best_y,2)}, {result.kernel}")
+    assert result.best_x is not None
+
+    plt.title(f"GP posterior {result.best_y:.3f}, {result.kernel}")
     plt.imshow(mu_mat, extent=extent, aspect="auto")
-    plt.scatter(result.X_sample[:, 0], result.X_sample[:, 1], c="k")
+    plt.scatter(X_sample[:, 0], X_sample[:, 1], c="k")
     plt.scatter([result.best_x[0]], [result.best_x[1]], c="r")
 
-    print(result.X_sample[0,0], result.X_sample[0, 1], result.y_sample[0])
+    print(X_sample[0,0], X_sample[0, 1], result.y_sample[0])
 
     return mu_mat, extent, x1, x2

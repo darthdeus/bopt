@@ -53,12 +53,18 @@ def index():
 
     dimensions = []
 
+    slices = []
+
     for i, param in enumerate(optim_result.params):
         dimensions.append({
             "values": optim_result.X_sample[:, i].tolist(),
             "range": [param.range.low, param.range.high],
             "label": param.name,
         })
+
+        x, y = optim_result.slice_at(i)
+
+        slices.append((x.tolist(), y.tolist()))
 
     mu_mat, extent, gx, gy = bopt.plot_2d_optim_result(optim_result)
     exp_gp = bopt.base64_plot()
@@ -71,6 +77,9 @@ def index():
     maxval = max(np.max(heatmap), np.max(optim_result.y_sample))
 
     data = {
+        "posterior_slices": slices,
+        "best_x": optim_result.best_x.tolist(),
+        "best_y": optim_result.best_y,
         "minval": minval,
         "maxval": maxval,
         "colors": optim_result.y_sample.tolist(),
