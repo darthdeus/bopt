@@ -1,9 +1,11 @@
 import numpy as np
 from typing import Union, NamedTuple
 
+
 class Integer:
     low: int
     high: int
+    type: str
 
     def __init__(self, low: int, high: int):
         self.low = low
@@ -16,9 +18,11 @@ class Integer:
     def __repr__(self) -> str:
         return f"Int({self.low}, {self.high})"
 
+
 class Float:
     low: float
     high: float
+    type: str
 
     def __init__(self, low: float, high: float):
         self.low = low
@@ -30,6 +34,7 @@ class Float:
 
     def __repr__(self) -> str:
         return f"Float({self.low}, {self.high})"
+
 
 Bound = Union[Integer, Float]
 

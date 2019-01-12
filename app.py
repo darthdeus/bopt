@@ -1,54 +1,28 @@
-import json
+import jsonpickle
 import numpy as np
 
 import matplotlib.pyplot as plt
 
+from typing import NamedTuple, List
 from livereload import Server
 from flask import Flask
 from flask import render_template
 
 import bopt
-from bopt import Experiment
 
 app = Flask(__name__)
 app.debug = True
 
-def he():
-    plt.figure()
-    bounds = [bopt.Hyperparameter("a", bopt.Float(-1.0, 2.0))]
-    noise = 0.2
 
-    def f(X):
-        return -np.sin(3*X) - X**2 + 0.7*X
-
-    X_init = np.array([[-0.9], [1.1]])
-    y_init = f(X_init)
-
-    X_true = np.arange(bounds[0].range.low, bounds[0].range.high, 0.01).reshape(-1, 1)
-
-    y_true = f(X_true)
-    import random
-    noisy_f = lambda x: f(x).item() + random.random()*0.01
-
-    plt.figure()
-    bopt.bo_plot_exploration(noisy_f, bounds, X_true=X_true, y_true=y_true,
-            n_iter=4, gp_noise=0.02)
-
-    return bopt.plot.base64_plot()
-
-def experiment_gp(experiment: Experiment) -> str:
-    X_train = np.array([list(e.run_parameters.values()) for e in experiment.evaluations])
-    y_train = np.array([e.final_result() for e in experiment.evaluations])
-
-    plt.figure()
-    bopt.GaussianProcess().fit(X_train, y_train).plot_prior(np.linspace(0, 1))
-
-    return bopt.base64_plot()
+class PosteriorSlice(NamedTuple):
+    param: bopt.Hyperparameter
+    x: List[float]
+    y: List[float]
 
 
 @app.route("/")
 def index():
-    experiment = Experiment.deserialize("results/rl-monte-carlo")
+    experiment = bopt.Experiment.deserialize("results/rl-monte-carlo")
     optim_result = experiment.current_optim_result()
 
     dimensions = []
@@ -64,7 +38,7 @@ def index():
 
         x, y = optim_result.slice_at(i)
 
-        slices.append((x.tolist(), y.tolist()))
+        slices.append(PosteriorSlice(param, x.tolist(), y.tolist()))
 
     mu_mat, extent, gx, gy = bopt.plot_2d_optim_result(optim_result)
     exp_gp = bopt.base64_plot()
@@ -93,7 +67,7 @@ def index():
             "sz": optim_result.y_sample.tolist(),
         }
     }
-    json_data = json.dumps(data)
+    json_data = jsonpickle.dumps(data)
 
     return render_template("index.html", data=data, json_data=json_data, experiment=experiment)
 

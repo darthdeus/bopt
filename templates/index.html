@@ -115,11 +115,11 @@
 
       <script type="text/javascript">
         Plotly.plot("all-param-slices", [
-          {% for param in experiment.hyperparameters %}
+          {% for slice in data.posterior_slices %}
             {
-              x: {{data.posterior_slices[loop.index - 1][0]}},
-              y: {{data.posterior_slices[loop.index - 1][1]}},
-              name: "{{param.name}}: ({{param.range.low}}, {{param.range.high}})"
+              x: {{slice.x}},
+              y: {{slice.y}},
+              name: "{{slice.param.name}}: ({{slice.param.range.low}}, {{slice.param.range.high}})"
             },
           {% endfor %}
         ], {
@@ -130,22 +130,22 @@
       </script>
 
       <div class="row">
-        {% for param in experiment.hyperparameters %}
+        {% for slice in data.posterior_slices %}
           <div class="col-md">
-            <div id="param-{{param.name}}"></div>
+            <div id="param-{{slice.param.name}}"></div>
           </div>
         {% endfor %}
       </div>
 
-      {% for param in experiment.hyperparameters %}
+      {% for slice in data.posterior_slices %}
           <script type="text/javascript">
-            Plotly.plot("param-{{param.name}}", [
+            Plotly.plot("param-{{slice.param.name}}", [
               {
-                x: {{data.posterior_slices[loop.index - 1][0]}},
-                y: {{data.posterior_slices[loop.index - 1][1]}}
+                x: {{slice.x}},
+                y: {{slice.y}}
               }
             ], {
-              title: { text: "{{param.name}}: ({{param.range.low}}, {{param.range.high}})" },
+              title: { text: "{{slice.param.name}}: ({{slice.param.range.low}}, {{slice.param.range.high}})" },
               yaxis: {
                 range: [0, 500]
               }
