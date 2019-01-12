@@ -13,7 +13,6 @@ import bopt
 app = Flask(__name__)
 app.debug = True
 
-
 class PosteriorSlice(NamedTuple):
     param: bopt.Hyperparameter
     x: List[float]

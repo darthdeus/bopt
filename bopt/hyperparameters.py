@@ -134,6 +134,9 @@ class Experiment:
     def current_optim_result(self) -> OptimizationResult:
         finished_evaluations = [e for e in self.evaluations if e.is_success()]
 
+        # TODO: this should be handled better
+        params = sorted(self.hyperparameters, key=lambda h: h.name)
+
         X_sample = np.array([e.sorted_parameter_values() for e in finished_evaluations])
         y_sample = np.array([e.final_result() for e in finished_evaluations])
 
@@ -151,7 +154,7 @@ class Experiment:
                 y_sample,
                 best_x,
                 best_y,
-                self.hyperparameters,
+                params,
                 kernel,
                 n_iter,
                 opt_fun=None)
