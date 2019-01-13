@@ -9,9 +9,18 @@ from flask import Flask
 from flask import render_template
 
 import bopt
+import sys
 
 app = Flask(__name__)
 app.debug = True
+
+import argparse
+parser = argparse.ArgumentParser()
+parser.add_argument("result_dir", type=str, help="Directory with the results.")
+args = parser.parse_args()
+
+app.config['result_dir'] = args.result_dir
+
 
 class PosteriorSlice(NamedTuple):
     param: bopt.Hyperparameter
@@ -21,7 +30,7 @@ class PosteriorSlice(NamedTuple):
 
 @app.route("/")
 def index():
-    experiment = bopt.Experiment.deserialize("results/rl-monte-carlo")
+    experiment = bopt.Experiment.deserialize(app.config.get("result_dir"))
     optim_result = experiment.current_optim_result()
 
     dimensions = []

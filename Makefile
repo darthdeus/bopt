@@ -6,6 +6,9 @@ watch:
 bo-exp:
 	PYTHONPATH=. python experiments/bo_rl_experiment.py
 
+simple-exp:
+	PYTHONPATH=. python experiments/simple_function_experiment.py
+
 clean:
 	rm -rf results/rl-monte-carlo
 
@@ -26,4 +29,4 @@ mypy:
 	mypy --ignore-missing-imports bopt
 
 web:
-	PYTHONPATH=. python app.py
+	PYTHONPATH=. python app.py "results/simple-function"
