@@ -88,6 +88,7 @@ class Experiment:
 
         self.serialize()
 
+    # TODO: deprecated
     def iterate(self):
         eval_params = [param.sample() for param in self.hyperparameters]
 

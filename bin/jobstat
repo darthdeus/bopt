@@ -53,7 +53,10 @@ if __name__ == "__main__":
     print(f"Status:\t\t{job.status_str()}")
     if is_finished:
         try:
-            print(f"Final result:\t{job.final_result()}")
+            if job.is_success():
+                print(f"Final result:\t{job.final_result()}")
+            else:
+                print(f"Error:\t{job.err()}")
         except ValueError as e:
             traceback.print_exc()
 
@@ -61,4 +64,8 @@ if __name__ == "__main__":
     print(f"Parameters:")
     for key, value in job.run_parameters.items():
         print(f"\t{key}: {value}")
+
+    print("RAW OUTPUT:")
+    print("----------------------------------------------")
+    print(job.get_job_output())
 

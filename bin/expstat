@@ -27,7 +27,7 @@ if __name__ == "__main__":
             mem = process.memory_info()
             proc_stats += f"Process:{process.status()}"
             proc_stats += f", cpu={process.cpu_percent()}"
-            proc_stats += f", rss={mem.rss}, vms={mem.vms}, shared={mem.shared}"
+            proc_stats += f", rss={mem.rss}, vms={mem.vms}" # TODO fix this on osx, shared={mem.shared}"
 
         print(f"{job}\t{proc_stats}")
 

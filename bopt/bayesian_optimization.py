@@ -1,5 +1,7 @@
-from typing import Callable, List, Union, Any
+from typing import Callable, List, Union, Any, Dict, Tuple
 
+import psutil
+import time
 import matplotlib.pyplot as plt
 import numpy as np
 from scipy.optimize import minimize
@@ -26,6 +28,7 @@ class OptimizationLoop:
         self.y_sample = np.array([], dtype=np.float32)
         self.kernel = kernel.with_bounds([p.range for p in params])
         self.params = params
+        # TODO: remove n_iter & done_iter
         self.n_iter = n_iter
         self.done_iter = 0
         self.optimize_kernel = optimize_kernel
@@ -35,14 +38,23 @@ class OptimizationLoop:
     def has_next(self) -> bool:
         return self.done_iter < self.n_iter
 
-    def next(self):
+    def next(self) -> Dict[str, Union[int, float]]:
+        bounds = [b.range for b in self.params]
+
         if len(self.X_sample) == 0:
-            return default_from_bounds([b.range for b in self.params])
+            x_next = default_from_bounds(bounds)
+        else:
+            gp = self.create_gp()
 
-        gp = self.create_gp()
-        x_next = propose_location(self.acquisition_function, gp, self.y_sample.max(), self.params)
+            x_next = propose_location(self.acquisition_function, gp, self.y_sample.max(), bounds)
 
-        return x_next
+        typed_vals = [int(x) if p.range.type == "int" else x
+                      for x, p in zip(x_next, self.params)]
+
+        names = [p.name for p in self.params]
+        params_dict = dict(zip(names, typed_vals))
+
+        return params_dict
 
     def add_sample(self, x_next, y_next) -> None:
         assert type(y_next) == float, f"f(x) must return a float, got type {type(y_next)}, value: {y_next}"
@@ -78,6 +90,18 @@ class OptimizationLoop:
             n_iter=self.n_iter,
             opt_fun=None
         )
+
+    def run(self, experiment, n_iter) -> None:
+        done = 0
+        while done < n_iter:
+            params_dict = self.next()
+
+            done += 1
+            job = experiment.runner.start(params_dict)
+
+            while not job.is_finished():
+                psutil.wait_procs(psutil.Process().children(), timeout=0.01)
+                time.sleep(1)
 
 
 def default_from_bounds(bounds: List[Bound]) -> np.ndarray:
