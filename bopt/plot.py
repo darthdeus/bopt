@@ -8,7 +8,7 @@ import numpy as np
 from matplotlib import cm
 from numpy.random import multivariate_normal
 from bopt.kernels import Kernel
-from bopt.kernel_opt import kernel_log_likelihood
+import bopt.kernel_opt as kernel_opt
 
 
 def base64_plot():
@@ -169,7 +169,7 @@ def plot_kernel_loss(kernel: Kernel, X_train: np.ndarray, y_train: np.ndarray,
     X = np.linspace(0.00001, xmax, num=50)
 
     def likelihood(l):
-        return kernel_log_likelihood(kernel.set_params(np.array([l, sigma])),
+        return kernel_opt.kernel_log_likelihood(kernel.set_params(np.array([l, sigma])),
                                                          X_train, y_train, noise_level)
 
     data = np.vectorize(likelihood)(X)
@@ -195,7 +195,7 @@ def plot_kernel_loss_2d(kernel: Kernel, X_train: np.ndarray, y_train: np.ndarray
     for i, a in enumerate(a_values):
         for j, b in enumerate(b_values):
             theta = np.array([a, b])
-            data[i, j] = kernel_log_likelihood(kernel.set_params(theta), X_train, y_train, noise_level)
+            data[i, j] = kernel_opt.kernel_log_likelihood(kernel.set_params(theta), X_train, y_train, noise_level)
 
     imshow(data, a_values, b_values)
 
