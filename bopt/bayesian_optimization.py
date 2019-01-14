@@ -20,7 +20,7 @@ def assert_in_bounds(x: np.ndarray, bounds: List[Bound]) -> None:
 
 
 class OptimizationLoop:
-    def __init__(self, params: List[Hyperparameter], n_iter: int,
+    def __init__(self, params: List[Hyperparameter],
                  kernel: Kernel = SquaredExp(), optimize_kernel: bool = True,
                  gp_noise: float = 0.0,
                  acquisition_function: AcquisitionFunction = expected_improvement) -> None:
@@ -28,15 +28,9 @@ class OptimizationLoop:
         self.y_sample = np.array([], dtype=np.float32)
         self.kernel = kernel.with_bounds([p.range for p in params])
         self.params = params
-        # TODO: remove n_iter & done_iter
-        self.n_iter = n_iter
-        self.done_iter = 0
         self.optimize_kernel = optimize_kernel
         self.gp_noise = gp_noise
         self.acquisition_function = acquisition_function
-
-    def has_next(self) -> bool:
-        return self.done_iter < self.n_iter
 
     def next(self) -> Dict[str, Union[int, float]]:
         bounds = [b.range for b in self.params]
@@ -87,7 +81,7 @@ class OptimizationLoop:
             best_y=y_sample[max_y_ind],
             params=self.params,
             kernel=self.kernel.copy(),
-            n_iter=self.n_iter,
+            n_iter=-1, # TODO: figure out a good way to pass this in
             opt_fun=None
         )
 
@@ -129,7 +123,7 @@ def bo_maximize_loop(
     use_tqdm=True,
     callback: Callable = None
 ) -> OptimizationResult:
-    loop = OptimizationLoop(bounds, n_iter, kernel, optimize_kernel,
+    loop = OptimizationLoop(bounds, kernel, optimize_kernel,
                             gp_noise, acquisition_function)
 
     if use_tqdm:
