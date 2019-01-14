@@ -50,7 +50,7 @@ class OptimizationLoop:
 
         return params_dict
 
-    def add_sample(self, x_next, y_next) -> None:
+    def add_sample(self, x_next: np.ndarray, y_next: float) -> None:
         assert type(y_next) == float, f"f(x) must return a float, got type {type(y_next)}, value: {y_next}"
 
         if len(self.X_sample) == 0 and len(self.y_sample) == 0:
@@ -93,6 +93,9 @@ class OptimizationLoop:
             done += 1
             job = experiment.runner.start(params_dict)
 
+            # TODO: !!! :D
+            # loop.add_sample(np.array(list(x_next.values())), y_next)
+
             while not job.is_finished():
                 psutil.wait_procs(psutil.Process().children(), timeout=0.01)
                 time.sleep(1)
@@ -110,6 +113,10 @@ def default_from_bounds(bounds: List[Bound]) -> np.ndarray:
             raise RuntimeError(f"Invalid type of bound, got {type(bound)}")
 
     return x_0
+
+
+def dict_values(d: Dict) -> np.ndarray:
+    return np.array(list(d.values()))
 
 
 def bo_maximize_loop(
@@ -136,10 +143,13 @@ def bo_maximize_loop(
         x_next = loop.next()
         y_next = f(x_next)
 
-        loop.add_sample(x_next, y_next)
+        x_next_values = dict_values(x_next)
+
+        loop.add_sample(x_next_values, y_next)
 
         if callback is not None:
-            callback(iter, acquisition_function, loop.create_gp(), loop.X_sample, loop.y_sample, x_next, y_next)
+            callback(i, acquisition_function, loop.create_gp(), loop.X_sample,
+                     loop.y_sample, x_next_values, y_next)
 
     return loop.result()
 

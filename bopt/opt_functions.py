@@ -2,7 +2,9 @@ from typing import NamedTuple, Callable, List
 
 import abc
 import numpy as np
-from bopt.bayesian_optimization import Float, Integer, Bound
+from bopt.basic_types import Float, Integer, Bound, Hyperparameter
+
+# TODO: Rewrite all Bounds to Hyperparmeters
 
 # https://www.sfu.ca/~ssurjano/franke2d.html
 
@@ -54,15 +56,18 @@ class Easom(OptFunction):
 class Eggholder(OptFunction):
     def __init__(self) -> None:
         self.name = "Eggholder"
-        self.bounds = [Float(-512, 512), Float(-512, 512)]
+        self.bounds = [
+            Hyperparameter("x", Float(-512, 512)),
+            Hyperparameter("y", Float(-512, 512))
+        ]
 
     def f(self, x: np.ndarray) -> float:
         """
         https://en.wikipedia.org/wiki/File:Eggholder_function.pdf
         Max: 959.6407
         """
-        y = x[1]
-        x = x[0]
+        y = x["y"]
+        x = x["x"]
 
         e1 = -(y + 47) * np.sin(np.sqrt(np.abs(x / 2 + (y + 47))))
         e2 = x * np.sin(np.sqrt(np.abs(x - (y + 47))))

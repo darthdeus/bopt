@@ -3,7 +3,7 @@ from typing import Optional, Tuple
 import numpy as np
 from numpy.linalg import inv, cholesky, solve
 
-from bopt.kernel_opt import compute_optimized_kernel
+import bopt.kernel_opt as kernel_opt
 from bopt.kernels import Kernel, SquaredExp
 from bopt.plot import plot_gp
 
@@ -112,7 +112,10 @@ class GaussianProcess:
         assert self.X_train is not None, "X_train is None, call `fit` first"
         assert self.y_train is not None, "y_train is None, call `fit` first"
 
-        self.kernel = compute_optimized_kernel(self.kernel, self.X_train, self.y_train)
+        self.kernel = kernel_opt.compute_optimized_kernel(
+                          self.kernel,
+                          self.X_train,
+                          self.y_train)
 
         return self
 

@@ -14,9 +14,9 @@ def kernel_log_likelihood(kernel: Kernel, X_train: np.ndarray,
     K = kernel(X_train, X_train) + noise
 
     # L = cholesky(K)
+    # t1 = 0.5 * y_train.T @ solve(L.T, solve(L, y_train))
 
     t1 = 0.5 * y_train.T @ solve(K, y_train)
-    # t1 = 0.5 * y_train.T @ solve(L.T, solve(L, y_train))
 
     # https://blogs.sas.com/content/iml/2012/10/31/compute-the-log-determinant-of-a-matrix.html
     t2 = 0.5 * 2 * np.sum(np.log(np.diagonal(cholesky(K))))
