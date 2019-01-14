@@ -55,8 +55,8 @@ def index():
     for i in range(len(mu_mat)):
         heatmap.append(mu_mat[i, :].tolist())
 
-    minval = min(np.min(heatmap), np.min(optim_result.y_sample))
-    maxval = max(np.max(heatmap), np.max(optim_result.y_sample))
+    minval = min(np.min(heatmap).item(), np.min(optim_result.y_sample).item())
+    maxval = max(np.max(heatmap).item(), np.max(optim_result.y_sample).item())
 
     data = {
         "posterior_slices": slices,

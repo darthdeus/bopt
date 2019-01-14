@@ -84,9 +84,6 @@
             },
           }
         ],
-        // {
-        //   margin: { t: m, b: m, l: m, r: m }
-        // }
         );
       </script>
 
@@ -123,9 +120,7 @@
             },
           {% endfor %}
         ], {
-          yaxis: {
-            range: [0, 500]
-          }
+          yaxis: { range: [exp_data.minval, exp_data.maxval] }
         });
       </script>
 
@@ -146,9 +141,7 @@
               }
             ], {
               title: { text: "{{slice.param.name}}: ({{slice.param.range.low}}, {{slice.param.range.high}})" },
-              yaxis: {
-                range: [0, 500]
-              }
+              yaxis: { range: [exp_data.minval, exp_data.maxval] }
             });
           </script>
       {% endfor %}
@@ -162,9 +155,7 @@
           },
           {% endfor %}
         ], {
-          yaxis: {
-            range: [0, 500]
-          }
+          yaxis: { range: [exp_data.minval, exp_data.maxval] }
         });
       </script>
 
