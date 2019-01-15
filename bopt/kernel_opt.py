@@ -62,7 +62,7 @@ def compute_optimized_kernel_tf(X_train, y_train, noise_level: float, kernel: Ke
     K = tf_sqexp_kernel(X_train, X_train, ls, sigma) + noise
     # K = kernel(X_train, X_train) + noise
 
-    t1 = 0.5 * tf.expand_dims(y_train, 0) @ tf.linalg.solve(K, y_train)
+    t1 = 0.5 * tf.expand_dims(y_train, 0) @ tf.linalg.solve(K, tf.expand_dims(y_train, 0))
     # t1 = 0.5 * y_train.T @ solve(K, y_train)
 
     # https://blogs.sas.com/content/iml/2012/10/31/compute-the-log-determinant-of-a-matrix.html

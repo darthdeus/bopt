@@ -48,8 +48,8 @@ class OptimizationResult:
             pickle.dump(self, filename)
             self.opt_fun = opt_fun
 
-    def slice_at(self, i: int) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
-        gp = GaussianProcess(kernel=self.kernel.copy())
+    def slice_at(self, i: int, noise: float = 0.0) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+        gp = GaussianProcess(kernel=self.kernel.copy(), noise=noise)
         gp.fit(self.X_sample, self.y_sample)
 
         bound = self.params[i].range

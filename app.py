@@ -40,6 +40,9 @@ def index():
 
     slices = []
 
+    # TODO: compute from data
+    gp_noise = 0.0
+
     for i, param in enumerate(optim_result.params):
         dimensions.append({
             "values": optim_result.X_sample[:, i].tolist(),
@@ -47,7 +50,7 @@ def index():
             "label": param.name,
         })
 
-        x, y, std = optim_result.slice_at(i)
+        x, y, std = optim_result.slice_at(i, gp_noise)
 
         points_x = optim_result.X_sample[:, i].tolist()
         points_y = optim_result.y_sample.tolist()
@@ -63,7 +66,7 @@ def index():
 
         slices.append(posterior_slice)
 
-    mu_mat, extent, gx, gy = bopt.plot_2d_optim_result(optim_result)
+    mu_mat, extent, gx, gy = bopt.plot_2d_optim_result(optim_result, noise=gp_noise)
     exp_gp = bopt.base64_plot()
 
     heatmap = []
@@ -72,6 +75,15 @@ def index():
 
     minval = min(np.min(heatmap).item(), np.min(optim_result.y_sample).item())
     maxval = max(np.max(heatmap).item(), np.max(optim_result.y_sample).item())
+
+    minval = min(optim_result.y_sample)
+    maxval = max(optim_result.y_sample)
+
+    y_range = maxval - minval
+
+    minval -= y_range * 0.2
+    maxval += y_range * 0.2
+
 
     data = {
         "posterior_slices": slices,

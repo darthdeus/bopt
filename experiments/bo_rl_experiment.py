@@ -3,7 +3,7 @@ import bopt
 hyperparameters = [
     bopt.Hyperparameter("gamma", bopt.Float(0, 1)),
     bopt.Hyperparameter("epsilon", bopt.Float(0, 1)),
-    bopt.Hyperparameter("epsilon_final", bopt.Float(-1, 2)),
+    # bopt.Hyperparameter("epsilon_final", bopt.Float(-1, 2)),
 ]
 
 meta_dir = "results/rl-monte-carlo"

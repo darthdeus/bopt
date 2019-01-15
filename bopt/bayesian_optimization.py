@@ -233,7 +233,7 @@ def bo_plot_exploration(f: Callable[[np.ndarray], float],
                             callback=plot_iteration, optimize_kernel=optimize_kernel)
 
 
-def plot_2d_optim_result(result: OptimizationResult, resolution: float = 30):
+def plot_2d_optim_result(result: OptimizationResult, resolution: float = 30, noise: float = 0.0):
     # TODO: handle more than 2 dimensions properly
     # assert len(result.params) == 2
 
@@ -255,7 +255,7 @@ def plot_2d_optim_result(result: OptimizationResult, resolution: float = 30):
 
     X_sample = result.X_sample[:, :2]
 
-    mu, _ = GaussianProcess(kernel=result.kernel.with_bounds(bounds)) \
+    mu, _ = GaussianProcess(kernel=result.kernel.with_bounds(bounds), noise=noise) \
         .fit(X_sample, result.y_sample) \
         .posterior(X_2d).mu_std()
 

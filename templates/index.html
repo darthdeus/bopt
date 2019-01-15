@@ -72,6 +72,7 @@
               color: "#000000",
             },
           },
+          // TODO: fix highlighted max
           {
             x: [exp_data.best_x[0]],
             y: [exp_data.best_x[1]],
@@ -107,6 +108,14 @@
 
       <h3>Hyperparameters</h3>
 
+      <div class="row">
+        {% for slice in data.posterior_slices %}
+          <div class="col-md">
+            <div id="param-{{slice.param.name}}"></div>
+          </div>
+        {% endfor %}
+      </div>
+
       <div id="all-param-slices">
       </div>
 
@@ -123,14 +132,6 @@
           yaxis: { range: [exp_data.minval, exp_data.maxval] }
         });
       </script>
-
-      <div class="row">
-        {% for slice in data.posterior_slices %}
-          <div class="col-md">
-            <div id="param-{{slice.param.name}}"></div>
-          </div>
-        {% endfor %}
-      </div>
 
       {% for slice in data.posterior_slices %}
           <script type="text/javascript">
