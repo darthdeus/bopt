@@ -6,8 +6,8 @@ params = [
 ]
 
 meta_dir = "results/local"
-sge_runner = bopt.LocalRunner(meta_dir, "./test.sh", ["default", "--argument=3"])
+runner = bopt.LocalRunner(meta_dir, "./test.sh", ["default", "--argument=3"])
 
-experiment = bopt.Experiment(meta_dir, params, sge_runner)
+experiment = bopt.Experiment(meta_dir, params, runner)
 
 experiment.runner.start({"a": 3})

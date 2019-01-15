@@ -89,20 +89,20 @@
 
 
       <script type="text/javascript">
-        var trace = {
-          type: 'parcoords',
-          line: {
-            color: exp_data.colors,
-            showscale: true,
-            colorscale: "Jet",
-            cmin: {{data.minval}},
-            cmax: {{data.maxval}}
-          },
+        Plotly.plot('parallel-coord', [
+          {
+            type: 'parcoords',
+            line: {
+              color: exp_data.colors,
+              showscale: true,
+              colorscale: "Jet",
+              cmin: {{data.minval}},
+              cmax: {{data.maxval}}
+            },
 
-          dimensions: exp_data.dimensions,
-        };
-
-        Plotly.plot('parallel-coord', [trace]);
+            dimensions: exp_data.dimensions,
+          }
+        ]);
       </script>
 
       <h3>Hyperparameters</h3>
@@ -137,7 +137,23 @@
             Plotly.plot("param-{{slice.param.name}}", [
               {
                 x: {{slice.x}},
-                y: {{slice.y}}
+                y: {{slice.y}},
+                error_y: {
+                  type: "data",
+                  array: {{slice.std}},
+                  visible: true
+                }
+              },
+              {
+                x: {{slice.points_x}},
+                y: {{slice.points_y}},
+                mode: "markers",
+                type: "scatter",
+                marker: {
+                  size: 15,
+                  color: "#000000",
+                },
+
               }
             ], {
               title: { text: "{{slice.param.name}}: ({{slice.param.range.low}}, {{slice.param.range.high}})" },
@@ -145,6 +161,8 @@
             });
           </script>
       {% endfor %}
+
+      <h3>Intermediate results</h3>
 
       <div id="job-all"></div>
       <script>

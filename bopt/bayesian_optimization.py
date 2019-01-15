@@ -64,8 +64,9 @@ class OptimizationLoop:
         gp = GaussianProcess(kernel=self.kernel, noise=self.gp_noise)
         gp.fit(self.X_sample, self.y_sample)
 
-        if self.optimize_kernel:
-            gp = gp.optimize_kernel()
+        # TODO: ... put this back!
+        # if self.optimize_kernel:
+        #     gp = gp.optimize_kernel()
 
         return gp
 
@@ -89,17 +90,18 @@ class OptimizationLoop:
         done = 0
         while done < n_iter:
             params_dict = self.next()
+            x_next = dict_values(params_dict)
 
             done += 1
             job = experiment.runner.start(params_dict)
-
-            # TODO: !!! :D
-            # loop.add_sample(np.array(list(x_next.values())), y_next)
 
             while not job.is_finished():
                 psutil.wait_procs(psutil.Process().children(), timeout=0.01)
                 time.sleep(1)
 
+            if job.is_success():
+                y_next = job.final_result()
+                self.add_sample(x_next, y_next)
 
 def default_from_bounds(bounds: List[Bound]) -> np.ndarray:
     x_0 = np.zeros(len(bounds))
@@ -253,7 +255,8 @@ def plot_2d_optim_result(result: OptimizationResult, resolution: float = 30):
     X_sample = result.X_sample[:, :2]
 
     mu, _ = GaussianProcess(kernel=result.kernel.with_bounds(bounds)) \
-        .fit(X_sample, result.y_sample).posterior(X_2d).mu_std()
+        .fit(X_sample, result.y_sample) \
+        .posterior(X_2d).mu_std()
 
     mu_mat = mu.reshape(gx.shape[0], gx.shape[1])
     extent = [b1.low, b1.high, b2.high, b2.low]

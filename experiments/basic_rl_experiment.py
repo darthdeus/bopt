@@ -8,14 +8,14 @@ params = [
 ]
 
 meta_dir = "results/rl-monte-carlo"
-sge_runner = bopt.LocalRunner(
+runner = bopt.LocalRunner(
         meta_dir,
         "./.venv/bin/python",
         ["./experiments/monte_carlo.py"],
         bopt.LastLineLastWordParser()
         )
 
-experiment = bopt.Experiment(meta_dir, params, sge_runner)
+experiment = bopt.Experiment(meta_dir, params, runner)
 
 
 # for gamma in [.1, .3, .5, .7, .9, .95, .99]:

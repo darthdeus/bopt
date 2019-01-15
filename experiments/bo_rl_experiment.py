@@ -7,7 +7,7 @@ hyperparameters = [
 ]
 
 meta_dir = "results/rl-monte-carlo"
-sge_runner = bopt.LocalRunner(
+runner = bopt.LocalRunner(
         meta_dir,
         "./.venv/bin/python",
         ["./experiments/rl/monte_carlo.py"],
@@ -15,7 +15,7 @@ sge_runner = bopt.LocalRunner(
         )
 
 
-experiment = bopt.Experiment(meta_dir, hyperparameters, sge_runner)
+experiment = bopt.Experiment(meta_dir, hyperparameters, runner)
 loop = bopt.OptimizationLoop(hyperparameters)
 
 loop.run(experiment, n_iter=20)

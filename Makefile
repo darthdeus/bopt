@@ -1,4 +1,5 @@
-default: bo-exp
+# default: bo-exp
+default: simple-exp
 
 watch:
 	watch -n1 expstat results/rl-monte-carlo

@@ -26,6 +26,9 @@ class PosteriorSlice(NamedTuple):
     param: bopt.Hyperparameter
     x: List[float]
     y: List[float]
+    std: List[float]
+    points_x: List[float]
+    points_y: List[float]
 
 
 @app.route("/")
@@ -44,9 +47,21 @@ def index():
             "label": param.name,
         })
 
-        x, y = optim_result.slice_at(i)
+        x, y, std = optim_result.slice_at(i)
 
-        slices.append(PosteriorSlice(param, x.tolist(), y.tolist()))
+        points_x = optim_result.X_sample[:, i].tolist()
+        points_y = optim_result.y_sample.tolist()
+
+        posterior_slice = PosteriorSlice(
+                param,
+                x.tolist(),
+                y.tolist(),
+                std.tolist(),
+                points_x,
+                points_y
+                )
+
+        slices.append(posterior_slice)
 
     mu_mat, extent, gx, gy = bopt.plot_2d_optim_result(optim_result)
     exp_gp = bopt.base64_plot()
