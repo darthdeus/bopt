@@ -112,6 +112,7 @@ class SquaredExp(Kernel):
             epsmin = 1e-5
             epsmax = 1e5
 
+            # TODO: `ls` not clipped?
             ls = np.clip(self.l**2, epsmin, epsmax)
             var = np.clip(self.sigma**2, epsmin, epsmax)
 
@@ -123,6 +124,7 @@ class SquaredExp(Kernel):
 
     def default_params(self, X_train, y_train) -> np.ndarray:
         if len(X_train) > 1:
+            # TODO: huh?
             scale = np.linalg.norm(X_train[0] - X_train[-1])
         else:
             scale = 1

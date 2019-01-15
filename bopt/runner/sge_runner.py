@@ -19,7 +19,7 @@ class SGEJob(Job):
         self.serialize()
 
     def is_finished(self) -> bool:
-        raise NotImplemented()
+        raise NotImplementedError()
 
     def state(self) -> str:
         return subprocess.check_output(["qstat"]).decode("ascii")

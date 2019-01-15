@@ -234,6 +234,7 @@ def bo_plot_exploration(f: Callable[[np.ndarray], float],
 
 
 def plot_2d_optim_result(result: OptimizationResult, resolution: float = 30):
+    # TODO: handle more than 2 dimensions properly
     # assert len(result.params) == 2
 
     b1 = result.params[0].range

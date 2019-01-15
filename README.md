@@ -2,24 +2,24 @@
 
 ## TODO:
 
-- [ ] marginal & conditional plots
+- [ ] TFE optimizer for SqExp kernel
+- [x] marginal & conditional plots
 - [x] share z-axis in plots
 - [ ] doublefork children so they don't need to be awaited & can survive crash of parent
+- [ ] noise optimization
 
 - [x] discrete hyperparameters
   - [ ] https://arxiv.org/pdf/1706.03673.pdf
 - [ ] priors
-- [ ] noise optimization
 - [x] parallel coords graph
-- [ ] outer loop for optimization
-- [ ] display last line in error in parser when it fails?
+- [x] outer loop for optimization
+- [x] display last line in error in parser when it fails?
 - [ ] UCB acquisition function
 - [ ] do we need L-BFGS?
   - [ ] compare optimizer performance between L-BFGS & SGD with TF
 - [ ] parallel optimization without cmdline target
 - [ ] expected improvement per second (hyperparam affects training time)
-- [ ] look into approximate GP inference
-  - at which point would we need it?
+- [ ] look into approximate GP inference ... at which point would we need it?
 - [ ] predicting training curves
   - [ ] ability to stop a job when it looks like it won't work out
 
