@@ -54,26 +54,41 @@ def compute_optimized_kernel_tf(X_train, y_train, noise_level: float, kernel: Ke
 
     def_sigma, def_ls = kernel.default_params(X_train, y_train)
 
+    noise = noise_level ** 2 * np.eye(len(X_train))
+
     sigma = tf.Variable(def_sigma, dtype=tf.float64)
     ls = tf.Variable(def_ls, dtype=tf.float64)
 
-    noise = noise_level ** 2 * np.eye(len(X_train))
+    global_step = tf.Variable(0)
+    optimizer = tf.train.AdamOptimizer()
 
-    K = tf_sqexp_kernel(X_train, X_train, ls, sigma) + noise
-    # K = kernel(X_train, X_train) + noise
+    for i in range(1000):
+        with tf.GradientTape() as tape:
+            K = tf_sqexp_kernel(X_train, X_train, ls, sigma) + noise
+            # K = kernel(X_train, X_train) + noise
 
-    t1 = 0.5 * tf.expand_dims(y_train, 0) @ tf.linalg.solve(K, tf.expand_dims(y_train, 0))
-    # t1 = 0.5 * y_train.T @ solve(K, y_train)
+            y_train_expanded = tf.expand_dims(y_train, 0)
 
-    # https://blogs.sas.com/content/iml/2012/10/31/compute-the-log-determinant-of-a-matrix.html
-    t2 = tf.reduce_sum(tf.log(tf.linalg.diag(tf.linalg.cholesky(K))))
-    # t2 = 0.5 * 2 * np.sum(np.log(np.diagonal(cholesky(K))))
+            t1 = 0.5 * y_train_expanded @ tf.linalg.solve(K, y_train_expanded)
+            # t1 = 0.5 * y_train.T @ solve(K, y_train)
 
-    t3 = 0.5 * len(X_train) * np.log(2 * np.pi)
+            # https://blogs.sas.com/content/iml/2012/10/31/compute-the-log-determinant-of-a-matrix.html
+            t2 = tf.reduce_sum(tf.log(tf.linalg.diag(tf.linalg.cholesky(K))))
+            # t2 = 0.5 * 2 * np.sum(np.log(np.diagonal(cholesky(K))))
 
-    loglikelihood = t1 + t2 + t3
+            t3 = 0.5 * len(X_train) * np.log(2 * np.pi)
 
-    return loglikelihood
+            nll = -(t1 + t2 + t3)
+
+        variables = [sigma, ls]
+        grads = tape.gradient(nll, variables)
+
+        optimizer.apply_gradients(zip(grads, variables), global_step=global_step)
+
+        if i % 20 == 0:
+            print("{:3d}: {}".format(global_step.numpy(), nll.numpy()))
+
+    return SquaredExp(l=ls.numpy().item(), sigma=sigma.numpy().item())
 
 
 def compute_optimized_kernel(kernel, X_train, y_train) -> Kernel:
