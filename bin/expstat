@@ -10,24 +10,29 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser()
     parser.add_argument("meta_dir", type=str, help="Directory with the results.")
+    parser.add_argument("--web", action="store_true")
     args = parser.parse_args()
 
-    experiment = bopt.Experiment.deserialize(args.meta_dir)
+    if args.web:
+        from bopt.web import run_web
+        run_web(args.meta_dir)
+    else:
+        experiment = bopt.Experiment.deserialize(args.meta_dir)
 
-    print("Hyperparameters:")
-    for param in experiment.hyperparameters:
-        print(f"\t{param}")
+        print("Hyperparameters:")
+        for param in experiment.hyperparameters:
+            print(f"\t{param}")
 
-    print("Evaluations:")
-    for job in experiment.evaluations:
+        print("Evaluations:")
+        for job in experiment.evaluations:
 
-        proc_stats = ""
-        if psutil.pid_exists(job.job_id):
-            process = psutil.Process(job.job_id)
-            mem = process.memory_info()
-            proc_stats += f"Process:{process.status()}"
-            proc_stats += f", cpu={process.cpu_percent()}"
-            proc_stats += f", rss={mem.rss}, vms={mem.vms}" # TODO fix this on osx, shared={mem.shared}"
+            proc_stats = ""
+            if psutil.pid_exists(job.job_id):
+                process = psutil.Process(job.job_id)
+                mem = process.memory_info()
+                proc_stats += f"Process:{process.status()}"
+                proc_stats += f", cpu={process.cpu_percent()}"
+                proc_stats += f", rss={mem.rss}, vms={mem.vms}" # TODO fix this on osx, shared={mem.shared}"
 
-        print(f"{job}\t{proc_stats}")
+            print(f"{job}\t{proc_stats}")
 
