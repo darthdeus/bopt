@@ -138,7 +138,9 @@ class Experiment:
         # TODO: this should be handled better
         params = sorted(self.hyperparameters, key=lambda h: h.name)
 
-        X_sample = np.array([e.sorted_parameter_values() for e in finished_evaluations])
+        X_sample_vals = [e.sorted_parameter_values() for e in finished_evaluations]
+
+        X_sample = np.array(X_sample_vals)
         y_sample = np.array([e.final_result() for e in finished_evaluations])
 
         best_y = None

@@ -26,8 +26,9 @@ class Job(abc.ABC):
     def is_finished(self) -> bool: pass
 
     def sorted_parameter_values(self) -> List[float]:
+        # TODO: detect case when experiment results have a different number of params
         idx = np.argsort(list(self.run_parameters.keys()))
-        return np.array(list(self.run_parameters.values()))[idx]
+        return np.array(list(self.run_parameters.values()), dtype=np.float32)[idx]
 
     def is_success(self) -> bool:
         if self.is_finished():

@@ -26,6 +26,8 @@ def run_web(meta_dir: str):
 
     app.config["meta_dir"] = meta_dir
 
+    print("web path", app.root_path)
+
     @app.route("/")
     def index():
         experiment = bopt.Experiment.deserialize(app.config.get("meta_dir"))
@@ -79,7 +81,6 @@ def run_web(meta_dir: str):
         minval -= y_range * 0.2
         maxval += y_range * 0.2
 
-
         data = {
             "posterior_slices": slices,
             "best_x": optim_result.best_x.tolist(),
@@ -107,3 +108,13 @@ def run_web(meta_dir: str):
     server = Server(app.wsgi_app)
     server.watch("**/*")
     server.serve()
+
+
+if __name__ == "__main__":
+    import argparse
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument("meta_dir", type=str, help="Directory with the results.")
+    args = parser.parse_args()
+
+    run_web(args.meta_dir)
