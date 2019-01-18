@@ -120,7 +120,7 @@ class Experiment:
 
         jobs = []
         for path in glob(os.path.join(directory, "job-*")):
-            matches = re.match('.*?(\d+).*?', path)
+            matches = re.match(r".*?(\d+).*?", path)
             assert matches is not None
 
             job_id = int(matches.group(1))
