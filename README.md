@@ -3,6 +3,7 @@
 ## TODO:
 
 - [ ] TFE optimizer for SqExp kernel
+- [ ] fix travis
 - [x] marginal & conditional plots
 - [x] share z-axis in plots
 - [ ] doublefork children so they don't need to be awaited & can survive crash of parent
