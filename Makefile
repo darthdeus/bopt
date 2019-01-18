@@ -31,3 +31,6 @@ benchmarks:
 
 mypy:
 	mypy --ignore-missing-imports bopt
+
+clean-dist:
+	rm -rf bopt.egg-info/ dist/ build/
