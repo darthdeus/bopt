@@ -8,3 +8,5 @@ from bopt.runner.result_parser import *
 from bopt.kernels import *
 from bopt.kernel_opt import *
 from bopt.plot import *
+
+name = "bopt"
