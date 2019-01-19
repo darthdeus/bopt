@@ -119,6 +119,9 @@ class GaussianProcess:
 
         return self
 
+    def log_prob(self, l, s) -> float:
+        return kernel_opt.kernel_log_likelihood(SquaredExp(l, s), self.X_train, self.y_train)
+
     def plot_prior(self, X, **kwargs):
         plot_gp(np.zeros(len(X)), self.kernel(X, X), X, kernel=self.kernel, **kwargs)
 

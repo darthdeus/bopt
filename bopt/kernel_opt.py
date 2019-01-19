@@ -94,7 +94,7 @@ def compute_optimized_kernel_tf(X_train, y_train, noise_level: float, kernel: Ke
 def compute_optimized_kernel(kernel, X_train, y_train) -> Kernel:
     noise_level = 0.1
     USE_TF = False
-    USE_TF = True
+    # USE_TF = True
 
     if USE_TF:
         return compute_optimized_kernel_tf(X_train, y_train, noise_level, kernel)
