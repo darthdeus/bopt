@@ -20,11 +20,12 @@ class PosteriorSlice(NamedTuple):
     points_y: List[float]
 
 
-def run_web(meta_dir: str):
+def run_web(args):
     app = Flask(__name__)
     app.debug = True
 
-    app.config["meta_dir"] = meta_dir
+    app.config["meta_dir"] = args.meta_dir
+    app.config["port"] = args.port
 
     print("web path", app.root_path)
 
@@ -37,9 +38,6 @@ def run_web(meta_dir: str):
 
         slices = []
 
-        # TODO: compute from data
-        gp_noise = 0.0
-
         for i, param in enumerate(optim_result.params):
             dimensions.append({
                 "values": optim_result.X_sample[:, i].tolist(),
@@ -47,7 +45,7 @@ def run_web(meta_dir: str):
                 "label": param.name,
             })
 
-            x, y, std = optim_result.slice_at(i, gp_noise)
+            x, y, std = optim_result.slice_at(i)
 
             points_x = optim_result.X_sample[:, i].tolist()
             points_y = optim_result.y_sample.tolist()
@@ -63,7 +61,7 @@ def run_web(meta_dir: str):
 
             slices.append(posterior_slice)
 
-        mu_mat, extent, gx, gy = bopt.plot_2d_optim_result(optim_result, noise=gp_noise)
+        mu_mat, extent, gx, gy = bopt.plot_2d_optim_result(optim_result)
         exp_gp = bopt.base64_plot()
 
         heatmap = []
@@ -107,14 +105,16 @@ def run_web(meta_dir: str):
 
     server = Server(app.wsgi_app)
     server.watch("**/*")
-    server.serve()
+    server.serve(port=app.config.get("port"))
 
 
 if __name__ == "__main__":
     import argparse
 
+    # TODO: remove duplicate argparse
     parser = argparse.ArgumentParser()
     parser.add_argument("meta_dir", type=str, help="Directory with the results.")
+    parser.add_argument("--port", type=int, default=5500, help="Port to run the web interface on.")
     args = parser.parse_args()
 
-    run_web(args.meta_dir)
+    run_web(args)

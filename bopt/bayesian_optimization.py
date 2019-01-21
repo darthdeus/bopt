@@ -64,9 +64,8 @@ class OptimizationLoop:
         gp = GaussianProcess(kernel=self.kernel, noise=self.gp_noise)
         gp.fit(self.X_sample, self.y_sample)
 
-        # TODO: ... put this back!
-        # if self.optimize_kernel:
-        #     gp = gp.optimize_kernel()
+        if self.optimize_kernel or True:
+            gp = gp.optimize_kernel()
 
         return gp
 
@@ -255,8 +254,9 @@ def plot_2d_optim_result(result: OptimizationResult, resolution: float = 30, noi
 
     X_sample = result.X_sample[:, :2]
 
-    mu, _ = GaussianProcess(kernel=result.kernel.with_bounds(bounds), noise=noise) \
+    mu, _ = GaussianProcess(kernel=result.kernel.with_bounds(bounds)) \
         .fit(X_sample, result.y_sample) \
+        .optimize_kernel() \
         .posterior(X_2d).mu_std()
 
     mu_mat = mu.reshape(gx.shape[0], gx.shape[1])

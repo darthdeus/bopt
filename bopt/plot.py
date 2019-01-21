@@ -57,14 +57,15 @@ def plot_gp_prior(mu, cov, X, kernel=None, num_samples=3):
         plt.plot(X, sample, lw=0.7, ls="--", label=f"Sample {i+1}", color="black")
 
 
-def plot_gp(mu, cov, X, X_train=None, y_train=None, kernel=None, num_samples=3, figsize=(7, 3), figure=True):
+def plot_gp(mu, cov, X, X_train=None, y_train=None, kernel=None, noise: int = 0,
+        num_samples=3, figsize=(7, 3), figure=True):
     std = 2 * np.sqrt(np.diag(cov))
 
     if figure:
         plt.figure(figsize=figsize)
 
     if kernel is not None:
-        plt.title(kernel)
+        plt.title("Noise: {:.3f}, {}".format(noise, kernel))
 
     plt.fill_between(X, mu + std, mu - std, alpha=0.1)
     plt.plot(X, mu, label="Mean")

@@ -48,9 +48,9 @@ class OptimizationResult:
             pickle.dump(self, filename)
             self.opt_fun = opt_fun
 
-    def slice_at(self, i: int, noise: float = 0.0) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
-        gp = GaussianProcess(kernel=self.kernel.copy(), noise=noise)
-        gp.fit(self.X_sample, self.y_sample)
+    def slice_at(self, i: int) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+        gp = GaussianProcess(kernel=self.kernel.copy())
+        gp.fit(self.X_sample, self.y_sample).optimize_kernel()
 
         bound = self.params[i].range
         resolution = 30
@@ -117,6 +117,10 @@ class Experiment:
         with open(Experiment.filename(directory), "r") as f:
             contents = f.read()
             obj = yaml.load(contents)
+
+        # This makes experiment directories movable.
+        # TODO: handle meta_dir in all children
+        obj.meta_dir = directory
 
         jobs = []
         for path in glob(os.path.join(directory, "job-*")):

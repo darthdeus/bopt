@@ -20,7 +20,10 @@ def kernel_log_likelihood(kernel: Kernel, X_train: np.ndarray,
     t1 = 0.5 * y_train.T @ solve(K, y_train)
 
     # https://blogs.sas.com/content/iml/2012/10/31/compute-the-log-determinant-of-a-matrix.html
-    t2 = 0.5 * 2 * np.sum(np.log(np.diagonal(cholesky(K))))
+
+    sign, logdet = np.linalg.slogdet(K)
+    # t2 = 0.5 * 2 * np.sum(np.log(np.diagonal(cholesky(K))))
+    t2 = logdet
 
     t3 = 0.5 * len(X_train) * np.log(2 * np.pi)
 
@@ -50,6 +53,11 @@ def compute_optimized_kernel_tf(X_train, y_train, noise_level: float, kernel: Ke
         -> Tuple[Kernel, float]:
     tf.enable_eager_execution()
 
+    assert X_train.ndim == 2, X_train.ndim
+    assert y_train.ndim == 1
+
+    print(X_train.dtype)
+
     if not isinstance(kernel, SquaredExp):
         raise NotImplementedError()
 
@@ -70,18 +78,19 @@ def compute_optimized_kernel_tf(X_train, y_train, noise_level: float, kernel: Ke
 
             y_train_expanded = tf.expand_dims(y_train, 0)
 
-            solved = tf.linalg.solve(K, y_train_expanded)
+            solved = tf.linalg.solve(K, tf.transpose(y_train_expanded))
 
-            t1 = 0.5 * tf.transpose(y_train_expanded) @ solved
+            t1 = 0.5 * y_train_expanded @ solved
             # t1 = 0.5 * y_train.T @ solve(K, y_train)
 
             # https://blogs.sas.com/content/iml/2012/10/31/compute-the-log-determinant-of-a-matrix.html
-            t2 = tf.reduce_sum(tf.log(tf.linalg.diag(tf.linalg.cholesky(K))))
+            t2 = tf.linalg.slogdet(K)
+            # t2 = tf.reduce_sum(tf.log(tf.linalg.diag(tf.linalg.cholesky(K))))
             # t2 = 0.5 * 2 * np.sum(np.log(np.diagonal(cholesky(K))))
 
             t3 = 0.5 * len(X_train) * np.log(2 * np.pi)
 
-            nll = -(t1 + t2 + t3)
+            nll = (t1 + t2 + t3)
 
         variables = [sigma, ls]
         grads = tape.gradient(nll, variables)
@@ -95,12 +104,17 @@ def compute_optimized_kernel_tf(X_train, y_train, noise_level: float, kernel: Ke
 
 
 def compute_optimized_kernel(kernel, X_train, y_train) -> Tuple[Kernel, float]:
-    noise_level = 0.1
+    # TODO: remove & optimize noise
+    noise_level = 0.492
     USE_TF = False
-    # USE_TF = True
+    USE_TF = True
+
+    # TODO:
+    assert X_train.dtype == y_train.dtype
 
     if USE_TF:
-        return compute_optimized_kernel_tf(X_train.reshape(-1, 1), y_train, noise_level, kernel)
+        X_train = X_train.reshape(-1, 1)
+        return compute_optimized_kernel_tf(X_train, y_train, noise_level, kernel)
     else:
         def step(theta):
             nll = kernel_log_likelihood(kernel.set_params(theta[:-1]), X_train, y_train, theta[-1])

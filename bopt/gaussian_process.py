@@ -132,7 +132,8 @@ class GaussianProcess:
 
     def plot_posterior(self, **kwargs):
         assert self.X_test is not None, "X_test was not provided, call `.posterior(X_test)` first"
-        plot_gp(self.mu, self.cov, self.X_test, self.X_train, self.y_train, kernel=self.kernel, **kwargs)
+        plot_gp(self.mu, self.cov, self.X_test, self.X_train, self.y_train,
+                kernel=self.kernel, noise=self.noise, **kwargs)
 
         return self
 

@@ -40,8 +40,8 @@ def probability_of_improvement(gp: GaussianProcess, X: np.ndarray, f_s: float, x
 
 def get_acquisition_fn_by_name(name):
     mapping = {
-            "ei": expected_improvement,
-            "pi": probability_of_improvement
-            }
+        "ei": expected_improvement,
+        "pi": probability_of_improvement
+    }
 
     return mapping[name]
