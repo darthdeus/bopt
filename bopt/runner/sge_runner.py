@@ -1,4 +1,5 @@
 import os
+import datetime
 import yaml
 import re
 import subprocess
@@ -59,7 +60,10 @@ class SGERunner(Runner):
         assert matches is not None
         job_id = int(matches.group(1))
 
-        return SGEJob(self.meta_dir, job_id)
+        sge_job = SGEJob(self.meta_dir, job_id)
+        sge_job.started_at = datetime.datetime.now()
+
+        return sge_job
 
     def deserialize_job(self, meta_dir: str, job_id: int) -> Job:
         return SGEJob(meta_dir, job_id)

@@ -1,6 +1,7 @@
 import abc
 import os
 import yaml
+import datetime
 
 import numpy as np
 from typing import Union, List, Optional, Tuple
@@ -15,6 +16,8 @@ class Job(abc.ABC):
     job_id: int
     result_parser: ResultParser
     run_parameters: dict
+    started_at: datetime.datetime
+    finished_at: datetime.datetime
 
     @abc.abstractmethod
     def state(self): pass

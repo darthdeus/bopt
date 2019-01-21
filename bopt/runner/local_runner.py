@@ -1,6 +1,7 @@
-import os
+import datetime
 import yaml
 import re
+import os
 import subprocess
 import pathlib
 import psutil
@@ -68,7 +69,10 @@ class LocalRunner(Runner):
 
             os.rename(temp_fname, job_fname)
 
-            return LocalJob(self.meta_dir, job_id, self.result_parser, run_parameters)
+            local_job = LocalJob(self.meta_dir, job_id, self.result_parser, run_parameters)
+            local_job.started_at = datetime.datetime.now()
+
+            return local_job
 
     def deserialize_job(self, meta_dir: str, job_id: int) -> Job:
         fname = Job.compute_job_filename(meta_dir, job_id)

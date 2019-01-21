@@ -1,13 +1,13 @@
 ## TODO:
 
-- [ ] fix travis
-- [ ] time slider
+- [x] fix travis
 
 - [ ] TFE optimizer for SqExp kernel
 - [x] marginal & conditional plots
 - [x] share z-axis in plots
 - [ ] doublefork children so they don't need to be awaited & can survive crash of parent
-- [ ] noise optimization
+- [x] noise optimization
+- [ ] time slider
 
 - [x] discrete hyperparameters
   - [ ] https://arxiv.org/pdf/1706.03673.pdf

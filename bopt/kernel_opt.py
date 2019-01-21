@@ -3,7 +3,7 @@ import numpy as np
 import tensorflow as tf
 
 
-from typing import Callable
+from typing import Callable, Tuple
 from numpy.linalg import inv, cholesky, det, solve
 from scipy.optimize import minimize
 
@@ -46,7 +46,8 @@ def tf_sqexp_kernel(a: tf.Tensor, b: tf.Tensor, ls: tf.Tensor, sigma: tf.Tensor)
     return tf.pow(sigma, 2) * tf.exp(exp)
 
 
-def compute_optimized_kernel_tf(X_train, y_train, noise_level: float, kernel: Kernel = SquaredExp()) -> Kernel:
+def compute_optimized_kernel_tf(X_train, y_train, noise_level: float, kernel: Kernel = SquaredExp()) \
+        -> Tuple[Kernel, float]:
     tf.enable_eager_execution()
 
     if not isinstance(kernel, SquaredExp):
@@ -69,7 +70,9 @@ def compute_optimized_kernel_tf(X_train, y_train, noise_level: float, kernel: Ke
 
             y_train_expanded = tf.expand_dims(y_train, 0)
 
-            t1 = 0.5 * y_train_expanded @ tf.linalg.solve(K, y_train_expanded)
+            solved = tf.linalg.solve(K, y_train_expanded)
+
+            t1 = 0.5 * tf.transpose(y_train_expanded) @ solved
             # t1 = 0.5 * y_train.T @ solve(K, y_train)
 
             # https://blogs.sas.com/content/iml/2012/10/31/compute-the-log-determinant-of-a-matrix.html
@@ -88,28 +91,34 @@ def compute_optimized_kernel_tf(X_train, y_train, noise_level: float, kernel: Ke
         if i % 20 == 0:
             print("{:3d}: {}".format(global_step.numpy(), nll.numpy()))
 
-    return SquaredExp(l=ls.numpy().item(), sigma=sigma.numpy().item())
+    return SquaredExp(l=ls.numpy().item(), sigma=sigma.numpy().item()), noise_level
 
 
-def compute_optimized_kernel(kernel, X_train, y_train) -> Kernel:
+def compute_optimized_kernel(kernel, X_train, y_train) -> Tuple[Kernel, float]:
     noise_level = 0.1
     USE_TF = False
     # USE_TF = True
 
     if USE_TF:
-        return compute_optimized_kernel_tf(X_train, y_train, noise_level, kernel)
+        return compute_optimized_kernel_tf(X_train.reshape(-1, 1), y_train, noise_level, kernel)
     else:
         def step(theta):
-            return kernel_log_likelihood(kernel.set_params(theta), X_train, y_train, noise_level)
+            nll = kernel_log_likelihood(kernel.set_params(theta[:-1]), X_train, y_train, theta[-1])
+            return nll
 
-        default_params = kernel.default_params(X_train, y_train)
+        default_params = np.array(kernel.default_params(X_train, y_train).tolist() + [0.0])
 
         if len(default_params) == 0:
             return kernel
 
+        bounds_with_noise = kernel.param_bounds() + [(1e-5, None)]
+
         res = minimize(step,
                        default_params,
-                       bounds=kernel.param_bounds(), method="L-BFGS-B", tol=0, options={"maxiter": 100})
+                       bounds=bounds_with_noise,
+                       method="L-BFGS-B",
+                       tol=0,
+                       options={"maxiter": 100})
 
         kernel.set_params(res.x)
-        return kernel
+        return kernel, res.x[-1]

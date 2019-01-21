@@ -94,7 +94,7 @@ class Kernel(abc.ABC):
 
 
 class SquaredExp(Kernel):
-    def __init__(self, l: float = 1, sigma: float = 1) -> None:
+    def __init__(self, l: float = 1., sigma: float = 1.) -> None:
         super().__init__()
         self.l = l
         self.sigma = sigma

@@ -112,15 +112,18 @@ class GaussianProcess:
         assert self.X_train is not None, "X_train is None, call `fit` first"
         assert self.y_train is not None, "y_train is None, call `fit` first"
 
-        self.kernel = kernel_opt.compute_optimized_kernel(
-                          self.kernel,
-                          self.X_train,
-                          self.y_train)
+        self.kernel, self.noise = kernel_opt.compute_optimized_kernel(
+                                      self.kernel,
+                                      self.X_train,
+                                      self.y_train)
 
         return self
 
-    def log_prob(self, l, s) -> float:
-        return kernel_opt.kernel_log_likelihood(SquaredExp(l, s), self.X_train, self.y_train)
+    def log_prob(self) -> float:
+        nll = kernel_opt.kernel_log_likelihood(self.kernel, self.X_train, self.y_train,
+                    noise_level=self.noise)
+
+        return nll
 
     def plot_prior(self, X, **kwargs):
         plot_gp(np.zeros(len(X)), self.kernel(X, X), X, kernel=self.kernel, **kwargs)
