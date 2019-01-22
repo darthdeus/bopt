@@ -107,17 +107,19 @@ def compute_optimized_kernel(kernel, X_train, y_train) -> Tuple[Kernel, float]:
     # TODO: remove & optimize noise
     noise_level = 0.492
     USE_TF = False
-    USE_TF = True
+    # USE_TF = True
 
     # TODO:
-    assert X_train.dtype == y_train.dtype
+    # assert X_train.dtype == y_train.dtype
 
     if USE_TF:
-        X_train = X_train.reshape(-1, 1)
+        X_train = X_train.reshape(-1, 1).astype(np.float64)
+        y_train = y_train.astype(np.float64)
         return compute_optimized_kernel_tf(X_train, y_train, noise_level, kernel)
     else:
         def step(theta):
             nll = kernel_log_likelihood(kernel.set_params(theta[:-1]), X_train, y_train, theta[-1])
+            print(nll)
             return nll
 
         default_params = np.array(kernel.default_params(X_train, y_train).tolist() + [0.0])

@@ -254,10 +254,18 @@ def plot_2d_optim_result(result: OptimizationResult, resolution: float = 30, noi
 
     X_sample = result.X_sample[:, :2]
 
-    mu, _ = GaussianProcess(kernel=result.kernel.with_bounds(bounds)) \
+    gp = GaussianProcess(kernel=result.kernel.with_bounds(bounds)) \
         .fit(X_sample, result.y_sample) \
-        .optimize_kernel() \
-        .posterior(X_2d).mu_std()
+        .optimize_kernel()
+
+    gp.noise = .5
+    gp.kernel.l = 5.
+    gp.kernel.sigma = 1.
+
+    gp.posterior(X_2d)
+    mu, _ = gp.mu_std()
+
+    print("..." + str(gp.kernel))
 
     mu_mat = mu.reshape(gx.shape[0], gx.shape[1])
     extent = [b1.low, b1.high, b2.high, b2.low]

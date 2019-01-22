@@ -1,8 +1,32 @@
 ## TODO:
 
-- [x] fix travis
+- bopt
+  - experiment
+    - hyperparam
+    - samples (noise?)
+      - per-sample noise?
+
+    - runner
+    - job
+      - model
+        - kernel
+        - noise
+
+        - random search
+        - gp
+  - last model
+
+- acq funce donstane optimizer
+  - max f(posterior(R|data))
+
+- grafy pro param kernelu
+
+- sgd momentum vs HMC
 
 - [ ] TFE optimizer for SqExp kernel
+
+- test x^2
+
 - [x] marginal & conditional plots
 - [x] share z-axis in plots
 - [ ] doublefork children so they don't need to be awaited & can survive crash of parent
