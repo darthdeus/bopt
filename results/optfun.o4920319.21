@@ -1,8 +1,0 @@
-Running 21 with '--fun=McCormick --n_iter=25 --kernel=sqexp'
-Running: Namespace(fun='McCormick', kernel='sqexp', n_iter=25)
-OptimizationResult(best_x=[-0.5566466  -1.58235085], best_y=1.9117083603893383)
-======= EPILOG: Sun Dec 2 23:19:53 CET 2018
-== Limits:   
-== Usage:    cpu=00:00:00, mem=0.00000 GB s, io=0.00000 GB, vmem=N/A, maxvmem=N/A
-== Duration: 00:00:10 (10 s)
-== Server name: helena7

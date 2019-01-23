@@ -1,8 +1,0 @@
-Running 14 with '--fun=Eggholder --n_iter=10 --kernel=matern'
-Running: Namespace(fun='Eggholder', kernel='matern', n_iter=10)
-OptimizationResult(best_x=[-224.14152391  286.50211354], best_y=469.3465171834812)
-======= EPILOG: Sun Dec 2 23:19:51 CET 2018
-== Limits:   
-== Usage:    cpu=00:00:00, mem=0.00000 GB s, io=0.00000 GB, vmem=N/A, maxvmem=N/A
-== Duration: 00:00:08 (8 s)
-== Server name: hector4

@@ -1,8 +1,0 @@
-Running 24 with '--fun=McCormick --n_iter=50 --kernel=matern'
-Running: Namespace(fun='McCormick', kernel='matern', n_iter=50)
-OptimizationResult(best_x=[-0.55018714 -1.54318042], best_y=1.913173403519946)
-======= EPILOG: Sun Dec 2 23:21:02 CET 2018
-== Limits:   
-== Usage:    cpu=00:20:52, mem=77.09001 GB s, io=0.13235 GB, vmem=705.969M, maxvmem=705.969M
-== Duration: 00:01:19 (79 s)
-== Server name: helena6
