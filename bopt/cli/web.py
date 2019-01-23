@@ -1,8 +1,6 @@
 import jsonpickle
 import numpy as np
 
-import matplotlib.pyplot as plt
-
 from typing import NamedTuple, List
 from livereload import Server
 from flask import Flask

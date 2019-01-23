@@ -5,7 +5,7 @@ with open("README.md", "r") as f:
 
 setuptools.setup(
     name="bopt",
-    version="0.0.1a2",
+    version="0.0.1a3",
     author="Jakub Arnold",
     author_email="darthdeus@gmail.com",
     description="Bayesian Optimization",
@@ -13,8 +13,41 @@ setuptools.setup(
     long_description_content_type="text/markdown",
     url="https://github.com/darthdeus/bopt",
     packages=setuptools.find_packages(),
+
+    package_data={
+        "": ["LICENSE"],
+        "bopt": ["templates/*"]
+    },
+
+    python_requires="~=3.6",
+    install_requires=[
+        "numpy>=1.15.4",
+        "scipy>=1.1.0",
+        "pyyaml~=3.13",
+        "tqdm~=4.28.1",
+        "flask~=1.0.2",
+        "psutil~=5.4.8",
+        "jsonpickle~=1.0",
+        "livereload==2.5.1",   # TODO: this is only temporary
+        "tf-nightly",
+    ],
+
+    extras_require={
+        "plotting": [
+            "matplotlib~=3.0.2"
+        ]
+    },
+
+    entry_points={
+        "console_scripts": [
+            "bopt=bopt.cli.cli:main"
+        ]
+    },
+
     classifiers=[
         "Development Status :: 2 - Pre-Alpha",
+        "Intended Audience :: Science/Research",
+        "Intended Audience :: Developers",
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
         "Programming Language :: Python :: 3",
