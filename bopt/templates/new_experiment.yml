@@ -1,0 +1,61 @@
+# This file is a template for a new experiment.
+# It specifies how the experiment is to be created,
+# but does not hold its state.
+
+# Name of the experiment
+name: EXPERIMENT_NAME
+
+# Directory where the results are being stored.
+# By default this is RELATIVE to the directory
+# where this configuration file is stored.
+#
+# It is also possible to specify an absolute path,
+# but it should not be necessary to change this
+# default in most cases.
+result_dir: EXPERIMENT_NAME
+
+# A List of hyperparamters to be tuned.
+hyperparameters:
+  # Each hyperparameter needs to specify:
+  #
+  #   name: string
+  #   type: int/float
+  #   bounds: min and max value, both int/float
+  - name: gamma
+    type: float
+    bounds:
+      min: 1e-6
+      max: 1.0
+
+  - name: epsilon
+    type: float
+    bounds:
+      min: 1e-6
+      max: 1.0
+
+  # - name: num_layers
+  #   type: int
+  #   bounds:
+  #     min: 1
+  #     max: 10
+
+# The runner determines which program is being optimzied.
+# It can run either in local mode when jobs are executed
+# on the current machine, or on SGE where each evaluation
+# is submitted as a separate job.
+runner:
+  # So far the runner can be either "local" or "sge".
+  type: local
+
+  # Module path a parser instance which can read
+  # the intermediate and final results of a job.
+  #
+  # Right now the only valid value is the default one.
+  result_parser: bopt.LastLineLastWordParser
+
+  # Path to the program being executed as each job.
+  script: "./.venv/bin/python"        # SPECIFY THIS
+  # Optional command line arguments
+  args:
+    - "experiments/rl/monte_carlo.py" # SPECIFY THIS
+
