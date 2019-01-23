@@ -1,35 +1,32 @@
-#!/usr/bin/env python
-import sys
-sys.path.append(".") # TODO: temporary hack
-
-import re
-import os
 import glob
-import bopt
+import os
+import re
+import sys
 import traceback
+from bopt.hyperparameters import Experiment
 
 
-if __name__ == "__main__":
-    import argparse
-
-    parser = argparse.ArgumentParser(description="Search for JOB_ID in META_DIR and display its status.")
-    parser.add_argument("--recursive", type=bool, default=True, help="Search subdirectories for job files", required=False)
-    parser.add_argument("META_DIR", type=str, default=".", help="Directory with the results.", nargs="?")
-    parser.add_argument("JOB_ID", type=int, default=".", help="Job to search for.")
-    args = parser.parse_args()
-
-    job_files = glob.glob(os.path.join(args.META_DIR, "**", "job-*.yml"), recursive=True)
+def run(args):
+    job_files = glob.glob(
+        os.path.join(args.META_DIR, "**", "job-*.yml"), recursive=True
+    )
 
     pattern = ".*job-(\\d+).yml"
 
     matches = [(fname, re.match(pattern, fname)) for fname in job_files]
-    job_ids = [(fname, int(m.groups()[0])) for fname, m in matches if m is not None and len(m.groups()) == 1]
+    job_ids = [
+        (fname, int(m.groups()[0]))
+        for fname, m in matches
+        if m is not None and len(m.groups()) == 1
+    ]
 
     if len(job_ids) == 0:
         print(f"No jobs found. Check that {args.META_DIR} contains job results.")
         sys.exit(1)
 
-    matched_job_ids = [(fname, job_id) for fname, job_id in job_ids if job_id == args.JOB_ID]
+    matched_job_ids = [
+        (fname, job_id) for fname, job_id in job_ids if job_id == args.JOB_ID
+    ]
 
     if len(matched_job_ids) == 0:
         print(f"Job with id {args.JOB_ID} not found in '{args.META_DIR}'.")
@@ -43,7 +40,7 @@ if __name__ == "__main__":
     fname, job_id = matched_job_ids[0]
 
     meta_dir = os.path.dirname(fname)
-    experiment = bopt.Experiment.deserialize(meta_dir)
+    experiment = Experiment.deserialize(meta_dir)
 
     # TODO: this is most likely not needed.
     job = experiment.runner.deserialize_job(meta_dir, job_id)
@@ -68,4 +65,3 @@ if __name__ == "__main__":
     print("RAW OUTPUT:")
     print("----------------------------------------------")
     print(job.get_job_output())
-

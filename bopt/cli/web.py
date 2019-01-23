@@ -20,7 +20,7 @@ class PosteriorSlice(NamedTuple):
     points_y: List[float]
 
 
-def run_web(args):
+def run(args):
     app = Flask(__name__)
     app.debug = True
 
@@ -106,15 +106,3 @@ def run_web(args):
     server = Server(app.wsgi_app)
     server.watch("**/*")
     server.serve(port=app.config.get("port"))
-
-
-if __name__ == "__main__":
-    import argparse
-
-    # TODO: remove duplicate argparse
-    parser = argparse.ArgumentParser()
-    parser.add_argument("meta_dir", type=str, help="Directory with the results.")
-    parser.add_argument("--port", type=int, default=5500, help="Port to run the web interface on.")
-    args = parser.parse_args()
-
-    run_web(args)
