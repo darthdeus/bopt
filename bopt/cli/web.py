@@ -20,7 +20,7 @@ class PosteriorSlice(NamedTuple):
     points_y: List[float]
 
 
-def run(args):
+def run(args) -> None:
     app = Flask(__name__)
     app.debug = True
 

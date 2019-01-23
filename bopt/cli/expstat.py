@@ -3,7 +3,7 @@ import psutil
 from bopt.hyperparameters import Experiment
 
 
-def run(args):
+def run(args) -> None:
     experiment = Experiment.deserialize(args.meta_dir)
 
     print("Hyperparameters:")

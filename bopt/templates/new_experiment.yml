@@ -2,17 +2,7 @@
 # It specifies how the experiment is to be created,
 # but does not hold its state.
 
-# Name of the experiment
 name: EXPERIMENT_NAME
-
-# Directory where the results are being stored.
-# By default this is RELATIVE to the directory
-# where this configuration file is stored.
-#
-# It is also possible to specify an absolute path,
-# but it should not be necessary to change this
-# default in most cases.
-result_dir: EXPERIMENT_NAME
 
 # A List of hyperparamters to be tuned.
 hyperparameters:

@@ -6,7 +6,7 @@ import traceback
 from bopt.hyperparameters import Experiment
 
 
-def run(args):
+def run(args) -> None:
     job_files = glob.glob(
         os.path.join(args.META_DIR, "**", "job-*.yml"), recursive=True
     )
