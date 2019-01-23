@@ -3,21 +3,27 @@
 Available commands:
 
 ```python
+# Create a new experiment
+bopt new META_DIR
+
+# Start tuning hyperparameters
+bopt run META_DIR
+
 # Run a Flask web interface to display experiment reuslts.
-python -m bopt.web META_DIR
+bopt web META_DIR
 
 # Get an overview status of an experiment.
-python -m bopt.expstat META_DIR
+bopt exp META_DIR
 
 # Check the status of a job based on its ID.
-python -m bopt.jobstat JOB_ID
+bopt job JOB_ID
 ```
 
 # Installation
 
-Since bopt depends on TensorFlow it is a good idea to run it either in Docker
-or in a Python virtual environment. Both methods are equivalent and there is no
-downside to choosing either.
+Since bopt depends on TensorFlow it is a good idea to run it either in
+Docker or in a Python virtual environment. Both methods are equivalent and
+there is no downside to choosing either.
 
 ## Virtualenv install
 
