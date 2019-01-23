@@ -53,7 +53,7 @@ class OptimizationResult:
         gp.fit(self.X_sample, self.y_sample).optimize_kernel()
 
         bound = self.params[i].range
-        resolution = 30
+        resolution = 15
         x_i = np.linspace(bound.low, bound.high, resolution)
 
         X_test = np.tile(self.best_x, (resolution, 1))
@@ -150,8 +150,9 @@ class Experiment:
         best_y = None
         best_x = None
         if len(y_sample) > 0:
-            best_y = np.max(y_sample)
-            best_x = X_sample[np.argmax(best_y)]
+            best_idx = np.argmax(y_sample)
+            best_y = y_sample[best_idx]
+            best_x = X_sample[best_idx]
 
         kernel = SquaredExp()
         n_iter = len(X_sample)

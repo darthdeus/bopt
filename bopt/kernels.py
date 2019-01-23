@@ -33,9 +33,10 @@ class Kernel(abc.ABC):
             x = x.copy()
             y = y.copy()
 
-            if self.round_indexes is not None and len(self.round_indexes) > 0:
-                x[:, self.round_indexes] = np.round(x[:, self.round_indexes])
-                y[:, self.round_indexes] = np.round(y[:, self.round_indexes])
+            # TODO: fix this
+            # if self.round_indexes is not None and len(self.round_indexes) > 0:
+            #     x[:, self.round_indexes] = np.round(x[:, self.round_indexes])
+            #     y[:, self.round_indexes] = np.round(y[:, self.round_indexes])
 
             x = x.reshape(x.shape[0], 1, x.shape[1])
             y = y.reshape(1, y.shape[0], y.shape[1])

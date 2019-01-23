@@ -97,8 +97,8 @@ def compute_optimized_kernel_tf(X_train, y_train, noise_level: float, kernel: Ke
 
         optimizer.apply_gradients(zip(grads, variables), global_step=global_step)
 
-        if i % 20 == 0:
-            print("{:3d}: {}".format(global_step.numpy(), nll.numpy()))
+        # if i % 20 == 0:
+        #     print("{:3d}: {}".format(global_step.numpy(), nll.numpy()))
 
     return SquaredExp(l=ls.numpy().item(), sigma=sigma.numpy().item()), noise_level
 
@@ -119,7 +119,7 @@ def compute_optimized_kernel(kernel, X_train, y_train) -> Tuple[Kernel, float]:
     else:
         def step(theta):
             nll = kernel_log_likelihood(kernel.set_params(theta[:-1]), X_train, y_train, theta[-1])
-            print(nll)
+            # print(nll)
             return nll
 
         default_params = np.array(kernel.default_params(X_train, y_train).tolist() + [0.0])

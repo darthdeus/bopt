@@ -1,0 +1,30 @@
+#!/usr/bin/env python
+import sys
+import os
+import psutil
+import inspect
+import pathlib
+
+package_dir = pathlib.Path(os.path.dirname(os.path.abspath(inspect.stack()[0][1]))).parent
+# TODO: temporary hack
+sys.path.append(str(package_dir))
+import bopt
+
+
+import argparse
+parser = argparse.ArgumentParser(prog="bopt")
+
+sp = parser.add_subparsers()
+
+sp_expstat = sp.add_parser("expstat", help="Overview status of an experiment.")
+sp_jobstat = sp.add_parser("jobstat", help="Retrieve job status.")
+sp_web = sp.add_parser("web", help="Starts the web interface.")
+
+# parser.add_argu
+# parser.add_argument("--foo", type=int, default=1, help="TODO")
+# parser.add_argument("--bar", type=float, default=3.14, help="TODO")
+# parser.add_argument("--baz", type=str, default=None, help="TODO")
+# parser.add_argument("--bool", default=False, action="store_true", help="TODO")
+
+args = parser.parse_args()
+
