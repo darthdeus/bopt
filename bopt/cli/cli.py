@@ -4,7 +4,7 @@ import psutil
 import inspect
 import argparse
 
-from bopt.cli import jobstat, expstat, web, new_exp, run_exp
+from bopt.cli import jobstat, expstat, web, new_exp, run_exp, init_exp
 
 
 def main():
@@ -16,10 +16,19 @@ def main():
     sp.required = True
 
     sp_new = sp.add_parser("new", help="Create a new experiment.")
+    sp_init = sp.add_parser("init", help="Initializes a new experiment, ready to run.")
     sp_expstat = sp.add_parser("exp", help="Overview status of an experiment.")
     sp_jobstat = sp.add_parser("job", help="Retrieve job status.")
     sp_web = sp.add_parser("web", help="Starts the web interface.")
     sp_run = sp.add_parser("run", help="Runs an experiment.")
+
+    sp_init.add_argument("--result_parser", type=str, default="bopt.LastLineLastWordParser", help="Module path to the result parser.")
+    sp_init.add_argument("--runner", type=str, default="local", help="Runner type.")
+    sp_init.add_argument("--param", action="append", help="Hyperparameter")
+    sp_init.add_argument("--dir", type=str, help="Path to the directory where the experiment data is stored.")
+    sp_init.add_argument("command", type=str, help="Command to run.")
+    sp_init.add_argument("arguments", type=str, nargs="*", help="Default arguments.")
+    sp_init.set_defaults(func=init_exp.run)
 
     sp_new.add_argument("DIR", type=str, help="Path to the directory where the experiment should be stored, both its configuration and results.")
     sp_new.set_defaults(func=new_exp.run)

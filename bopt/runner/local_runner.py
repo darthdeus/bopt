@@ -54,11 +54,12 @@ class LocalRunner(Runner):
         cmdline_run_params = [f"--{name}={value}" for name, value in run_parameters.items()]
 
         output_dir = os.path.join(self.meta_dir, "outputs")
-        cmd = [
-            os.path.expanduser(self.script_path),
+
+        cmd = list(map(lambda x: os.path.expanduser(x), [
+            self.script_path,
             *self.arguments,
             *cmdline_run_params
-        ]
+        ]))
 
         print(f"Starting a new job: {' '.join(cmd)}")
 

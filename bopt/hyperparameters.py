@@ -71,6 +71,7 @@ class OptimizationResult:
 META_FILENAME = "meta.yml"
 
 
+# TODO: fix numpy being stored everywhere when serializing! possibly in hyp.sample? :(
 class Experiment:
     meta_dir: str
     hyperparameters: List[Hyperparameter]

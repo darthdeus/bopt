@@ -13,7 +13,7 @@ class Integer:
         self.type = "int"
 
     def sample(self) -> float:
-        return np.random.randint(self.low, self.high)
+        return np.random.randint(self.low, self.high).item()
 
     def __repr__(self) -> str:
         return f"Int({self.low}, {self.high})"
@@ -30,7 +30,7 @@ class Float:
         self.type = "float"
 
     def sample(self) -> float:
-        return np.random.uniform(self.low, self.high)
+        return np.random.uniform(self.low, self.high).item()
 
     def __repr__(self) -> str:
         return f"Float({self.low}, {self.high})"
