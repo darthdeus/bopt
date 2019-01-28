@@ -69,12 +69,10 @@ def compute_optimized_kernel_tf(X_train, y_train, noise_level_: float, kernel: K
 
     def tf_nll(ls_var: tf.Variable, sigma_var: tf.Variable, noise_level_var: tf.Variable):
         with tf.GradientTape(persistent=True) as tape:
-            ls = tf.exp(ls_var)
-            sigma = tf.exp(sigma_var)
+            ls          = tf.exp(ls_var)
+            sigma       = tf.exp(sigma_var)
             noise_level = tf.exp(noise_level_var)
 
-            x = tf.Variable(1.0)
-            y = x**2
             noise = tf.eye(len(X_train), dtype=tf.float64) * noise_level**2
 
             K = tf_sqexp_kernel(X_train, X_train, ls, sigma) + noise
@@ -101,8 +99,8 @@ def compute_optimized_kernel_tf(X_train, y_train, noise_level_: float, kernel: K
         return nll, tape
 
     def value_and_gradients(params):
-        ls_var = tf.Variable(params[0])
-        sigma_var = tf.Variable(params[1])
+        ls_var          = tf.Variable(params[0])
+        sigma_var       = tf.Variable(params[1])
         noise_level_var = tf.Variable(params[2])
 
         variables = [ls_var, sigma_var, noise_level_var]
@@ -145,7 +143,7 @@ def compute_optimized_kernel_tf(X_train, y_train, noise_level_: float, kernel: K
 
 
     PLOT_TRACE = True
-    PLOT_TRACE = False
+    # PLOT_TRACE = False
 
     if PLOT_TRACE:
         import matplotlib.pyplot as plt
@@ -172,10 +170,10 @@ def compute_optimized_kernel_tf(X_train, y_train, noise_level_: float, kernel: K
 
 
 def compute_optimized_kernel(kernel, X_train, y_train) -> Tuple[Kernel, float]:
-    # TODO: remove & optimize noise
+    # TODO: noise 1000 overflow
     noise_level = 0.492
     USE_TF = False
-    # USE_TF = True
+    USE_TF = True
 
     # TODO:
     # assert X_train.dtype == y_train.dtype
