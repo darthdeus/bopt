@@ -1,3 +1,8 @@
+- boundy v lbfgs
+- 
+
+
+
 - double fork pajp.py
 - co vsechno chci ukladat do resultu
   - jak ukladam parametry?

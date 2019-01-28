@@ -258,14 +258,14 @@ def plot_2d_optim_result(result: OptimizationResult, resolution: float = 30, noi
         .fit(X_sample, result.y_sample) \
         .optimize_kernel()
 
-    gp.noise = .5
-    gp.kernel.l = 5.
-    gp.kernel.sigma = 1.
+    # gp.noise = .5
+    # gp.kernel.l = 5.
+    # gp.kernel.sigma = 1.
 
     gp.posterior(X_2d)
     mu, _ = gp.mu_std()
 
-    print("..." + str(gp.kernel))
+    print("..." + str(gp.kernel) + " " + str(gp.noise))
 
     mu_mat = mu.reshape(gx.shape[0], gx.shape[1])
     extent = [b1.low, b1.high, b2.high, b2.low]
@@ -279,4 +279,4 @@ def plot_2d_optim_result(result: OptimizationResult, resolution: float = 30, noi
 
     print(X_sample[0,0], X_sample[0, 1], result.y_sample[0])
 
-    return mu_mat, extent, x1, x2
+    return mu_mat, extent, x1, x2, gp

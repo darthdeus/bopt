@@ -8,6 +8,13 @@ from bopt.kernels import Kernel, SquaredExp
 from bopt.plot import plot_gp
 
 
+def convert_to_rank1(arr):
+    assert arr.ndim == 2, f"rank-2 tensor required, got {arr.ndim}"
+    assert arr.shape[1] == 1, f"arr.shape[1] must equal `1`, got {arr.shape}"
+
+    return arr.squeeze()
+
+
 class GaussianProcess:
     X_train: np.ndarray
     y_train: np.ndarray
@@ -36,6 +43,8 @@ class GaussianProcess:
         self.stable_computation = stable_computation
 
     def fit(self, X_train: np.ndarray, y_train: np.ndarray, kernel=None) -> "GaussianProcess":
+        assert X_train.ndim == 2, f"X_train must be rank-2 tensor, got ndim={X_train.ndim}"
+
         if kernel is not None:
             self.kernel = kernel
 
@@ -51,6 +60,8 @@ class GaussianProcess:
         """
         if (X_train is not None) and (y_train is not None):
             self.fit(X_train, y_train)
+
+        assert X_test.ndim == 2, f"X_test must be rank-2 tensor, got ndim={X_test.ndim}"
 
         assert self.X_train is not None, "X_train is None, call `fit` first, or provide X_train directly"
         assert self.y_train is not None, "y_train is None, call `fit` first, or provide y_train directly"
@@ -132,7 +143,11 @@ class GaussianProcess:
 
     def plot_posterior(self, **kwargs):
         assert self.X_test is not None, "X_test was not provided, call `.posterior(X_test)` first"
-        plot_gp(self.mu, self.cov, self.X_test, self.X_train, self.y_train,
+
+        plot_gp(self.mu, self.cov,
+                convert_to_rank1(self.X_test),
+                convert_to_rank1(self.X_train),
+                self.y_train,
                 kernel=self.kernel, noise=self.noise, **kwargs)
 
         return self

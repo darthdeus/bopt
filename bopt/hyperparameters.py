@@ -48,7 +48,7 @@ class OptimizationResult:
             pickle.dump(self, filename)
             self.opt_fun = opt_fun
 
-    def slice_at(self, i: int) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+    def slice_at(self, i: int) -> Tuple[np.ndarray, np.ndarray, np.ndarray, GaussianProcess]:
         gp = GaussianProcess(kernel=self.kernel.copy())
         gp.fit(self.X_sample, self.y_sample).optimize_kernel()
 
@@ -61,7 +61,7 @@ class OptimizationResult:
 
         mu, std = gp.posterior(X_test).mu_std()
 
-        return x_i, mu, std
+        return x_i, mu, std, gp
 
     @staticmethod
     def load(filename) -> "OptimizationResult":

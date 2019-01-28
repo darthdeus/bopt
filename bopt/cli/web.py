@@ -16,10 +16,15 @@ class PosteriorSlice(NamedTuple):
     std: List[float]
     points_x: List[float]
     points_y: List[float]
+    gp: bopt.GaussianProcess
 
 
 def run(args) -> None:
-    app = Flask(__name__)
+    import inspect
+    import os
+    script_dir = os.path.dirname(os.path.abspath(inspect.stack()[0][1]))
+
+    app = Flask(__name__, template_folder=os.path.join(script_dir, "..", "templates"))
     app.debug = True
 
     app.config["meta_dir"] = args.meta_dir
@@ -43,23 +48,24 @@ def run(args) -> None:
                 "label": param.name,
             })
 
-            x, y, std = optim_result.slice_at(i)
+            x, y, std, gp = optim_result.slice_at(i)
 
             points_x = optim_result.X_sample[:, i].tolist()
             points_y = optim_result.y_sample.tolist()
 
             posterior_slice = PosteriorSlice(
-                    param,
-                    x.tolist(),
-                    y.tolist(),
-                    std.tolist(),
-                    points_x,
-                    points_y
-                    )
+                param,
+                x.tolist(),
+                y.tolist(),
+                std.tolist(),
+                points_x,
+                points_y,
+                gp
+            )
 
             slices.append(posterior_slice)
 
-        mu_mat, extent, gx, gy = bopt.plot_2d_optim_result(optim_result)
+        mu_mat, extent, gx, gy, result_gp = bopt.plot_2d_optim_result(optim_result)
         exp_gp = bopt.base64_plot()
 
         heatmap = []
@@ -98,7 +104,8 @@ def run(args) -> None:
 
         return render_template("index.html", data=data,
                 json_data=json_data,
-                experiment=experiment)
+                experiment=experiment,
+                result_gp=result_gp)
 
 
     server = Server(app.wsgi_app)
