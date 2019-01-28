@@ -61,8 +61,6 @@ class LocalRunner(Runner):
             *cmdline_run_params
         ]))
 
-        print(f"Starting a new job: {' '.join(cmd)}")
-
         temp_fname = tempfile.mktemp(dir=".")
         with open(temp_fname, "w") as f:
             process = psutil.Popen(cmd, stdout=f, stderr=subprocess.STDOUT)
@@ -70,7 +68,7 @@ class LocalRunner(Runner):
             job_id = process.pid
             job_fname = Job.compute_job_output_filename(self.meta_dir, job_id)
 
-            print(f"... started with job id: {job_id}")
+            print(f"START {job_id}:\t{' '.join(cmd)}")
 
             os.rename(temp_fname, job_fname)
 

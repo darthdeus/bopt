@@ -1,6 +1,9 @@
 # default: bo-exp
 default: simple-exp
 
+init:
+	bopt init --param "gamma:float:0:1" --param "epsilon:float:0:1" --dir results/mc ./.venv/bin/python ./experiments/rl/monte_carlo.py
+
 watch:
 	watch -n1 expstat results/rl-monte-carlo
 
