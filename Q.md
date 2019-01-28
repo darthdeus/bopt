@@ -1,5 +1,5 @@
 - boundy v lbfgs
-- 
+- merit MI mezi dimenzema?
 
 
 
