@@ -61,38 +61,18 @@ def compute_optimized_kernel_tf(X_train, y_train, noise_level_: float, kernel: K
         raise NotImplementedError()
 
     def_sigma, def_ls = kernel.default_params(X_train, y_train)
-
-    noise_level = tf.Variable(1.0, dtype=tf.float64)
-    # noise_level = tf.Variable(noise_level_, dtype=tf.float64)
-
-    # noise = noise_level ** 2 * np.eye(len(X_train))
-
-    sigma = tf.Variable(def_sigma, dtype=tf.float64)
-    ls = tf.Variable(def_ls, dtype=tf.float64)
-
-    global_step = tf.Variable(0)
-    optimizer = tf.train.AdamOptimizer(learning_rate=1e-2)
-    # optimizer = tf.train.MomentumOptimizer(learning_rate=1e-3, momentum=1e-4)
+    def_noise = noise_level_
 
     trace: List[float] = []
 
     y_train_expanded = tf.expand_dims(y_train, -1)
-    variables = [sigma, ls, noise_level]
 
-    def value_and_gradients(params):
-        ls_var = tf.Variable(params[0])
-        sigma_var = tf.Variable(params[1])
-        noise_level_var = tf.Variable(params[2])
-
-        ls = tf.exp(ls_var)
-        sigma = tf.exp(sigma_var)
-        noise_level = tf.exp(noise_level)
-
-        # EXP?
-
-        # ls, sigma, noise_level = params
-
+    def tf_nll(ls_var: tf.Variable, sigma_var: tf.Variable, noise_level_var: tf.Variable):
         with tf.GradientTape(persistent=True) as tape:
+            ls = tf.exp(ls_var)
+            sigma = tf.exp(sigma_var)
+            noise_level = tf.exp(noise_level_var)
+
             x = tf.Variable(1.0)
             y = x**2
             noise = tf.eye(len(X_train), dtype=tf.float64) * noise_level**2
@@ -115,43 +95,87 @@ def compute_optimized_kernel_tf(X_train, y_train, noise_level_: float, kernel: K
             t3 = len(X_train) * np.log(2 * np.pi)
 
             nll = 0.5 * tf.squeeze(t1 + t2 + t3)
+            trace.append(nll)
             assert nll.ndim == 0, f"got {nll.ndim} with shape {nll.shape}"
 
-        grads = tape.gradient(nll, [ls, sigma, noise_level])
+        return nll, tape
+
+    def value_and_gradients(params):
+        ls_var = tf.Variable(params[0])
+        sigma_var = tf.Variable(params[1])
+        noise_level_var = tf.Variable(params[2])
+
+        variables = [ls_var, sigma_var, noise_level_var]
+
+        nll, tape = tf_nll(ls_var, sigma_var, noise_level_var)
+
+        grads = tape.gradient(nll, variables)
 
         grads_ = tf.constant(list(map(lambda x: x.numpy(), grads)))
 
         return nll, grads_
 
-    import tensorflow_probability as tfp
-    init = tf.constant([ls.numpy(), sigma.numpy(), noise_level.numpy()])
-    result = tfp.optimizer.bfgs_minimize(value_and_gradients, initial_position=init)
+    USE_LBFGS = True
+    # USE_LBFGS = False
 
-    # for i in range(400):
-    #     nll, grads = value_and_gradients(ls, sigma, noise_level)
-    #     trace.append(nll.numpy())
-    #
-    #     optimizer.apply_gradients(zip(grads, variables), global_step=global_step)
+    def optimize_lbfgs():
+        import tensorflow_probability as tfp
+
+        init = tf.constant([def_ls, def_sigma, def_noise])
+        result = tfp.optimizer.bfgs_minimize(value_and_gradients, initial_position=init)
+
+        return np.exp(result.position.numpy())
+
+    def optimize_sgd():
+        sigma_var       = tf.Variable(def_sigma, dtype=tf.float64)
+        ls_var          = tf.Variable(def_ls, dtype=tf.float64)
+        noise_level_var = tf.Variable(def_noise, dtype=tf.float64)
+
+        optimizer = tf.train.AdamOptimizer(learning_rate=1e-2)
+        # optimizer = tf.train.MomentumOptimizer(learning_rate=1e-2, momentum=1e-3)
+        variables = [sigma_var, ls_var, noise_level_var]
+
+        for i in range(400):
+            nll, tape = tf_nll(*variables)
+            grads = tape.gradient(nll, variables)
+
+            optimizer.apply_gradients(zip(grads, variables))
+
+        return np.exp(list(map(lambda x: x.numpy(), variables)))
+
 
     PLOT_TRACE = True
-    # PLOT_TRACE = False
+    PLOT_TRACE = False
 
     if PLOT_TRACE:
         import matplotlib.pyplot as plt
+        print(optimize_lbfgs())
+        plt.plot(trace)
+        plt.show()
+        trace = []
+
+        print(optimize_sgd())
+        plt.plot(trace)
+        plt.show()
+        trace = []
+
+    if USE_LBFGS:
+        ls, sigma, noise_level = optimize_lbfgs()
+    else:
+        ls, sigma, noise_level = optimize_sgd()
+
+    if PLOT_TRACE:
         plt.plot(trace)
         plt.show()
 
-    ls, sigma, noise_level = result.position.numpy()
-    __import__('pdb').set_trace()
-
-    return SquaredExp(l=ls.numpy().item(), sigma=sigma.numpy().item()), noise_level.numpy()
+    return SquaredExp(l=ls, sigma=sigma), noise_level
 
 
 def compute_optimized_kernel(kernel, X_train, y_train) -> Tuple[Kernel, float]:
     # TODO: remove & optimize noise
     noise_level = 0.492
     USE_TF = False
-    USE_TF = True
+    # USE_TF = True
 
     # TODO:
     # assert X_train.dtype == y_train.dtype
@@ -182,12 +206,14 @@ def compute_optimized_kernel(kernel, X_train, y_train) -> Tuple[Kernel, float]:
                        options={"maxiter": 100})
 
         PLOT_TRACE = True
-        # PLOT_TRACE = False
+        PLOT_TRACE = False
 
         if PLOT_TRACE:
             import matplotlib.pyplot as plt
             plt.plot(trace)
             plt.show()
+
+        print(res.x)
 
         kernel.set_params(res.x)
         return kernel, res.x[-1]
