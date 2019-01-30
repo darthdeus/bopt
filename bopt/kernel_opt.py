@@ -8,6 +8,11 @@ from scipy.optimize import minimize
 
 from bopt.kernels import Kernel, SquaredExp
 
+
+def print_rounded(*args):
+    print("\t".join(list(map(lambda x: str(round(x, 3).item()), args))))
+
+
 def kernel_log_likelihood(kernel: Kernel, X_train: np.ndarray,
                           y_train: np.ndarray, noise_level: float = 0) -> float:
     noise = noise_level ** 2 * np.eye(len(X_train))
@@ -28,10 +33,7 @@ def kernel_log_likelihood(kernel: Kernel, X_train: np.ndarray,
 
     loglikelihood = t1 + t2 + t3
 
-    # print(loglikelihood, kernel.l, kernel.sigma)
-
-    # TODO: check this
-    # assert loglikelihood >= 0, f"got negative log likelihood={loglikelihood}, t1={t1}, t2={t2}, t3={t3}"
+    # print_rounded(kernel.l, kernel.sigma, noise_level, loglikelihood)
 
     return loglikelihood
 
@@ -55,8 +57,6 @@ def compute_optimized_kernel_tf(X_train, y_train, noise_level_: float, kernel: K
     assert X_train.ndim == 2, X_train.ndim
     assert y_train.ndim == 1
 
-    print(X_train.dtype)
-
     if not isinstance(kernel, SquaredExp):
         raise NotImplementedError()
 
@@ -67,8 +67,8 @@ def compute_optimized_kernel_tf(X_train, y_train, noise_level_: float, kernel: K
 
     y_train_expanded = tf.expand_dims(y_train, -1)
 
-    bounds_fn_tf = tf.exp
-    bounds_fn_np = np.exp
+    bounds_fn_tf = lambda x: tf.nn.softplus(x) + 1e-5
+    bounds_fn_np = lambda x: np.logaddexp(0, x) + 1e-5
 
     def tf_nll(ls_var: tf.Variable, sigma_var: tf.Variable, noise_level_var: tf.Variable):
         with tf.GradientTape(persistent=True) as tape:
@@ -79,8 +79,6 @@ def compute_optimized_kernel_tf(X_train, y_train, noise_level_: float, kernel: K
             noise = tf.eye(len(X_train), dtype=tf.float64) * noise_level**2
 
             K = tf_sqexp_kernel(X_train, X_train, ls, sigma) + noise
-
-            print(ls.numpy(), sigma.numpy(), noise_level.numpy())
 
             t1 = tf.transpose(y_train_expanded) @ tf.linalg.solve(K, y_train_expanded)
             t2 = tf.linalg.slogdet(K).log_abs_determinant
@@ -98,6 +96,9 @@ def compute_optimized_kernel_tf(X_train, y_train, noise_level_: float, kernel: K
             t3 = len(X_train) * np.log(2 * np.pi)
 
             nll = 0.5 * tf.squeeze(t1 + t2 + t3)
+
+            print(ls.numpy(), sigma.numpy(), noise_level.numpy(), nll.numpy())
+
             trace.append(nll)
             assert nll.ndim == 0, f"got {nll.ndim} with shape {nll.shape}"
 
@@ -122,26 +123,26 @@ def compute_optimized_kernel_tf(X_train, y_train, noise_level_: float, kernel: K
     USE_LBFGS = True
     USE_LBFGS = False
 
-    def optimize_lbfgs():
+    def optimize_bfgs():
         import tensorflow_probability as tfp
 
         init = tf.constant([def_ls, def_sigma, def_noise], dtype=tf.float64)
         result = tfp.optimizer.bfgs_minimize(
             value_and_gradients,
             initial_position=init,
-            tolerance=tf.constant(1e-6, dtype=tf.float64)
+            tolerance=tf.constant(1e-3, dtype=tf.float64)
         )
 
         return bounds_fn_np(result.position.numpy())
 
     def optimize_sgd():
-        sigma_var       = tf.Variable(def_sigma, dtype=tf.float64)
         ls_var          = tf.Variable(def_ls,    dtype=tf.float64)
+        sigma_var       = tf.Variable(def_sigma, dtype=tf.float64)
         noise_level_var = tf.Variable(def_noise, dtype=tf.float64)
 
         optimizer = tf.train.AdamOptimizer(learning_rate=1e-2)
         # optimizer = tf.train.MomentumOptimizer(learning_rate=1e-2, momentum=1e-3)
-        variables = [sigma_var, ls_var, noise_level_var]
+        variables = [ls_var, sigma_var, noise_level_var]
 
         for i in range(400):
             nll, tape = tf_nll(*variables)
@@ -153,11 +154,11 @@ def compute_optimized_kernel_tf(X_train, y_train, noise_level_: float, kernel: K
 
 
     PLOT_TRACE = True
-    PLOT_TRACE = False
+    # PLOT_TRACE = False
 
     if PLOT_TRACE:
         import matplotlib.pyplot as plt
-        print(optimize_lbfgs())
+        print(optimize_bfgs())
         plt.plot(trace)
         plt.show()
         trace = []
@@ -168,7 +169,7 @@ def compute_optimized_kernel_tf(X_train, y_train, noise_level_: float, kernel: K
         trace = []
 
     if USE_LBFGS:
-        ls, sigma, noise_level = optimize_lbfgs()
+        ls, sigma, noise_level = optimize_bfgs()
     else:
         ls, sigma, noise_level = optimize_sgd()
 
@@ -179,16 +180,76 @@ def compute_optimized_kernel_tf(X_train, y_train, noise_level_: float, kernel: K
     return SquaredExp(l=ls, sigma=sigma), noise_level
 
 
+def scikit_tf(X_train, y_train, noise_level_: float, kernel: Kernel = SquaredExp()) \
+        -> Tuple[Kernel, float]:
+    tf.enable_eager_execution()
+
+    assert X_train.ndim == 2, X_train.ndim
+    assert y_train.ndim == 1
+
+    if not isinstance(kernel, SquaredExp):
+        raise NotImplementedError()
+
+    trace: List[float] = []
+
+    y_train_expanded = tf.expand_dims(y_train, -1)
+
+    # ls          = tf.Variable(kernel.l,    dtype=tf.float64)
+    # sigma       = tf.Variable(kernel.sigma, dtype=tf.float64)
+    # noise_level = tf.Variable(noise_level_, dtype=tf.float64)
+
+    ls          = tf.constant(kernel.l,    dtype=tf.float64)
+    sigma       = tf.constant(kernel.sigma, dtype=tf.float64)
+    noise_level = tf.constant(noise_level_, dtype=tf.float64)
+
+    with tf.GradientTape() as tape:
+        tape.watch(ls)
+        tape.watch(sigma)
+        tape.watch(noise_level)
+        noise = tf.eye(len(X_train), dtype=tf.float64) * noise_level**2
+
+        K = tf_sqexp_kernel(X_train, X_train, ls, sigma) + noise
+
+        t1 = tf.transpose(y_train_expanded) @ tf.linalg.solve(K, y_train_expanded)
+        t2 = 2*tf.linalg.slogdet(K).log_abs_determinant
+
+        # https://blogs.sas.com/content/iml/2012/10/31/compute-the-log-determinant-of-a-matrix.html
+        # log(det(K)) = log(det(L' @ L)) = log(det(L') * det(L)) =
+        # = 2*log(det(L)) = 2*log(prod(diag(L))) = 2*sum(log(diag(L)))
+
+        # L = tf.cholesky(K)
+        # t1 = tf.transpose(y_train_expanded) @ tf.linalg.cholesky_solve(L, y_train_expanded)
+        # t2 = 2 * tf.reduce_sum(tf.log(tf.linalg.tensor_diag_part(L)))
+
+        # trace.append((t2 - t2_g).numpy())
+
+        t3 = len(X_train) * np.log(2 * np.pi).item()
+
+        nll = 0.5 * tf.squeeze(t1 + t2 + t3)
+
+        # print_rounded(ls.numpy(), sigma.numpy(), noise_level.numpy(), nll.numpy())
+
+        trace.append(nll)
+        assert nll.ndim == 0, f"got {nll.ndim} with shape {nll.shape}"
+
+    return nll
+
+
 def compute_optimized_kernel(kernel, X_train, y_train) -> Tuple[Kernel, float]:
     # TODO: noise 1000 overflow
     noise_level = 0.492
     USE_TF = False
-    USE_TF = True
+    # USE_TF = True
 
     # TODO:
     # assert X_train.dtype == y_train.dtype
 
     assert X_train.ndim == 2
+
+    X_train = X_train.astype(np.float64)
+    y_train = y_train.astype(np.float64)
+
+    # k, n = compute_optimized_kernel_tf(X_train, y_train, noise_level, kernel)
 
     if USE_TF:
         X_train = X_train.astype(np.float64)
@@ -196,12 +257,25 @@ def compute_optimized_kernel(kernel, X_train, y_train) -> Tuple[Kernel, float]:
         return compute_optimized_kernel_tf(X_train, y_train, noise_level, kernel)
     else:
         trace = []
+        global i
+        i = 0
         def step(theta):
-            nll = kernel_log_likelihood(kernel.set_params(theta[:-1]), X_train, y_train, theta[-1])
+            # nll = kernel_log_likelihood(kernel.set_params(theta[:-1]), X_train, y_train, theta[-1])
+            nll = scikit_tf(X_train, y_train, theta[-1], kernel.set_params(theta[:-1])).numpy()
+
+            # print((nll - nll2).numpy())
+
             trace.append(nll)
+            global i
+
+            if i % 1 == 0:
+                print(theta, nll)
+
+            i += 1
             return nll
 
         default_params = np.array(kernel.default_params(X_train, y_train).tolist() + [0.0])
+        # default_params = np.array([k.l, k.sigma, n])
 
         if len(default_params) == 0:
             return kernel
@@ -222,8 +296,6 @@ def compute_optimized_kernel(kernel, X_train, y_train) -> Tuple[Kernel, float]:
             import matplotlib.pyplot as plt
             plt.plot(trace)
             plt.show()
-
-        print(res.x)
 
         kernel.set_params(res.x)
         return kernel, res.x[-1]

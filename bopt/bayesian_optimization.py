@@ -277,6 +277,4 @@ def plot_2d_optim_result(result: OptimizationResult, resolution: float = 30, noi
     plt.scatter(X_sample[:, 0], X_sample[:, 1], c="k")
     plt.scatter([result.best_x[0]], [result.best_x[1]], c="r")
 
-    print(X_sample[0,0], X_sample[0, 1], result.y_sample[0])
-
     return mu_mat, extent, x1, x2, gp

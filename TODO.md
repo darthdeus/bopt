@@ -1,5 +1,11 @@
 ## TODO:
 
+- ukladat kernel parametry v kernelu jako dictionary
+- tape.watch(x)
+- overridovani parametru
+- porovnavat s gpyopt
+- porovnat tfnll a np nll
+
 - bopt
   - experiment
     - hyperparam
@@ -137,3 +143,5 @@ class Job:
 class SGERunner():
   def __init__(self, script_path, output_type)
 ```
+
+- newton sranda H^-1
