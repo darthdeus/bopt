@@ -71,7 +71,11 @@ def compute_optimized_kernel_tf(X_train, y_train, noise_level_: float, kernel: K
     bounds_fn_np = lambda x: np.logaddexp(0, x) + 1e-5
 
     def tf_nll(ls_var: tf.Variable, sigma_var: tf.Variable, noise_level_var: tf.Variable):
-        with tf.GradientTape(persistent=True) as tape:
+        with tf.GradientTape() as tape:
+            tape.watch(ls_var)
+            tape.watch(sigma_var)
+            tape.watch(noise_level_var)
+
             ls          = bounds_fn_tf(ls_var)
             sigma       = bounds_fn_tf(sigma_var)
             noise_level = bounds_fn_tf(noise_level_var)
@@ -81,7 +85,7 @@ def compute_optimized_kernel_tf(X_train, y_train, noise_level_: float, kernel: K
             K = tf_sqexp_kernel(X_train, X_train, ls, sigma) + noise
 
             t1 = tf.transpose(y_train_expanded) @ tf.linalg.solve(K, y_train_expanded)
-            t2 = tf.linalg.slogdet(K).log_abs_determinant
+            t2 = 2*tf.linalg.slogdet(K).log_abs_determinant
 
             # https://blogs.sas.com/content/iml/2012/10/31/compute-the-log-determinant-of-a-matrix.html
             # log(det(K)) = log(det(L' @ L)) = log(det(L') * det(L)) =
@@ -97,7 +101,7 @@ def compute_optimized_kernel_tf(X_train, y_train, noise_level_: float, kernel: K
 
             nll = 0.5 * tf.squeeze(t1 + t2 + t3)
 
-            print(ls.numpy(), sigma.numpy(), noise_level.numpy(), nll.numpy())
+            # print(ls.numpy(), sigma.numpy(), noise_level.numpy(), nll.numpy())
 
             trace.append(nll)
             assert nll.ndim == 0, f"got {nll.ndim} with shape {nll.shape}"
@@ -106,15 +110,15 @@ def compute_optimized_kernel_tf(X_train, y_train, noise_level_: float, kernel: K
 
     def value_and_gradients(params):
         params = tf.cast(params, tf.float64)
-        ls_var          = tf.Variable(params[0])
-        sigma_var       = tf.Variable(params[1])
-        noise_level_var = tf.Variable(params[2])
+        # ls_var          = tf.Variable(params[0])
+        # sigma_var       = tf.Variable(params[1])
+        # noise_level_var = tf.Variable(params[2])
 
-        variables = [ls_var, sigma_var, noise_level_var]
+        # variables = [ls_var, sigma_var, noise_level_var]
 
-        nll, tape = tf_nll(ls_var, sigma_var, noise_level_var)
+        nll, tape = tf_nll(*params)# ls_var, sigma_var, noise_level_var)
 
-        grads = tape.gradient(nll, variables)
+        grads = tape.gradient(nll, params)
 
         grads_ = tf.constant(list(map(lambda x: x.numpy(), grads)))
 
@@ -154,7 +158,7 @@ def compute_optimized_kernel_tf(X_train, y_train, noise_level_: float, kernel: K
 
 
     PLOT_TRACE = True
-    # PLOT_TRACE = False
+    PLOT_TRACE = False
 
     if PLOT_TRACE:
         import matplotlib.pyplot as plt
@@ -240,9 +244,6 @@ def compute_optimized_kernel(kernel, X_train, y_train) -> Tuple[Kernel, float]:
     noise_level = 0.492
     USE_TF = False
     # USE_TF = True
-
-    # TODO:
-    # assert X_train.dtype == y_train.dtype
 
     assert X_train.ndim == 2
 

@@ -30,6 +30,7 @@
 - sgd momentum vs HMC
 
 - [ ] TFE optimizer for SqExp kernel
+- [ ] levenberg marquardt
 
 - test x^2
 
