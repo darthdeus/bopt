@@ -1,6 +1,9 @@
 import abc
 from typing import Optional, List
 
+import tensorflow as tf
+tf.enable_eager_execution()
+
 import numpy as np
 from bopt.basic_types import Bound
 
@@ -13,6 +16,7 @@ class Kernel(abc.ABC):
 
     def __init__(self):
         self.round_indexes = None
+        self.params = {}
 
     def __call__(self, x_init: np.ndarray, y_init: np.ndarray = None) -> np.ndarray:
         if y_init is None:
@@ -97,8 +101,12 @@ class Kernel(abc.ABC):
 class SquaredExp(Kernel):
     def __init__(self, l: float = 1., sigma: float = 1.) -> None:
         super().__init__()
-        self.l = l
-        self.sigma = sigma
+
+        self.params = {
+            "lengthscale": tf.Variable(l, dtype=tf.float64),
+            "sigma":       tf.Variable(sigma, dtype=tf.float64)
+        }
+
         self.name = "sqexp"
 
     def kernel(self, x: np.ndarray, y: np.ndarray) -> np.ndarray:
@@ -113,12 +121,14 @@ class SquaredExp(Kernel):
             epsmin = 1e-5
             epsmax = 1e5
 
-            # TODO: `ls` not clipped?
-            ls = np.clip(self.l**2, epsmin, epsmax)
-            var = np.clip(self.sigma**2, epsmin, epsmax)
 
-            exp = - (0.5 / self.l**2) * sqnorm
-            return var * np.exp(exp)
+            ls  = tf.clip_by_value(self.params["lengthscale"], epsmin, epsmax)
+            var = tf.clip_by_value(self.params["sigma"] ** 2, epsmin, epsmax)
+            # ls = np.clip(self.params["lengthscale"]**2, epsmin, epsmax)
+            # var = np.clip(self.sigma**2, epsmin, epsmax)
+
+            exp = - (0.5 / ls**2) * sqnorm
+            return var * tf.exp(exp)
 
         else:
             return self.sigma ** 2 * np.exp(- (1 / (2 * self.l ** 2)) * (x * x + y * y - 2 * x * y))
@@ -136,17 +146,20 @@ class SquaredExp(Kernel):
         return [(1e-5, None), (1e-5, None)]
 
     def set_params(self, theta) -> "Kernel":
-        self.l = theta[0]
-        self.sigma = theta[1]
+        self.params["lengthscale"] = theta[0]
+        self.params["sigma"] = theta[1]
         return self
 
     def copy(self) -> "Kernel":
-        copy = SquaredExp(l=self.l, sigma=self.sigma)
+        copy = SquaredExp(l=self.params["lengthscale"], sigma=self.params["sigma"])
         copy.round_indexes = self.round_indexes
         return copy
 
     def __repr__(self):
-        return f"SquaredExp(l={round(self.l, 5)}, sigma={round(self.sigma, 2)})"
+        # TODO: numpy :( assert and fix all places where numpy values are coming in
+        param_str = ",".join([f"{name}={value}"
+                              for name, value in self.params.items()])
+        return f"SquaredExp({param_str})"
 
 
 class Matern(Kernel):

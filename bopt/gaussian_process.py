@@ -78,9 +78,10 @@ class GaussianProcess:
 
         noise = self.noise * np.eye(len(self.X_train))
 
-        K = self.kernel(self.X_train, self.X_train) + noise
-        K_s = self.kernel(self.X_train, X_test)
-        K_ss = self.kernel(X_test, X_test)
+        # TODO: get rid of numpy
+        K = self.kernel(self.X_train, self.X_train).numpy() + noise
+        K_s = self.kernel(self.X_train, X_test).numpy()
+        K_ss = self.kernel(X_test, X_test).numpy()
 
         # Symmetrization hack
         K = (K + K.T) / 2.0
