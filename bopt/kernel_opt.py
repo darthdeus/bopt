@@ -114,8 +114,6 @@ def compute_optimized_kernel_tf(X_train, y_train, kernel: Kernel = SquaredExp())
 
     trace: List[float] = []
 
-    y_train_expanded = tf.expand_dims(y_train, -1)
-
     bounds_fn_tf = lambda x: tf.nn.softplus(x) + 1e-5
     bounds_fn_np = lambda x: np.logaddexp(0, x) + 1e-5
 
@@ -134,7 +132,7 @@ def compute_optimized_kernel_tf(X_train, y_train, kernel: Kernel = SquaredExp())
 
             K = tf_sqexp_kernel(X_train, X_train, ls, sigma) + noise
 
-            t1 = tf.transpose(y_train_expanded) @ tf.linalg.solve(K, y_train_expanded)
+            t1 = tf.transpose(y_train) @ tf.linalg.solve(K, y_train)
             t2 = 2*tf.linalg.slogdet(K).log_abs_determinant
 
             # https://blogs.sas.com/content/iml/2012/10/31/compute-the-log-determinant-of-a-matrix.html
@@ -285,7 +283,7 @@ def scikit_tf(X_train, y_train, noise_level_: float, kernel: Kernel = SquaredExp
 def compute_optimized_kernel(kernel, X_train, y_train) -> Tuple[Kernel, float]:
     # TODO: noise 1000 overflow
     USE_TF = False
-    # USE_TF = True
+    USE_TF = True
 
     if y_train.ndim == 1:
         y_train = np.expand_dims(y_train, -1)
