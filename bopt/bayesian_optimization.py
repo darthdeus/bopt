@@ -1,10 +1,11 @@
-from typing import Callable, List, Union, Any, Dict, Tuple
+import os
 
 import psutil
 import time
 import matplotlib.pyplot as plt
 import numpy as np
 from scipy.optimize import minimize
+from typing import Callable, List, Union, Any, Dict, Tuple
 
 from bopt.acquisition_functions import expected_improvement, AcquisitionFunction
 from bopt.gaussian_process import GaussianProcess
@@ -232,7 +233,8 @@ def bo_plot_exploration(f: Callable[[np.ndarray], float],
                             callback=plot_iteration, optimize_kernel=optimize_kernel)
 
 
-def plot_2d_optim_result(result: OptimizationResult, resolution: float = 30, noise: float = 0.0, gp = None):
+def plot_2d_optim_result(result: OptimizationResult,
+        resolution: float = 30, noise: float = 0.0, gp = None):
     # TODO: handle more than 2 dimensions properly
     # assert len(result.params) == 2
 
@@ -263,15 +265,19 @@ def plot_2d_optim_result(result: OptimizationResult, resolution: float = 30, noi
     gp.posterior(X_2d)
     mu, _ = gp.mu_std()
 
-    print("..." + str(gp.kernel) + " " + str(gp.noise))
+    # print("..." + str(gp.kernel) + " " + str(gp.noise))
 
     mu_mat = mu.reshape(gx.shape[0], gx.shape[1])
     extent = [b1.low, b1.high, b2.high, b2.low]
 
     assert result.best_x is not None
 
-    plt.title(f"GP posterior {result.best_y:.3f}, {result.kernel}")
-    plt.imshow(mu_mat, extent=extent, aspect="auto")
+    U_LB = os.environ.get("USE_LBFGS", False)
+    U_TF = os.environ.get("USE_TF", False)
+
+    # plt.title(f"LBFGS={U_LB} TF={U_TF}   noise={round(gp.noise, 2)} {result.kernel}", fontsize=20)
+    # plt.pcolor(mu_mat, extent=extent, aspect="auto")
+    plt.pcolor(gx, gy, mu_mat, cmap="jet")
     plt.scatter(X_sample[:, 0], X_sample[:, 1], c="k")
     plt.scatter([result.best_x[0]], [result.best_x[1]], c="r")
 

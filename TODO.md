@@ -1,5 +1,7 @@
 ## TODO:
 
+- neukladat meta_dir nikde v jobech, rozbiji to relativni cesty
+
 - ukladat kernel parametry v kernelu jako dictionary
 - tape.watch(x)
 - overridovani parametru

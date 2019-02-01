@@ -161,9 +161,9 @@ class SquaredExp(Kernel):
 
     def __repr__(self):
         # TODO: numpy :( assert and fix all places where numpy values are coming in
-        param_str = ",".join([f"{name}={value}"
+        param_str = " ".join([f"{name[:2]}={round(value.numpy().item(), 2)}"
                               for name, value in self.params.items()])
-        return f"SquaredExp({param_str})"
+        return f"{param_str}"
 
 
 class Matern(Kernel):

@@ -1,3 +1,5 @@
+import os
+
 import numpy as np
 import tensorflow as tf
 tf.enable_eager_execution()
@@ -13,9 +15,11 @@ from bopt.kernels import Kernel, SquaredExp
 def is_tensor(x):
     return isinstance(x, (tf.Tensor, tf.SparseTensor, tf.Variable))
 
+PRINT_EACH = 20
+PRINT_ITER = 0
 
 def print_rounded(*args):
-    print("\t".join(list(map(lambda x: str(round(x, 3).item()), args))))
+    print("    ".join(list(map(lambda x: "{:.6f}".format(x.item()), args))))
 
 
 def tf_kernel_nll(X_train: np.ndarray, y_train: np.ndarray, ls, sigma, noise):
@@ -74,7 +78,11 @@ def tf_kernel_nll(X_train: np.ndarray, y_train: np.ndarray, ls, sigma, noise):
     param_traces["noise"].append(float(noise.numpy()))
     param_traces["nll"].append(float(nll.numpy()))
 
-    # print_rounded(ls.numpy(), sigma.numpy(), noise_level.numpy(), nll.numpy())
+
+    global PRINT_ITER
+    PRINT_ITER += 1
+    if PRINT_ITER % PRINT_EACH == 0:
+        print_rounded(ls.numpy(), sigma.numpy(), noise.numpy(), nll.numpy())
     return nll
 
 
@@ -136,8 +144,8 @@ def compute_optimized_kernel_tf(X_train, y_train, kernel: Kernel) \
     assert X_train.ndim == 2, X_train.ndim
     assert y_train.ndim == 2
 
-    if not isinstance(kernel, SquaredExp):
-        raise NotImplementedError()
+    # if not isinstance(kernel, SquaredExp):
+    #     raise NotImplementedError()
 
     def_sigma, def_ls = kernel.default_params(X_train, y_train)
     def_noise = 0.0
@@ -162,9 +170,6 @@ def compute_optimized_kernel_tf(X_train, y_train, kernel: Kernel) \
 
         return nll, grads_
 
-    USE_LBFGS = True
-    # USE_LBFGS = False
-
     def optimize_bfgs():
         # ls: 0.4692210017785583
         # sigma: 149.12150786283382
@@ -180,15 +185,16 @@ def compute_optimized_kernel_tf(X_train, y_train, kernel: Kernel) \
             max_iterations=200,
         )
 
-        print("#######################")
-        print("       LBFGS DONE      ")
-        print("#######################")
+        # print("#######################")
+        # print("       LBFGS DONE      ")
+        # print("#######################")
 
         return bounds_fn_tf(result.position).numpy()
 
     def optimize_sgd():
         init = tf.constant([0.469, 150, 34], dtype=tf.float64)
         init = tf.constant([def_ls, def_sigma, def_noise], dtype=tf.float64)
+        # init = tf.constant([10, 100, 100], dtype=tf.float64)
 
         ls_var          = tf.Variable(init[0], dtype=tf.float64)
         sigma_var       = tf.Variable(init[1], dtype=tf.float64)
@@ -197,12 +203,12 @@ def compute_optimized_kernel_tf(X_train, y_train, kernel: Kernel) \
         global_step = tf.Variable(0)
 
         learning_rate = tf.train.exponential_decay(1e-2, global_step, 300, 0.5)
-        optimizer = tf.train.AdamOptimizer(learning_rate)
+        optimizer = tf.train.AdamOptimizer(1e-3)
         # optimizer = tf.train.MomentumOptimizer(learning_rate, momentum=1e-3,
         #         global_step=global_step)
         variables = [ls_var, sigma_var, noise_level_var]
 
-        for i in range(2000):
+        for i in range(1000):
             global_step.assign_add(1)
             nll, grads = tf_kernel_nll_with_grads(
                     X_train, y_train,
@@ -211,10 +217,9 @@ def compute_optimized_kernel_tf(X_train, y_train, kernel: Kernel) \
 
             optimizer.apply_gradients(zip(grads, variables))
 
-        print("#######################")
-        print("         SGD DONE      ")
-        print("#######################")
-
+        # print("#######################")
+        # print("         SGD DONE      ")
+        # print("#######################")
 
         return bounds_fn_tf(tf.stack(variables)).numpy()
 
@@ -234,7 +239,10 @@ def compute_optimized_kernel_tf(X_train, y_train, kernel: Kernel) \
         plt.show()
         trace = []
 
-    if USE_LBFGS:
+    # os.setenv("USE_LBFGS", True)
+    # os.setenv("USE_LBFGS", False)
+
+    if os.environ.get("USE_LBFGS", "0") == "1":
         ls, sigma, noise_level = optimize_bfgs()
     else:
         ls, sigma, noise_level = optimize_sgd()
@@ -292,15 +300,15 @@ def compute_optimized_kernel(kernel, X_train, y_train) -> Tuple[Kernel, float]:
     # k, n = compute_optimized_kernel_tf(X_train, y_train, noise_level, kernel)
 
     # TODO: noise 1000 overflow
-    USE_TF = False
-    USE_TF = True
+
+    # os.setenv("USE_TF", True)
+    # os.setenv("USE_TF", False)
 
     constraint_transform = lambda x: tf.nn.softplus(x) + 1e-5
 
-    if USE_TF:
+    if os.environ.get("USE_TF", "0") == "1":
         return compute_optimized_kernel_tf(X_train, y_train, kernel)
     else:
-        trace = []
         global i
         i = 0
         def step(theta):
@@ -317,8 +325,6 @@ def compute_optimized_kernel(kernel, X_train, y_train) -> Tuple[Kernel, float]:
 
             nll = nll.numpy()
 
-
-            trace.append(nll)
             global i
 
             # if i % 20 == 0:
@@ -336,16 +342,8 @@ def compute_optimized_kernel(kernel, X_train, y_train) -> Tuple[Kernel, float]:
         res = minimize(step,
                        default_params,
                        method="L-BFGS-B",
-                       tol=0,
+                       tol=1e-6,
                        options={"maxiter": 100})
-
-        PLOT_TRACE = True
-        PLOT_TRACE = False
-
-        if PLOT_TRACE:
-            import matplotlib.pyplot as plt
-            plt.plot(trace)
-            plt.show()
 
         transformed_x = constraint_transform(res.x).numpy()
         kernel.set_params(transformed_x)

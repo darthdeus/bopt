@@ -108,10 +108,16 @@ def run(args) -> None:
         }
         json_data = jsonpickle.dumps(data)
 
+        param_traces = bopt.kernel_opt.get_param_traces()
+
+        nll_trace = param_traces["nll"]
+        param_traces.pop("nll")
+
         return render_template("index.html", data=data,
                 json_data=json_data,
                 experiment=experiment,
-                param_traces=bopt.kernel_opt.get_param_traces(),
+                param_traces=param_traces,
+                nll_trace=nll_trace,
                 result_gp=gp)
 
 

@@ -51,6 +51,7 @@
 
         <div class="col-md">
           <div id="param-trace-plot"></div>
+          <div id="param-nll-plot"></div>
           <script>
             Plotly.plot("param-trace-plot", [
               {% for trace_name, trace_vals in param_traces.items() %}
@@ -59,8 +60,13 @@
                 name: "{{trace_name}}"
               },
               {% endfor %}
-            ], {
-            });
+            ]);
+            Plotly.plot("param-nll-plot", [
+              {
+                y: {{nll_trace|safe}},
+                name: "nll"
+              }
+            ]);
           </script>
         </div>
 
