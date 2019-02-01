@@ -38,11 +38,15 @@
 
       <p>Best params: {{data.best_x}}, fitness: {{data.best_y}}</p>
 
-      {{data.minval}} - {{data.maxval}}
+      <p>Value range [{{data.minval}} - {{data.maxval}}]</p>
 
       <div class="row">
         <div class="col-md">
-          <p>{{result_gp.kernel}} - {{result_gp.noise}}</p>
+          <p>
+            ls: {{result_gp.kernel.params["lengthscale"].numpy()}}<br>
+            sigma: {{result_gp.kernel.params["sigma"].numpy()}}<br>
+            noise: {{result_gp.noise}}
+          </p>
           <div id="heatmap"></div>
         </div>
         <div class="col-md">

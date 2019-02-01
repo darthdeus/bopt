@@ -136,8 +136,6 @@ def compute_optimized_kernel_tf(X_train, y_train, kernel: Kernel) \
                 X_train, y_train, ls_var, sigma_var, noise_var,
                 bounds_fn_tf)
 
-        print(ls, sigma, noise, nll.numpy())
-
         grads_ = tf.stack(grads)
 
         return nll, grads_
@@ -154,9 +152,7 @@ def compute_optimized_kernel_tf(X_train, y_train, kernel: Kernel) \
         )
 
         print("#######################")
-        print("#######################")
         print("       LBFGS DONE      ")
-        print("#######################")
         print("#######################")
 
         return bounds_fn_tf(result.position).numpy()
@@ -182,9 +178,7 @@ def compute_optimized_kernel_tf(X_train, y_train, kernel: Kernel) \
             optimizer.apply_gradients(zip(grads, variables))
 
         print("#######################")
-        print("#######################")
         print("         SGD DONE      ")
-        print("#######################")
         print("#######################")
 
 
