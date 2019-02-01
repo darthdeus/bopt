@@ -170,8 +170,9 @@ def plot_kernel_loss(kernel: Kernel, X_train: np.ndarray, y_train: np.ndarray,
     X = np.linspace(0.00001, xmax, num=50)
 
     def likelihood(l):
-        return kernel_opt.kernel_log_likelihood(kernel.set_params(np.array([l, sigma])),
-                                                         X_train, y_train, noise_level)
+        return kernel_opt.kernel_log_likelihood(
+                 kernel.set_params(np.array([l, sigma])),
+                 X_train, y_train, noise_level)
 
     data = np.vectorize(likelihood)(X)
 

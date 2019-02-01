@@ -70,17 +70,17 @@ def kernel_log_likelihood(kernel: Kernel, X_train: np.ndarray,
     # L = cholesky(K)
     # t1 = 0.5 * y_train.T @ solve(L.T, solve(L, y_train))
 
-    t1 = 0.5 * y_train.T @ solve(K, y_train)
+    t1 = y_train.T @ solve(K, y_train)
 
     # https://blogs.sas.com/content/iml/2012/10/31/compute-the-log-determinant-of-a-matrix.html
 
     sign, logdet = np.linalg.slogdet(K)
-    # t2 = 0.5 * 2 * np.sum(np.log(np.diagonal(cholesky(K))))
-    t2 = logdet
+    t2 = 2*logdet
+    # t2 = 2 * np.sum(np.log(np.diagonal(cholesky(K))))
 
-    t3 = 0.5 * len(X_train) * np.log(2 * np.pi)
+    t3 = len(X_train) * np.log(2 * np.pi)
 
-    loglikelihood = t1 + t2 + t3
+    loglikelihood = 0.5 * (t1 + t2 + t3)
 
     # print_rounded(kernel.l, kernel.sigma, noise_level, loglikelihood)
 
@@ -281,10 +281,6 @@ def scikit_tf(X_train, y_train, noise_level_: float, kernel: Kernel = SquaredExp
 
 
 def compute_optimized_kernel(kernel, X_train, y_train) -> Tuple[Kernel, float]:
-    # TODO: noise 1000 overflow
-    USE_TF = False
-    USE_TF = True
-
     if y_train.ndim == 1:
         y_train = np.expand_dims(y_train, -1)
 
@@ -296,25 +292,27 @@ def compute_optimized_kernel(kernel, X_train, y_train) -> Tuple[Kernel, float]:
 
     # k, n = compute_optimized_kernel_tf(X_train, y_train, noise_level, kernel)
 
+    # TODO: noise 1000 overflow
+    USE_TF = False
+    # USE_TF = True
+
     if USE_TF:
-        X_train = X_train.astype(np.float64)
-        y_train = y_train.astype(np.float64)
         return compute_optimized_kernel_tf(X_train, y_train, kernel)
     else:
         trace = []
         global i
         i = 0
         def step(theta):
-            # nll = kernel_log_likelihood(kernel.set_params(theta[:-1]), X_train, y_train, theta[-1])
+            nll2 = kernel_log_likelihood(kernel.set_params(theta[:-1]), X_train, y_train, theta[-1])
             nll = scikit_tf(X_train, y_train, theta[-1], kernel.set_params(theta[:-1])).numpy()
 
-            # print((nll - nll2).numpy())
+            print((nll - nll2))
 
             trace.append(nll)
             global i
 
-            if i % 1 == 0:
-                print(theta, nll)
+            # if i % 1 == 0:
+                # print(theta, nll)
 
             i += 1
             return nll
