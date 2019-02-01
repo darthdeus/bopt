@@ -102,6 +102,7 @@ class SquaredExp(Kernel):
     def __init__(self, l: float = 1., sigma: float = 1.) -> None:
         super().__init__()
 
+        # TODO: assert correct type of l/s
         self.params = {
             "lengthscale": tf.Variable(l, dtype=tf.float64),
             "sigma":       tf.Variable(sigma, dtype=tf.float64)
