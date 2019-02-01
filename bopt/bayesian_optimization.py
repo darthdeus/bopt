@@ -232,7 +232,7 @@ def bo_plot_exploration(f: Callable[[np.ndarray], float],
                             callback=plot_iteration, optimize_kernel=optimize_kernel)
 
 
-def plot_2d_optim_result(result: OptimizationResult, resolution: float = 30, noise: float = 0.0):
+def plot_2d_optim_result(result: OptimizationResult, resolution: float = 30, noise: float = 0.0, gp = None):
     # TODO: handle more than 2 dimensions properly
     # assert len(result.params) == 2
 
@@ -250,17 +250,15 @@ def plot_2d_optim_result(result: OptimizationResult, resolution: float = 30, noi
     X_2d = np.c_[gx.ravel(), gy.ravel()]
 
     bounds = [p.range for p in result.params]
-    # TODO: optimize kernel
 
     X_sample = result.X_sample[:, :2]
 
-    gp = GaussianProcess(kernel=result.kernel.with_bounds(bounds)) \
-        .fit(X_sample, result.y_sample) \
-        .optimize_kernel()
+    assert gp is not None, "gp is None"
 
-    # gp.noise = .5
-    # gp.kernel.l = 5.
-    # gp.kernel.sigma = 1.
+    # TODO: with_bounds?
+    # gp = GaussianProcess(kernel=result.kernel.with_bounds(bounds)) \
+    #     .fit(X_sample, result.y_sample) \
+    #     .optimize_kernel()
 
     gp.posterior(X_2d)
     mu, _ = gp.mu_std()
@@ -277,4 +275,4 @@ def plot_2d_optim_result(result: OptimizationResult, resolution: float = 30, noi
     plt.scatter(X_sample[:, 0], X_sample[:, 1], c="k")
     plt.scatter([result.best_x[0]], [result.best_x[1]], c="r")
 
-    return mu_mat, extent, x1, x2, gp
+    return mu_mat, extent, x1, x2

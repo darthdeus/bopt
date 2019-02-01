@@ -34,8 +34,14 @@ def run(args) -> None:
 
     @app.route("/")
     def index():
+        bopt.clear_param_traces()
+
         experiment = bopt.Experiment.deserialize(app.config.get("meta_dir"))
         optim_result = experiment.current_optim_result()
+
+        gp = bopt.GaussianProcess(kernel=optim_result.kernel) \
+                .fit(optim_result.X_sample, optim_result.y_sample) \
+                .optimize_kernel()
 
         dimensions = []
 
@@ -48,7 +54,7 @@ def run(args) -> None:
                 "label": param.name,
             })
 
-            x, y, std, gp = optim_result.slice_at(i)
+            x, y, std = optim_result.slice_at(i, gp)
 
             points_x = optim_result.X_sample[:, i].tolist()
             points_y = optim_result.y_sample.tolist()
@@ -65,7 +71,7 @@ def run(args) -> None:
 
             slices.append(posterior_slice)
 
-        mu_mat, extent, gx, gy, result_gp = bopt.plot_2d_optim_result(optim_result)
+        mu_mat, extent, gx, gy = bopt.plot_2d_optim_result(optim_result, gp=gp)
         exp_gp = bopt.base64_plot()
 
         heatmap = []
@@ -105,7 +111,8 @@ def run(args) -> None:
         return render_template("index.html", data=data,
                 json_data=json_data,
                 experiment=experiment,
-                result_gp=result_gp)
+                param_traces=bopt.kernel_opt.get_param_traces(),
+                result_gp=gp)
 
 
     server = Server(app.wsgi_app)

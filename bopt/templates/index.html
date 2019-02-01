@@ -39,7 +39,6 @@
       <p>Best params: {{data.best_x}}, fitness: {{data.best_y}}</p>
 
       <p>Value range [{{data.minval}} - {{data.maxval}}]</p>
-
       <div class="row">
         <div class="col-md">
           <p>
@@ -49,11 +48,27 @@
           </p>
           <div id="heatmap"></div>
         </div>
+
         <div class="col-md">
-          <div id="parallel-coord"></div>
+          <div id="param-trace-plot"></div>
+          <script>
+            Plotly.plot("param-trace-plot", [
+              {% for trace_name, trace_vals in param_traces.items() %}
+              {
+                y: {{trace_vals|safe}},
+                name: "{{trace_name}}"
+              },
+              {% endfor %}
+            ], {
+            });
+          </script>
         </div>
+
       </div>
 
+      <div class="col-md">
+        <div id="parallel-coord"></div>
+      </div>
 
       <script type="text/javascript">
         var m = 20;

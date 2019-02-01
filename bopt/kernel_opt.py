@@ -3,7 +3,7 @@ import tensorflow as tf
 tf.enable_eager_execution()
 import tensorflow_probability as tfp
 
-from typing import Callable, Tuple, List
+from typing import Callable, Tuple, List, Dict
 from numpy.linalg import inv, cholesky, det, solve
 from scipy.optimize import minimize
 
@@ -69,6 +69,11 @@ def tf_kernel_nll(X_train: np.ndarray, y_train: np.ndarray, ls, sigma, noise):
 
     nll = 0.5 * tf.squeeze(t1 + t2 + t3)
 
+    param_traces["ls"].append(float(ls.numpy()))
+    param_traces["sigma"].append(float(sigma.numpy()))
+    param_traces["noise"].append(float(noise.numpy()))
+    param_traces["nll"].append(float(nll.numpy()))
+
     # print_rounded(ls.numpy(), sigma.numpy(), noise_level.numpy(), nll.numpy())
     return nll
 
@@ -109,6 +114,23 @@ def tf_sqexp_kernel(a: tf.Tensor, b: tf.Tensor, ls: tf.Tensor, sigma: tf.Tensor)
     return tf.pow(sigma, 2) * tf.exp(exp)
 
 
+param_traces: Dict = {
+    "ls": [],
+    "sigma": [],
+    "noise": [],
+    "nll": []
+}
+
+def get_param_traces():
+    return param_traces
+
+def clear_param_traces():
+    param_traces["ls"] = []
+    param_traces["sigma"] = []
+    param_traces["noise"] = []
+    param_traces["nll"] = []
+
+
 def compute_optimized_kernel_tf(X_train, y_train, kernel: Kernel) \
         -> Tuple[Kernel, float]:
     assert X_train.ndim == 2, X_train.ndim
@@ -141,14 +163,21 @@ def compute_optimized_kernel_tf(X_train, y_train, kernel: Kernel) \
         return nll, grads_
 
     USE_LBFGS = True
-    USE_LBFGS = False
+    # USE_LBFGS = False
 
     def optimize_bfgs():
+        # ls: 0.4692210017785583
+        # sigma: 149.12150786283382
+        # noise: 34.913024881555735
+
+        init = tf.constant([0.469, 150, 34], dtype=tf.float64)
         init = tf.constant([def_ls, def_sigma, def_noise], dtype=tf.float64)
+
         result = tfp.optimizer.bfgs_minimize(
             value_and_gradients,
             initial_position=init,
-            tolerance=tf.constant(1e-3, dtype=tf.float64)
+            parallel_iterations=8,
+            max_iterations=200,
         )
 
         print("#######################")
@@ -158,22 +187,27 @@ def compute_optimized_kernel_tf(X_train, y_train, kernel: Kernel) \
         return bounds_fn_tf(result.position).numpy()
 
     def optimize_sgd():
-        ls_var          = tf.Variable(def_ls,    dtype=tf.float64)
-        sigma_var       = tf.Variable(def_sigma, dtype=tf.float64)
-        noise_level_var = tf.Variable(def_noise, dtype=tf.float64)
+        init = tf.constant([0.469, 150, 34], dtype=tf.float64)
+        init = tf.constant([def_ls, def_sigma, def_noise], dtype=tf.float64)
 
-        optimizer = tf.train.AdamOptimizer(learning_rate=1e-2)
-        # optimizer = tf.train.MomentumOptimizer(learning_rate=1e-2, momentum=1e-3)
+        ls_var          = tf.Variable(init[0], dtype=tf.float64)
+        sigma_var       = tf.Variable(init[1], dtype=tf.float64)
+        noise_level_var = tf.Variable(init[2], dtype=tf.float64)
+
+        global_step = tf.Variable(0)
+
+        learning_rate = tf.train.exponential_decay(1e-2, global_step, 300, 0.5)
+        optimizer = tf.train.AdamOptimizer(learning_rate)
+        # optimizer = tf.train.MomentumOptimizer(learning_rate, momentum=1e-3,
+        #         global_step=global_step)
         variables = [ls_var, sigma_var, noise_level_var]
 
-        for i in range(200):
+        for i in range(2000):
+            global_step.assign_add(1)
             nll, grads = tf_kernel_nll_with_grads(
                     X_train, y_train,
                     ls_var, sigma_var, noise_level_var,
                     bounds_fn_tf)
-            # nll, tape = tf_nll(*variables)
-            #
-            # grads = tape.gradient(nll, variables)
 
             optimizer.apply_gradients(zip(grads, variables))
 
@@ -225,7 +259,7 @@ def tf_kernel_nll_with_grads(X_train, y_train, ls, sigma, noise,
     with tf.GradientTape() as tape:
         # tape.watch(ls)
         # tape.watch(sigma)
-        # tape.watch(noise_level)
+        # tape.watch(noise)
         ls_ = constraint_transform(ls)
         sigma_ = constraint_transform(sigma)
         noise_ = constraint_transform(noise)
