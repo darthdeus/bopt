@@ -125,28 +125,6 @@ def compute_optimized_kernel_tf(X_train, y_train, kernel: Kernel) \
     bounds_fn_tf = lambda x: tf.nn.softplus(x) + 1e-5
     bounds_fn_np = lambda x: np.logaddexp(0, x) + 1e-5
 
-    def tf_nll(ls_var, sigma_var, noise_level_var):
-        with tf.GradientTape() as tape:
-            # TODO: check if this is actually required
-            tape.watch(ls_var)
-            tape.watch(sigma_var)
-            tape.watch(noise_level_var)
-
-            ls          = bounds_fn_tf(ls_var)
-            sigma       = bounds_fn_tf(sigma_var)
-            noise_level = bounds_fn_tf(noise_level_var)
-
-            kernel.params = {
-                "lengthscale": ls,
-                "sigma": sigma
-            }
-            nll = tf_kernel_nll(kernel, X_train, y_train, noise_level)
-
-            trace.append(nll)
-            assert nll.ndim == 0, f"got {nll.ndim} with shape {nll.shape}"
-
-        return nll, tape
-
     def value_and_gradients(params):
         ls, sigma, noise = tf.cast(params, tf.float64)
 
@@ -159,16 +137,13 @@ def compute_optimized_kernel_tf(X_train, y_train, kernel: Kernel) \
                 bounds_fn_tf)
 
         print(ls, sigma, noise, nll.numpy())
-        # nll, tape = tf_nll(*params)
-        #
-        # grads = tape.gradient(nll, params)
-        #
-        grads_ = tf.constant(list(map(lambda x: x.numpy(), grads)))
+
+        grads_ = tf.stack(grads)
 
         return nll, grads_
 
     USE_LBFGS = True
-    # USE_LBFGS = False
+    USE_LBFGS = False
 
     def optimize_bfgs():
         init = tf.constant([def_ls, def_sigma, def_noise], dtype=tf.float64)
@@ -178,7 +153,13 @@ def compute_optimized_kernel_tf(X_train, y_train, kernel: Kernel) \
             tolerance=tf.constant(1e-3, dtype=tf.float64)
         )
 
-        return bounds_fn_np(result.position.numpy())
+        print("#######################")
+        print("#######################")
+        print("       LBFGS DONE      ")
+        print("#######################")
+        print("#######################")
+
+        return bounds_fn_tf(result.position).numpy()
 
     def optimize_sgd():
         ls_var          = tf.Variable(def_ls,    dtype=tf.float64)
@@ -200,7 +181,14 @@ def compute_optimized_kernel_tf(X_train, y_train, kernel: Kernel) \
 
             optimizer.apply_gradients(zip(grads, variables))
 
-        return bounds_fn_np(list(map(lambda x: x.numpy(), variables)))
+        print("#######################")
+        print("#######################")
+        print("         SGD DONE      ")
+        print("#######################")
+        print("#######################")
+
+
+        return bounds_fn_tf(tf.stack(variables)).numpy()
 
 
     PLOT_TRACE = True
@@ -277,7 +265,7 @@ def compute_optimized_kernel(kernel, X_train, y_train) -> Tuple[Kernel, float]:
 
     # TODO: noise 1000 overflow
     USE_TF = False
-    # USE_TF = True
+    USE_TF = True
 
     constraint_transform = lambda x: tf.nn.softplus(x) + 1e-5
 
@@ -313,16 +301,12 @@ def compute_optimized_kernel(kernel, X_train, y_train) -> Tuple[Kernel, float]:
             return nll
 
         default_params = np.array(kernel.default_params(X_train, y_train).tolist() + [0.0])
-        # default_params = np.array([k.l, k.sigma, n])
 
         if len(default_params) == 0:
             return kernel
 
-        bounds_with_noise = kernel.param_bounds() + [(1e-5, None)]
-
         res = minimize(step,
                        default_params,
-                       # bounds=bounds_with_noise,
                        method="L-BFGS-B",
                        tol=0,
                        options={"maxiter": 100})
