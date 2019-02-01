@@ -18,7 +18,7 @@ def base64_plot():
     plt.gcf().clear()
     plt.close()
     image.seek(0)
-    return base64.encodestring(image.getvalue()).decode("ascii")
+    return base64.encodebytes(image.getvalue()).decode("ascii")
 
 
 def imshow(data: np.ndarray, a_values: np.ndarray, b_values: np.ndarray,

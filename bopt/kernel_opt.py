@@ -10,14 +10,19 @@ from scipy.optimize import minimize
 from bopt.kernels import Kernel, SquaredExp
 
 
+def is_tensor(x):
+    return isinstance(x, (tf.Tensor, tf.SparseTensor, tf.Variable))
+
+
 def print_rounded(*args):
     print("\t".join(list(map(lambda x: str(round(x, 3).item()), args))))
 
 
-def tf_kernel_nll(X_train: np.ndarray, y_train: np.ndarray, ls, sigma, noise_level):
-    assert isinstance(ls, tf.Variable)
-    assert isinstance(sigma, tf.Variable)
-    assert isinstance(noise_level, tf.Variable)
+def tf_kernel_nll(X_train: np.ndarray, y_train: np.ndarray, ls, sigma, noise):
+    assert is_tensor(ls)
+    assert is_tensor(sigma)
+    assert is_tensor(noise)
+
     # K = kernel.kernel(X_train, X_train) + noise
     #
     # # L = cholesky(K)
@@ -39,9 +44,13 @@ def tf_kernel_nll(X_train: np.ndarray, y_train: np.ndarray, ls, sigma, noise_lev
     #
     # return loglikelihood
 
-    noise = tf.eye(len(X_train), dtype=tf.float64) * noise_level**2
+    # print("\n\n\n")
+    # print_rounded(*map(lambda x: x.numpy(), [ls, sigma, noise]))
+    # print("\n\n\n")
 
-    K = tf_sqexp_kernel(X_train, X_train, ls, sigma) + noise
+    noise_mat = tf.eye(len(X_train), dtype=tf.float64) * noise**2
+
+    K = tf_sqexp_kernel(X_train, X_train, ls, sigma) + noise_mat
 
     t1 = tf.transpose(y_train) @ tf.linalg.solve(K, y_train)
     t2 = 2*tf.linalg.slogdet(K).log_abs_determinant
@@ -67,27 +76,25 @@ def tf_kernel_nll(X_train: np.ndarray, y_train: np.ndarray, ls, sigma, noise_lev
 
 def kernel_log_likelihood(kernel: Kernel, X_train: np.ndarray,
                           y_train: np.ndarray, noise_level: float = 0) -> float:
-    noise = noise_level ** 2 * np.eye(len(X_train))
-    K = kernel(X_train, X_train) + noise
+    ls = kernel.params["lengthscale"]
+    sigma = kernel.params["sigma"]
+    assert is_tensor(ls)
+    assert is_tensor(sigma)
 
-    # L = cholesky(K)
-    # t1 = 0.5 * y_train.T @ solve(L.T, solve(L, y_train))
+    noise = tf.Variable(noise_level, dtype=tf.float64)
 
-    t1 = y_train.T @ solve(K, y_train)
+    if False:
+        noise = noise_level ** 2 * np.eye(len(X_train))
+        K = kernel(X_train, X_train) + noise
+        t1 = y_train.T @ solve(K, y_train)
 
-    # https://blogs.sas.com/content/iml/2012/10/31/compute-the-log-determinant-of-a-matrix.html
+        sign, logdet = np.linalg.slogdet(K)
+        t2 = 2*logdet
+        t3 = len(X_train) * np.log(2 * np.pi)
 
-    sign, logdet = np.linalg.slogdet(K)
-    t2 = 2*logdet
-    # t2 = 2 * np.sum(np.log(np.diagonal(cholesky(K))))
-
-    t3 = len(X_train) * np.log(2 * np.pi)
-
-    loglikelihood = 0.5 * (t1 + t2 + t3)
-
-    # print_rounded(kernel.l, kernel.sigma, noise_level, loglikelihood)
-
-    return loglikelihood
+        return 0.5 * (t1 + t2 + t3)
+    else:
+        return tf_kernel_nll(X_train, y_train, ls, sigma, noise)
 
 
 def tf_sqexp_kernel(a: tf.Tensor, b: tf.Tensor, ls: tf.Tensor, sigma: tf.Tensor) -> tf.Tensor:
@@ -120,6 +127,7 @@ def compute_optimized_kernel_tf(X_train, y_train, kernel: Kernel) \
 
     def tf_nll(ls_var, sigma_var, noise_level_var):
         with tf.GradientTape() as tape:
+            # TODO: check if this is actually required
             tape.watch(ls_var)
             tape.watch(sigma_var)
             tape.watch(noise_level_var)
@@ -146,7 +154,9 @@ def compute_optimized_kernel_tf(X_train, y_train, kernel: Kernel) \
         sigma_var = tf.Variable(sigma, dtype=tf.float64)
         noise_var = tf.Variable(noise, dtype=tf.float64)
 
-        nll, grads = tf_kernel_nll_with_grads(X_train, y_train, ls_var, sigma_var, noise_var)
+        nll, grads = tf_kernel_nll_with_grads(
+                X_train, y_train, ls_var, sigma_var, noise_var,
+                bounds_fn_tf)
 
         print(ls, sigma, noise, nll.numpy())
         # nll, tape = tf_nll(*params)
@@ -180,7 +190,10 @@ def compute_optimized_kernel_tf(X_train, y_train, kernel: Kernel) \
         variables = [ls_var, sigma_var, noise_level_var]
 
         for i in range(200):
-            nll, grads = tf_kernel_nll_with_grads(X_train, y_train, ls_var, sigma_var, noise_level_var)
+            nll, grads = tf_kernel_nll_with_grads(
+                    X_train, y_train,
+                    ls_var, sigma_var, noise_level_var,
+                    bounds_fn_tf)
             # nll, tape = tf_nll(*variables)
             #
             # grads = tape.gradient(nll, variables)
@@ -217,26 +230,30 @@ def compute_optimized_kernel_tf(X_train, y_train, kernel: Kernel) \
     return SquaredExp(l=ls, sigma=sigma), noise_level
 
 
-def tf_kernel_nll_with_grads(X_train, y_train, ls, sigma, noise_level, compute_grads: bool = True) \
+def tf_kernel_nll_with_grads(X_train, y_train, ls, sigma, noise,
+        constraint_transform: Callable, compute_grads: bool = True) \
         -> Tuple[Kernel, float]:
     assert X_train.ndim == 2, X_train.ndim
     assert y_train.ndim == 2
 
     assert isinstance(ls, tf.Variable)
     assert isinstance(sigma, tf.Variable)
-    assert isinstance(noise_level, tf.Variable)
+    assert isinstance(noise, tf.Variable)
 
     with tf.GradientTape() as tape:
         # tape.watch(ls)
         # tape.watch(sigma)
         # tape.watch(noise_level)
+        ls_ = constraint_transform(ls)
+        sigma_ = constraint_transform(sigma)
+        noise_ = constraint_transform(noise)
 
-        nll = tf_kernel_nll(X_train, y_train, ls, sigma, noise_level)
+        nll = tf_kernel_nll(X_train, y_train, ls_, sigma_, noise_)
 
         assert nll.ndim == 0, f"got {nll.ndim} with shape {nll.shape}"
 
     if compute_grads:
-        grad_vars = [ls, sigma, noise_level]
+        grad_vars = [ls, sigma, noise]
         grads = tape.gradient(nll, grad_vars)
     else:
         grads = None
@@ -269,14 +286,16 @@ def compute_optimized_kernel(kernel, X_train, y_train) -> Tuple[Kernel, float]:
         global i
         i = 0
         def step(theta):
-            nll2 = kernel_log_likelihood(kernel.set_params(theta[:-1]), X_train, y_train, theta[-1])
+            # nll2 = kernel_log_likelihood(kernel.set_params(theta[:-1]), X_train, y_train, theta[-1])
 
             ls_var = tf.Variable(theta[0], dtype=tf.float64)
             sigma_var = tf.Variable(theta[1], dtype=tf.float64)
             noise_var = tf.Variable(theta[2], dtype=tf.float64)
 
+            # TODO: handle constraints manually?
             nll, grads = tf_kernel_nll_with_grads(X_train, y_train,
-                    ls_var, sigma_var, noise_var, compute_grads=False)
+                    ls_var, sigma_var, noise_var, compute_grads=False,
+                    constraint_transform=lambda x: x)
 
             nll = nll.numpy()
 
@@ -284,8 +303,8 @@ def compute_optimized_kernel(kernel, X_train, y_train) -> Tuple[Kernel, float]:
             trace.append(nll)
             global i
 
-            if i % 20 == 0:
-                print((nll - nll2), grads)
+            # if i % 20 == 0:
+            #     print((nll - nll2), grads)
                 # print(theta, nll)
 
             i += 1
