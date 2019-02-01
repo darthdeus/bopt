@@ -168,7 +168,7 @@ def compute_optimized_kernel_tf(X_train, y_train, kernel: Kernel) \
         return nll, grads_
 
     USE_LBFGS = True
-    USE_LBFGS = False
+    # USE_LBFGS = False
 
     def optimize_bfgs():
         init = tf.constant([def_ls, def_sigma, def_noise], dtype=tf.float64)
@@ -279,6 +279,8 @@ def compute_optimized_kernel(kernel, X_train, y_train) -> Tuple[Kernel, float]:
     USE_TF = False
     # USE_TF = True
 
+    constraint_transform = lambda x: tf.nn.softplus(x) + 1e-5
+
     if USE_TF:
         return compute_optimized_kernel_tf(X_train, y_train, kernel)
     else:
@@ -295,7 +297,7 @@ def compute_optimized_kernel(kernel, X_train, y_train) -> Tuple[Kernel, float]:
             # TODO: handle constraints manually?
             nll, grads = tf_kernel_nll_with_grads(X_train, y_train,
                     ls_var, sigma_var, noise_var, compute_grads=False,
-                    constraint_transform=lambda x: x)
+                    constraint_transform=constraint_transform)
 
             nll = nll.numpy()
 
@@ -320,7 +322,7 @@ def compute_optimized_kernel(kernel, X_train, y_train) -> Tuple[Kernel, float]:
 
         res = minimize(step,
                        default_params,
-                       bounds=bounds_with_noise,
+                       # bounds=bounds_with_noise,
                        method="L-BFGS-B",
                        tol=0,
                        options={"maxiter": 100})
@@ -333,5 +335,6 @@ def compute_optimized_kernel(kernel, X_train, y_train) -> Tuple[Kernel, float]:
             plt.plot(trace)
             plt.show()
 
-        kernel.set_params(res.x)
-        return kernel, res.x[-1]
+        transformed_x = constraint_transform(res.x).numpy()
+        kernel.set_params(transformed_x)
+        return kernel, transformed_x[-1]
