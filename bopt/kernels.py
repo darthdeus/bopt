@@ -111,6 +111,8 @@ class SquaredExp(Kernel):
 
     def kernel(self, x: np.ndarray, y: np.ndarray) -> np.ndarray:
         if FAST_KERNEL:
+            assert isinstance(self.params["lengthscale"], tf.Variable)
+            assert isinstance(self.params["sigma"], tf.Variable)
             sqnorm = ((x - y) ** 2).sum(axis=2)
 
             assert x.shape[1] == 1
@@ -146,8 +148,9 @@ class SquaredExp(Kernel):
         return [(1e-5, None), (1e-5, None)]
 
     def set_params(self, theta) -> "Kernel":
-        self.params["lengthscale"] = theta[0]
-        self.params["sigma"] = theta[1]
+        # TODO: assert variable type
+        self.params["lengthscale"] = tf.Variable(theta[0], dtype=tf.float64)
+        self.params["sigma"] = tf.Variable(theta[1], dtype=tf.float64)
         return self
 
     def copy(self) -> "Kernel":
