@@ -31,7 +31,7 @@ class SGEJob(Job):
         assert re.match(pattern=".*has registered.*", string=output) is not None
 
 
-QSUB_JOBID_PATTERN = "Your job (\d+) \(\".*\"\) has been submitted"
+QSUB_JOBID_PATTERN = r"Your job (\d+) \(\".*\"\) has been submitted"
 
 
 class SGERunner(Runner):

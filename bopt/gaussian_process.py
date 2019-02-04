@@ -149,7 +149,7 @@ class GaussianProcess:
                 convert_to_rank1(self.X_test),
                 convert_to_rank1(self.X_train),
                 self.y_train,
-                kernel=self.kernel, noise=self.noise, **kwargs)
+                kernel=self.kernel, noise=self.noise, nll=round(self.log_prob().numpy().item(), 3), **kwargs)
 
         return self
 

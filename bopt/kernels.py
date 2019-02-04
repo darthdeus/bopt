@@ -104,7 +104,7 @@ class SquaredExp(Kernel):
 
         # TODO: assert correct type of l/s
         self.params = {
-            "lengthscale": tf.Variable(l, dtype=tf.float64),
+            "lengthscale": tf.Variable(l,     dtype=tf.float64),
             "sigma":       tf.Variable(sigma, dtype=tf.float64)
         }
 

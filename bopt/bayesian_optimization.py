@@ -241,8 +241,9 @@ def plot_2d_optim_result(result: OptimizationResult,
     b1 = result.params[0].range
     b2 = result.params[1].range
 
-    x1 = np.linspace(b1.low, b1.high, resolution)
-    x2 = np.linspace(b2.low, b2.high, resolution)
+    # TODO: float64
+    x1 = np.linspace(b1.low, b1.high, resolution, dtype=np.float64)
+    x2 = np.linspace(b2.low, b2.high, resolution, dtype=np.float64)
 
     assert len(x1) < 80, f"too large x1, len = {len(x1)}"
     assert len(x2) < 80, f"too large x1, len = {len(x2)}"
@@ -265,7 +266,7 @@ def plot_2d_optim_result(result: OptimizationResult,
     gp.posterior(X_2d)
     mu, _ = gp.mu_std()
 
-    # print("..." + str(gp.kernel) + " " + str(gp.noise))
+    print("..." + str(gp.kernel) + " " + str(gp.noise) + f" nll={round(gp.log_prob().numpy().item(), 2)}")
 
     mu_mat = mu.reshape(gx.shape[0], gx.shape[1])
     extent = [b1.low, b1.high, b2.high, b2.low]

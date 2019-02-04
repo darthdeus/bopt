@@ -12,6 +12,12 @@ from scipy.optimize import minimize
 from bopt.kernels import Kernel, SquaredExp
 
 
+os.environ["USE_LBFGS"] = "1"
+# os.environ["USE_LBFGS"] = "0"
+os.environ["USE_TF"] = "1"
+# os.environ["USE_TF"] = "0"
+
+
 def is_tensor(x):
     return isinstance(x, (tf.Tensor, tf.SparseTensor, tf.Variable))
 
@@ -52,6 +58,10 @@ def tf_kernel_nll(X_train: np.ndarray, y_train: np.ndarray, ls, sigma, noise):
     # print_rounded(*map(lambda x: x.numpy(), [ls, sigma, noise]))
     # print("\n\n\n")
 
+    # TODO: fuj, pryc s timhle a fixnout to poradne
+    if y_train.ndim == 1:
+        y_train = tf.expand_dims(y_train, -1)
+
     noise_mat = tf.eye(len(X_train), dtype=tf.float64) * noise**2
 
     K = tf_sqexp_kernel(X_train, X_train, ls, sigma) + noise_mat
@@ -78,11 +88,12 @@ def tf_kernel_nll(X_train: np.ndarray, y_train: np.ndarray, ls, sigma, noise):
     param_traces["noise"].append(float(noise.numpy()))
     param_traces["nll"].append(float(nll.numpy()))
 
+    # TODO: re-eneable
+    # global PRINT_ITER
+    # PRINT_ITER += 1
+    # if PRINT_ITER % PRINT_EACH == 0:
+    #     print_rounded(ls.numpy(), sigma.numpy(), noise.numpy(), nll.numpy())
 
-    global PRINT_ITER
-    PRINT_ITER += 1
-    if PRINT_ITER % PRINT_EACH == 0:
-        print_rounded(ls.numpy(), sigma.numpy(), noise.numpy(), nll.numpy())
     return nll
 
 
@@ -118,6 +129,9 @@ def tf_sqexp_kernel(a: tf.Tensor, b: tf.Tensor, ls: tf.Tensor, sigma: tf.Tensor)
 
     sqnorm = stable_eye = tf.reduce_sum((a - b) ** 2.0, axis=2)
 
+    # TODO: fuj fixnout poradne
+    sqnorm = tf.cast(sqnorm, tf.float64)
+
     exp = - (0.5 / tf.pow(ls, 2)) * sqnorm
     return tf.pow(sigma, 2) * tf.exp(exp)
 
@@ -137,6 +151,9 @@ def clear_param_traces():
     param_traces["sigma"] = []
     param_traces["noise"] = []
     param_traces["nll"] = []
+
+
+clear_param_traces()
 
 
 def compute_optimized_kernel_tf(X_train, y_train, kernel: Kernel) \
@@ -206,9 +223,10 @@ def compute_optimized_kernel_tf(X_train, y_train, kernel: Kernel) \
         optimizer = tf.train.AdamOptimizer(1e-3)
         # optimizer = tf.train.MomentumOptimizer(learning_rate, momentum=1e-3,
         #         global_step=global_step)
+
         variables = [ls_var, sigma_var, noise_level_var]
 
-        for i in range(1000):
+        for i in range(500):
             global_step.assign_add(1)
             nll, grads = tf_kernel_nll_with_grads(
                     X_train, y_train,
@@ -238,9 +256,6 @@ def compute_optimized_kernel_tf(X_train, y_train, kernel: Kernel) \
         plt.plot(trace)
         plt.show()
         trace = []
-
-    # os.setenv("USE_LBFGS", True)
-    # os.setenv("USE_LBFGS", False)
 
     if os.environ.get("USE_LBFGS", "0") == "1":
         ls, sigma, noise_level = optimize_bfgs()
@@ -300,9 +315,6 @@ def compute_optimized_kernel(kernel, X_train, y_train) -> Tuple[Kernel, float]:
     # k, n = compute_optimized_kernel_tf(X_train, y_train, noise_level, kernel)
 
     # TODO: noise 1000 overflow
-
-    # os.setenv("USE_TF", True)
-    # os.setenv("USE_TF", False)
 
     constraint_transform = lambda x: tf.nn.softplus(x) + 1e-5
 

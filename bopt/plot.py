@@ -58,23 +58,34 @@ def plot_gp_prior(mu, cov, X, kernel=None, num_samples=3):
 
 
 def plot_gp(mu, cov, X, X_train=None, y_train=None, kernel=None, noise: int = 0,
-        num_samples=3, figsize=(7, 3), figure=True):
+        num_samples=3, figsize=(7, 3), figure=True, nll=None):
+    assert X.ndim == 1
+
     std = 2 * np.sqrt(np.diag(cov))
 
     if figure:
         plt.figure(figsize=figsize)
 
     if kernel is not None:
-        plt.title("Noise: {:.3f}, {}".format(noise, kernel))
+        # TODO: fuj duplicity
+        if nll is not None:
+            plt.title("Noise: {:.3f}, {}, nll={}".format(noise, kernel, nll))
+        else:
+            plt.title("Noise: {:.3f}, {}".format(noise, kernel))
 
     plt.fill_between(X, mu + std, mu - std, alpha=0.1)
     plt.plot(X, mu, label="Mean")
 
     samples = multivariate_normal(mu, cov, size=num_samples)
+    # print(mu.mean(), cov.mean(), noise)
+
     for i, sample in enumerate(samples):
-        plt.plot(X, sample, lw=0.7, ls="--", label=f"Sample {i+1}", color="black")
+        plt.plot(X, sample, lw=0.7, ls="--",
+                label=f"Sample {i+1}", color="black")
 
     if X_train is not None:
+        assert X_train.ndim == 1
+        assert y_train.ndim == 1
         plt.plot(X_train, y_train, "rx", lw=2)
 
     plt.legend()
@@ -177,7 +188,7 @@ def plot_kernel_loss(kernel: Kernel, X_train: np.ndarray, y_train: np.ndarray,
     data = np.vectorize(likelihood)(X)
 
     plt.plot(X, data)
-    plt.title(f"Kernel marginal likelihood, $\sigma = {sigma}$")
+    plt.title(f"Kernel marginal likelihood, $\\sigma = {sigma}$")
 
 
 def plot_kernel_loss_2d(kernel: Kernel, X_train: np.ndarray, y_train: np.ndarray,
