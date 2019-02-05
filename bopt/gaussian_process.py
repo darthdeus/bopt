@@ -76,21 +76,28 @@ class GaussianProcess:
             assert self.X_train.shape[1] == self.X_test.shape[1], \
                     f"got {self.X_train.shape} and {self.X_test.shape}"
 
-        noise = self.noise * np.eye(len(self.X_train))
+        noise = (self.noise ** 2) * np.eye(len(self.X_train))
 
         # TODO: get rid of numpy
+        # print("XXX noise", noise)
         K = self.kernel(self.X_train, self.X_train).numpy() + noise
         K_s = self.kernel(self.X_train, X_test).numpy()
         K_ss = self.kernel(X_test, X_test).numpy()
 
+        K_ss_noise = (self.noise ** 2) * np.eye(len(K_ss))
         # Symmetrization hack
-        K = (K + K.T) / 2.0
-        K_ss = (K_ss + K_ss.T) / 2.0
+        # K = (K + K.T) / 2.0
+        # K_ss = (K_ss + K_ss.T) / 2.0
 
-        K_stable_eye = 1e-6 * np.eye(len(K))  # Just for numerical stability?
-        Kss_stable_eye = 1e-6 * np.eye(len(K_ss))  # Just for numerical stability?
+        K_stable_eye   = 1e-8 * np.eye(len(K))  # Just for numerical stability?
+        # Ks_stable_eye  = 1e-8 * np.eye(len(K_s))  # Just for numerical stability?
+        Kss_stable_eye = 1e-8 * np.eye(len(K_ss))  # Just for numerical stability?
+
+        for i in range(min(*K_s.shape)):
+            K_s[i, i] += 1e-8
 
         K += K_stable_eye
+        # K_s += Ks_stable_eye
         K_ss += Kss_stable_eye
 
         assert np.allclose(K, K.T, atol=1e-7), "K is not symmetric"
@@ -101,12 +108,24 @@ class GaussianProcess:
         #     print("Got negative eigs", eigs)
 
         if self.stable_computation:
+            # print("y_train", self.X_train)
+            # print()
+
             L = cholesky(K)
             alpha = solve(L.T, solve(L, self.y_train))
+            assert np.allclose((L @ L.T) @ alpha, self.y_train)
+
+            alpha = solve(K, self.y_train)
+            assert np.allclose(K @ alpha, self.y_train)
             L_k = solve(L, K_s)
 
+            # print("HA")
+            # print(K_s[:5, :5])
+            # print(alpha)
+            # print(alpha.shape, K_s.shape)
+
             self.mu = K_s.T @ alpha
-            self.cov = K_ss - L_k.T @ L_k
+            self.cov = K_ss - L_k.T @ L_k + K_ss_noise
             self.std = np.sqrt(np.diag(K_ss) - np.sum(L_k ** 2, axis=0))
         else:
             K_inv = inv(K)

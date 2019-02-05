@@ -13,9 +13,9 @@ from bopt.kernels import Kernel, SquaredExp
 
 
 os.environ["USE_LBFGS"] = "1"
-# os.environ["USE_LBFGS"] = "0"
+os.environ["USE_LBFGS"] = "0"
 os.environ["USE_TF"] = "1"
-# os.environ["USE_TF"] = "0"
+os.environ["USE_TF"] = "0"
 
 
 def is_tensor(x):
@@ -66,8 +66,12 @@ def tf_kernel_nll(X_train: np.ndarray, y_train: np.ndarray, ls, sigma, noise):
 
     K = tf_sqexp_kernel(X_train, X_train, ls, sigma) + noise_mat
 
+    # print(np.diag(K.numpy()).mean(), K.numpy().mean())
+    Ky = K.numpy()
+    # print(np.diag(Ky).mean(), (Ky - np.diag(np.diag(Ky))).mean())
+
     t1 = tf.transpose(y_train) @ tf.linalg.solve(K, y_train)
-    t2 = 2*tf.linalg.slogdet(K).log_abs_determinant
+    t2 = tf.linalg.slogdet(K).log_abs_determinant
 
     # https://blogs.sas.com/content/iml/2012/10/31/compute-the-log-determinant-of-a-matrix.html
     # log(det(K)) = log(det(L' @ L)) = log(det(L') * det(L)) =

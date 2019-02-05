@@ -145,6 +145,9 @@ class Experiment:
         X_sample = np.array(X_sample_vals)
         y_sample = np.array([e.final_result() for e in finished_evaluations])
 
+        # TODO; normalizace?
+        y_sample = (y_sample - y_sample.mean()) / y_sample.std()
+
         best_y = None
         best_x = None
         if len(y_sample) > 0:
