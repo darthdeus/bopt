@@ -87,6 +87,9 @@ def tf_kernel_nll(X_train: np.ndarray, y_train: np.ndarray, ls, sigma, noise):
 
     nll = 0.5 * tf.squeeze(t1 + t2 + t3)
 
+    if not "nll" in param_traces:
+        param_traces["nll"] = []
+
     param_traces["ls"].append(float(ls.numpy()))
     param_traces["sigma"].append(float(sigma.numpy()))
     param_traces["noise"].append(float(noise.numpy()))
@@ -224,13 +227,13 @@ def compute_optimized_kernel_tf(X_train, y_train, kernel: Kernel) \
         global_step = tf.Variable(0)
 
         learning_rate = tf.train.exponential_decay(1e-2, global_step, 300, 0.5)
-        optimizer = tf.train.AdamOptimizer(1e-3)
+        optimizer = tf.train.AdamOptimizer(1e-2)
         # optimizer = tf.train.MomentumOptimizer(learning_rate, momentum=1e-3,
         #         global_step=global_step)
 
         variables = [ls_var, sigma_var, noise_level_var]
 
-        for i in range(500):
+        for i in range(2000):
             global_step.assign_add(1)
             nll, grads = tf_kernel_nll_with_grads(
                     X_train, y_train,
