@@ -8,23 +8,21 @@
 - porovnavat s gpyopt
 - porovnat tfnll a np nll
 
-- bopt
-  - experiment
-    - hyperparam
-    - samples (noise?)
-      - param + vysledek
-      - per-sample noise?
-      - model
-        - kernel
+- experiment
+  - hyperparam
+  - runner
+  - samples (noise?)
+    - param + vysledek
+    - per-sample noise?
+    - model
+      - kernel
 
-        - random search
-        - gp
+      - random search
+      - gp
 
-      - job
-        - vypocet
-        - result parser
-
-    - runner
+    - job
+      - vypocet
+      - result parser
   - last model
 
 - acq funce donstane optimizer
