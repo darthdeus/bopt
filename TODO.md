@@ -12,16 +12,19 @@
   - experiment
     - hyperparam
     - samples (noise?)
+      - param + vysledek
       - per-sample noise?
-
-    - runner
-    - job
       - model
         - kernel
-        - noise
 
         - random search
         - gp
+
+      - job
+        - vypocet
+        - result parser
+
+    - runner
   - last model
 
 - acq funce donstane optimizer
