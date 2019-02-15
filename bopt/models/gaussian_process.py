@@ -15,7 +15,11 @@ def convert_to_rank1(arr):
     return arr.squeeze()
 
 
-class GaussianProcess:
+class Model:
+    pass
+
+
+class GaussianProcess(Model):
     X_train: np.ndarray
     y_train: np.ndarray
     X_test: Optional[np.ndarray]

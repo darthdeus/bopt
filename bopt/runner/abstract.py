@@ -12,7 +12,6 @@ Value = float
 
 
 class Job(abc.ABC):
-    meta_dir: str
     job_id: int
     result_parser: ResultParser
     run_parameters: dict
