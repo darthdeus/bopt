@@ -12,6 +12,7 @@ from bopt.gaussian_process import GaussianProcess
 from bopt.basic_types import Hyperparameter
 from bopt.kernels import SquaredExp, Kernel
 from bopt.runner.abstract import Job, Runner
+from bopt.sample import Sample
 
 
 class OptimizationResult:
@@ -65,77 +66,38 @@ class OptimizationResult:
         with open(filename, "rb") as f:
             return pickle.load(f)
 
-META_FILENAME = "meta.yml"
-
 
 # TODO: fix numpy being stored everywhere when serializing! possibly in hyp.sample? :(
 class Experiment:
-    meta_dir: str
     hyperparameters: List[Hyperparameter]
     runner: Runner
-    evaluations: List[Job]
+    samples: List[Sample]
 
-    def __init__(self, meta_dir: str, hyperparameters: List[Hyperparameter], runner: Runner):
-        self.meta_dir = meta_dir
+    def __init__(self, hyperparameters: List[Hyperparameter], runner: Runner):
         self.hyperparameters = hyperparameters
         self.runner = runner
-        self.evaluations = []
+        self.samples = []
 
-        pathlib.Path(os.path.join(self.meta_dir, "outputs"))\
-                .mkdir(parents=True, exist_ok=True)
+        # pathlib.Path(os.path.join(self.meta_dir, "outputs"))\
+        #         .mkdir(parents=True, exist_ok=True)
+        # self.serialize()
 
-        self.serialize()
-
-    # TODO: deprecated
-    def iterate(self):
-        eval_params = [param.sample() for param in self.hyperparameters]
-
-        job = self.runner.start(eval_params)
-
-        self.evaluations.append(job)
-
-    @staticmethod
-    def filename(directory) -> str:
-        return os.path.join(directory, META_FILENAME)
-
-    def serialize(self) -> None:
-        evals = self.evaluations
-        del self.evaluations
+    def serialize(self, meta_dir) -> None:
         dump = yaml.dump(self)
-        self.evaluations = evals
 
-        with open(Experiment.filename(self.meta_dir), "w") as f:
+        with open(os.path.join(meta_dir, "meta.yml"), "w") as f:
             f.write(dump)
 
-        for job in self.evaluations:
-            job.serialize()
-
     @staticmethod
-    def deserialize(directory: str) -> "Experiment":
-        with open(Experiment.filename(directory), "r") as f:
+    def deserialize(meta_dir: str) -> "Experiment":
+        with open(os.path.join(meta_dir, "meta.yml"), "r") as f:
             contents = f.read()
             obj = yaml.load(contents)
-
-        # This makes experiment directories movable.
-        # TODO: handle meta_dir in all children
-        obj.meta_dir = directory
-
-        jobs = []
-        for path in glob(os.path.join(directory, "job-*")):
-            matches = re.match(r".*?(\d+).*?", path)
-            assert matches is not None
-
-            job_id = int(matches.group(1))
-            job = obj.runner.deserialize_job(obj.meta_dir, job_id)
-            job.deserialize()
-
-            jobs.append(job)
-        obj.evaluations = jobs
 
         return obj
 
     def current_optim_result(self) -> OptimizationResult:
-        finished_evaluations = [e for e in self.evaluations if e.is_success()]
+        finished_evaluations = [e for e in self.samples if e.is_success()]
 
         # TODO: this should be handled better
         params = sorted(self.hyperparameters, key=lambda h: h.name)

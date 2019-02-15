@@ -42,4 +42,3 @@ Bound = Union[Integer, Float]
 class Hyperparameter(NamedTuple):
   name: str
   range: Bound
-
