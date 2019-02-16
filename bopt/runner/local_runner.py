@@ -10,9 +10,8 @@ import tempfile
 from glob import glob
 from typing import Union, List, Optional, Tuple, Callable
 
-from bopt.hyperparameters import Hyperparameter
+from bopt.basic_types import Hyperparameter
 from bopt.runner.abstract import Job, Runner, Timestamp, Value
-from bopt.runner.result_parser import ResultParser
 
 
 class LocalJob(Job):

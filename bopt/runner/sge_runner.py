@@ -8,7 +8,7 @@ import pathlib
 from glob import glob
 from typing import Union, List, Optional, Tuple
 
-from bopt.hyperparameters import Hyperparameter
+from bopt.basic_types import Hyperparameter
 from bopt.runner.abstract import Job, Runner, Timestamp, Value
 
 
@@ -27,8 +27,6 @@ class SGEJob(Job):
         output = subprocess.check_output(["qdel", str(self.job_id)]).decode("ascii")
 
         assert re.match(pattern=".*has registered.*", string=output) is not None
-
-
 
 
 class SGERunner(Runner):

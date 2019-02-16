@@ -5,6 +5,7 @@ import inspect
 import bopt
 from typing import Type, Callable
 
+
 def run(args) -> None:
     hyperparameters = []
 
@@ -33,20 +34,11 @@ def run(args) -> None:
     assert args.runner == "local"
 
     meta_dir = args.dir
-    cmd = args.command
+    script_path = args.command
     default_arguments = args.arguments
 
-    runner = bopt.LocalRunner(
-        meta_dir,
-        cmd,
-        default_arguments,
-        bopt.LastLineLastWordParser()
-    )
-
-    experiment = bopt.Experiment(
-        meta_dir,
-        hyperparameters,
-        runner)
+    runner = bopt.LocalRunner(script_path, default_arguments)
+    experiment = bopt.Experiment(hyperparameters, runner)
 
     print(f"Experiment created, run `bopt run {meta_dir}` to start.")
 

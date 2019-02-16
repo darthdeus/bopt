@@ -2,7 +2,6 @@ import abc
 from typing import Optional, List
 
 import tensorflow as tf
-tf.enable_eager_execution()
 
 import numpy as np
 from bopt.basic_types import Bound

@@ -2,7 +2,6 @@ import os
 
 import numpy as np
 import tensorflow as tf
-tf.enable_eager_execution()
 import tensorflow_probability as tfp
 
 from typing import Callable, Tuple, List, Dict
