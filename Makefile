@@ -1,5 +1,7 @@
 # default: bo-exp
-default: simple-exp
+# default: simple-exp
+default:
+	bopt exp
 
 init:
 	bopt init --param "gamma:float:0:1" --param "epsilon:float:0:1" --dir results/mc ./.venv/bin/python ./experiments/rl/monte_carlo.py

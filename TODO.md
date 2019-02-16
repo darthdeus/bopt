@@ -1,5 +1,10 @@
 ## TODO:
 
+- flake8 + black
+- only import tensorflow when needed
+
+!!!!!!!!
+
 - neukladat meta_dir nikde v jobech, rozbiji to relativni cesty
 
 - ukladat kernel parametry v kernelu jako dictionary

@@ -5,7 +5,6 @@ import datetime
 from typing import List, Optional
 
 from bopt.kernels import Kernel
-from bopt.runner.abstract import Runner
 
 
 # class Noise: pass
@@ -14,10 +13,6 @@ from bopt.runner.abstract import Runner
 #
 # class Model:
 #     noise: Noise
-#
-#
-# class RandomSearch(Model):
-#     pass
 #
 #
 # class GP(Model):
@@ -57,9 +52,9 @@ from bopt.runner.abstract import Runner
 #     runner: Runner
 #     samples: List[Sample]
 #     last_model: Model
-
-
-
+#
+#
+#
 # import bopt
 #
 # hyperparameters = [

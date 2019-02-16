@@ -3,7 +3,8 @@ import os
 import re
 import sys
 import traceback
-from bopt.hyperparameters import Experiment
+
+from bopt.experiment import Experiment
 
 
 def run(args) -> None:

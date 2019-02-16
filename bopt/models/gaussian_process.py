@@ -1,11 +1,14 @@
-from typing import Optional, Tuple
+import abc
+import datetime
 
 import numpy as np
 from numpy.linalg import inv, cholesky, solve
+from typing import Optional, Tuple, List
 
-import bopt.kernel_opt as kernel_opt
-from bopt.kernels import Kernel, SquaredExp
+import bopt.kernels.kernel_opt as kernel_opt
+from bopt.kernels.kernels import Kernel, SquaredExp
 from bopt.plot import plot_gp
+from bopt.models.model import Model
 
 
 def convert_to_rank1(arr):
@@ -13,10 +16,6 @@ def convert_to_rank1(arr):
     assert arr.shape[1] == 1, f"arr.shape[1] must equal `1`, got {arr.shape}"
 
     return arr.squeeze()
-
-
-class Model:
-    pass
 
 
 class GaussianProcess(Model):

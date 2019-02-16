@@ -9,7 +9,7 @@ from typing import Callable, Tuple, List, Dict
 from numpy.linalg import inv, cholesky, det, solve
 from scipy.optimize import minimize
 
-from bopt.kernels import Kernel, SquaredExp
+from bopt.kernels.kernels import Kernel, SquaredExp
 
 
 os.environ["USE_LBFGS"] = "1"
