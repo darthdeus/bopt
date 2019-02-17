@@ -65,6 +65,8 @@ def tf_kernel_nll(X_train: np.ndarray, y_train: np.ndarray, ls, sigma, noise):
 
     K = tf_sqexp_kernel(X_train, X_train, ls, sigma) + noise_mat
 
+    assert is_tensor(K)
+
     # print(np.diag(K.numpy()).mean(), K.numpy().mean())
     Ky = K.numpy()
     # print(np.diag(Ky).mean(), (Ky - np.diag(np.diag(Ky))).mean())

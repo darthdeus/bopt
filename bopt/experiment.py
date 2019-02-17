@@ -1,12 +1,14 @@
 import yaml
 import os
 import numpy as np
+import pathlib
 from typing import List
 
 from bopt.models.model import Model
+from bopt.models.random_search import RandomSearch
 from bopt.basic_types import Hyperparameter
 from bopt.runner.abstract import Job, Runner
-from bopt.models.model import Sample
+from bopt.models.model import Sample, SampleCollection
 from bopt.models.model import Model
 
 
@@ -21,14 +23,31 @@ class Experiment:
         self.runner = runner
         self.samples = []
 
-    def run_next(self, model: Model) -> None:
-        next_params, fitted_model = model.predict_next(self.samples)
+    def run_next(self, model: Model, meta_dir: str, output_dir: str) -> None:
+        if len(self.samples) == 0:
+            model = RandomSearch()
 
-        job = self.runner.start("output", next_params)
+        sample_collection = SampleCollection(self.samples, meta_dir, output_dir)
+
+        next_params, fitted_model = \
+                model.predict_next(self.hyperparameters, sample_collection)
+
+        job = self.runner.start(output_dir, next_params)
 
         next_sample = Sample(next_params, job, fitted_model)
 
         self.samples.append(next_sample)
+
+    def run_loop(self, model: Model, meta_dir: str, n_iter=20) -> None:
+        # TODO: ...
+        print("running")
+
+        output_dir = pathlib.Path(meta_dir) / "output"
+        output_dir.mkdir(parents=True, exist_ok=True)
+
+        self.run_next(model, meta_dir, str(output_dir))
+
+        self.serialize(meta_dir)
 
     def serialize(self, meta_dir) -> None:
         dump = yaml.dump(self)
@@ -41,6 +60,9 @@ class Experiment:
         with open(os.path.join(meta_dir, "meta.yml"), "r") as f:
             contents = f.read()
             obj = yaml.load(contents)
+
+        if obj.samples is None:
+            obj.samples = []
 
         return obj
 

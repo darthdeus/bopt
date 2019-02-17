@@ -3,13 +3,13 @@ from typing import Callable
 import numpy as np
 from scipy.stats import norm
 
-from bopt.gaussian_process import GaussianProcess
+from bopt.models.gaussian_process_regressor import GaussianProcessRegressor
 
 
-AcquisitionFunction = Callable[[GaussianProcess, np.ndarray, float], np.ndarray]
+AcquisitionFunction = Callable[[GaussianProcessRegressor, np.ndarray, float], np.ndarray]
 
 
-def expected_improvement(gp: GaussianProcess, X: np.ndarray, f_s: float, xi: float=0.01) -> np.ndarray:
+def expected_improvement(gp: GaussianProcessRegressor, X: np.ndarray, f_s: float, xi: float=0.01) -> np.ndarray:
     assert X is not None
 
     mu, sigma = gp.posterior(X).mu_std()
@@ -24,7 +24,7 @@ def expected_improvement(gp: GaussianProcess, X: np.ndarray, f_s: float, xi: flo
     return ei
 
 
-def probability_of_improvement(gp: GaussianProcess, X: np.ndarray, f_s: float, xi: float=0.01) -> np.ndarray:
+def probability_of_improvement(gp: GaussianProcessRegressor, X: np.ndarray, f_s: float, xi: float=0.01) -> np.ndarray:
     assert X is not None
 
     mu, sigma = gp.posterior(X).mu_std()

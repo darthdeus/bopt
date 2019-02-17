@@ -1,213 +1,87 @@
-import abc
-import datetime
-
 import numpy as np
-from numpy.linalg import inv, cholesky, solve
-from typing import Optional, Tuple, List
+from typing import List, Tuple
+from scipy.optimize import minimize
 
-import bopt.kernels.kernel_opt as kernel_opt
-from bopt.kernels.kernels import Kernel, SquaredExp
-from bopt.plot import plot_gp
-from bopt.models.model import Model
-
-
-def convert_to_rank1(arr):
-    assert arr.ndim == 2, f"rank-2 tensor required, got {arr.ndim}"
-    assert arr.shape[1] == 1, f"arr.shape[1] must equal `1`, got {arr.shape}"
-
-    return arr.squeeze()
+from bopt.acquisition_functions.acquisition_functions import AcquisitionFunction, expected_improvement
+from bopt.models.model import Model, SampleCollection
+from bopt.basic_types import Hyperparameter, Bound
+from bopt.models.gaussian_process_regressor import GaussianProcessRegressor
 
 
-class GaussianProcess(Model):
-    X_train: np.ndarray
-    y_train: np.ndarray
-    X_test: Optional[np.ndarray]
+# TODO: BOModel?
+class GPModel(Model):
+    gp: GaussianProcessRegressor
 
-    mu: np.ndarray
-    cov: np.ndarray
-    std: np.ndarray
-    noise: float
+    def predict_next(self, hyperparameters: List[Hyperparameter],
+                     sample_col: SampleCollection) -> Tuple[dict, "Model"]:
+        samples = sample_col.samples
 
-    kernel: Kernel
-    stable_computation: bool
+        assert all([s.job.is_finished() for s in samples])
 
-    def __init__(self, noise=0, kernel=SquaredExp(), stable_computation=True):
-        self.noise = noise
-        self.kernel = kernel
+        num_samples = len(samples)
+        num_params = len(hyperparameters)
 
-        self.X_train = None
-        self.y_train = None
-        self.X_test = None
+        X_sample = np.zeros([num_samples,num_params], dtype=np.float64)
+        y_sample = np.zeros([num_samples], dtype=np.float64)
 
-        self.mu = None
-        self.cov = None
-        self.std = None
+        for i, sample in enumerate(samples):
+            x, y = sample.to_xy(sample_col.output_dir)
 
-        self.stable_computation = stable_computation
+            X_sample[i] = x
+            y_sample[i] = y
 
-    def fit(self, X_train: np.ndarray, y_train: np.ndarray, kernel=None) -> "GaussianProcess":
-        assert X_train.ndim == 2, f"X_train must be rank-2 tensor, got ndim={X_train.ndim}"
+        gp = GaussianProcessRegressor().fit(X_sample, y_sample).optimize_kernel()
 
-        if kernel is not None:
-            self.kernel = kernel
+        bounds = [b.range for b in hyperparameters]
 
-        self.X_train = X_train
-        self.y_train = y_train
+        x_next = propose_location(expected_improvement,
+                gp,
+                y_sample.max(),
+                bounds)
 
-        return self
+        typed_vals = [int(x) if p.range.type == "int" else x
+                      for x, p in zip(x_next, hyperparameters)]
 
-    def posterior(self, X_test: np.ndarray, X_train: np.ndarray = None, y_train: np.ndarray = None) -> "GaussianProcess":
-        """
-        Computes the posterior `p(y_test | X_test, X_train, y_train)`
-        and stores the result.
-        """
-        if (X_train is not None) and (y_train is not None):
-            self.fit(X_train, y_train)
+        names = [p.name for p in hyperparameters]
 
-        assert X_test.ndim == 2, f"X_test must be rank-2 tensor, got ndim={X_test.ndim}"
+        params_dict = dict(zip(names, typed_vals))
 
-        assert self.X_train is not None, "X_train is None, call `fit` first, or provide X_train directly"
-        assert self.y_train is not None, "y_train is None, call `fit` first, or provide y_train directly"
+        fitted_model = GPModel()
+        fitted_model.gp = gp
 
-        self.X_test = X_test
+        return params_dict, fitted_model
 
-        assert self.y_train.ndim == 1
-        assert self.y_train.shape[0] == self.X_train.shape[0]
-        assert self.X_test is not None
-
-        if self.X_train.ndim > 1:
-            assert self.X_train.shape[1] == self.X_test.shape[1], \
-                    f"got {self.X_train.shape} and {self.X_test.shape}"
-
-        noise = (self.noise ** 2) * np.eye(len(self.X_train))
-
-        # TODO: get rid of numpy
-        # print("XXX noise", noise)
-        K = self.kernel(self.X_train, self.X_train).numpy() + noise
-        K_s = self.kernel(self.X_train, X_test).numpy()
-        K_ss = self.kernel(X_test, X_test).numpy()
-
-        K_ss_noise = (self.noise ** 2) * np.eye(len(K_ss))
-        # Symmetrization hack
-        # K = (K + K.T) / 2.0
-        # K_ss = (K_ss + K_ss.T) / 2.0
-
-        K_stable_eye   = 1e-8 * np.eye(len(K))  # Just for numerical stability?
-        # Ks_stable_eye  = 1e-8 * np.eye(len(K_s))  # Just for numerical stability?
-        Kss_stable_eye = 1e-8 * np.eye(len(K_ss))  # Just for numerical stability?
-
-        for i in range(min(*K_s.shape)):
-            K_s[i, i] += 1e-8
-
-        K += K_stable_eye
-        # K_s += Ks_stable_eye
-        K_ss += Kss_stable_eye
-
-        assert np.allclose(K, K.T, atol=1e-7), "K is not symmetric"
-        assert np.allclose(K_ss, K_ss.T, atol=1e-7), "K_ss is not symmetric"
-
-        # eigs = np.linalg.eigvals(K)
-        # if np.any(eigs <= 0):
-        #     print("Got negative eigs", eigs)
-
-        if self.stable_computation:
-            # print("y_train", self.X_train)
-            # print()
-
-            L = cholesky(K)
-            alpha = solve(L.T, solve(L, self.y_train))
-            assert np.allclose((L @ L.T) @ alpha, self.y_train)
-
-            alpha = solve(K, self.y_train)
-            assert np.allclose(K @ alpha, self.y_train)
-            L_k = solve(L, K_s)
-
-            # print("HA")
-            # print(K_s[:5, :5])
-            # print(alpha)
-            # print(alpha.shape, K_s.shape)
-
-            self.mu = K_s.T @ alpha
-            self.cov = K_ss - L_k.T @ L_k + K_ss_noise
-            self.std = np.sqrt(np.diag(K_ss) - np.sum(L_k ** 2, axis=0))
-        else:
-            K_inv = inv(K)
-            self.mu = K_s.T @ K_inv @ self.y_train
-            self.cov = K_ss - K_s.T @ K_inv @ K_s
-            self.std = np.sqrt(np.diag(self.cov))
-
-        assert self.mu.ndim == 1
-        assert self.mu.shape[0] == X_test.shape[0]
-        assert self.cov.shape == (X_test.shape[0], X_test.shape[0])
-
-        return self
-
-    def optimize_kernel(self) -> "GaussianProcess":
-        assert self.X_train is not None, "X_train is None, call `fit` first"
-        assert self.y_train is not None, "y_train is None, call `fit` first"
-
-        self.kernel, self.noise = kernel_opt.compute_optimized_kernel(
-                                      self.kernel,
-                                      self.X_train,
-                                      self.y_train)
-
-        return self
-
-    def log_prob(self) -> float:
-        nll = kernel_opt.kernel_log_likelihood(self.kernel, self.X_train, self.y_train,
-                    noise_level=self.noise)
-
-        return nll
-
-    def plot_prior(self, X, **kwargs):
-        plot_gp(np.zeros(len(X)), self.kernel(X, X), X, kernel=self.kernel, **kwargs)
-
-        return self
-
-    def plot_posterior(self, **kwargs):
-        assert self.X_test is not None, "X_test was not provided, call `.posterior(X_test)` first"
-
-        plot_gp(self.mu, self.cov,
-                convert_to_rank1(self.X_test),
-                convert_to_rank1(self.X_train),
-                self.y_train,
-                kernel=self.kernel, noise=self.noise, nll=round(self.log_prob().numpy().item(), 3), **kwargs)
-
-        return self
-
-    def copy(self) -> "GaussianProcess":
-        gp = GaussianProcess()
-        gp.kernel = self.kernel.copy()
-        gp.noise = self.noise
-
-        gp.X_train = self.X_train
-        gp.y_train = self.y_train
-        gp.X_test = self.X_test
-
-        gp.mu = self.mu
-        gp.cov = self.cov
-        gp.std = self.std
+    def create_gp(self) -> GaussianProcessRegressor:
+        gp = GaussianProcessRegressor()
+        gp = gp.fit(self.X_sample, self.y_sample)
+        gp = gp.optimize_kernel()
 
         return gp
 
-    def with_kernel(self, kernel: Kernel) -> "GaussianProcess":
-        gp = self.copy()
-        gp.kernel = kernel
 
-        return gp
+def propose_location(
+    acquisition: AcquisitionFunction,
+    gp: GaussianProcessRegressor,
+    y_max: float,
+    bounds: List[Bound],
+    n_restarts: int = 25,
+) -> np.ndarray:
+    def min_obj(X):
+        return -acquisition(gp, X.reshape(1, -1), y_max)
 
-    def with_kernel_params(self, theta) -> "GaussianProcess":
-        gp = self.copy()
-        gp.kernel = gp.kernel.copy()
-        gp.kernel.set_params(theta)
+    scipy_bounds = [(bound.low, bound.high) for bound in bounds]
 
-        return gp
+    starting_points = []
+    for _ in range(n_restarts):
+        starting_points.append(np.array([bound.sample() for bound in bounds]))
 
-    def with_noise(self, noise: float) -> "GaussianProcess":
-        gp = self.copy()
-        gp.noise = noise
+    min_val = 1
+    min_x = None
 
-        return gp
+    for x0 in starting_points:
+        res = minimize(min_obj, x0=x0, bounds=scipy_bounds, method="L-BFGS-B")
+        if res.fun < min_val:
+            min_val = res.fun[0]
+            min_x = res.x
 
-    def mu_std(self) -> Tuple[np.ndarray, np.ndarray]:
-        return self.mu, self.std
+    return min_x

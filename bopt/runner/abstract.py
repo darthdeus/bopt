@@ -13,7 +13,6 @@ Value = float
 
 class Job(abc.ABC):
     job_id: int
-    result_parser: ResultParser
     run_parameters: dict
     started_at: datetime.datetime
     finished_at: datetime.datetime
@@ -27,34 +26,42 @@ class Job(abc.ABC):
     @abc.abstractmethod
     def is_finished(self) -> bool: pass
 
+    # TODO: delete this
     def sorted_parameter_values(self) -> List[float]:
         # TODO: detect case when experiment results have a different number of params
         idx = np.argsort(list(self.run_parameters.keys()))
         return np.array(list(self.run_parameters.values()), dtype=np.float32)[idx]
 
-    def is_success(self) -> bool:
-        if self.is_finished():
-            return self.result_parser.safe_final_result(self).is_ok()
-        else:
-            return False
+    def get_result(self, output_dir: str) -> float:
+        fname = os.path.join(output_dir, f"job-{self.job_id}.out")
 
-    def result_or_err(self) -> str:
-        if self.is_finished():
-            if self.is_success():
-                return str(self.final_result())
-            else:
-                return self.err()
-        else:
-            return "RUNNING"
+        # TODO: handle errors
+        with open(fname, "r") as f:
+            return float(f.read())
 
-    def err(self) -> str:
-        return self.result_parser.safe_final_result(self).err()
-
-    def intermediate_results(self) -> List[float]:
-        return self.result_parser.intermediate_results(self)
-
-    def final_result(self) -> float:
-        return self.result_parser.final_result(self)
+    # def is_success(self) -> bool:
+    #     if self.is_finished():
+    #         return self.result_parser.safe_final_result(self).is_ok()
+    #     else:
+    #         return False
+    #
+    # def result_or_err(self) -> str:
+    #     if self.is_finished():
+    #         if self.is_success():
+    #             return str(self.final_result())
+    #         else:
+    #             return self.err()
+    #     else:
+    #         return "RUNNING"
+    #
+    # def err(self) -> str:
+    #     return self.result_parser.safe_final_result(self).err()
+    #
+    # def intermediate_results(self) -> List[float]:
+    #     return self.result_parser.intermediate_results(self)
+    #
+    # def final_result(self) -> float:
+    #     return self.result_parser.final_result(self)
 
     def status_str(self) -> str:
         if self.is_finished():

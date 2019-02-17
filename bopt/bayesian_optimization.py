@@ -103,6 +103,7 @@ class OptimizationLoop:
                 y_next = job.final_result()
                 self.add_sample(x_next, y_next)
 
+
 def default_from_bounds(bounds: List[Bound]) -> np.ndarray:
     x_0 = np.zeros(len(bounds))
 
@@ -180,27 +181,27 @@ def propose_multiple_locations(acquisition: AcquisitionFunction, gp: GaussianPro
     return result
 
 
-def propose_location(acquisition: AcquisitionFunction, gp: GaussianProcess, y_max: float,
-                     bounds: List[Bound], n_restarts: int = 25) -> np.ndarray:
-    def min_obj(X):
-        return -acquisition(gp, X.reshape(1, -1), y_max)
-
-    scipy_bounds = [(bound.low, bound.high) for bound in bounds]
-
-    starting_points = []
-    for _ in range(n_restarts):
-        starting_points.append(np.array([bound.sample() for bound in bounds]))
-
-    min_val = 1
-    min_x = None
-
-    for x0 in starting_points:
-        res = minimize(min_obj, x0=x0, bounds=scipy_bounds, method='L-BFGS-B')
-        if res.fun < min_val:
-            min_val = res.fun[0]
-            min_x = res.x
-
-    return min_x
+# def propose_location(acquisition: AcquisitionFunction, gp: GaussianProcess, y_max: float,
+#                      bounds: List[Bound], n_restarts: int = 25) -> np.ndarray:
+#     def min_obj(X):
+#         return -acquisition(gp, X.reshape(1, -1), y_max)
+#
+#     scipy_bounds = [(bound.low, bound.high) for bound in bounds]
+#
+#     starting_points = []
+#     for _ in range(n_restarts):
+#         starting_points.append(np.array([bound.sample() for bound in bounds]))
+#
+#     min_val = 1
+#     min_x = None
+#
+#     for x0 in starting_points:
+#         res = minimize(min_obj, x0=x0, bounds=scipy_bounds, method='L-BFGS-B')
+#         if res.fun < min_val:
+#             min_val = res.fun[0]
+#             min_x = res.x
+#
+#     return min_x
 
 
 def bo_plot_exploration(f: Callable[[np.ndarray], float],
