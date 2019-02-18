@@ -12,9 +12,9 @@ from bopt.kernels.kernels import Kernel, SquaredExp
 
 
 os.environ["USE_LBFGS"] = "1"
-# os.environ["USE_LBFGS"] = "0"
+os.environ["USE_LBFGS"] = "0"
 os.environ["USE_TF"] = "1"
-# os.environ["USE_TF"] = "0"
+os.environ["USE_TF"] = "0"
 
 
 def is_tensor(x):

@@ -1,11 +1,10 @@
-import lapack
 import numpy as np
 import numpy.linalg as linalg
 import logging
 
 
 # TODO: missing source/ref
-def jitchol(A, maxtries=5):
+def jitchol(A, maxtries=6):
     A = np.ascontiguousarray(A)
     diagA = np.diag(A)
 
@@ -17,15 +16,17 @@ def jitchol(A, maxtries=5):
 
     while num_tries <= maxtries and np.isfinite(jitter):
         try:
-            L = linalg.cholesky(A + np.eye(A.shape[0]) * jitter, lower=True)
+            L = linalg.cholesky(A + np.eye(A.shape[0]) * jitter) # , lower=True)
             if num_tries > 1:
                 logging.info("solved jitchol with {} tries".format(num_tries))
             return L
-        except:
+        except linalg.LinAlgError:
             jitter *= 10
         finally:
             num_tries += 1
-    raise linalg.LinAlgError("not positive definite, even with jitter.")
+
+    __import__('ipdb').set_trace()
+    raise linalg.LinAlgError("not positive definite, even with jitter of {}.".format(jitter))
 
     # TODO: which one do I actually want?
     import traceback

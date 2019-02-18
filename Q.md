@@ -1,7 +1,9 @@
 TODO:
   - gpotri
-    - log when big noise
+    - log kdyz noise fuj
 
+
+- GPR failuje assert u solve
 
 - gpy vs bopt tests :O
   - likelihoody vypadaji stejne ... multimodalni?
