@@ -9,6 +9,7 @@ from typing import List
 
 from bopt.models.model import Model
 from bopt.models.random_search import RandomSearch
+from bopt.models.gaussian_process_regressor import GaussianProcessRegressor
 from bopt.basic_types import Hyperparameter
 from bopt.runner.abstract import Job, Runner
 from bopt.models.model import Sample, SampleCollection
@@ -22,6 +23,7 @@ class Experiment:
     hyperparameters: List[Hyperparameter]
     runner: Runner
     samples: List[Sample]
+    last_model: Model
 
     def __init__(self, hyperparameters: List[Hyperparameter], runner: Runner):
         self.hyperparameters = hyperparameters
@@ -43,6 +45,8 @@ class Experiment:
         next_sample = Sample(next_params, job, fitted_model)
 
         self.samples.append(next_sample)
+
+        self.last_model = next_sample.model
 
         return job
 
@@ -69,7 +73,8 @@ class Experiment:
 
             from bopt.bayesian_optimization import plot_2d_optim_result
 
-            plot_2d_optim_result(optim_result, gp=gp)
+            self.plot_current(meta_dir)
+            # plot_2d_optim_result(optim_result, gp=gp)
 
 
     def to_serializable(self) -> "Experiment":
@@ -139,3 +144,67 @@ class Experiment:
                 n_iter,
                 opt_fun=None)
 
+
+    def plot_current(self, meta_dir: str, resolution: float = 30, noise: float = 0.0):
+        # TODO: handle more than 2 dimensions properly
+        # assert len(result.params) == 2
+
+        b1 = self.hyperparameters[0].range
+        b2 = self.hyperparameters[1].range
+
+        # TODO: float64
+        x1 = np.linspace(b1.low, b1.high, resolution, dtype=np.float64)
+        x2 = np.linspace(b2.low, b2.high, resolution, dtype=np.float64)
+
+        assert len(x1) < 80, f"too large x1, len = {len(x1)}"
+        assert len(x2) < 80, f"too large x1, len = {len(x2)}"
+
+        gx, gy = np.meshgrid(x1, x2)
+
+        X_2d = np.c_[gx.ravel(), gy.ravel()]
+
+        bounds = [p.range for p in self.hyperparameters]
+
+
+        X_sample, y_sample = SampleCollection(self.samples, meta_dir).to_xy()
+        X_sample = X_sample[:, :2]
+
+        gp = self.last_model
+
+        # TODO: fuj
+        if isinstance(gp, RandomSearch):
+            return
+
+        gp = gp.gp
+
+        assert gp is not None, "gp is None"
+
+        # TODO: with_bounds?
+        # gp = GaussianProcess(kernel=result.kernel.with_bounds(bounds)) \
+        #     .fit(X_sample, result.y_sample) \
+        #     .optimize_kernel()
+
+        gp.posterior(X_2d)
+        mu, _ = gp.mu_std()
+
+        param_str = str(gp.kernel) + " " + str(gp.noise) + f" nll={round(gp.log_prob().numpy().item(), 2)}"
+
+        mu_mat = mu.reshape(gx.shape[0], gx.shape[1])
+        extent = [b1.low, b1.high, b2.high, b2.low]
+
+        import matplotlib.pyplot as plt
+        import datetime
+        # assert result.best_x is not None
+
+        U_LB = os.environ.get("USE_LBFGS", False)
+        U_TF = os.environ.get("USE_TF", False)
+
+        # plt.title(f"LBFGS={U_LB} TF={U_TF}   noise={round(gp.noise, 2)} {result.kernel}", fontsize=20)
+        # plt.pcolor(mu_mat, extent=extent, aspect="auto")
+        plt.title(param_str)
+        plt.pcolor(gx, gy, mu_mat, cmap="jet")
+        plt.scatter(X_sample[:, 0], X_sample[:, 1], c="k")
+        # plt.scatter([result.best_x[0]], [result.best_x[1]], c="r")
+        plt.savefig("tmp/opt-plot-{}.png".format(datetime.datetime.now().strftime("%Y-%m-%d_%H%M%S")))
+
+        return mu_mat, extent, x1, x2
