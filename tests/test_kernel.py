@@ -2,7 +2,7 @@ import unittest
 import numpy as np
 import pytest
 
-from bopt.kernels import Linear
+# from bopt.kernels import Linear
 
 
 class TestKernel(unittest.TestCase):

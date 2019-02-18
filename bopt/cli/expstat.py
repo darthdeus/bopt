@@ -1,6 +1,6 @@
 # TODO: get rid of psutil?
 import psutil
-from bopt.hyperparameters import Experiment
+from bopt.experiment import Experiment
 
 
 def run(args) -> None:

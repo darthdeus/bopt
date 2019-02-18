@@ -199,9 +199,9 @@
       <div id="job-all"></div>
       <script>
         Plotly.plot("job-all", [
-          {% for job in experiment.evaluations %}
+          {% for sample in sample_col.samples %}
           {
-            y: {{job.intermediate_results()|safe}}
+            y: {# sample.intermediate_results()|safe #}
           },
           {% endfor %}
         ], {
@@ -220,17 +220,17 @@
         </thead>
 
         <tbody>
-          {% for job in experiment.evaluations[:5] %}
+          {% for sample in sample_col.samples[:5] %}
           <tr>
-            <td>{{job.job_id}}</td>
-            <td>{{job.run_parameters}}</td>
-            <td>{{job.result_or_err()}}</td>
+            <td>{{sample.job.job_id}}</td>
+            <td>{{sample.job.run_parameters}}</td>
+            <td>{{sample.get_result(sample_col.meta_dir)}}</td>
             <td>
-              <div id="job-{{job.job_id}}" style="width:400px;height:75px;"></div>
+              <div id="job-{{sample.job.job_id}}" style="width:400px;height:75px;"></div>
               <script>
-                Plotly.plot("job-{{job.job_id}}", [
+                Plotly.plot("job-{{sample.job.job_id}}", [
                   {
-                    y: {{job.intermediate_results()|safe}}
+                    y: {#sample.job.intermediate_results()|safe#}
                   }
                 ], {
                   yaxis: {

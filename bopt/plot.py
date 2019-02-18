@@ -7,8 +7,8 @@ import numpy as np
 
 from matplotlib import cm
 from numpy.random import multivariate_normal
-from bopt.kernels import Kernel
-import bopt.kernel_opt as kernel_opt
+from bopt.kernels.kernels import Kernel
+import bopt.kernels.kernel_opt as kernel_opt
 
 
 def base64_plot():

@@ -1,11 +1,14 @@
-from typing import Optional, Tuple
+import abc
+import datetime
 
 import numpy as np
 from numpy.linalg import inv, cholesky, solve
+from typing import Optional, Tuple, List
 
-import bopt.kernel_opt as kernel_opt
-from bopt.kernels import Kernel, SquaredExp
+import bopt.kernels.kernel_opt as kernel_opt
+from bopt.kernels.kernels import Kernel, SquaredExp
 from bopt.plot import plot_gp
+from bopt.models.model import Model
 
 
 def convert_to_rank1(arr):
@@ -15,7 +18,7 @@ def convert_to_rank1(arr):
     return arr.squeeze()
 
 
-class GaussianProcess:
+class GaussianProcessRegressor:
     X_train: np.ndarray
     y_train: np.ndarray
     X_test: Optional[np.ndarray]
@@ -41,6 +44,26 @@ class GaussianProcess:
         self.std = None
 
         self.stable_computation = stable_computation
+
+    def to_serializable(self) -> "GaussianProcessRegressor":
+        model = self.copy()
+
+        model.noise = float(model.noise)
+
+        model.mu = None
+        model.cov = None
+        model.std = None
+        model.X_train = None
+        model.y_train = None
+        model.X_test = None
+
+        model.kernel = model.kernel.to_serializable()
+        return model
+
+    def from_serializable(self) -> "GaussianProcessRegressor":
+        model = self.copy()
+        model.kernel = model.kernel.from_serializable()
+        return model
 
     def fit(self, X_train: np.ndarray, y_train: np.ndarray, kernel=None) -> "GaussianProcess":
         assert X_train.ndim == 2, f"X_train must be rank-2 tensor, got ndim={X_train.ndim}"
@@ -89,12 +112,14 @@ class GaussianProcess:
         # K = (K + K.T) / 2.0
         # K_ss = (K_ss + K_ss.T) / 2.0
 
-        K_stable_eye   = 1e-8 * np.eye(len(K))  # Just for numerical stability?
-        # Ks_stable_eye  = 1e-8 * np.eye(len(K_s))  # Just for numerical stability?
-        Kss_stable_eye = 1e-8 * np.eye(len(K_ss))  # Just for numerical stability?
+        eye_eps = 1e-8
+
+        K_stable_eye   = eye_eps * np.eye(len(K))  # Just for numerical stability?
+        # Ks_stable_eye  = eye_eps * np.eye(len(K_s))  # Just for numerical stability?
+        Kss_stable_eye = eye_eps * np.eye(len(K_ss))  # Just for numerical stability?
 
         for i in range(min(*K_s.shape)):
-            K_s[i, i] += 1e-8
+            K_s[i, i] += eye_eps
 
         K += K_stable_eye
         # K_s += Ks_stable_eye
@@ -172,8 +197,8 @@ class GaussianProcess:
 
         return self
 
-    def copy(self) -> "GaussianProcess":
-        gp = GaussianProcess()
+    def copy(self) -> "GaussianProcessRegressor":
+        gp = GaussianProcessRegressor()
         gp.kernel = self.kernel.copy()
         gp.noise = self.noise
 

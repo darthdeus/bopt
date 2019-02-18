@@ -2,14 +2,13 @@ import os
 
 import numpy as np
 import tensorflow as tf
-tf.enable_eager_execution()
 import tensorflow_probability as tfp
 
 from typing import Callable, Tuple, List, Dict
 from numpy.linalg import inv, cholesky, det, solve
 from scipy.optimize import minimize
 
-from bopt.kernels import Kernel, SquaredExp
+from bopt.kernels.kernels import Kernel, SquaredExp
 
 
 os.environ["USE_LBFGS"] = "1"
@@ -21,7 +20,7 @@ os.environ["USE_TF"] = "0"
 def is_tensor(x):
     return isinstance(x, (tf.Tensor, tf.SparseTensor, tf.Variable))
 
-PRINT_EACH = 20
+PRINT_EACH = 50
 PRINT_ITER = 0
 
 def print_rounded(*args):
@@ -66,6 +65,8 @@ def tf_kernel_nll(X_train: np.ndarray, y_train: np.ndarray, ls, sigma, noise):
 
     K = tf_sqexp_kernel(X_train, X_train, ls, sigma) + noise_mat
 
+    assert is_tensor(K)
+
     # print(np.diag(K.numpy()).mean(), K.numpy().mean())
     Ky = K.numpy()
     # print(np.diag(Ky).mean(), (Ky - np.diag(np.diag(Ky))).mean())
@@ -96,10 +97,11 @@ def tf_kernel_nll(X_train: np.ndarray, y_train: np.ndarray, ls, sigma, noise):
     param_traces["nll"].append(float(nll.numpy()))
 
     # TODO: re-eneable
-    # global PRINT_ITER
-    # PRINT_ITER += 1
-    # if PRINT_ITER % PRINT_EACH == 0:
-    #     print_rounded(ls.numpy(), sigma.numpy(), noise.numpy(), nll.numpy())
+    global PRINT_ITER
+    PRINT_ITER += 1
+    if PRINT_ITER % PRINT_EACH == 0:
+        print_rounded(ls.numpy(), sigma.numpy(), noise.numpy(), nll.numpy())
+
 
     return nll
 

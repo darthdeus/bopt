@@ -2,7 +2,6 @@ import abc
 from typing import Optional, List
 
 import tensorflow as tf
-tf.enable_eager_execution()
 
 import numpy as np
 from bopt.basic_types import Bound
@@ -97,6 +96,24 @@ class Kernel(abc.ABC):
     def copy(self) -> "Kernel":
         pass
 
+    def to_serializable(self) -> "Kernel":
+        copy = self.copy()
+        copy.params = {
+            name: float(value.numpy())
+            for name, value in self.params.items()
+        }
+
+        return copy
+
+    def from_serializable(self) -> "Kernel":
+        copy = self.copy()
+        copy.params = {
+            name: tf.Variable(value, dtype=tf.float64)
+            for name, value in self.params.items()
+        }
+
+        return copy
+
 
 class SquaredExp(Kernel):
     def __init__(self, l: float = 1., sigma: float = 1.) -> None:
@@ -161,7 +178,7 @@ class SquaredExp(Kernel):
 
     def __repr__(self):
         # TODO: numpy :( assert and fix all places where numpy values are coming in
-        param_str = " ".join([f"{name[:2]}={round(value.numpy().item(), 2)}"
+        param_str = " ".join([f"{name[:2]}={round(value.numpy().item(), 4)}"
                               for name, value in self.params.items()])
         return f"{param_str}"
 

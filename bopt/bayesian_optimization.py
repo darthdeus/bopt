@@ -7,12 +7,12 @@ import numpy as np
 from scipy.optimize import minimize
 from typing import Callable, List, Union, Any, Dict, Tuple
 
-from bopt.acquisition_functions import expected_improvement, AcquisitionFunction
-from bopt.gaussian_process import GaussianProcess
-from bopt.kernels import SquaredExp, Kernel
+from bopt.acquisition_functions.acquisition_functions import expected_improvement, AcquisitionFunction
+from bopt.models.gaussian_process_regressor import GaussianProcessRegressor
+from bopt.kernels.kernels import SquaredExp, Kernel
 from bopt.plot import plot_approximation
 from bopt.basic_types import Integer, Float, Bound, Hyperparameter
-from bopt.hyperparameters import OptimizationResult
+from bopt.optimization_result import OptimizationResult
 
 
 def assert_in_bounds(x: np.ndarray, bounds: List[Bound]) -> None:
@@ -61,8 +61,8 @@ class OptimizationLoop:
             self.X_sample = np.vstack((self.X_sample, x_next))
             self.y_sample = np.hstack((self.y_sample, y_next))
 
-    def create_gp(self) -> GaussianProcess:
-        gp = GaussianProcess(kernel=self.kernel, noise=self.gp_noise)
+    def create_gp(self) -> GaussianProcessRegressor:
+        gp = GaussianProcessRegressor(kernel=self.kernel, noise=self.gp_noise)
         gp.fit(self.X_sample, self.y_sample)
 
         if self.optimize_kernel or True:
@@ -102,6 +102,7 @@ class OptimizationLoop:
             if job.is_success():
                 y_next = job.final_result()
                 self.add_sample(x_next, y_next)
+
 
 def default_from_bounds(bounds: List[Bound]) -> np.ndarray:
     x_0 = np.zeros(len(bounds))
@@ -156,7 +157,7 @@ def bo_maximize_loop(
     return loop.result()
 
 
-def propose_multiple_locations(acquisition: AcquisitionFunction, gp: GaussianProcess,
+def propose_multiple_locations(acquisition: AcquisitionFunction, gp: GaussianProcessRegressor,
                                X_sample: np.ndarray, y_sample: np.ndarray,
                                bounds: List[Bound], n_locations: int, n_restarts: int = 25,
                                optimize_kernel: bool = True) -> List[np.ndarray]:
@@ -180,27 +181,27 @@ def propose_multiple_locations(acquisition: AcquisitionFunction, gp: GaussianPro
     return result
 
 
-def propose_location(acquisition: AcquisitionFunction, gp: GaussianProcess, y_max: float,
-                     bounds: List[Bound], n_restarts: int = 25) -> np.ndarray:
-    def min_obj(X):
-        return -acquisition(gp, X.reshape(1, -1), y_max)
-
-    scipy_bounds = [(bound.low, bound.high) for bound in bounds]
-
-    starting_points = []
-    for _ in range(n_restarts):
-        starting_points.append(np.array([bound.sample() for bound in bounds]))
-
-    min_val = 1
-    min_x = None
-
-    for x0 in starting_points:
-        res = minimize(min_obj, x0=x0, bounds=scipy_bounds, method='L-BFGS-B')
-        if res.fun < min_val:
-            min_val = res.fun[0]
-            min_x = res.x
-
-    return min_x
+# def propose_location(acquisition: AcquisitionFunction, gp: GaussianProcess, y_max: float,
+#                      bounds: List[Bound], n_restarts: int = 25) -> np.ndarray:
+#     def min_obj(X):
+#         return -acquisition(gp, X.reshape(1, -1), y_max)
+#
+#     scipy_bounds = [(bound.low, bound.high) for bound in bounds]
+#
+#     starting_points = []
+#     for _ in range(n_restarts):
+#         starting_points.append(np.array([bound.sample() for bound in bounds]))
+#
+#     min_val = 1
+#     min_x = None
+#
+#     for x0 in starting_points:
+#         res = minimize(min_obj, x0=x0, bounds=scipy_bounds, method='L-BFGS-B')
+#         if res.fun < min_val:
+#             min_val = res.fun[0]
+#             min_x = res.x
+#
+#     return min_x
 
 
 def bo_plot_exploration(f: Callable[[np.ndarray], float],

@@ -10,20 +10,14 @@ import tempfile
 from glob import glob
 from typing import Union, List, Optional, Tuple, Callable
 
-from bopt.hyperparameters import Hyperparameter
+from bopt.basic_types import Hyperparameter
 from bopt.runner.abstract import Job, Runner, Timestamp, Value
-from bopt.runner.result_parser import ResultParser
 
 
 class LocalJob(Job):
-    def __init__(self, meta_dir: str, job_id: int, result_parser: ResultParser,
-                 run_parameters: dict) -> None:
-        self.meta_dir = meta_dir
+    def __init__(self, job_id: int, run_parameters: dict) -> None:
         self.job_id = job_id
-        self.result_parser = result_parser
         self.run_parameters = run_parameters
-
-        self.serialize()
 
     def is_finished(self) -> bool:
         return not psutil.pid_exists(self.job_id)
@@ -37,23 +31,15 @@ class LocalJob(Job):
 
 
 class LocalRunner(Runner):
-    hidden_fields = ["result_parser"]
-
-    meta_dir: str
     script_path: str
     arguments: List[str]
 
-    def __init__(self, meta_dir: str, script_path: str, arguments: List[str],
-                 result_parser: ResultParser) -> None:
+    def __init__(self, script_path: str, arguments: List[str]) -> None:
         self.script_path = script_path
         self.arguments = arguments
-        self.meta_dir = meta_dir
-        self.result_parser = result_parser
 
-    def start(self, run_parameters: dict) -> Job:
+    def start(self, output_dir: str, run_parameters: dict) -> Job:
         cmdline_run_params = [f"--{name}={value}" for name, value in run_parameters.items()]
-
-        output_dir = os.path.join(self.meta_dir, "outputs")
 
         cmd = list(map(lambda x: os.path.expanduser(x), [
             self.script_path,
@@ -61,24 +47,20 @@ class LocalRunner(Runner):
             *cmdline_run_params
         ]))
 
-        temp_fname = tempfile.mktemp(dir=".")
+        temp_fname = tempfile.mktemp(dir=output_dir)
         with open(temp_fname, "w") as f:
-            process = psutil.Popen(cmd, stdout=f, stderr=subprocess.STDOUT)
+            process = psutil.Popen(cmd, stdout=f)
+            # TODO: stderr?
+            # , stderr=subprocess.STDOUT)
 
             job_id = process.pid
-            job_fname = Job.compute_job_output_filename(self.meta_dir, job_id)
+            job_fname = os.path.join(output_dir, f"job-{job_id}.out")
 
             print(f"START {job_id}:\t{' '.join(cmd)}")
 
             os.rename(temp_fname, job_fname)
 
-            local_job = LocalJob(self.meta_dir, job_id, self.result_parser, run_parameters)
+            local_job = LocalJob(job_id, run_parameters)
             local_job.started_at = datetime.datetime.now()
 
             return local_job
-
-    def deserialize_job(self, meta_dir: str, job_id: int) -> Job:
-        fname = Job.compute_job_filename(meta_dir, job_id)
-
-        with open(fname, "r") as f:
-            return yaml.load(f.read())
