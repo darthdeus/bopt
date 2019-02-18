@@ -36,10 +36,13 @@ def run(args) -> None:
     def index():
         bopt.clear_param_traces()
 
-        experiment = bopt.Experiment.deserialize(app.config.get("meta_dir"))
-        optim_result = experiment.current_optim_result()
+        meta_dir = app.config.get("meta_dir")
+        experiment = bopt.Experiment.deserialize(meta_dir)
+        optim_result = experiment.current_optim_result(meta_dir)
 
-        gp = bopt.GaussianProcess(kernel=optim_result.kernel) \
+        sample_col = bopt.SampleCollection(experiment.samples, meta_dir)
+
+        gp = bopt.GaussianProcessRegressor(kernel=optim_result.kernel) \
                 .fit(optim_result.X_sample, optim_result.y_sample) \
                 .optimize_kernel()
 
@@ -116,6 +119,7 @@ def run(args) -> None:
         return render_template("index.html", data=data,
                 json_data=json_data,
                 experiment=experiment,
+                sample_col=sample_col,
                 param_traces=param_traces,
                 nll_trace=nll_trace,
                 result_gp=gp)

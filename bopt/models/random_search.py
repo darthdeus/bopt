@@ -13,6 +13,13 @@ class RandomSearch(Model):
 
         return value, self
 
+    def to_serializable(self) -> "Model":
+        return self
+
+    def from_serializable(self) -> "Model":
+        return self
+
+
 # TODO: delete
 # def default_from_bounds(bounds: List[Bound]) -> np.ndarray:
 #     x_0 = np.zeros(len(bounds))

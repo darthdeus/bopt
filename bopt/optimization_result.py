@@ -8,11 +8,10 @@ import pickle
 from glob import glob
 from typing import Union, NamedTuple, List, Any, Optional, Tuple
 
-from bopt.gaussian_process import GaussianProcess
 from bopt.basic_types import Hyperparameter
-from bopt.kernels import SquaredExp, Kernel
+from bopt.kernels.kernels import Kernel
 from bopt.runner.abstract import Job, Runner
-from bopt.sample import Sample
+from bopt.models.model import Sample
 
 
 class OptimizationResult:

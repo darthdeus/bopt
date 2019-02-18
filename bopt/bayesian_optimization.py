@@ -7,12 +7,12 @@ import numpy as np
 from scipy.optimize import minimize
 from typing import Callable, List, Union, Any, Dict, Tuple
 
-from bopt.acquisition_functions import expected_improvement, AcquisitionFunction
-from bopt.gaussian_process import GaussianProcess
-from bopt.kernels import SquaredExp, Kernel
+from bopt.acquisition_functions.acquisition_functions import expected_improvement, AcquisitionFunction
+from bopt.models.gaussian_process_regressor import GaussianProcessRegressor
+from bopt.kernels.kernels import SquaredExp, Kernel
 from bopt.plot import plot_approximation
 from bopt.basic_types import Integer, Float, Bound, Hyperparameter
-from bopt.hyperparameters import OptimizationResult
+from bopt.optimization_result import OptimizationResult
 
 
 def assert_in_bounds(x: np.ndarray, bounds: List[Bound]) -> None:
@@ -61,8 +61,8 @@ class OptimizationLoop:
             self.X_sample = np.vstack((self.X_sample, x_next))
             self.y_sample = np.hstack((self.y_sample, y_next))
 
-    def create_gp(self) -> GaussianProcess:
-        gp = GaussianProcess(kernel=self.kernel, noise=self.gp_noise)
+    def create_gp(self) -> GaussianProcessRegressor:
+        gp = GaussianProcessRegressor(kernel=self.kernel, noise=self.gp_noise)
         gp.fit(self.X_sample, self.y_sample)
 
         if self.optimize_kernel or True:
@@ -157,7 +157,7 @@ def bo_maximize_loop(
     return loop.result()
 
 
-def propose_multiple_locations(acquisition: AcquisitionFunction, gp: GaussianProcess,
+def propose_multiple_locations(acquisition: AcquisitionFunction, gp: GaussianProcessRegressor,
                                X_sample: np.ndarray, y_sample: np.ndarray,
                                bounds: List[Bound], n_locations: int, n_restarts: int = 25,
                                optimize_kernel: bool = True) -> List[np.ndarray]:

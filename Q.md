@@ -1,3 +1,8 @@
+- nemuzu se ptat na vysledky samplu, aniz bych vedel adresar outputu jobu
+  - jak a kdy mam prelejt outputy jobu do samplu? mam to vubec delat?
+
+
+
 def jitchol(A, maxtries=5):
     A = np.ascontiguousarray(A)
     L, info = lapack.dpotrf(A, lower=1)

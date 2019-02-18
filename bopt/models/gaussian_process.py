@@ -12,23 +12,20 @@ from bopt.models.gaussian_process_regressor import GaussianProcessRegressor
 class GPModel(Model):
     gp: GaussianProcessRegressor
 
+    def to_serializable(self) -> "Model":
+        model = GPModel()
+        model.gp = self.gp.to_serializable()
+        return model
+
+    def from_serializable(self) -> "Model":
+        model = GPModel()
+        model.gp = self.gp.from_serializable()
+        return model
+        pass
+
     def predict_next(self, hyperparameters: List[Hyperparameter],
                      sample_col: SampleCollection) -> Tuple[dict, "Model"]:
-        samples = sample_col.samples
-
-        assert all([s.job.is_finished() for s in samples])
-
-        num_samples = len(samples)
-        num_params = len(hyperparameters)
-
-        X_sample = np.zeros([num_samples,num_params], dtype=np.float64)
-        y_sample = np.zeros([num_samples], dtype=np.float64)
-
-        for i, sample in enumerate(samples):
-            x, y = sample.to_xy(sample_col.output_dir)
-
-            X_sample[i] = x
-            y_sample[i] = y
+        X_sample, y_sample = sample_col.to_xy()
 
         gp = GaussianProcessRegressor().fit(X_sample, y_sample).optimize_kernel()
 
@@ -39,7 +36,7 @@ class GPModel(Model):
                 y_sample.max(),
                 bounds)
 
-        typed_vals = [int(x) if p.range.type == "int" else x
+        typed_vals = [int(x) if p.range.type == "int" else float(x)
                       for x, p in zip(x_next, hyperparameters)]
 
         names = [p.name for p in hyperparameters]

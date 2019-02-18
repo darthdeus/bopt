@@ -96,6 +96,24 @@ class Kernel(abc.ABC):
     def copy(self) -> "Kernel":
         pass
 
+    def to_serializable(self) -> "Kernel":
+        copy = self.copy()
+        copy.params = {
+            name: float(value.numpy())
+            for name, value in self.params.items()
+        }
+
+        return copy
+
+    def from_serializable(self) -> "Kernel":
+        copy = self.copy()
+        copy.params = {
+            name: tf.Variable(value, dtype=tf.float64)
+            for name, value in self.params.items()
+        }
+
+        return copy
+
 
 class SquaredExp(Kernel):
     def __init__(self, l: float = 1., sigma: float = 1.) -> None:
