@@ -12,6 +12,7 @@ from bopt.basic_types import Hyperparameter
 from bopt.kernels.kernels import Kernel
 from bopt.runner.abstract import Job, Runner
 from bopt.models.model import Sample
+from bopt.models.gaussian_process_regressor import GaussianProcessRegressor
 
 
 class OptimizationResult:
@@ -66,3 +67,9 @@ class OptimizationResult:
             return pickle.load(f)
 
 
+    def fit_gp(self) -> "GaussianProcessRegressor":
+        gp = GaussianProcessRegressor(kernel=self.kernel) \
+                .fit(self.X_sample, self.y_sample) \
+                .optimize_kernel()
+
+        return gp

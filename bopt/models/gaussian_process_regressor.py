@@ -138,10 +138,10 @@ class GaussianProcessRegressor:
 
             L = cholesky(K)
             alpha = solve(L.T, solve(L, self.y_train))
-            assert np.allclose((L @ L.T) @ alpha, self.y_train)
+            assert np.allclose((L @ L.T) @ alpha, self.y_train, atol=1e-7)
 
             alpha = solve(K, self.y_train)
-            assert np.allclose(K @ alpha, self.y_train)
+            assert np.allclose(K @ alpha, self.y_train, atol=1e-7)
             L_k = solve(L, K_s)
 
             # print("HA")

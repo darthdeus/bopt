@@ -42,9 +42,7 @@ def run(args) -> None:
 
         sample_col = bopt.SampleCollection(experiment.samples, meta_dir)
 
-        gp = bopt.GaussianProcessRegressor(kernel=optim_result.kernel) \
-                .fit(optim_result.X_sample, optim_result.y_sample) \
-                .optimize_kernel()
+        gp = optim_result.fit_gp()
 
         dimensions = []
 
@@ -75,7 +73,6 @@ def run(args) -> None:
             slices.append(posterior_slice)
 
         mu_mat, extent, gx, gy = bopt.plot_2d_optim_result(optim_result, gp=gp)
-        exp_gp = bopt.base64_plot()
 
         heatmap = []
         for i in range(len(mu_mat)):

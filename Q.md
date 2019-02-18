@@ -1,4 +1,12 @@
+TODO:
+  - gpotri
+    - log when big noise
+
+
 - gpy vs bopt tests :O
+  - likelihoody vypadaji stejne ... multimodalni?
+  - mozna TF failuje, protoze to nebezi s restartama?
+    - kdyz necham jenom porovnani likelihoodu tak to funguje
 
 - nemuzu se ptat na vysledky samplu, aniz bych vedel adresar outputu jobu
   - jak a kdy mam prelejt outputy jobu do samplu? mam to vubec delat?
@@ -6,34 +14,25 @@
 - ukladani meta_dir? ted ho vsude musim predavat, ale
   kdyz ho budu serializovat, tak pak nic nejde presunout
 
+- kam patri result parser? viz kradeni stdout
+
+- jak u multijobu poustet/schedulovat vic behu?
+
+- format cmdline argu u init? vs template.yml
+
+    bopt init --param "gamma:float:0:1" --param "epsilon:float:0:1" --dir results/mc ./.venv/bin/python ./experiments/rl/monte_carlo.py
 
 
-def jitchol(A, maxtries=5):
-    A = np.ascontiguousarray(A)
-    L, info = lapack.dpotrf(A, lower=1)
-    if info == 0:
-        return L
-    else:
-        diagA = np.diag(A)
-        if np.any(diagA <= 0.):
-            raise linalg.LinAlgError("not pd: non-positive diagonal elements")
-        jitter = diagA.mean() * 1e-6
-        num_tries = 1
-        while num_tries <= maxtries and np.isfinite(jitter):
-            try:
-                L = linalg.cholesky(A + np.eye(A.shape[0]) * jitter, lower=True)
-                return L
-            except:
-                jitter *= 10
-            finally:
-                num_tries += 1
-        raise linalg.LinAlgError("not positive definite, even with jitter.")
-    import traceback
-    try: raise
-    except:
-        logging.warning('\n'.join(['Added jitter of {:.10e}'.format(jitter),
-            '  in '+traceback.format_list(traceback.extract_stack(limit=3)[-2:-1])[0][2:]]))
-    return L
+- logging? ploty kdyz failne assert ... soft assert?
+
+
+
+
+
+
+## oooooooooooooooooooooooooooooooooooooooooooold   |
+##                                                  v
+
 
 
 

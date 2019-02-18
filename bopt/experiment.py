@@ -62,6 +62,16 @@ class Experiment:
 
             self.serialize(meta_dir)
 
+            optim_result = self.current_optim_result(meta_dir)
+            # TODO: used the job model
+            # TODO: plot optim from job?
+            gp = optim_result.fit_gp()
+
+            from bopt.bayesian_optimization import plot_2d_optim_result
+
+            plot_2d_optim_result(optim_result, gp=gp)
+
+
     def to_serializable(self) -> "Experiment":
         samples = [s.to_serializable() for s in self.samples]
         exp = Experiment(self.hyperparameters, self.runner)

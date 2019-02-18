@@ -6,6 +6,7 @@ import yaml
 import unittest
 import numpy as np
 import math
+import random
 
 import GPy
 from bopt import GaussianProcessRegressor, SquaredExp
@@ -64,8 +65,7 @@ def param_nll_gpy(X_train, y_train, params):
 
 def model_bopt(X_train, y_train, X):
     gp = GaussianProcessRegressor(noise=1.0, kernel=SquaredExp(l=1.0, sigma=1.0)).\
-            fit(X_train, y_train)\
-      .optimize_kernel().posterior(X)
+            fit(X_train, y_train).optimize_kernel().posterior(X)
 
     params = {
         "noise": gp.noise,
@@ -108,9 +108,18 @@ def generate_datasets() -> List[Tuple[np.ndarray, np.ndarray, np.ndarray]]:
 
     results.append(d1())
 
-    for i in range(10):
-        X_train = np.random.random(5).astype(np.float64).reshape(-1, 1)
-        y_train = np.random.random(5).astype(np.float64)
+    num_points = 20
+
+    funs = [np.sin, np.cos, lambda x: x**2]
+
+    for i in range(50):
+        data_noise = random.random()
+        X_train = np.random.random(num_points).astype(np.float64).reshape(-1, 1)
+
+        y_train = random.choice(funs)(X_train) + np.random.random(1).astype(np.float64)
+        y_train = y_train.reshape(-1)
+
+        # y_train = np.random.random(num_points).astype(np.float64)
 
         X = np.arange(min(X_train) - 0.1, max(X_train) + 0.1, step=0.1).reshape(-1, 1)
 
@@ -158,15 +167,14 @@ class TestMatchingGPy(unittest.TestCase):
 
             # param_nll_gpflow(X_train, y_train, p1)
 
+            self.assertAlmostEqual(nll1, nll2, places=1)
             self.assertSetEqual(set(p1.keys()), set(p2.keys()))
 
             for key in p1.keys():
-                # self.assertTrue(math.isclose(p1[key], 0, rel_tol=1e-3))
                 self.assertAlmostEqual(p1[key], p2[key], delta=1e-1)
 
-            self.assertAlmostEqual(nll1, nll2, places=1)
-
             self.assertTrue(np.allclose(c1, c2, atol=1e-3), np.allclose(m1, m2, atol=1e-3))
+
 
             # plt.plot(np.diag(c1 - c2))
             # plt.show()

@@ -1,5 +1,6 @@
 import os
 
+import datetime
 import psutil
 import time
 import matplotlib.pyplot as plt
@@ -267,7 +268,7 @@ def plot_2d_optim_result(result: OptimizationResult,
     gp.posterior(X_2d)
     mu, _ = gp.mu_std()
 
-    print("..." + str(gp.kernel) + " " + str(gp.noise) + f" nll={round(gp.log_prob().numpy().item(), 2)}")
+    param_str = str(gp.kernel) + " " + str(gp.noise) + f" nll={round(gp.log_prob().numpy().item(), 2)}"
 
     mu_mat = mu.reshape(gx.shape[0], gx.shape[1])
     extent = [b1.low, b1.high, b2.high, b2.low]
@@ -279,8 +280,10 @@ def plot_2d_optim_result(result: OptimizationResult,
 
     # plt.title(f"LBFGS={U_LB} TF={U_TF}   noise={round(gp.noise, 2)} {result.kernel}", fontsize=20)
     # plt.pcolor(mu_mat, extent=extent, aspect="auto")
+    plt.title(param_str)
     plt.pcolor(gx, gy, mu_mat, cmap="jet")
     plt.scatter(X_sample[:, 0], X_sample[:, 1], c="k")
     plt.scatter([result.best_x[0]], [result.best_x[1]], c="r")
+    plt.savefig("tmp/opt-plot-{}.png".format(datetime.datetime.now().strftime("%Y-%m-%d_%H%M%S")))
 
     return mu_mat, extent, x1, x2
