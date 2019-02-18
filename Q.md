@@ -1,3 +1,5 @@
+- gpy vs bopt tests :O
+
 - nemuzu se ptat na vysledky samplu, aniz bych vedel adresar outputu jobu
   - jak a kdy mam prelejt outputy jobu do samplu? mam to vubec delat?
 

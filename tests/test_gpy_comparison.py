@@ -13,6 +13,21 @@ from bopt import GaussianProcessRegressor, SquaredExp
 from typing import NamedTuple, List, Tuple
 
 
+# def param_nll_gpflow(X_train, y_train, params):
+#     import gpflow
+#     with gpflow.defer_build():
+#         kernel = gpflow.kernels.RBF(
+#                 input_dim=1,
+#                 variance=params["sigma"] ** 2, # TODO !!!!!!!!!!!!! ** 2?
+#                 lengthscales=params["ls"])
+#
+#
+#         m = gpflow.models.GPR(X_train, y_train.reshape(-1, 1), kern=kernel)
+#         m.likelihood.variance = params["noise"] ** 2
+#
+#     # __import__('ipdb').set_trace()
+
+
 def param_nll_bopt(X_train, y_train, params):
     kernel = SquaredExp(l=params["ls"], sigma=params["sigma"])
     gp = GaussianProcessRegressor(noise=params["noise"], kernel=kernel).\
@@ -27,7 +42,7 @@ def param_nll_gpy(X_train, y_train, params):
     #         fit(X_train, y_train)
     #
     # return gp.log_prob().numpy().item()
-    rbf = GPy.kern.RBF(input_dim=1, variance=params["sigma"], lengthscale=params["ls"])
+    rbf = GPy.kern.RBF(input_dim=1, variance=params["sigma"]**2, lengthscale=params["ls"])
     gpr = GPy.models.GPRegression(X_train, y_train.reshape(-1, 1), rbf)
     gpr.Gaussian_noise.variance = params["noise"] ** 2
 
@@ -140,6 +155,8 @@ class TestMatchingGPy(unittest.TestCase):
 
             print("B -> G:\t", param_nll_gpy(X_train, y_train, p1))
             print("G -> G:\t", param_nll_gpy(X_train, y_train, p2))
+
+            # param_nll_gpflow(X_train, y_train, p1)
 
             self.assertSetEqual(set(p1.keys()), set(p2.keys()))
 
