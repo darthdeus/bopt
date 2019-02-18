@@ -20,7 +20,7 @@ os.environ["USE_TF"] = "0"
 def is_tensor(x):
     return isinstance(x, (tf.Tensor, tf.SparseTensor, tf.Variable))
 
-PRINT_EACH = 20
+PRINT_EACH = 50
 PRINT_ITER = 0
 
 def print_rounded(*args):
@@ -97,10 +97,11 @@ def tf_kernel_nll(X_train: np.ndarray, y_train: np.ndarray, ls, sigma, noise):
     param_traces["nll"].append(float(nll.numpy()))
 
     # TODO: re-eneable
-    # global PRINT_ITER
-    # PRINT_ITER += 1
-    # if PRINT_ITER % PRINT_EACH == 0:
-    #     print_rounded(ls.numpy(), sigma.numpy(), noise.numpy(), nll.numpy())
+    global PRINT_ITER
+    PRINT_ITER += 1
+    if PRINT_ITER % PRINT_EACH == 0:
+        print_rounded(ls.numpy(), sigma.numpy(), noise.numpy(), nll.numpy())
+
 
     return nll
 

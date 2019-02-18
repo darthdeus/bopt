@@ -1,113 +1,111 @@
 #!/usr/bin/env python3
-
-import time
-import random
-# from argparse import Namespace
-# from typing import NamedTuple, List
-
 import numpy as np
+import random
+
+from collections import defaultdict
 
 import cart_pole_evaluator
-# from gym_evaluator import GymEnvironment
 
 
-def update_timestep(sar, G: float, Q: np.ndarray, C: np.ndarray) -> float:
-    s, a, r = sar
-
-    G = args.gamma * G + r
-    C[s, a] += 1
-
-    Qsa = Q[s, a]
-    Csa = C[s, a]
-
-    Q[s, a] = Qsa + (1.0 / Csa * (G - Qsa))
-
-    return G
-
-
-def train(args, env, Q, C) -> None:
-    for episode in range(args.episodes):
-        state, done = env.reset(False), False
-        sar_tups = []
-
-        while not done:
-            if args.render_each and env.episode and env.episode % args.render_each == 0:
-                env.render()
-
-            if np.random.rand() < args.epsilon:
-                action = random.choice(range(env.actions))
-            else:
-                action = Q.argmax(axis=1)[state]
-
-            next_state, reward, done, _ = env.step(action)
-            sar_tups.append((state, action, reward))
-            state = next_state
-
-        G = 0.0
-
-        for t in reversed(range(len(sar_tups))):
-            G = update_timestep(sar_tups[t], G, Q, C)
-
-
-def evaluate(args, env, Q) -> float:
-    for _ in range(100):
-        # Perform a training episode
-        state, done = env.reset(True), False
-        while not done:
-            if args.render_each and env.episode and env.episode % args.render_each == 0:
-                env.render()
-
-            action = Q.argmax(axis=1)[state]
-            try:
-                next_state, reward, done, info = env.step(action)
-            # FUJ ale lip to neumim :P
-            except UnicodeError as e:
-                # print("caught ", e.args[0])
-                return e.args[0]
-
-            state = next_state
-
-    raise ValueError()
-
-
-if __name__ == "__main__":
+def main():
     # Fix random seed
     np.random.seed(42)
 
     # Parse arguments
     import argparse
-
     parser = argparse.ArgumentParser()
-    parser.add_argument("--episodes", default=200, type=int, help="Training episodes.")
-    parser.add_argument("--render_each", default=None, type=int, help="Render some episodes.")
-    parser.add_argument("--sleep_when_done", default=0, type=int, help="Time to sleep at the end.")
+    parser.add_argument("--episodes", default=2000, type=int, help="Training episodes.")
+    parser.add_argument("--render_each", default=0, type=int, help="Render some episodes.")
 
-    parser.add_argument("--epsilon", default=0.45, type=float, help="Exploration factor.")
-    parser.add_argument("--epsilon_final", default=None, type=float, help="Final exploration factor.")
-    parser.add_argument("--gamma", default=0.45, type=float, help="Discounting factor.")
+    parser.add_argument("--epsilon", default=0.2, type=float, help="Exploration factor.")
+    parser.add_argument("--epsilon_final", default=0.1, type=float, help="Final exploration factor.")
+    parser.add_argument("--gamma", default=0.99, type=float, help="Discounting factor.")
     args = parser.parse_args()
 
+    print(args)
+
     # Create the environment
+    env = cart_pole_evaluator.environment()
 
     # TODO: Implement Monte-Carlo RL algorithm.
-    #
-    # The overall structure of the code follows.
+    training = True
 
+    Q = np.zeros([env.states, env.actions], dtype=np.float32)
+    Q.fill(500)
+    # Q.fill(1 / args.epsilon)
 
-    def target_fn() -> float:
-        env = cart_pole_evaluator.environment()
+    C = np.zeros([env.states, env.actions], dtype=np.float32)
 
-        Q = np.zeros((env.states, env.actions), dtype=np.float32)
-        C = np.zeros_like(Q)
+    eps_diff = (args.epsilon_final - args.epsilon) / float(args.episodes)
+    eps_curr = args.epsilon
 
-        train(args, env, Q, C)
+    while training:
+        trajectory = []
 
-        # Perform last 100 evaluation episodes
-        mean_value = evaluate(args, env, Q)
+        # Perform a training episode
+        state, done = env.reset(), False
+        while not done:
+            if args.render_each and env.episode and env.episode % args.render_each == 0:
+                env.render()
 
-        return mean_value
+            if random.random() < eps_curr:
+                action = random.randint(0, env.actions - 1)
+            else:
+                action = np.argmax(Q[state]).item()
 
-    num_runs = 5
-    print(np.mean([target_fn() for i in range(num_runs)]).item())
+            next_state, reward, done, _ = env.step(action)
 
-    time.sleep(args.sleep_when_done)
+            trajectory.append([state, action, reward])
+
+            state = next_state
+
+        G = 0.0
+
+        for state, action, reward in reversed(trajectory):
+            G = args.gamma * G + reward
+            # returns[(state, action)].append(G)
+            # Q[state, action] = np.mean(returns[(state, action)]).item()
+
+            C[state, action] += 1
+            Q[state, action] += (G - Q[state, action])/C[state, action]
+
+            state = next_state
+
+        eps_curr += eps_diff
+
+        if args.render_each and env.episode % args.render_each == 0:
+            print(f"eps curr: {eps_curr}")
+
+            # Evaluation episode
+            state, done = env.reset(), False
+            while not done:
+                env.render()
+                action = np.argmax(Q[state]).item()
+                state, _, done, _ = env.step(action)
+
+        if env.episode > args.episodes:
+            break
+
+    # Perform last 100 evaluation episodes
+    for _ in range(100):
+        state, done = env.reset(True), False
+        while not done:
+            action = np.argmax(Q[state]).item()
+            state, _, done, _ = env.step(action)
+
+if __name__ == "__main__":
+    from io import StringIO # Python3 use: from io import StringIO
+    import sys
+
+    old_stdout = sys.stdout
+    sys.stdout = mystdout = StringIO()
+
+    main()
+
+    sys.stdout = old_stdout
+
+    print(mystdout.getvalue().strip().split("\n")[-1].split(" ")[-1])
+
+    # __import__('ipdb').set_trace()
+
+    # examine mystdout.getvalue()

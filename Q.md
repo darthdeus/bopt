@@ -1,6 +1,9 @@
 - nemuzu se ptat na vysledky samplu, aniz bych vedel adresar outputu jobu
   - jak a kdy mam prelejt outputy jobu do samplu? mam to vubec delat?
 
+- ukladani meta_dir? ted ho vsude musim predavat, ale
+  kdyz ho budu serializovat, tak pak nic nejde presunout
+
 
 
 def jitchol(A, maxtries=5):

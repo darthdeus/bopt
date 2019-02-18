@@ -112,7 +112,7 @@ class GaussianProcessRegressor:
         # K = (K + K.T) / 2.0
         # K_ss = (K_ss + K_ss.T) / 2.0
 
-        eye_eps = 1e-6
+        eye_eps = 1e-8
 
         K_stable_eye   = eye_eps * np.eye(len(K))  # Just for numerical stability?
         # Ks_stable_eye  = eye_eps * np.eye(len(K_s))  # Just for numerical stability?

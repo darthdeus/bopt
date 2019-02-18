@@ -128,7 +128,7 @@ class GymEnvironment:
                 mean = np.mean(self._episode_returns[-100:])
                 print("The mean 100-episode return after evaluation {}".format(mean))
                 # FUJ ale lip to neumim :P
-                raise UnicodeError(mean)
+                # raise UnicodeError(mean)
                 # sys.exit(0)
 
             self._episode_return = 0
