@@ -1,14 +1,38 @@
-TODO:
-  - gpotri
-    - log kdyz noise fuj
+- co kdyz mam duplicitni-pid?
+  - job-PID-1
+  - pouzivat relativni cesty
 
 
-- GPR failuje assert u solve
+<!-- - GPR failuje assert u solve -->
+<!--  -->
+<!-- - gpy vs bopt tests :O -->
+<!--   - likelihoody vypadaji stejne ... multimodalni? -->
+<!--   - mozna TF failuje, protoze to nebezi s restartama? -->
+<!--     - kdyz necham jenom porovnani likelihoodu tak to funguje -->
 
-- gpy vs bopt tests :O
-  - likelihoody vypadaji stejne ... multimodalni?
-  - mozna TF failuje, protoze to nebezi s restartama?
-    - kdyz necham jenom porovnani likelihoodu tak to funguje
+- GPy !!!
+
+- zamykani
+
+- bopt cmdline
+  - vytvoreni experimentu
+  - pousteni jobu
+    - single shot run
+    - forever
+      - lock
+      - sync
+      - run
+      - unlock
+      - sleep
+  - suggest
+    - naformatovany command s newlinama
+  - bopt manual-run
+  - bopt web
+    - sync + render
+  - bopt job -c DIR ID
+  - bopt exp -c DIR
+
+
 
 - nemuzu se ptat na vysledky samplu, aniz bych vedel adresar outputu jobu
   - jak a kdy mam prelejt outputy jobu do samplu? mam to vubec delat?
@@ -21,6 +45,15 @@ TODO:
 - jak u multijobu poustet/schedulovat vic behu?
 
 - format cmdline argu u init? vs template.yml
+    bopt init results/mc ./.venv/bin/python ./experiments/rl/monte_carlo.py
+
+    bopt init -p parser neur
+    bopt init -p file_parser[fname] neur
+
+    mkfifo p
+    neur 2>p | parser
+    parser < p
+
 
     bopt init --param "gamma:float:0:1" --param "epsilon:float:0:1" --dir results/mc ./.venv/bin/python ./experiments/rl/monte_carlo.py
 
