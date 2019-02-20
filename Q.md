@@ -12,7 +12,7 @@
 
 - GPy !!!
 
-- zamykani
+- zamykani - flock, lockfile
 
 - bopt cmdline
   - vytvoreni experimentu
