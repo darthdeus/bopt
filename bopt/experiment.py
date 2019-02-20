@@ -5,7 +5,7 @@ import time
 import pathlib
 import numpy as np
 
-from typing import List
+from typing import List, Optional
 
 from bopt.models.model import Model
 from bopt.models.random_search import RandomSearch
@@ -23,12 +23,13 @@ class Experiment:
     hyperparameters: List[Hyperparameter]
     runner: Runner
     samples: List[Sample]
-    last_model: Model
+    last_model: Optional[Model]
 
     def __init__(self, hyperparameters: List[Hyperparameter], runner: Runner):
         self.hyperparameters = hyperparameters
         self.runner = runner
         self.samples = []
+        self.last_model = None
 
     def run_next(self, model: Model, meta_dir: str, output_dir: str) -> Job:
         if len(self.samples) == 0:
@@ -66,27 +67,39 @@ class Experiment:
 
             self.serialize(meta_dir)
 
-            optim_result = self.current_optim_result(meta_dir)
-            # TODO: used the job model
-            # TODO: plot optim from job?
-            gp = optim_result.fit_gp()
-
-            from bopt.bayesian_optimization import plot_2d_optim_result
-
+            ##################################
+            # TODO: plot with GPy!!!
+            ##################################
             self.plot_current(meta_dir)
-            # plot_2d_optim_result(optim_result, gp=gp)
+            # optim_result = self.current_optim_result(meta_dir)
+            #
+            # # TODO: used the job model
+            # # TODO: plot optim from job?
+            # gp = optim_result.fit_gp()
+            #
+            # from bopt.bayesian_optimization import plot_2d_optim_result
+            #
+            # self.plot_current(meta_dir)
 
 
     def to_serializable(self) -> "Experiment":
         samples = [s.to_serializable() for s in self.samples]
         exp = Experiment(self.hyperparameters, self.runner)
         exp.samples = samples
+
+        if exp.last_model is not None:
+            exp.last_model = exp.last_model.to_serializable()
+
         return exp
 
     def from_serializable(self) -> "Experiment":
         samples = [s.from_serializable() for s in self.samples]
         exp = Experiment(self.hyperparameters, self.runner)
         exp.samples = samples
+
+        if exp.last_model is not None:
+            exp.last_model = exp.last_model.from_serializable()
+
         return exp
 
     def serialize(self, meta_dir: str) -> None:
@@ -165,7 +178,6 @@ class Experiment:
 
         bounds = [p.range for p in self.hyperparameters]
 
-
         X_sample, y_sample = SampleCollection(self.samples, meta_dir).to_xy()
         X_sample = X_sample[:, :2]
 
@@ -175,7 +187,8 @@ class Experiment:
         if isinstance(gp, RandomSearch):
             return
 
-        gp = gp.gp
+        # TODO: fuuuuj
+        gp = gp.model
 
         assert gp is not None, "gp is None"
 
@@ -184,10 +197,17 @@ class Experiment:
         #     .fit(X_sample, result.y_sample) \
         #     .optimize_kernel()
 
-        gp.posterior(X_2d)
-        mu, _ = gp.mu_std()
+        mu, std = gp.predict(X_2d)
+        # mu, _ = gp.mu_std()
 
-        param_str = str(gp.kernel) + " " + str(gp.noise) + f" nll={round(gp.log_prob().numpy().item(), 2)}"
+        # TODO: use paramz properly
+        param_str = "ls: {:.3f}, variance: {:.3f}, noise: {:.3f}".format(
+                float(gp.kern.lengthscale),
+                float(gp.kern.variance),
+                float(gp.Gaussian_noise.variance)
+
+        )
+        # param_str = str(gp.kern) + " " + str(gp.noise) + f" nll={round(gp.log_prob().numpy().item(), 2)}"
 
         mu_mat = mu.reshape(gx.shape[0], gx.shape[1])
         extent = [b1.low, b1.high, b2.high, b2.low]

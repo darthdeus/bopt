@@ -16,7 +16,7 @@ def run(args) -> None:
         experiment = bopt.Experiment.deserialize(args.DIR)
 
         # TODO
-        experiment.run_loop(bopt.GPModel(), args.DIR)
+        experiment.run_loop(bopt.GPyModel(), args.DIR)
     else:
         print(f"There is no `meta_yml.yml` at {meta_fname}.")
         sys.exit(1)

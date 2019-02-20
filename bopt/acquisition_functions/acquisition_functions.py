@@ -1,21 +1,21 @@
 from typing import Callable
+from GPy.models import GPRegression
 
 import numpy as np
 from scipy.stats import norm
 
-from bopt.models.gaussian_process_regressor import GaussianProcessRegressor
+
+AcquisitionFunction = Callable[[GPRegression, np.ndarray, float], np.ndarray]
 
 
-AcquisitionFunction = Callable[[GaussianProcessRegressor, np.ndarray, float], np.ndarray]
-
-
-def expected_improvement(gp: GaussianProcessRegressor, X: np.ndarray, f_s: float, xi: float=0.01) -> np.ndarray:
+def expected_improvement(gp: GPRegression, X: np.ndarray, f_s: float, xi: float=0.01) -> np.ndarray:
     assert X is not None
 
-    mu, sigma = gp.posterior(X).mu_std()
+    mu, sigma = gp.predict(X)
+    # mu, sigma = gp.posterior(X).mu_std()
 
-    mu = mu.reshape(-1, 1)
-    sigma = sigma.reshape(-1, 1) + 1e-6
+    # mu = mu.reshape(-1, 1)
+    # sigma = sigma.reshape(-1, 1) + 1e-6
 
     improvement = mu - f_s - xi
     Z = improvement / sigma
@@ -24,10 +24,10 @@ def expected_improvement(gp: GaussianProcessRegressor, X: np.ndarray, f_s: float
     return ei
 
 
-def probability_of_improvement(gp: GaussianProcessRegressor, X: np.ndarray, f_s: float, xi: float=0.01) -> np.ndarray:
+def probability_of_improvement(gp: GPRegression, X: np.ndarray, f_s: float, xi: float=0.01) -> np.ndarray:
     assert X is not None
 
-    mu, sigma = gp.posterior(X).mu_std()
+    mu, sigma = gp.predict(X)
 
     mu = mu.reshape(-1, 1)
     sigma = sigma.reshape(-1, 1) + 1e-6

@@ -66,7 +66,6 @@ class OptimizationResult:
         with open(filename, "rb") as f:
             return pickle.load(f)
 
-
     def fit_gp(self) -> "GaussianProcessRegressor":
         gp = GaussianProcessRegressor(kernel=self.kernel) \
                 .fit(self.X_sample, self.y_sample) \

@@ -1,33 +1,37 @@
 import numpy as np
-from typing import List, Tuple
 from scipy.optimize import minimize
 
+import GPy
+from GPy.models import GPRegression
+
+from typing import Tuple, List
+
 from bopt.acquisition_functions.acquisition_functions import AcquisitionFunction, expected_improvement
-from bopt.models.model import Model, SampleCollection
 from bopt.basic_types import Hyperparameter, Bound
-from bopt.models.gaussian_process_regressor import GaussianProcessRegressor
+from bopt.models.model import Model, Sample, SampleCollection
 
 
-# TODO: BOModel?
-class GPModel(Model):
-    gp: GaussianProcessRegressor
+class GPyModel(Model):
+    model: GPRegression
 
     def to_serializable(self) -> "Model":
-        model = GPModel()
-        model.gp = self.gp.to_serializable()
-        return model
+        copy = GPyModel()
+        copy.model = self.model[:].tolist()
+        return copy
 
     def from_serializable(self) -> "Model":
-        model = GPModel()
-        model.gp = self.gp.from_serializable()
-        return model
-        pass
+        gp = GPyModel()
+        gp[:] = self.model
+        self.model = gp
+        return self
 
     def predict_next(self, hyperparameters: List[Hyperparameter],
                      sample_col: SampleCollection) -> Tuple[dict, "Model"]:
         X_sample, y_sample = sample_col.to_xy()
 
-        gp = GaussianProcessRegressor().fit(X_sample, y_sample).optimize_kernel()
+        gp = GPRegression(X_sample, y_sample.reshape(-1, 1))
+        gp.optimize()
+        # gp = GaussianProcessRegressor().fit(X_sample, y_sample).optimize_kernel()
 
         bounds = [b.range for b in hyperparameters]
 
@@ -43,15 +47,15 @@ class GPModel(Model):
 
         params_dict = dict(zip(names, typed_vals))
 
-        fitted_model = GPModel()
-        fitted_model.gp = gp
+        fitted_model = GPyModel()
+        fitted_model.model = gp
 
         return params_dict, fitted_model
 
 
 def propose_location(
     acquisition: AcquisitionFunction,
-    gp: GaussianProcessRegressor,
+    gp: GPRegression,
     y_max: float,
     bounds: List[Bound],
     n_restarts: int = 25,

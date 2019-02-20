@@ -25,7 +25,6 @@ def jitchol(A, maxtries=6):
         finally:
             num_tries += 1
 
-    __import__('ipdb').set_trace()
     raise linalg.LinAlgError("not positive definite, even with jitter of {}.".format(jitter))
 
     # TODO: which one do I actually want?

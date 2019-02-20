@@ -9,7 +9,9 @@ from bopt.runner.abstract import Job
 
 class Model(abc.ABC):
     @abc.abstractmethod
-    def predict_next(self, samples: "SampleCollection") -> Tuple[dict, "Model"]:
+    def predict_next(self,
+                     hyperparameters: List[Hyperparameter],
+                     samples: "SampleCollection") -> Tuple[dict, "Model"]:
         pass
 
     @abc.abstractmethod

@@ -1,6 +1,7 @@
 from bopt.experiment import *
 from bopt.models.model import *
 from bopt.models.gaussian_process import *
+from bopt.models.gpy_model import *
 from bopt.models.gaussian_process_regressor import *
 from bopt.basic_types import *
 from bopt.runner.abstract import *

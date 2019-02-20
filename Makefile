@@ -1,14 +1,16 @@
 # default: bo-exp
 # default: simple-exp
 
-default:
+default: mctest
+
+gpy_compare:
 	PYTHONPATH=. python tests/test_gpy_comparison.py
 
 mctest:
+	rm -f tmp/*
 	rm -rf results/mc
 	bopt init --param "gamma:float:0:1" --param "epsilon:float:0:1" --dir results/mc ./.venv/bin/python ./experiments/rl/monte_carlo.py
 	bopt run results/mc
-
 
 init:
 	bopt init --param "gamma:float:0:1" --param "epsilon:float:0:1" --dir results/mc ./.venv/bin/python ./experiments/rl/monte_carlo.py
