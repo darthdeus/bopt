@@ -27,7 +27,7 @@ def test_exp1():
 
     samples = [
         bopt.Sample({ "foo": "bar" },
-            bopt.LocalJob(314, { "job": "params" }), None),
+            bopt.LocalJob(314, { "job": "params" }), gpy_model),
 
         bopt.Sample({ "foo": "goo" },
             bopt.SGEJob(314, { "job": "params" }), None)
@@ -41,9 +41,19 @@ class TestToDictFromDict(unittest.TestCase):
     def test_experiment(self):
         experiment = test_exp1()
 
-        deserialized = bopt.Experiment.from_dict(experiment.to_dict())
+        dd = experiment.to_dict()
+        deserialized = bopt.Experiment.from_dict(dd)
 
-        self.assertDictEqual({}, DeepDiff(experiment, deserialized))
+        x = experiment.samples[0].model.model
+        y = deserialized.samples[0].model.model
+
+        self.assertDictEqual(x.to_dict(), y.to_dict())
+
+        experiment.samples[0].model = None
+        deserialized.samples[0].model = None
+
+        diff = DeepDiff(experiment, deserialized)
+        self.assertDictEqual({}, diff)
 
 
 if __name__ == "__main__":

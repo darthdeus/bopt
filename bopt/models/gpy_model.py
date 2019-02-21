@@ -29,7 +29,8 @@ class GPyModel(Model):
     def from_dict(data: dict) -> Model:
         # TODO: fuj naming
         gpy_model = GPyModel()
-        gpy_model.model = GPRegression.from_dict(data)
+        gp = GPRegression.from_dict(data)
+        gpy_model.model = GPRegression.from_gp(gp)
         return gpy_model
 
     def predict_next(self, hyperparameters: List[Hyperparameter],
