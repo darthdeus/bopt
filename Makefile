@@ -1,7 +1,7 @@
 # default: bo-exp
 # default: simple-exp
 
-default: test_serialization
+default: mctest
 
 test_serialization:
 	pytest tests/test_todict_fromdict.py

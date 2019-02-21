@@ -7,6 +7,7 @@ import GPy
 from deepdiff import DeepDiff
 
 
+# TODO: zathura na png?
 def test_exp1():
     hyperparameters = [
             bopt.Hyperparameter("x", bopt.Float(0.1, 0.7)),
@@ -35,11 +36,8 @@ def test_exp1():
     #       a pak jejich zpetne setnuti?
 
     samples = [
-        bopt.Sample({ "foo": "bar" },
-            bopt.LocalJob(314, { "job": "params" }), gpy_model),
-
-        bopt.Sample({ "foo": "goo" },
-            bopt.SGEJob(314, { "job": "params" }), None)
+        bopt.Sample(bopt.LocalJob(314, { "job": "params" }), gpy_model.to_model_params()),
+        bopt.Sample(bopt.SGEJob(314, { "job": "params" }), None)
     ]
 
     experiment.samples = samples
@@ -52,15 +50,6 @@ class TestToDictFromDict(unittest.TestCase):
 
         dd = experiment.to_dict()
         deserialized = bopt.Experiment.from_dict(dd)
-
-        x = experiment.samples[0].model.model
-        y = deserialized.samples[0].model.model
-
-        # self.assertDictEqual(x.to_dict(), y.to_dict())
-        # __import__('ipdb').set_trace()
-
-        experiment.samples[0].model = None
-        deserialized.samples[0].model = None
 
         diff = DeepDiff(experiment, deserialized)
         self.assertDictEqual({}, diff)

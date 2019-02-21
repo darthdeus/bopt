@@ -45,14 +45,13 @@ class Hyperparameter(NamedTuple):
 
     def to_dict(self) -> dict:
         return {
-            "name": self.name,
             "type": self.range.type,
             "low": self.range.low,
             "high": self.range.high
         }
 
     @staticmethod
-    def from_dict(data: dict) -> "Hyperparameter":
+    def from_dict(name, data: dict) -> "Hyperparameter":
         if data["type"] == "int":
             cls = Integer
             parser = int
@@ -62,5 +61,5 @@ class Hyperparameter(NamedTuple):
         else:
             raise NotImplemented()
 
-        return Hyperparameter(name=data["name"],
+        return Hyperparameter(name=name,
                 range=cls(parser(data["low"]), parser(data["high"])))

@@ -4,6 +4,7 @@ from bopt.models.random_search import RandomSearch
 from bopt.models.gpy_model import GPyModel
 
 
+# TODO: possibly remove now that we store only parameters?
 class ModelLoader:
     @staticmethod
     def from_dict(data: dict) -> Model:

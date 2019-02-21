@@ -3,6 +3,7 @@ from typing import List, Tuple
 
 from bopt.models.model import Model, SampleCollection
 from bopt.basic_types import Hyperparameter, Bound
+from bopt.models.parameters import ModelParameters
 
 
 class RandomSearch(Model):
@@ -12,6 +13,9 @@ class RandomSearch(Model):
         value = {h.name: h.range.sample() for h in hyperparameters}
 
         return value, self
+
+    def to_model_params(self) -> ModelParameters:
+        return ModelParameters("random_search", {})
 
     def to_dict(self) -> Model:
         return { "model_type": "random_search" }

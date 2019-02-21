@@ -8,7 +8,9 @@ from typing import Tuple, List
 
 from bopt.acquisition_functions.acquisition_functions import AcquisitionFunction, expected_improvement
 from bopt.basic_types import Hyperparameter, Bound
-from bopt.models.model import Model, Sample, SampleCollection
+from bopt.models.model import Model
+from bopt.sample import Sample, SampleCollection
+from bopt.models.parameters import ModelParameters
 
 
 # TODO: round indexes
@@ -19,36 +21,44 @@ class GPyModel(Model):
     def __init__(self, model: GPRegression = None) -> None:
         self.model = model
 
-    def to_dict(self) -> dict:
-        # TODO: !!! sample nema mit model, ale jenom parametery :)
-        return {
-            "model_type": "gpy",
-            "gpy": {name: float(self.model[name])
-                    for name in self.model.parameter_names()}
-            # {
-            #     "kernel": self.model.kern.name,
-            #     "input_dim": self.model.kern.input_dim,
-            #     "params": self.model.param_array.tolist(),
-            #     "X": self.model.X, # TODO: tolist?
-            #     "Y": self.model.Y,
-            # }
+    def to_model_params(self) -> ModelParameters:
+        params = {
+            name: float(self.model[name])
+            for name in self.model.parameter_names()
         }
 
-    @staticmethod
-    def from_dict(data: dict) -> Model:
-        # TODO: fuj naming
-        gpy_model = GPyModel()
+        return ModelParameters("gpy", params)
 
-        # if data["kernel"] == "rbf":
-        #     kernel = GPy.kern.RBF(input_dim=data["input_dim"])
-        # else:
-        #     raise NotImplemented()
-
-        gpy_model# .model = GPRegression(data["X"], data["Y"], kernel)
-
-        # gp = GPRegression.from_dict(data)
-        # gpy_model.model = GPRegression.from_gp(gp)
-        return gpy_model
+    def to_dict(self) -> dict:
+        pass
+    #     return {
+    #         "model_type": "gpy",
+    #         "gpy": {name: float(self.model[name])
+    #                 for name in self.model.parameter_names()}
+    #         # {
+    #         #     "kernel": self.model.kern.name,
+    #         #     "input_dim": self.model.kern.input_dim,
+    #         #     "params": self.model.param_array.tolist(),
+    #         #     "X": self.model.X, # TODO: tolist?
+    #         #     "Y": self.model.Y,
+    #         # }
+    #     }
+    #
+    # @staticmethod
+    # def from_dict(data: dict) -> Model:
+    #     # TODO: fuj naming
+    #     gpy_model = GPyModel()
+    #
+    #     # if data["kernel"] == "rbf":
+    #     #     kernel = GPy.kern.RBF(input_dim=data["input_dim"])
+    #     # else:
+    #     #     raise NotImplemented()
+    #
+    #     gpy_model# .model = GPRegression(data["X"], data["Y"], kernel)
+    #
+    #     # gp = GPRegression.from_dict(data)
+    #     # gpy_model.model = GPRegression.from_gp(gp)
+    #     return gpy_model
 
     def predict_next(self, hyperparameters: List[Hyperparameter],
                      sample_col: SampleCollection) -> Tuple[dict, "Model"]:

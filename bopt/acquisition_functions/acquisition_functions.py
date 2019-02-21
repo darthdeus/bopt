@@ -12,10 +12,6 @@ def expected_improvement(gp: GPRegression, X: np.ndarray, f_s: float, xi: float=
     assert X is not None
 
     mu, sigma = gp.predict(X)
-    # mu, sigma = gp.posterior(X).mu_std()
-
-    # mu = mu.reshape(-1, 1)
-    # sigma = sigma.reshape(-1, 1) + 1e-6
 
     improvement = mu - f_s - xi
     Z = improvement / sigma
@@ -28,9 +24,6 @@ def probability_of_improvement(gp: GPRegression, X: np.ndarray, f_s: float, xi: 
     assert X is not None
 
     mu, sigma = gp.predict(X)
-
-    mu = mu.reshape(-1, 1)
-    sigma = sigma.reshape(-1, 1) + 1e-6
 
     improvement = mu - f_s - xi
     Z = improvement / sigma

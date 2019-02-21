@@ -10,7 +10,7 @@ from typing import Union, NamedTuple, List, Any, Optional, Tuple
 
 from bopt.basic_types import Hyperparameter
 from bopt.runner.abstract import Job, Runner
-from bopt.models.model import Sample
+from bopt.sample import Sample
 
 
 class OptimizationResult:

@@ -2,6 +2,8 @@
   - job-PID-1
   - pouzivat relativni cesty
 
+- GPy normalizer ! ?
+
 
 <!-- - GPR failuje assert u solve -->
 <!--  -->

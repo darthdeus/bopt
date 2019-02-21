@@ -133,7 +133,7 @@ class TestMatchingGPy(unittest.TestCase):
     def test_on_random_data(self):
         datasets = generate_datasets()
 
-        with open("gen_datasets.yml", "w") as f:
+        with open("tmp/gen_datasets.yml", "w") as f:
             yaml.dump(datasets, f)
 
         for i, (X_train, y_train, X) in enumerate(datasets):
