@@ -1,8 +1,13 @@
+- GPy normalizer ! ?
+- store likelihoods
+- last model pryc?
+- yaml sort keys? (custom key order)
+
+
+
 - co kdyz mam duplicitni-pid?
   - job-PID-1
   - pouzivat relativni cesty
-
-- GPy normalizer ! ?
 
 
 <!-- - GPR failuje assert u solve -->

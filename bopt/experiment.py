@@ -42,7 +42,8 @@ class Experiment:
             "hyperparameters": {h.name: h.to_dict() for h in self.hyperparameters},
             "samples": [s.to_dict() for s in self.samples],
             "runner": self.runner.to_dict(),
-            "last_model": self.last_model.to_dict() if self.last_model is not None else None
+            # TODO: last_model
+            # "last_model": self.last_model.to_dict() if self.last_model is not None else None
         }
 
     @staticmethod
@@ -51,16 +52,13 @@ class Experiment:
             [Hyperparameter.from_dict(key, data["hyperparameters"][key])
             for key in data["hyperparameters"].keys()]
 
-        # hyperparameters = [Hyperparameter.from_dict(h)
-        #         for h in data["hyperparameters"]]
-
         samples = [Sample.from_dict(s) for s in data["samples"]]
         runner = RunnerLoader.from_dict(data["runner"])
-        last_model = ModelLoader.from_dict(data["last_model"])
+        # last_model = ModelLoader.from_dict(data["last_model"])
 
         experiment = Experiment(hyperparameters, runner)
         experiment.samples = samples
-        experiment.last_model = last_model
+        # experiment.last_model = last_model
 
         return experiment
 
@@ -84,10 +82,7 @@ class Experiment:
 
         return job, fitted_model
 
-    def run_loop(self, model: Model, meta_dir: str, n_iter=3) -> None:
-        # TODO: ...
-        print("running")
-
+    def run_loop(self, model: Model, meta_dir: str, n_iter=10) -> None:
         output_dir = pathlib.Path(meta_dir) / "output"
         output_dir.mkdir(parents=True, exist_ok=True)
 

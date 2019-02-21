@@ -64,7 +64,12 @@ class GPyModel(Model):
                      sample_col: SampleCollection) -> Tuple[dict, "Model"]:
         X_sample, y_sample = sample_col.to_xy()
 
-        model = GPRegression(X_sample, y_sample.reshape(-1, 1))
+        # TODO: compare NLL with and without normalizer
+
+        # If there is only one sample, .std() == 0 and Y ends up being NaN.
+        normalizer = len(X_sample) > 1
+
+        model = GPRegression(X_sample, y_sample.reshape(-1, 1), normalizer=normalizer)
         model.optimize()
         # gp = GaussianProcessRegressor().fit(X_sample, y_sample).optimize_kernel()
 
