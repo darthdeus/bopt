@@ -20,7 +20,7 @@ class GPyModel(Model):
         self.model = model
 
     def to_dict(self) -> dict:
-
+        # TODO: !!! sample nema mit model, ale jenom parametery :)
         return {
             "model_type": "gpy",
             "gpy": {name: float(self.model[name])
