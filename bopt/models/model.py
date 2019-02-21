@@ -30,6 +30,21 @@ class Sample:
         self.job = job
         self.model = fitted_model
 
+    def to_dict(self) -> dict:
+        return {
+            "param_values": self.param_values,
+            "job": self.job.to_dict(),
+            "model": self.model.to_dict() if self.model is not None else None,
+        }
+
+    @staticmethod
+    def from_dict(data: dict) -> "Sample":
+        from bopt.models.model_loader import ModelLoader
+
+        return Sample(data["param_values"],
+                      JobLoader.from_dict(data["job"]),
+                      ModelLoader.from_dict(data["model"]))
+
     def to_xy(self, output_dir: str) -> Tuple[np.ndarray, float]:
         x = np.zeros(len(self.param_values), dtype=np.float64)
 
@@ -50,20 +65,6 @@ class Sample:
         # TODO: fuj
         output_dir = os.path.join(meta_dir, "output")
         return self.job.get_result(output_dir)
-
-    def to_dict(self) -> dict:
-        return {
-            "param_values": self.param_values,
-            "job": self.job.to_dict(),
-            "model": self.model.to_dict(),
-        }
-
-    @staticmethod
-    def from_dict(data: dict) -> "Sample":
-        from bopt.models.model_loader import ModelLoader
-        return Sample(data["param_values"],
-                      JobLoader.from_dict(data["job"]),
-                      ModelLoader.from_dict(data["model"]))
 
     # TODO: fuj pryc
     # def to_serializable(self) -> "Sample":

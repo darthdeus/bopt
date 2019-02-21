@@ -10,7 +10,7 @@ JOB_MAPPING = {
 class JobLoader:
 
     @staticmethod
-    def from_dict(self, data: dict) -> Job:
+    def from_dict(data: dict) -> Job:
         job_type = data["job_type"]
 
         if job_type not in JOB_MAPPING:

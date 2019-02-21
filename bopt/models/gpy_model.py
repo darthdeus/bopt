@@ -16,14 +16,21 @@ from bopt.models.model import Model, Sample, SampleCollection
 class GPyModel(Model):
     model: GPRegression
 
+    def __init__(self, model: GPRegression = None) -> None:
+        self.model = model
+
     def to_dict(self) -> dict:
-        return self.model.to_dict()
+        return {
+            "model_type": "gpy",
+            "gpy": self.model.to_dict()
+        }
 
     @staticmethod
-    def from_dict(self, data: dict) -> Model:
-        gp = GPyModel()
-        self.model = GPRegression.from_dict(data)
-        return self
+    def from_dict(data: dict) -> Model:
+        # TODO: fuj naming
+        gpy_model = GPyModel()
+        gpy_model.model = GPRegression.from_dict(data)
+        return gpy_model
 
     def predict_next(self, hyperparameters: List[Hyperparameter],
                      sample_col: SampleCollection) -> Tuple[dict, "Model"]:

@@ -38,21 +38,6 @@ class Experiment:
             "last_model": self.last_model.to_dict() if self.last_model is not None else None
         }
 
-        # for param in self.hyperparameters:
-        #     h = {
-        #         "name": h.name,
-        #         "type": h.range.type,
-        #         "low": h.range.low,
-        #         "high": h.range.high,
-        #     }
-        #
-        #     result["hyperparameters"].append(h)
-        #
-        # for sample in self.samples:
-        #     result["
-
-
-
     @staticmethod
     def from_dict(data: dict) -> "Experiment":
         hyperparameters = [Hyperparameter.from_dict(h)
@@ -60,10 +45,12 @@ class Experiment:
 
         samples = [Sample.from_dict(s) for s in data["samples"]]
         runner = RunnerLoader.from_dict(data["runner"])
-        last_model = ModelLoader.from_dict(data["last_model"]) \
-            if data["last_model"] is not None else None
+        last_model = ModelLoader.from_dict(data["last_model"])
 
         experiment = Experiment(hyperparameters, runner)
+        experiment.samples = samples
+        experiment.last_model = last_model
+
         return experiment
 
     def run_next(self, model: Model, meta_dir: str, output_dir: str) -> Job:

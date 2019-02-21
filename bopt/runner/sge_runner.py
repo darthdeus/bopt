@@ -16,6 +16,8 @@ class SGEJob(Job):
     def __init__(self, job_id: int, run_parameters: dict) -> None:
         self.job_id = job_id
         self.run_parameters = run_parameters
+        self.started_at = None
+        self.finished_at = None
 
     def job_type(self) -> str:
         return "sge_job"
