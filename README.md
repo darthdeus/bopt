@@ -1,4 +1,4 @@
-# Bayesian Optimization of HyperParameters - `bopt` [![Build Status](https://travis-ci.com/darthdeus/master-thesis-code.svg?token=9CyU7Xa9qUJ9aPDDUHrX&branch=master)](https://travis-ci.com/darthdeus/master-thesis-code)
+# Bayesian Optimization of HyperParameters - `bopt` [![Build Status](https://travis-ci.com/darthdeus/bopt.svg?branch=master)](https://travis-ci.com/darthdeus/bopt)
 
 Available commands:
 
@@ -20,6 +20,8 @@ bopt job JOB_ID
 ```
 
 # Installation
+
+TODO: no more TF
 
 Since bopt depends on TensorFlow it is a good idea to run it either in
 Docker or in a Python virtual environment. Both methods are equivalent and
