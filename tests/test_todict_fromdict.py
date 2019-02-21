@@ -1,5 +1,7 @@
-import numpy as np
 import unittest
+import warnings
+
+import numpy as np
 import bopt
 import GPy
 from deepdiff import DeepDiff
@@ -21,9 +23,13 @@ def test_exp1():
     X = np.random.uniform(-3., 3., (20, 1))
     Y = np.sin(X) + np.random.randn(20, 1) * 0.05
 
-    kernel = GPy.kern.RBF(input_dim=1, variance=1., lengthscale=1.)
-    m1 = GPy.models.GPRegression(X, Y, kernel)
-    gpy_model = bopt.GPyModel(m1)
+    with warnings.catch_warnings():
+        warnings.filterwarnings("ignore", category=DeprecationWarning)
+
+        kernel = GPy.kern.RBF(input_dim=1, variance=1., lengthscale=1.)
+        m1 = GPy.models.GPRegression(X, Y, kernel)
+        gpy_model = bopt.GPyModel(m1)
+
     # TODO: fuj, pryc s tim ... patri tam jenom parametry :)
     # TODO: pouzit flat_parameter_names na vylistovani parametru
     #       a pak jejich zpetne setnuti?

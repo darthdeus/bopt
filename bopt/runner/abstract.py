@@ -14,8 +14,14 @@ Value = float
 class Job(abc.ABC):
     job_id: int
     run_parameters: dict
-    started_at: datetime.datetime
-    finished_at: datetime.datetime
+    started_at: Optional[datetime.datetime]
+    finished_at: Optional[datetime.datetime]
+
+    def __init__(self, job_id: int, run_parameters: dict) -> None:
+        self.job_id = job_id
+        self.run_parameters = run_parameters
+        self.started_at = None
+        self.finished_at = None
 
     def to_dict(self) -> dict:
         return {
@@ -37,12 +43,6 @@ class Job(abc.ABC):
 
     @abc.abstractmethod
     def is_finished(self) -> bool: pass
-
-    # TODO: delete this
-    def sorted_parameter_values(self) -> List[float]:
-        # TODO: detect case when experiment results have a different number of params
-        idx = np.argsort(list(self.run_parameters.keys()))
-        return np.array(list(self.run_parameters.values()), dtype=np.float32)[idx]
 
     def get_result(self, output_dir: str) -> float:
         fname = os.path.join(output_dir, f"job-{self.job_id}.out")
@@ -105,6 +105,10 @@ class Job(abc.ABC):
 class Runner(abc.ABC):
     script_path: str
     arguments: List[str]
+
+    def __init__(self, script_path: str, arguments: List[str]) -> None:
+        self.script_path = script_path
+        self.arguments = arguments
 
     @abc.abstractmethod
     def start(self, output_dir: str, run_parameters: dict) -> Job: pass

@@ -66,13 +66,6 @@ class Sample:
         output_dir = os.path.join(meta_dir, "output")
         return self.job.get_result(output_dir)
 
-    # TODO: fuj pryc
-    # def to_serializable(self) -> "Sample":
-    #     return Sample(self.param_values, self.job, self.model.to_serializable())
-    #
-    # def from_serializable(self) -> "Sample":
-    #     return Sample(self.param_values, self.job, self.model.from_serializable())
-
 
 class SampleCollection:
     samples: List[Sample]

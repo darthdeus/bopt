@@ -103,27 +103,6 @@ class Experiment:
             #
             # self.plot_current(meta_dir)
 
-    # TODO: delete, old serialization
-    # def to_serializable(self) -> "Experiment":
-    #     samples = [s.to_serializable() for s in self.samples]
-    #     exp = Experiment(self.hyperparameters, self.runner)
-    #     exp.samples = samples
-    #
-    #     if exp.last_model is not None:
-    #         exp.last_model = exp.last_model.to_serializable()
-    #
-    #     return exp
-    #
-    # def from_serializable(self) -> "Experiment":
-    #     samples = [s.from_serializable() for s in self.samples]
-    #     exp = Experiment(self.hyperparameters, self.runner)
-    #     exp.samples = samples
-    #
-    #     if exp.last_model is not None:
-    #         exp.last_model = exp.last_model.from_serializable()
-    #
-    #     return exp
-
     def serialize(self, meta_dir: str) -> None:
         dump = yaml.dump(self.to_dict())
 

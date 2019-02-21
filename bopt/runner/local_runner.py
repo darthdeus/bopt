@@ -16,12 +16,6 @@ from bopt.runner.abstract import Job, Runner, Timestamp, Value
 
 class LocalJob(Job):
     # TODO: unify constructors? call super with shared params
-    def __init__(self, job_id: int, run_parameters: dict) -> None:
-        self.job_id = job_id
-        self.run_parameters = run_parameters
-        self.started_at = None
-        self.finished_at = None
-
     def job_type(self) -> str:
         return "local_job"
 
@@ -37,10 +31,6 @@ class LocalJob(Job):
 
 
 class LocalRunner(Runner):
-    def __init__(self, script_path: str, arguments: List[str]) -> None:
-        self.script_path = script_path
-        self.arguments = arguments
-
     def runner_type(self) -> str:
         return "local_runner"
 
