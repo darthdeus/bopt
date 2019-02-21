@@ -80,7 +80,7 @@ def model_gpy(X_train, y_train, X):
     rbf = GPy.kern.RBF(input_dim=1, variance=1.0, lengthscale=1.0)
     gpr = GPy.models.GPRegression(X_train, y_train.reshape(-1, 1), rbf)
 
-    gpr.optimize(max_iters=5000)
+    gpr.optimize_restarts(max_iters=5000)
 
     mu, cov = gpr.predict(X, full_cov=True)
 

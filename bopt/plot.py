@@ -7,8 +7,8 @@ import numpy as np
 
 from matplotlib import cm
 from numpy.random import multivariate_normal
-from bopt.kernels.kernels import Kernel
-import bopt.kernels.kernel_opt as kernel_opt
+# from bopt.kernels.kernels import Kernel
+# import bopt.kernels.kernel_opt as kernel_opt
 
 
 def base64_plot():
@@ -175,8 +175,8 @@ def plot_gp_2D(gx, gy, mu, X_train, y_train, title, i):
     ax.scatter(X_train[:, 0], X_train[:, 1], y_train, c=y_train, cmap=cm.coolwarm)
     ax.set_title(title)
 
-
-def plot_kernel_loss(kernel: Kernel, X_train: np.ndarray, y_train: np.ndarray,
+# TODO: missing kernel typing
+def plot_kernel_loss(kernel, X_train: np.ndarray, y_train: np.ndarray,
                      noise_level: float = 0.1, xmax: int = 5, sigma: float = 1) -> None:
     X = np.linspace(0.00001, xmax, num=50)
 
@@ -191,7 +191,8 @@ def plot_kernel_loss(kernel: Kernel, X_train: np.ndarray, y_train: np.ndarray,
     plt.title(f"Kernel marginal likelihood, $\\sigma = {sigma}$")
 
 
-def plot_kernel_loss_2d(kernel: Kernel, X_train: np.ndarray, y_train: np.ndarray,
+# TODO: missing kernel typing
+def plot_kernel_loss_2d(kernel, X_train: np.ndarray, y_train: np.ndarray,
                         noise_level: float = 0.1) -> None:
     num_points = 10
     data = np.zeros((num_points, num_points))

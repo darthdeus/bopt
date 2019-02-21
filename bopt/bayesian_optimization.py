@@ -9,8 +9,6 @@ from scipy.optimize import minimize
 from typing import Callable, List, Union, Any, Dict, Tuple
 
 from bopt.acquisition_functions.acquisition_functions import expected_improvement, AcquisitionFunction
-from bopt.models.gaussian_process_regressor import GaussianProcessRegressor
-from bopt.kernels.kernels import SquaredExp, Kernel
 from bopt.plot import plot_approximation
 from bopt.basic_types import Integer, Float, Bound, Hyperparameter
 from bopt.optimization_result import OptimizationResult
@@ -22,8 +20,9 @@ def assert_in_bounds(x: np.ndarray, bounds: List[Bound]) -> None:
 
 
 class OptimizationLoop:
+    # TODO: missing kernel typing
     def __init__(self, params: List[Hyperparameter],
-                 kernel: Kernel = SquaredExp(), optimize_kernel: bool = True,
+                 kernel, optimize_kernel: bool = True,
                  gp_noise: float = 0.0,
                  acquisition_function: AcquisitionFunction = expected_improvement) -> None:
         self.X_sample = np.array([], dtype=np.float32)
@@ -62,7 +61,8 @@ class OptimizationLoop:
             self.X_sample = np.vstack((self.X_sample, x_next))
             self.y_sample = np.hstack((self.y_sample, y_next))
 
-    def create_gp(self) -> GaussianProcessRegressor:
+    # TODO: missing typing
+    def create_gp(self):
         gp = GaussianProcessRegressor(kernel=self.kernel, noise=self.gp_noise)
         gp.fit(self.X_sample, self.y_sample)
 
@@ -123,10 +123,11 @@ def dict_values(d: Dict) -> np.ndarray:
     return np.array(list(d.values()))
 
 
+# TODO: missing typing
 def bo_maximize_loop(
     f: Callable[[np.array], float],
     bounds: List[Hyperparameter],
-    kernel: Kernel = SquaredExp(),
+    kernel,
     acquisition_function=expected_improvement,
     gp_noise: float = 0,
     n_iter: int = 8,
@@ -158,7 +159,8 @@ def bo_maximize_loop(
     return loop.result()
 
 
-def propose_multiple_locations(acquisition: AcquisitionFunction, gp: GaussianProcessRegressor,
+# TODO: missing gp typing
+def propose_multiple_locations(acquisition: AcquisitionFunction, gp,
                                X_sample: np.ndarray, y_sample: np.ndarray,
                                bounds: List[Bound], n_locations: int, n_restarts: int = 25,
                                optimize_kernel: bool = True) -> List[np.ndarray]:
@@ -205,10 +207,11 @@ def propose_multiple_locations(acquisition: AcquisitionFunction, gp: GaussianPro
 #     return min_x
 
 
+# TODO: default kernel should not be None
 def bo_plot_exploration(f: Callable[[np.ndarray], float],
                         bounds: List[Hyperparameter],
                         X_true: np.ndarray = None, y_true: np.ndarray = None,
-                        kernel=SquaredExp(),
+                        kernel=None,
                         acquisition_function=expected_improvement,
                         n_iter: int = 8, plot_every: int = 1,
                         optimize_kernel=True, gp_noise: float = 0):

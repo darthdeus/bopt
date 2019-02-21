@@ -15,9 +15,13 @@ from bopt.runner.abstract import Job, Runner, Timestamp, Value
 
 
 class LocalJob(Job):
+    # TODO: unify constructors? call super with shared params
     def __init__(self, job_id: int, run_parameters: dict) -> None:
         self.job_id = job_id
         self.run_parameters = run_parameters
+
+    def job_type(self) -> str:
+        return "local_job"
 
     def is_finished(self) -> bool:
         return not psutil.pid_exists(self.job_id)
@@ -31,12 +35,12 @@ class LocalJob(Job):
 
 
 class LocalRunner(Runner):
-    script_path: str
-    arguments: List[str]
-
     def __init__(self, script_path: str, arguments: List[str]) -> None:
         self.script_path = script_path
         self.arguments = arguments
+
+    def runner_type(self) -> str:
+        return "local_runner"
 
     def start(self, output_dir: str, run_parameters: dict) -> Job:
         cmdline_run_params = [f"--{name}={value}" for name, value in run_parameters.items()]

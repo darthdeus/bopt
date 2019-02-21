@@ -9,11 +9,9 @@ from typing import List, Optional
 
 from bopt.models.model import Model
 from bopt.models.random_search import RandomSearch
-from bopt.models.gaussian_process_regressor import GaussianProcessRegressor
 from bopt.basic_types import Hyperparameter
 from bopt.runner.abstract import Job, Runner
-from bopt.models.model import Sample, SampleCollection
-from bopt.models.model import Model
+from bopt.models.model import Sample, SampleCollection, Model
 
 from bopt.optimization_result import OptimizationResult
 
@@ -30,6 +28,33 @@ class Experiment:
         self.runner = runner
         self.samples = []
         self.last_model = None
+
+    def to_dict(self) -> dict:
+        return {
+            "hyperparameters": [h.to_dict() for h in self.hyperparameters],
+            "samples": [s.to_dict() for s in self.samples],
+            "runner": self.runner.to_dict(),
+            "last_model": self.last_model.to_dict() if self.last_model is not None else None
+        }
+
+        # for param in self.hyperparameters:
+        #     h = {
+        #         "name": h.name,
+        #         "type": h.range.type,
+        #         "low": h.range.low,
+        #         "high": h.range.high,
+        #     }
+        #
+        #     result["hyperparameters"].append(h)
+        #
+        # for sample in self.samples:
+        #     result["
+
+
+
+    @staticmethod
+    def from_dict(data: dict) -> "Experiment":
+        pass
 
     def run_next(self, model: Model, meta_dir: str, output_dir: str) -> Job:
         if len(self.samples) == 0:
@@ -80,7 +105,6 @@ class Experiment:
             # from bopt.bayesian_optimization import plot_2d_optim_result
             #
             # self.plot_current(meta_dir)
-
 
     def to_serializable(self) -> "Experiment":
         samples = [s.to_serializable() for s in self.samples]

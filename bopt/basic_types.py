@@ -40,5 +40,27 @@ Bound = Union[Integer, Float]
 
 
 class Hyperparameter(NamedTuple):
-  name: str
-  range: Bound
+    name: str
+    range: Bound
+
+    def to_dict(self) -> dict:
+        return {
+            "name": self.name,
+            "type": self.range.type,
+            "low": self.range.low,
+            "high": self.range.high
+        }
+
+    @staticmethod
+    def from_dict(data: dict) -> "Hyperparameter":
+        if data["type"] == "int":
+            cls = Integer
+            parser = int
+        elif data["type"] == "float":
+            cls = Float
+            parser = float
+        else:
+            raise NotImplemented()
+
+        return Hyperparameter(name=data["name"],
+                range=cls(parser(data["low"]), parser(data["high"])))

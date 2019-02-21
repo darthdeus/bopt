@@ -14,29 +14,27 @@ from bopt.models.model import Model, Sample, SampleCollection
 class GPyModel(Model):
     model: GPRegression
 
-    def to_serializable(self) -> "Model":
-        copy = GPyModel()
-        copy.model = self.model[:].tolist()
-        return copy
+    def to_dict(self) -> dict:
+        return self.model.to_dict()
 
-    def from_serializable(self) -> "Model":
+    @staticmethod
+    def from_dict(self, data: dict) -> Model:
         gp = GPyModel()
-        gp[:] = self.model
-        self.model = gp
+        self.model = GPRegression.from_dict(data)
         return self
 
     def predict_next(self, hyperparameters: List[Hyperparameter],
                      sample_col: SampleCollection) -> Tuple[dict, "Model"]:
         X_sample, y_sample = sample_col.to_xy()
 
-        gp = GPRegression(X_sample, y_sample.reshape(-1, 1))
-        gp.optimize()
+        model = GPRegression(X_sample, y_sample.reshape(-1, 1))
+        model.optimize()
         # gp = GaussianProcessRegressor().fit(X_sample, y_sample).optimize_kernel()
 
         bounds = [b.range for b in hyperparameters]
 
         x_next = propose_location(expected_improvement,
-                gp,
+                model,
                 y_sample.max(),
                 bounds)
 
@@ -48,7 +46,7 @@ class GPyModel(Model):
         params_dict = dict(zip(names, typed_vals))
 
         fitted_model = GPyModel()
-        fitted_model.model = gp
+        fitted_model.model = model
 
         return params_dict, fitted_model
 

@@ -9,10 +9,8 @@ from glob import glob
 from typing import Union, NamedTuple, List, Any, Optional, Tuple
 
 from bopt.basic_types import Hyperparameter
-from bopt.kernels.kernels import Kernel
 from bopt.runner.abstract import Job, Runner
 from bopt.models.model import Sample
-from bopt.models.gaussian_process_regressor import GaussianProcessRegressor
 
 
 class OptimizationResult:
@@ -21,13 +19,14 @@ class OptimizationResult:
     best_x: Optional[np.ndarray]
     best_y: Optional[float]
     params: List[Hyperparameter]
-    kernel: Kernel
+    # kernel: Kernel
     n_iter: int
     opt_fun: Any
 
+    # TODO: kernel typing
     def __init__(self, X_sample: np.ndarray, y_sample: np.ndarray,
             best_x: Optional[np.ndarray], best_y: Optional[float],
-            params: List[Hyperparameter], kernel: Kernel, n_iter: int, opt_fun: Any) -> None:
+            params: List[Hyperparameter], kernel, n_iter: int, opt_fun: Any) -> None:
         self.X_sample = X_sample
         self.y_sample = y_sample
         self.best_x = best_x

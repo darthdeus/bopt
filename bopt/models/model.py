@@ -5,6 +5,7 @@ import numpy as np
 from typing import List, Tuple
 from bopt.basic_types import Hyperparameter
 from bopt.runner.abstract import Job
+from bopt.runner.job_loader import JobLoader
 
 
 class Model(abc.ABC):
@@ -15,11 +16,7 @@ class Model(abc.ABC):
         pass
 
     @abc.abstractmethod
-    def to_serializable(self) -> "Model":
-        pass
-
-    @abc.abstractmethod
-    def from_serializable(self) -> "Model":
+    def to_dict(self) -> "Model":
         pass
 
 
@@ -54,11 +51,26 @@ class Sample:
         output_dir = os.path.join(meta_dir, "output")
         return self.job.get_result(output_dir)
 
-    def to_serializable(self) -> "Sample":
-        return Sample(self.param_values, self.job, self.model.to_serializable())
+    def to_dict(self) -> dict:
+        return {
+            "param_values": self.param_values,
+            "job": self.job.to_dict(),
+            "model": self.model.to_dict(),
+        }
 
-    def from_serializable(self) -> "Sample":
-        return Sample(self.param_values, self.job, self.model.from_serializable())
+    @staticmethod
+    def from_dict(data: dict) -> "Sample":
+        from bopt.models.model_loader import ModelLoader
+        return Sample(data["param_values"],
+                      JobLoader.from_dict(data["job"]),
+                      ModelLoader.from_dict(data["model"]))
+
+    # TODO: fuj pryc
+    # def to_serializable(self) -> "Sample":
+    #     return Sample(self.param_values, self.job, self.model.to_serializable())
+    #
+    # def from_serializable(self) -> "Sample":
+    #     return Sample(self.param_values, self.job, self.model.from_serializable())
 
 
 class SampleCollection:
@@ -75,6 +87,15 @@ class SampleCollection:
         num_samples = len(self.samples)
 
         y_sample = np.zeros([num_samples], dtype=np.float64)
+        # TODO: chci to normalizovat?
+        zero_mean = y_sample - y_sample.mean()
+
+        std = y_sample.std()
+
+        if std > 0:
+            y_sample = zero_mean / std
+        else:
+            y_sample = zero_mean
 
         xs = []
 

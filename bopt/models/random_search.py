@@ -13,11 +13,8 @@ class RandomSearch(Model):
 
         return value, self
 
-    def to_serializable(self) -> "Model":
-        return self
-
-    def from_serializable(self) -> "Model":
-        return self
+    def to_dict(self) -> Model:
+        return { "model_type": "random_search" }
 
 
 # TODO: delete

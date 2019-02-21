@@ -17,6 +17,18 @@ class Job(abc.ABC):
     started_at: datetime.datetime
     finished_at: datetime.datetime
 
+    def to_dict(self) -> dict:
+        return {
+            "job_type": self.job_type(),
+            "job_id": self.job_id,
+            "run_parameters": self.run_parameters,
+            "started_at": self.started_at,
+            "finished_at": self.finished_at,
+        }
+
+    @abc.abstractmethod
+    def job_type(self) -> str: pass
+
     @abc.abstractmethod
     def state(self): pass
 
@@ -91,5 +103,19 @@ class Job(abc.ABC):
         return s
 
 class Runner(abc.ABC):
+    script_path: str
+    arguments: List[str]
+
     @abc.abstractmethod
     def start(self, output_dir: str, run_parameters: dict) -> Job: pass
+
+    @abc.abstractmethod
+    def runner_type(self) -> str: pass
+
+    def to_dict(self) -> dict:
+        return {
+            "runner_type": self.runner_type(),
+            "script_path": self.script_path,
+            "arguments": self.arguments,
+        }
+

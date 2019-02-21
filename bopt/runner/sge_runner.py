@@ -17,6 +17,9 @@ class SGEJob(Job):
         self.job_id = job_id
         self.run_parameters = run_parameters
 
+    def job_type(self) -> str:
+        return "sge_job"
+
     def is_finished(self) -> bool:
         raise NotImplementedError()
 
@@ -30,12 +33,13 @@ class SGEJob(Job):
 
 
 class SGERunner(Runner):
-    script_path: str
-    arguments: List[str]
-
+    # TODO: share arguments in parent ctor
     def __init__(self, script_path: str, arguments: List[str]) -> None:
         self.script_path = script_path
         self.arguments = arguments
+
+    def runner_type(self) -> str:
+        return "sge_runner"
 
     def start(self, output_dir: str, run_parameters: dict) -> Job:
         run_params = [f"--{name}={value}" for name, value in run_parameters.items()]
