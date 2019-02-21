@@ -20,9 +20,11 @@ class GPyModel(Model):
         self.model = model
 
     def to_dict(self) -> dict:
+
         return {
             "model_type": "gpy",
-            "gpy": self.model[:].tolist()
+            "gpy": {name: float(self.model[name])
+                    for name in self.model.parameter_names()}
             # {
             #     "kernel": self.model.kern.name,
             #     "input_dim": self.model.kern.input_dim,

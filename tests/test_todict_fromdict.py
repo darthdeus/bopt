@@ -25,6 +25,8 @@ def test_exp1():
     m1 = GPy.models.GPRegression(X, Y, kernel)
     gpy_model = bopt.GPyModel(m1)
     # TODO: fuj, pryc s tim ... patri tam jenom parametry :)
+    # TODO: pouzit flat_parameter_names na vylistovani parametru
+    #       a pak jejich zpetne setnuti?
 
     samples = [
         bopt.Sample({ "foo": "bar" },
@@ -49,7 +51,6 @@ class TestToDictFromDict(unittest.TestCase):
         y = deserialized.samples[0].model.model
 
         # self.assertDictEqual(x.to_dict(), y.to_dict())
-        #
         # __import__('ipdb').set_trace()
 
         experiment.samples[0].model = None
