@@ -11,6 +11,8 @@ from bopt.basic_types import Hyperparameter, Bound
 from bopt.models.model import Model, Sample, SampleCollection
 
 
+# TODO: round indexes
+# https://arxiv.org/abs/1706.03673
 class GPyModel(Model):
     model: GPRegression
 
