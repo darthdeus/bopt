@@ -103,28 +103,29 @@ class Experiment:
             #
             # self.plot_current(meta_dir)
 
-    def to_serializable(self) -> "Experiment":
-        samples = [s.to_serializable() for s in self.samples]
-        exp = Experiment(self.hyperparameters, self.runner)
-        exp.samples = samples
-
-        if exp.last_model is not None:
-            exp.last_model = exp.last_model.to_serializable()
-
-        return exp
-
-    def from_serializable(self) -> "Experiment":
-        samples = [s.from_serializable() for s in self.samples]
-        exp = Experiment(self.hyperparameters, self.runner)
-        exp.samples = samples
-
-        if exp.last_model is not None:
-            exp.last_model = exp.last_model.from_serializable()
-
-        return exp
+    # TODO: delete, old serialization
+    # def to_serializable(self) -> "Experiment":
+    #     samples = [s.to_serializable() for s in self.samples]
+    #     exp = Experiment(self.hyperparameters, self.runner)
+    #     exp.samples = samples
+    #
+    #     if exp.last_model is not None:
+    #         exp.last_model = exp.last_model.to_serializable()
+    #
+    #     return exp
+    #
+    # def from_serializable(self) -> "Experiment":
+    #     samples = [s.from_serializable() for s in self.samples]
+    #     exp = Experiment(self.hyperparameters, self.runner)
+    #     exp.samples = samples
+    #
+    #     if exp.last_model is not None:
+    #         exp.last_model = exp.last_model.from_serializable()
+    #
+    #     return exp
 
     def serialize(self, meta_dir: str) -> None:
-        dump = yaml.dump(self.to_serializable())
+        dump = yaml.dump(self.to_dict())
 
         with open(os.path.join(meta_dir, "meta.yml"), "w") as f:
             f.write(dump)
@@ -135,10 +136,7 @@ class Experiment:
             contents = f.read()
             obj = yaml.load(contents)
 
-        if obj.samples is None:
-            obj.samples = []
-
-        return obj.from_serializable()
+        return Experiment.from_dict(obj)
 
     def ok_samples(self) -> List[Sample]:
         return [s for s in self.samples if s.job.is_finished()]

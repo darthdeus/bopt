@@ -16,7 +16,7 @@ class PosteriorSlice(NamedTuple):
     std: List[float]
     points_x: List[float]
     points_y: List[float]
-    gp: bopt.GaussianProcessRegressor
+    gp: object # TODO: missing typing: bopt.GaussianProcessRegressor
 
 
 def run(args) -> None:
