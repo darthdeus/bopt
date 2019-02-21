@@ -1,7 +1,10 @@
 # default: bo-exp
 # default: simple-exp
 
-default: mctest
+default: test_serialization
+
+test_serialization:
+	pytest tests/test_todict_fromdict.py
 
 gpy_compare:
 	PYTHONPATH=. python tests/test_gpy_comparison.py
