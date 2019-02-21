@@ -11,7 +11,6 @@ class ModelLoader:
             logging.info("ModelLoader received model = None.")
             return None
 
-        print(data)
         model_type = data["model_type"]
 
         if model_type == "random_search":

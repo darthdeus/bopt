@@ -27,7 +27,7 @@ def test_exp1():
 
     samples = [
         bopt.Sample({ "foo": "bar" },
-            bopt.LocalJob(314, { "job": "params" }), gpy_model),
+            bopt.LocalJob(314, { "job": "params" }), None),
 
         bopt.Sample({ "foo": "goo" },
             bopt.SGEJob(314, { "job": "params" }), None)
