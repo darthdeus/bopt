@@ -6,6 +6,9 @@ default: test_serialization
 test_serialization:
 	pytest tests/test_todict_fromdict.py
 
+test_serialization_ipdb:
+	PYTHONPATH=. python tests/test_todict_fromdict.py
+
 gpy_compare:
 	PYTHONPATH=. python tests/test_gpy_comparison.py
 

@@ -22,15 +22,30 @@ class GPyModel(Model):
     def to_dict(self) -> dict:
         return {
             "model_type": "gpy",
-            "gpy": self.model.to_dict()
+            "gpy": self.model[:].tolist()
+            # {
+            #     "kernel": self.model.kern.name,
+            #     "input_dim": self.model.kern.input_dim,
+            #     "params": self.model.param_array.tolist(),
+            #     "X": self.model.X, # TODO: tolist?
+            #     "Y": self.model.Y,
+            # }
         }
 
     @staticmethod
     def from_dict(data: dict) -> Model:
         # TODO: fuj naming
         gpy_model = GPyModel()
-        gp = GPRegression.from_dict(data)
-        gpy_model.model = GPRegression.from_gp(gp)
+
+        # if data["kernel"] == "rbf":
+        #     kernel = GPy.kern.RBF(input_dim=data["input_dim"])
+        # else:
+        #     raise NotImplemented()
+
+        gpy_model# .model = GPRegression(data["X"], data["Y"], kernel)
+
+        # gp = GPRegression.from_dict(data)
+        # gpy_model.model = GPRegression.from_gp(gp)
         return gpy_model
 
     def predict_next(self, hyperparameters: List[Hyperparameter],

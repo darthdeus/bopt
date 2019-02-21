@@ -73,7 +73,7 @@ class Experiment:
 
         return job
 
-    def run_loop(self, model: Model, meta_dir: str, n_iter=20) -> None:
+    def run_loop(self, model: Model, meta_dir: str, n_iter=8) -> None:
         # TODO: ...
         print("running")
 
