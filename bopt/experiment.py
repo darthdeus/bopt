@@ -7,11 +7,12 @@ import numpy as np
 
 from typing import List, Optional
 
-from bopt.models.model import Model
+from bopt.models.model import Sample, SampleCollection, Model
+from bopt.models.model_loader import ModelLoader
 from bopt.models.random_search import RandomSearch
 from bopt.basic_types import Hyperparameter
 from bopt.runner.abstract import Job, Runner
-from bopt.models.model import Sample, SampleCollection, Model
+from bopt.runner.runner_loader import RunnerLoader
 
 from bopt.optimization_result import OptimizationResult
 
@@ -54,7 +55,16 @@ class Experiment:
 
     @staticmethod
     def from_dict(data: dict) -> "Experiment":
-        pass
+        hyperparameters = [Hyperparameter.from_dict(h)
+                for h in data["hyperparameters"]]
+
+        samples = [Sample.from_dict(s) for s in data["samples"]]
+        runner = RunnerLoader.from_dict(data["runner"])
+        last_model = ModelLoader.from_dict(data["last_model"]) \
+            if data["last_model"] is not None else None
+
+        experiment = Experiment(hyperparameters, runner)
+        return experiment
 
     def run_next(self, model: Model, meta_dir: str, output_dir: str) -> Job:
         if len(self.samples) == 0:

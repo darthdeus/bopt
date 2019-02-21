@@ -1,6 +1,6 @@
 from bopt.runner.abstract import Runner
 from bopt.runner.local_runner import LocalRunner
-from bopt.models.sge_runner import SGERunner
+from bopt.runner.sge_runner import SGERunner
 
 
 class RunnerLoader:
