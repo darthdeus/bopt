@@ -17,6 +17,7 @@ mctest:
 	rm -rf results/mc
 	bopt init --param "gamma:float:0:1" --param "epsilon:float:0:1" --dir results/mc ./.venv/bin/python ./experiments/rl/monte_carlo.py
 	bopt run results/mc
+	convert -delay 60 -loop 0 tmp/*.png anim.gif
 
 init:
 	bopt init --param "gamma:float:0:1" --param "epsilon:float:0:1" --dir results/mc ./.venv/bin/python ./experiments/rl/monte_carlo.py

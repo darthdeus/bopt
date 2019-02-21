@@ -1,3 +1,8 @@
+- plot STD + ACQ
+
+- fix vmin/vmax
+
+- matice 2d slicu
 - GPy normalizer ! ?
 - store likelihoods
 - last model pryc?

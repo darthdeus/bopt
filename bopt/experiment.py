@@ -218,13 +218,13 @@ class Experiment:
         import datetime
         # assert result.best_x is not None
 
-        U_LB = os.environ.get("USE_LBFGS", False)
-        U_TF = os.environ.get("USE_TF", False)
-
         # plt.title(f"LBFGS={U_LB} TF={U_TF}   noise={round(gp.noise, 2)} {result.kernel}", fontsize=20)
         # plt.pcolor(mu_mat, extent=extent, aspect="auto")
+        plt.figure()
         plt.title(param_str)
-        plt.pcolor(gx, gy, mu_mat, cmap="jet")
+        # TODO: take vmin/vmax from the input
+        plt.pcolor(gx, gy, mu_mat, cmap="jet", vmin=0, vmax=500)
+        plt.colorbar()
         plt.scatter(X_sample[:, 0], X_sample[:, 1], c="k")
         # plt.scatter([result.best_x[0]], [result.best_x[1]], c="r")
         plt.savefig("tmp/opt-plot-{}.png".format(datetime.datetime.now().strftime("%Y-%m-%d_%H%M%S")))
