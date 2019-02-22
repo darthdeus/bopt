@@ -9,5 +9,10 @@ if __name__ == "__main__":
     parser.add_argument("--y", default=1.0, type=float, help="Y")
     args = parser.parse_args()
 
-    result = args.x + 2 * args.y
+    import math
+    import random
+
+    result = math.sin(args.x) * math.sin(args.y) + random.random() * 0.05
+
+    # result = args.x + 2 * args.y
     print(result)

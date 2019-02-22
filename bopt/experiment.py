@@ -17,6 +17,7 @@ from bopt.runner.abstract import Job, Runner
 from bopt.runner.runner_loader import RunnerLoader
 
 from bopt.optimization_result import OptimizationResult
+from bopt.acquisition_functions.acquisition_functions import expected_improvement_f
 
 
 class NoAliasDumper(yaml.Dumper):
@@ -91,7 +92,7 @@ class Experiment:
 
             while not job.is_finished():
                 psutil.wait_procs(psutil.Process().children(), timeout=0.01)
-                time.sleep(1)
+                time.sleep(0.2)
 
             self.serialize(meta_dir)
 
@@ -163,7 +164,7 @@ class Experiment:
                 opt_fun=None)
 
 
-    def plot_current(self, model: Model, meta_dir: str, resolution: float = 30, noise: float = 0.0):
+    def plot_current(self, model: Model, meta_dir: str, resolution: float = 30):
         # TODO: handle more than 2 dimensions properly
         # assert len(result.params) == 2
 
@@ -185,6 +186,9 @@ class Experiment:
 
         X_sample, y_sample = SampleCollection(self.samples, meta_dir).to_xy()
         X_sample = X_sample[:, :2]
+
+        np.save("data_X", X_sample)
+        np.save("data_Y", y_sample)
 
         if isinstance(model, RandomSearch):
             return
@@ -211,8 +215,20 @@ class Experiment:
         )
         # param_str = str(gp.kern) + " " + str(gp.noise) + f" nll={round(gp.log_prob().numpy().item(), 2)}"
 
-        mu_mat = mu.reshape(gx.shape[0], gx.shape[1])
-        extent = [b1.low, b1.high, b2.high, b2.low]
+        ei = expected_improvement_f(X_2d, mu, std, y_sample.max())
+
+        # TODO: std or var?
+        std = np.sqrt(std)
+
+        # TODO: fuj
+        mu_mat  = mu.reshape(gx.shape[0], gx.shape[1])
+        std_mat = std.reshape(gx.shape[0], gx.shape[1])
+        ei_mat  = ei.reshape(gx.shape[0], gx.shape[1])
+        extent  = [b1.low, b1.high, b2.high, b2.low]
+
+        # TODO: take as input
+        vmin = y_sample.min()
+        vmax = y_sample.max()
 
         import matplotlib.pyplot as plt
         import datetime
@@ -220,13 +236,29 @@ class Experiment:
 
         # plt.title(f"LBFGS={U_LB} TF={U_TF}   noise={round(gp.noise, 2)} {result.kernel}", fontsize=20)
         # plt.pcolor(mu_mat, extent=extent, aspect="auto")
-        plt.figure()
-        plt.title(param_str)
-        # TODO: take vmin/vmax from the input
-        plt.pcolor(gx, gy, mu_mat, cmap="jet", vmin=0, vmax=500)
+        plt.figure(figsize=(12, 16))
+
+        plt.suptitle(param_str, fontsize=14)
+
+        plt.subplot(3, 1, 1)
+        plt.title("Mean")
+        plt.pcolor(gx, gy, mu_mat, cmap="jet", vmin=vmin, vmax=vmax)
+        plt.colorbar()
+        plt.scatter(X_sample[:, 0], X_sample[:, 1], c="k")
+
+        plt.subplot(3, 1, 2)
+        plt.title("Sigma")
+        plt.pcolor(gx, gy, std_mat, cmap="jet", vmin=vmin, vmax=vmax)
+        plt.colorbar()
+        plt.scatter(X_sample[:, 0], X_sample[:, 1], c="k")
+
+        plt.subplot(3, 1, 3)
+        plt.title("Expected Improvement")
+        plt.pcolor(gx, gy, ei_mat, cmap="jet")# , vmin=0, vmax=500)
         plt.colorbar()
         plt.scatter(X_sample[:, 0], X_sample[:, 1], c="k")
         # plt.scatter([result.best_x[0]], [result.best_x[1]], c="r")
+
         plt.savefig("tmp/opt-plot-{}.png".format(datetime.datetime.now().strftime("%Y-%m-%d_%H%M%S")))
 
         return mu_mat, extent, x1, x2

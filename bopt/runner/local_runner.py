@@ -52,7 +52,7 @@ class LocalRunner(Runner):
             job_id = process.pid
             job_fname = os.path.join(output_dir, f"job-{job_id}.out")
 
-            print(f"START {job_id}:\t{' '.join(cmd)}")
+            print(f"START {job_id}") # :\t{' '.join(cmd)}")
 
             os.rename(temp_fname, job_fname)
 

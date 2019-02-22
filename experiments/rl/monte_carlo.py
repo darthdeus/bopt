@@ -14,7 +14,7 @@ def main():
     # Parse arguments
     import argparse
     parser = argparse.ArgumentParser()
-    parser.add_argument("--episodes", default=100, type=int, help="Training episodes.")
+    parser.add_argument("--episodes", default=50, type=int, help="Training episodes.")
     parser.add_argument("--render_each", default=0, type=int, help="Render some episodes.")
 
     parser.add_argument("--epsilon", default=0.2, type=float, help="Exploration factor.")

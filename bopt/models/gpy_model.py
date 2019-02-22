@@ -69,9 +69,9 @@ class GPyModel(Model):
         # If there is only one sample, .std() == 0 and Y ends up being NaN.
         normalizer = len(X_sample) > 1
 
-        model = GPRegression(X_sample, y_sample.reshape(-1, 1), normalizer=normalizer)
+        model = GPRegression(X_sample, y_sample.reshape(-1, 1),
+                             normalizer=normalizer)
         model.optimize()
-        # gp = GaussianProcessRegressor().fit(X_sample, y_sample).optimize_kernel()
 
         bounds = [b.range for b in hyperparameters]
 
