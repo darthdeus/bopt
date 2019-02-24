@@ -282,12 +282,14 @@ class Experiment:
         # plt.scatter(
 
         # plot_limits = [[gx.min(), gy.min()], [gx.max(), gy.max()]]
-        plot_objective(model, X_sample[-1], plot_limits, vmin=vmin, vmax=vmax)
+
+        with plt.xkcd():
+            plot_objective(model, X_sample[-1], plot_limits, vmin, vmax, self.hyperparameters)
 
         plt.savefig("tmp/opt-plot-{}.png".format(datetime.datetime.now().strftime("%Y-%m-%d_%H%M%S")))
 
 
-def plot_objective(model, X_slice, plot_limits, vmin, vmax, levels=10, n_points=40, n_samples=250, size=4,
+def plot_objective(model, X_slice, plot_limits, vmin, vmax, hyperparameters, levels=10, n_points=40, n_samples=250, size=4,
                    zscale='linear', dimensions=None):
     """Pairwise partial dependence plot of the objective function.
     ----------
@@ -323,6 +325,7 @@ def plot_objective(model, X_slice, plot_limits, vmin, vmax, levels=10, n_points=
 
                 model.plot(ax=ax[i, j], fixed_inputs=fixed_inputs,
                         plot_limits=[p[i] for p in plot_limits], legend=False)
+                ax[i, j].set_xlabel(hyperparameters[i].name)
 
                 model.plot_data(ax=ax[i, j], alpha=1, cmap=black_cmap, zorder=10, s=60, visible_dims=[i])
 
@@ -347,6 +350,8 @@ def plot_objective(model, X_slice, plot_limits, vmin, vmax, levels=10, n_points=
 
                 model.plot_mean(ax=ax[i, j], fixed_inputs=fixed_inputs, cmap="jet", label="Mean",
                         vmin=vmin, vmax=vmax, plot_limits=[np.array(p)[[i, j]] for p in plot_limits])
+                ax[i, j].set_xlabel(hyperparameters[i].name)
+                ax[i, j].set_ylabel(hyperparameters[j].name)
 
                 # TODO: vratit
                 model.plot_data(ax=ax[i, j], alpha=1, cmap=black_cmap, zorder=10, s=60, visible_dims=[i, j])
