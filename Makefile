@@ -12,7 +12,7 @@ gpy_compare:
 sfntest:
 	rm -f tmp/*
 	rm -rf results/sfn
-	bopt init --param "x:float:0:25" --param "y:float:0:25" \
+	bopt init --param "x:float:0:5" --param "y:float:0:25" --param "z:float:0:1" \
 		--dir results/sfn \
 		./.venv/bin/python ./experiments/simple_function.py
 	bopt run results/sfn

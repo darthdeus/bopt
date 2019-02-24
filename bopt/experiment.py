@@ -173,24 +173,27 @@ class Experiment:
         # TODO: handle more than 2 dimensions properly
         # assert len(result.params) == 2
 
-        b1 = self.hyperparameters[0].range
-        b2 = self.hyperparameters[1].range
+        lows        = [h.range.low for h in self.hyperparameters]
+        highs       = [h.range.high for h in self.hyperparameters]
+        plot_limits = [lows, highs]
+
+        # b1 = self.hyperparameters[0].range
+        # b2 = self.hyperparameters[1].range
 
         # TODO: float64
-        x1 = np.linspace(b1.low, b1.high, resolution, dtype=np.float64)
-        x2 = np.linspace(b2.low, b2.high, resolution, dtype=np.float64)
-
-        assert len(x1) < 80, f"too large x1, len = {len(x1)}"
-        assert len(x2) < 80, f"too large x1, len = {len(x2)}"
-
-        gx, gy = np.meshgrid(x1, x2)
-
-        X_2d = np.c_[gx.ravel(), gy.ravel()]
-
-        bounds = [p.range for p in self.hyperparameters]
+        # x1 = np.linspace(b1.low, b1.high, resolution, dtype=np.float64)
+        # x2 = np.linspace(b2.low, b2.high, resolution, dtype=np.float64)
+        #
+        # assert len(x1) < 80, f"too large x1, len = {len(x1)}"
+        # assert len(x2) < 80, f"too large x1, len = {len(x2)}"
+        #
+        # gx, gy = np.meshgrid(x1, x2)
+        #
+        # X_2d = np.c_[gx.ravel(), gy.ravel()]
+        #
+        # bounds = [p.range for p in self.hyperparameters]
 
         X_sample, y_sample = SampleCollection(self.samples, meta_dir).to_xy()
-        X_sample = X_sample[:, :2]
 
         np.save("data_X", X_sample)
         np.save("data_Y", y_sample)
@@ -208,9 +211,6 @@ class Experiment:
         # TODO: lol :)
         model = model.model
 
-        mu, std = model.predict(X_2d)
-        # mu, _ = gp.mu_std()
-
         # TODO: use paramz properly
         param_str = "ls: {:.3f}, variance: {:.3f}, noise: {:.3f}".format(
                 float(model.kern.lengthscale),
@@ -220,16 +220,19 @@ class Experiment:
         )
         # param_str = str(gp.kern) + " " + str(gp.noise) + f" nll={round(gp.log_prob().numpy().item(), 2)}"
 
-        ei = expected_improvement_f(X_2d, mu, std, y_sample.max())
-
-        # TODO: std or var?
-        std = np.sqrt(std)
-
-        # TODO: fuj
-        mu_mat  = mu.reshape(gx.shape[0], gx.shape[1])
-        std_mat = std.reshape(gx.shape[0], gx.shape[1])
-        ei_mat  = ei.reshape(gx.shape[0], gx.shape[1])
-        extent  = [b1.low, b1.high, b2.high, b2.low]
+        # TODO: stare plotovani, nefunguje na vic nez 2d
+        # mu, std = model.predict(X_2d)
+        # ei = expected_improvement_f(X_2d, mu, std, y_sample.max())
+        #
+        # # TODO: std or var?
+        # std = np.sqrt(std)
+        #
+        # # TODO: fuj
+        # mu_mat  = mu.reshape(gx.shape[0], gx.shape[1])
+        # std_mat = std.reshape(gx.shape[0], gx.shape[1])
+        #
+        # ei_mat  = ei.reshape(gx.shape[0], gx.shape[1])
+        # extent  = [b1.low, b1.high, b2.high, b2.low]
 
         # TODO: take as input
         vmin = y_sample.min()
@@ -278,16 +281,13 @@ class Experiment:
         # TODO: plot current max
         # plt.scatter(
 
-        plot_limits = [[gx.min(), gy.min()], [gx.max(), gy.max()]]
+        # plot_limits = [[gx.min(), gy.min()], [gx.max(), gy.max()]]
         plot_objective(model, X_sample[-1], plot_limits, vmin=vmin, vmax=vmax)
 
         plt.savefig("tmp/opt-plot-{}.png".format(datetime.datetime.now().strftime("%Y-%m-%d_%H%M%S")))
 
 
-        return mu_mat, extent, x1, x2
-
-
-def plot_objective(model, X_slice, plot_limits, vmin, vmax, levels=10, n_points=40, n_samples=250, size=2,
+def plot_objective(model, X_slice, plot_limits, vmin, vmax, levels=10, n_points=40, n_samples=250, size=4,
                    zscale='linear', dimensions=None):
     """Pairwise partial dependence plot of the objective function.
     ----------
@@ -304,12 +304,15 @@ def plot_objective(model, X_slice, plot_limits, vmin, vmax, levels=10, n_points=
         variables. `None` defaults to `space.dimensions[i].name`, or
         if also `None` to `['X_0', 'X_1', ..]`.
     """
-    n_dims = model.X.ndim
+
+    # Number of hyperparameters
+    n_dims = model.X.shape[1]
 
     fig, ax = plt.subplots(n_dims, n_dims, figsize=(size * n_dims, size * n_dims))
+    plt.suptitle(str(list(map(lambda x: str(round(x, 3)), model.param_array.tolist()))) + " " + str(X_slice.tolist()))
 
-    fig.subplots_adjust(left=0.05, right=0.95, bottom=0.05, top=0.95,
-                        hspace=0.1, wspace=0.1)
+    # fig.subplots_adjust(left=0.05, right=0.95, bottom=0.05, top=0.95,
+    #                     hspace=0.1, wspace=0.1)
 
     for i in range(n_dims):
         for j in range(n_dims):
@@ -318,10 +321,10 @@ def plot_objective(model, X_slice, plot_limits, vmin, vmax, levels=10, n_points=
                 for f in list(set(range(n_dims)) - set([i])):
                     fixed_inputs.append((f, X_slice[f].item()))
 
-                model.plot_mean(ax=ax[i, j], fixed_inputs=fixed_inputs)
+                model.plot(ax=ax[i, j], fixed_inputs=fixed_inputs,
+                        plot_limits=[p[i] for p in plot_limits], legend=False)
 
-                # model.plot_mean(ax=ax[i, j], fixed_inputs=fixed_inputs,
-                #         vmin=vmin, vmax=vmax, plot_limits=[p[i] for p in plot_limits], cmap="jet", label="Mean")
+                model.plot_data(ax=ax[i, j], alpha=1, cmap=black_cmap, zorder=10, s=60, visible_dims=[i])
 
             #
             #     xi, yi = partial_dependence(space, result.models[-1], i,
@@ -330,7 +333,7 @@ def plot_objective(model, X_slice, plot_limits, vmin, vmax, levels=10, n_points=
             #                                 n_points=n_points)
             #
             #     ax[i, i].plot(xi, yi)
-            #     ax[i, i].axvline(result.x[i], linestyle="--", color="r", lw=1)
+                ax[i, i].axvline(X_slice[i], linestyle="--", color="r", lw=1)
 
             # lower triangle
             elif i > j:
@@ -342,13 +345,13 @@ def plot_objective(model, X_slice, plot_limits, vmin, vmax, levels=10, n_points=
 
                 # plot_limits = [[gx.min(), gy.min()], [gx.max(), gy.max()]]
 
-                model.plot_mean(ax=ax[i, j], fixed_inputs=fixed_inputs)
-                # model.plot_mean(ax=ax[i, j], fixed_inputs=fixed_inputs,
-                #         vmin=vmin, vmax=vmax, plot_limits=[p[[i, j]] for p in plot_limits], cmap="jet", label="Mean")
+                model.plot_mean(ax=ax[i, j], fixed_inputs=fixed_inputs, cmap="jet", label="Mean",
+                        vmin=vmin, vmax=vmax, plot_limits=[np.array(p)[[i, j]] for p in plot_limits])
 
                 # TODO: vratit
-                # model.plot_data(ax=ax[i, j], fixed_inputs=fixed_inputs,
-                #         alpha=1, cmap=black_cmap, zorder=10, s=60)
+                model.plot_data(ax=ax[i, j], alpha=1, cmap=black_cmap, zorder=10, s=60, visible_dims=[i, j])
+                ax[i, j].axvline(X_slice[i], linestyle="--", color="r", lw=1)
+                ax[i, j].axhline(X_slice[j], linestyle="--", color="r", lw=1)
 
                 # xi, yi, zi = partial_dependence(space, result.models[-1],
                 #                                 i, j,

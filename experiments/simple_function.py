@@ -7,6 +7,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--x", default=1.0, type=float, help="X")
     parser.add_argument("--y", default=1.0, type=float, help="Y")
+    parser.add_argument("--z", default=1.0, type=float, help="Z")
     args = parser.parse_args()
 
     import math
@@ -14,5 +15,5 @@ if __name__ == "__main__":
 
     result = math.sin(args.x) * math.sin(args.y) + random.random() * 0.05
 
-    result = args.x + 2 * args.y
+    result = args.x + 2 * args.y - args.z**2
     print(result)
