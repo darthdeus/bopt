@@ -8,6 +8,9 @@ import numpy as np
 from typing import List, Optional, Tuple
 from matplotlib.colors import LinearSegmentedColormap
 import matplotlib.pyplot as plt
+import matplotlib.gridspec as gridspec
+
+import GPy
 
 from bopt.models.model import Model
 from bopt.sample import Sample, SampleCollection
@@ -88,7 +91,7 @@ class Experiment:
 
         return job, fitted_model
 
-    def run_loop(self, model: Model, meta_dir: str, n_iter=5) -> None:
+    def run_loop(self, model: Model, meta_dir: str, n_iter=8) -> None:
         output_dir = pathlib.Path(meta_dir) / "output"
         output_dir.mkdir(parents=True, exist_ok=True)
 
@@ -177,9 +180,6 @@ class Experiment:
         highs       = [h.range.high for h in self.hyperparameters]
         plot_limits = [lows, highs]
 
-        # b1 = self.hyperparameters[0].range
-        # b2 = self.hyperparameters[1].range
-
         # TODO: float64
         # x1 = np.linspace(b1.low, b1.high, resolution, dtype=np.float64)
         # x2 = np.linspace(b2.low, b2.high, resolution, dtype=np.float64)
@@ -195,8 +195,8 @@ class Experiment:
 
         X_sample, y_sample = SampleCollection(self.samples, meta_dir).to_xy()
 
-        np.save("data_X", X_sample)
-        np.save("data_Y", y_sample)
+        np.save("tmp/data_X", X_sample)
+        np.save("tmp/data_Y", y_sample)
 
         if isinstance(model, RandomSearch):
             return
@@ -219,20 +219,6 @@ class Experiment:
 
         )
         # param_str = str(gp.kern) + " " + str(gp.noise) + f" nll={round(gp.log_prob().numpy().item(), 2)}"
-
-        # TODO: stare plotovani, nefunguje na vic nez 2d
-        # mu, std = model.predict(X_2d)
-        # ei = expected_improvement_f(X_2d, mu, std, y_sample.max())
-        #
-        # # TODO: std or var?
-        # std = np.sqrt(std)
-        #
-        # # TODO: fuj
-        # mu_mat  = mu.reshape(gx.shape[0], gx.shape[1])
-        # std_mat = std.reshape(gx.shape[0], gx.shape[1])
-        #
-        # ei_mat  = ei.reshape(gx.shape[0], gx.shape[1])
-        # extent  = [b1.low, b1.high, b2.high, b2.low]
 
         # TODO: take as input
         vmin = y_sample.min()
@@ -283,14 +269,23 @@ class Experiment:
 
         # plot_limits = [[gx.min(), gy.min()], [gx.max(), gy.max()]]
 
+        fig = plt.figure(figsize=(15, 15))
+        outer_grid = gridspec.GridSpec(2, 1)
+
+
         with plt.xkcd():
-            plot_objective(model, X_sample[-1], plot_limits, vmin, vmax, self.hyperparameters)
+            plot_objective(model, X_sample[-1], plot_limits, vmin, vmax, self.hyperparameters, outer_grid, fig)
+
+            # ax = plt.subplot(outer_grid[1, 0])
+
+            # ei_for_dims(model, X_sample, y_sample, self.hyperparameters, ax, [0, 1])
+
 
         plt.savefig("tmp/opt-plot-{}.png".format(datetime.datetime.now().strftime("%Y-%m-%d_%H%M%S")))
 
 
-def plot_objective(model, X_slice, plot_limits, vmin, vmax, hyperparameters, levels=10, n_points=40, n_samples=250, size=4,
-                   zscale='linear', dimensions=None):
+def plot_objective(model, X_slice, plot_limits, vmin, vmax, hyperparameters, outer_grid, fig,
+        levels=10, n_points=40, n_samples=250, size=4, zscale='linear', dimensions=None):
     """Pairwise partial dependence plot of the objective function.
     ----------
     * `result` [`OptimizeResult`]
@@ -310,7 +305,10 @@ def plot_objective(model, X_slice, plot_limits, vmin, vmax, hyperparameters, lev
     # Number of hyperparameters
     n_dims = model.X.shape[1]
 
-    fig, ax = plt.subplots(n_dims, n_dims, figsize=(size * n_dims, size * n_dims))
+    inner_grid = gridspec.GridSpecFromSubplotSpec(n_dims, n_dims, subplot_spec=outer_grid[0, 0])
+    second_grid = gridspec.GridSpecFromSubplotSpec(n_dims, n_dims, subplot_spec=outer_grid[1, 0])
+
+    # fig, ax = plt.subplots(n_dims, n_dims, figsize=(size * n_dims, size * n_dims))
     plt.suptitle(str(list(map(lambda x: str(round(x, 3)), model.param_array.tolist()))) + " " + str(X_slice.tolist()))
 
     # fig.subplots_adjust(left=0.05, right=0.95, bottom=0.05, top=0.95,
@@ -318,16 +316,19 @@ def plot_objective(model, X_slice, plot_limits, vmin, vmax, hyperparameters, lev
 
     for i in range(n_dims):
         for j in range(n_dims):
+            ax = plt.Subplot(fig, inner_grid[i * n_dims + j])
+            ax2 = plt.Subplot(fig, second_grid[i * n_dims + j])
+
             if i == j:
                 fixed_inputs = []
                 for f in list(set(range(n_dims)) - set([i])):
                     fixed_inputs.append((f, X_slice[f].item()))
 
-                model.plot(ax=ax[i, j], fixed_inputs=fixed_inputs,
+                model.plot(ax=ax, fixed_inputs=fixed_inputs,
                         plot_limits=[p[i] for p in plot_limits], legend=False)
-                ax[i, j].set_xlabel(hyperparameters[i].name)
+                ax.set_xlabel(hyperparameters[i].name)
 
-                model.plot_data(ax=ax[i, j], alpha=1, cmap=black_cmap, zorder=10, s=60, visible_dims=[i])
+                model.plot_data(ax=ax, alpha=1, cmap=black_cmap, zorder=10, s=60, visible_dims=[i])
 
             #
             #     xi, yi = partial_dependence(space, result.models[-1], i,
@@ -336,7 +337,7 @@ def plot_objective(model, X_slice, plot_limits, vmin, vmax, hyperparameters, lev
             #                                 n_points=n_points)
             #
             #     ax[i, i].plot(xi, yi)
-                ax[i, i].axvline(X_slice[i], linestyle="--", color="r", lw=1)
+                ax.axvline(X_slice[i], linestyle="--", color="r", lw=1)
 
             # lower triangle
             elif i > j:
@@ -347,16 +348,19 @@ def plot_objective(model, X_slice, plot_limits, vmin, vmax, hyperparameters, lev
                     fixed_inputs.append((f, X_slice[f]))
 
                 # plot_limits = [[gx.min(), gy.min()], [gx.max(), gy.max()]]
+                lims = [np.array(p)[[i, j]] for p in plot_limits]
 
-                model.plot_mean(ax=ax[i, j], fixed_inputs=fixed_inputs, cmap="jet", label="Mean",
-                        vmin=vmin, vmax=vmax, plot_limits=[np.array(p)[[i, j]] for p in plot_limits])
-                ax[i, j].set_xlabel(hyperparameters[i].name)
-                ax[i, j].set_ylabel(hyperparameters[j].name)
+                model.plot_mean(ax=ax, fixed_inputs=fixed_inputs, cmap="jet", label="Mean",
+                        vmin=vmin, vmax=vmax, plot_limits=lims)
+                ax.set_xlabel(hyperparameters[i].name)
+                ax.set_ylabel(hyperparameters[j].name)
 
                 # TODO: vratit
-                model.plot_data(ax=ax[i, j], alpha=1, cmap=black_cmap, zorder=10, s=60, visible_dims=[i, j])
-                ax[i, j].axvline(X_slice[i], linestyle="--", color="r", lw=1)
-                ax[i, j].axhline(X_slice[j], linestyle="--", color="r", lw=1)
+                model.plot_data(ax=ax, alpha=1, cmap=black_cmap, zorder=10, s=60, visible_dims=[i, j])
+                ax.axvline(X_slice[i], linestyle="--", color="r", lw=1)
+                ax.axhline(X_slice[j], linestyle="--", color="r", lw=1)
+
+                ei_for_dims(model, model.X, model.Y, hyperparameters, ax2, [i, j], lims)
 
                 # xi, yi, zi = partial_dependence(space, result.models[-1],
                 #                                 i, j,
@@ -368,5 +372,48 @@ def plot_objective(model, X_slice, plot_limits, vmin, vmax, hyperparameters, lev
                 # ax[i, j].scatter(result.x[j], result.x[i],
                 #                  c=['r'], s=20, lw=0.)
 
+            fig.add_subplot(ax)
+            fig.add_subplot(ax2)
+
     # return _format_scatter_plot_axes(ax, space, ylabel="Partial dependence",
     #                                  dim_labels=dimensions)
+
+def ei_for_dims(model, X_sample, y_sample, hyperparameters, ax, dims, plot_limits):
+    Xnew, xx, yy, xmin, xmax = GPy.plotting.gpy_plot.plot_util.x_frame2D(X_sample[:, dims], plot_limits=plot_limits)
+    X_2d = np.c_[xx.ravel(), yy.ravel()]
+
+    print("xmin: {}, xmax: {}, plot_limits: {}", xmin, xmax, plot_limits)
+
+    X_2d_pred = np.c_[xx.ravel(), yy.ravel(), np.zeros_like(xx.ravel())]
+
+    # TODO: stare plotovani, nefunguje na vic nez 2d
+    mu, std = model.predict(X_2d_pred)
+    ei = expected_improvement_f(X_2d, mu, std, y_sample.max())
+
+    # TODO: std or var?
+    std = np.sqrt(std)
+
+
+    b1 = hyperparameters[0].range
+    b2 = hyperparameters[1].range
+
+    # TODO: fuj
+    mu_mat  = mu.reshape(xx.shape[0], xx.shape[1])
+    std_mat = std.reshape(xx.shape[0], xx.shape[1])
+
+    ei_mat  = ei.reshape(xx.shape[0], xx.shape[1])
+    extent  = [b1.low, b1.high, b2.high, b2.low]
+
+    ei_mat += ei_mat.mean()
+
+    ax.set_xlim(left=plot_limits[0][0], right=plot_limits[1][0])
+    ax.set_ylim(bottom=plot_limits[0][1], top=plot_limits[1][1])
+    # ax.pcolor(xx, yy, ei_mat, cmap="jet")# , vmin=0, vmax=500)
+    ax.contour(xx, yy, ei_mat, cmap="jet")# , vmin=0, vmax=500)
+    # ax.colorbar()
+
+    # fixed_inputs = [[0, X_sample[-1][0]]]
+    # model.plot(ax=ax, fixed_inputs=fixed_inputs, plot_limits=[p[0] for p in plot_limits], legend=False)
+    # ax.set_xlabel(self.hyperparameters[0].name)
+    #
+    # model.plot_data(ax=ax, alpha=1, cmap=black_cmap, zorder=10, s=60, visible_dims=[0])
