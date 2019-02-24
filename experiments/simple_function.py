@@ -14,5 +14,5 @@ if __name__ == "__main__":
 
     result = math.sin(args.x) * math.sin(args.y) + random.random() * 0.05
 
-    # result = args.x + 2 * args.y
+    result = args.x + 2 * args.y
     print(result)

@@ -1,3 +1,6 @@
+GPSS.CC !!!!!
+http://deepbayes.ru
+
 - plot STD + ACQ
 
 - fix vmin/vmax
@@ -8,6 +11,8 @@
 - last model pryc?
 - yaml sort keys? (custom key order)
 
+
+- plot current max
 
 
 - co kdyz mam duplicitni-pid?

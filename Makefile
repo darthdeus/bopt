@@ -12,18 +12,18 @@ gpy_compare:
 sfntest:
 	rm -f tmp/*
 	rm -rf results/sfn
-	bopt init --param "x:float:0:1" --param "y:float:0:1" \
+	bopt init --param "x:float:0:25" --param "y:float:0:25" \
 		--dir results/sfn \
 		./.venv/bin/python ./experiments/simple_function.py
 	bopt run results/sfn
-	convert -delay 100 -loop 0 tmp/*.png anim.gif
+	# convert -delay 100 -loop 0 tmp/*.png anim.gif
 
 mctest:
 	rm -f tmp/*
 	rm -rf results/mc
 	bopt init --param "gamma:float:0:1" --param "epsilon:float:0:1" --dir results/mc ./.venv/bin/python ./experiments/rl/monte_carlo.py
 	bopt run results/mc
-	convert -delay 100 -loop 0 tmp/*.png anim.gif
+	# convert -delay 100 -loop 0 tmp/*.png anim.gif
 
 init:
 	bopt init --param "gamma:float:0:1" --param "epsilon:float:0:1" --dir results/mc ./.venv/bin/python ./experiments/rl/monte_carlo.py

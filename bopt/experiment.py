@@ -6,6 +6,8 @@ import pathlib
 import numpy as np
 
 from typing import List, Optional, Tuple
+from matplotlib.colors import LinearSegmentedColormap
+import matplotlib.pyplot as plt
 
 from bopt.models.model import Model
 from bopt.sample import Sample, SampleCollection
@@ -18,6 +20,9 @@ from bopt.runner.runner_loader import RunnerLoader
 
 from bopt.optimization_result import OptimizationResult
 from bopt.acquisition_functions.acquisition_functions import expected_improvement_f
+
+
+black_cmap = LinearSegmentedColormap.from_list("black", ["black", "black"])
 
 
 class NoAliasDumper(yaml.Dumper):
@@ -83,7 +88,7 @@ class Experiment:
 
         return job, fitted_model
 
-    def run_loop(self, model: Model, meta_dir: str, n_iter=10) -> None:
+    def run_loop(self, model: Model, meta_dir: str, n_iter=5) -> None:
         output_dir = pathlib.Path(meta_dir) / "output"
         output_dir.mkdir(parents=True, exist_ok=True)
 
@@ -236,29 +241,124 @@ class Experiment:
 
         # plt.title(f"LBFGS={U_LB} TF={U_TF}   noise={round(gp.noise, 2)} {result.kernel}", fontsize=20)
         # plt.pcolor(mu_mat, extent=extent, aspect="auto")
-        plt.figure(figsize=(12, 16))
 
-        plt.suptitle(param_str, fontsize=14)
 
-        plt.subplot(3, 1, 1)
-        plt.title("Mean")
-        plt.pcolor(gx, gy, mu_mat, cmap="jet", vmin=vmin, vmax=vmax)
-        plt.colorbar()
-        plt.scatter(X_sample[:, 0], X_sample[:, 1], c="k")
+        # TODO: funkcni stary plotovani
+        # plt.figure(figsize=(12, 16))
+        #
+        # plt.suptitle(param_str, fontsize=14)
+        #
+        # plt.subplot(4, 1, 1)
+        # plt.title("Mean")
+        # plt.pcolor(gx, gy, mu_mat, cmap="jet", vmin=vmin, vmax=vmax)
+        # plt.colorbar()
+        # plt.scatter(X_sample[:, 0], X_sample[:, 1], c="k")
+        #
+        # plt.subplot(4, 1, 2)
+        # plt.title("Sigma")
+        # plt.pcolor(gx, gy, std_mat, cmap="jet", vmin=vmin, vmax=vmax)
+        # plt.colorbar()
+        # plt.scatter(X_sample[:, 0], X_sample[:, 1], c="k")
+        #
+        # plt.subplot(4, 1, 3)
+        # plt.title("Expected Improvement")
+        # plt.pcolor(gx, gy, ei_mat, cmap="jet")# , vmin=0, vmax=500)
+        # plt.colorbar()
+        # plt.scatter(X_sample[:, 0], X_sample[:, 1], c="k")
+        # # plt.scatter([result.best_x[0]], [result.best_x[1]], c="r")
+        #
+        # ax = plt.subplot(4, 1, 4)
+        # plot_limits = [[gx.min(), gy.min()], [gx.max(), gy.max()]]
+        # model.plot_mean(ax=ax, vmin=vmin, vmax=vmax, plot_limits=plot_limits, cmap="jet", label="Mean")
+        #
+        # black_cmap = LinearSegmentedColormap.from_list("black", ["black", "black"])
+        # model.plot_data(ax=ax, alpha=1, cmap=black_cmap, zorder=10, s=60)
 
-        plt.subplot(3, 1, 2)
-        plt.title("Sigma")
-        plt.pcolor(gx, gy, std_mat, cmap="jet", vmin=vmin, vmax=vmax)
-        plt.colorbar()
-        plt.scatter(X_sample[:, 0], X_sample[:, 1], c="k")
+        # TODO: new point
+        # TODO: plot current max
+        # plt.scatter(
 
-        plt.subplot(3, 1, 3)
-        plt.title("Expected Improvement")
-        plt.pcolor(gx, gy, ei_mat, cmap="jet")# , vmin=0, vmax=500)
-        plt.colorbar()
-        plt.scatter(X_sample[:, 0], X_sample[:, 1], c="k")
-        # plt.scatter([result.best_x[0]], [result.best_x[1]], c="r")
+        plot_limits = [[gx.min(), gy.min()], [gx.max(), gy.max()]]
+        plot_objective(model, X_sample[-1], plot_limits, vmin=vmin, vmax=vmax)
 
         plt.savefig("tmp/opt-plot-{}.png".format(datetime.datetime.now().strftime("%Y-%m-%d_%H%M%S")))
 
+
         return mu_mat, extent, x1, x2
+
+
+def plot_objective(model, X_slice, plot_limits, vmin, vmax, levels=10, n_points=40, n_samples=250, size=2,
+                   zscale='linear', dimensions=None):
+    """Pairwise partial dependence plot of the objective function.
+    ----------
+    * `result` [`OptimizeResult`]
+        The result for which to create the scatter plot matrix.
+
+    * `levels` [int, default=10]
+        Number of levels to draw on the contour plot, passed directly
+        to `plt.contour()`.
+    * `zscale` [str, default='linear']
+        Scale to use for the z axis of the contour plots. Either 'linear'
+        or 'log'.
+    * `dimensions` [list of str, default=None] Labels of the dimension
+        variables. `None` defaults to `space.dimensions[i].name`, or
+        if also `None` to `['X_0', 'X_1', ..]`.
+    """
+    n_dims = model.X.ndim
+
+    fig, ax = plt.subplots(n_dims, n_dims, figsize=(size * n_dims, size * n_dims))
+
+    fig.subplots_adjust(left=0.05, right=0.95, bottom=0.05, top=0.95,
+                        hspace=0.1, wspace=0.1)
+
+    for i in range(n_dims):
+        for j in range(n_dims):
+            if i == j:
+                fixed_inputs = []
+                for f in list(set(range(n_dims)) - set([i])):
+                    fixed_inputs.append((f, X_slice[f].item()))
+
+                model.plot_mean(ax=ax[i, j], fixed_inputs=fixed_inputs)
+
+                # model.plot_mean(ax=ax[i, j], fixed_inputs=fixed_inputs,
+                #         vmin=vmin, vmax=vmax, plot_limits=[p[i] for p in plot_limits], cmap="jet", label="Mean")
+
+            #
+            #     xi, yi = partial_dependence(space, result.models[-1], i,
+            #                                 j=None,
+            #                                 sample_points=rvs_transformed,
+            #                                 n_points=n_points)
+            #
+            #     ax[i, i].plot(xi, yi)
+            #     ax[i, i].axvline(result.x[i], linestyle="--", color="r", lw=1)
+
+            # lower triangle
+            elif i > j:
+                # gx, gy = None # TODO
+                # vmin, vmax = None # TODO
+                fixed_inputs = []
+                for f in list(set(range(n_dims)) - set([i, j])):
+                    fixed_inputs.append((f, X_slice[f]))
+
+                # plot_limits = [[gx.min(), gy.min()], [gx.max(), gy.max()]]
+
+                model.plot_mean(ax=ax[i, j], fixed_inputs=fixed_inputs)
+                # model.plot_mean(ax=ax[i, j], fixed_inputs=fixed_inputs,
+                #         vmin=vmin, vmax=vmax, plot_limits=[p[[i, j]] for p in plot_limits], cmap="jet", label="Mean")
+
+                # TODO: vratit
+                # model.plot_data(ax=ax[i, j], fixed_inputs=fixed_inputs,
+                #         alpha=1, cmap=black_cmap, zorder=10, s=60)
+
+                # xi, yi, zi = partial_dependence(space, result.models[-1],
+                #                                 i, j,
+                #                                 rvs_transformed, n_points)
+                # ax[i, j].contourf(xi, yi, zi, levels,
+                #                   locator=locator, cmap='viridis_r')
+                # ax[i, j].scatter(samples[:, j], samples[:, i],
+                #                  c='k', s=10, lw=0.)
+                # ax[i, j].scatter(result.x[j], result.x[i],
+                #                  c=['r'], s=20, lw=0.)
+
+    # return _format_scatter_plot_axes(ax, space, ylabel="Partial dependence",
+    #                                  dim_labels=dimensions)

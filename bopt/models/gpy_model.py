@@ -71,9 +71,21 @@ class GPyModel(Model):
 
         model = GPRegression(X_sample, y_sample.reshape(-1, 1),
                              normalizer=normalizer)
-        model.kern.variance.set_prior(GPy.priors.Gamma(1, 0.1))
-        model.kern.lengthscale.set_prior(GPy.priors.Gamma(1, 0.1))
-        model.Gaussian_noise.set_prior(GPy.priors.Gamma(1, 0.1))
+
+        # TODO: zamyslet se
+        # model.kern.variance.set_prior(GPy.priors.Gamma(1., 0.1))
+        # model.kern.lengthscale.set_prior(GPy.priors.Gamma(1., 0.1))
+        model.kern.variance.unconstrain()
+        model.kern.variance.constrain_bounded(1e-2, 1e6)
+
+        model.kern.lengthscale.unconstrain()
+        model.kern.lengthscale.constrain_bounded(1e-2, 1e6)
+
+        model.Gaussian_noise.variance.unconstrain()
+        model.Gaussian_noise.variance.constrain_bounded(1e-2, 1e6)
+
+
+        # model.Gaussian_noise.set_prior(GPy.priors.Gamma(1., 0.1))
         model.optimize()
 
         bounds = [b.range for b in hyperparameters]

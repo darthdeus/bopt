@@ -9,7 +9,7 @@ AcquisitionFunction = Callable[[GPRegression, np.ndarray, float], np.ndarray]
 
 
 def expected_improvement(gp: GPRegression, X: np.ndarray, f_s: float, xi:
-        float=0.01) -> np.ndarray:
+        float=0.001) -> np.ndarray:
     assert X is not None
 
     mu, sigma = gp.predict(X)
