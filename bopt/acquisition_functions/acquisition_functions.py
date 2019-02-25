@@ -14,11 +14,12 @@ def expected_improvement(gp: GPRegression, X: np.ndarray, f_s: float, xi:
 
     mu, sigma = gp.predict(X)
 
-    return expected_improvement_f(X, mu, sigma, f_s, xi)
+    return expected_improvement_f(mu, sigma, f_s, xi)
 
 
-def expected_improvement_f(X: np.ndarray, mu: np.ndarray, sigma: np.ndarray,
+def expected_improvement_f(mu: np.ndarray, sigma: np.ndarray,
         f_s: float, xi: float=0.01) -> np.ndarray:
+    # TODO: neni to opacne?
     improvement = mu - f_s - xi
     Z = improvement / sigma
     ei = improvement * norm.cdf(Z) + sigma * norm.pdf(Z)

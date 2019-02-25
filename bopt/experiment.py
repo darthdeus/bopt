@@ -71,7 +71,7 @@ class Experiment:
 
         return experiment
 
-    def run_next(self, model: Model, meta_dir: str, output_dir: str) -> Tuple[Job, Model]:
+    def run_next(self, model: Model, meta_dir: str, output_dir: str) -> Tuple[Job, Model, np.ndarray]:
         if len(self.samples) == 0:
             model = RandomSearch()
 
@@ -89,25 +89,25 @@ class Experiment:
 
         self.last_model = next_sample.model
 
-        return job, fitted_model
+        return job, fitted_model, next_sample.to_x()
 
-    def run_loop(self, model: Model, meta_dir: str, n_iter=8) -> None:
+    def run_loop(self, model: Model, meta_dir: str, n_iter=20) -> None:
         output_dir = pathlib.Path(meta_dir) / "output"
         output_dir.mkdir(parents=True, exist_ok=True)
 
         for i in range(n_iter):
-            job, fitted_model = self.run_next(model, meta_dir, str(output_dir))
+            job, fitted_model, x_next = self.run_next(model, meta_dir, str(output_dir))
+
+            ##################################
+            # TODO: plot with GPy!!!
+            ##################################
+            self.plot_current(fitted_model, meta_dir, x_next)
 
             while not job.is_finished():
                 psutil.wait_procs(psutil.Process().children(), timeout=0.01)
                 time.sleep(0.2)
 
             self.serialize(meta_dir)
-
-            ##################################
-            # TODO: plot with GPy!!!
-            ##################################
-            self.plot_current(fitted_model, meta_dir)
 
             # optim_result = self.current_optim_result(meta_dir)
             #
@@ -172,7 +172,7 @@ class Experiment:
                 opt_fun=None)
 
 
-    def plot_current(self, model: Model, meta_dir: str, resolution: float = 30):
+    def plot_current(self, model: Model, meta_dir: str, x_next: np.ndarray, resolution: float = 30):
         # TODO: handle more than 2 dimensions properly
         # assert len(result.params) == 2
 
@@ -193,10 +193,11 @@ class Experiment:
         #
         # bounds = [p.range for p in self.hyperparameters]
 
-        X_sample, y_sample = SampleCollection(self.samples, meta_dir).to_xy()
-
-        np.save("tmp/data_X", X_sample)
-        np.save("tmp/data_Y", y_sample)
+        # TODO: nepotrebuju?
+        # X_sample, y_sample = SampleCollection(self.samples, meta_dir).to_xy()
+        #
+        # np.save("tmp/data_X", X_sample)
+        # np.save("tmp/data_Y", y_sample)
 
         if isinstance(model, RandomSearch):
             return
@@ -221,8 +222,10 @@ class Experiment:
         # param_str = str(gp.kern) + " " + str(gp.noise) + f" nll={round(gp.log_prob().numpy().item(), 2)}"
 
         # TODO: take as input
-        vmin = y_sample.min()
-        vmax = y_sample.max()
+        # vmin = y_sample.min()
+        # vmax = y_sample.max()
+        vmin = model.Y.min()
+        vmax = model.Y.max()
 
         import matplotlib.pyplot as plt
         import datetime
@@ -270,11 +273,15 @@ class Experiment:
         # plot_limits = [[gx.min(), gy.min()], [gx.max(), gy.max()]]
 
         fig = plt.figure(figsize=(15, 15))
-        outer_grid = gridspec.GridSpec(2, 1)
+        outer_grid = gridspec.GridSpec(1, 1)
+
+        max_idx = model.Y.reshape(-1).argmax()
+        x_max = model.X[max_idx]
 
 
-        with plt.xkcd():
-            plot_objective(model, X_sample[-1], plot_limits, vmin, vmax, self.hyperparameters, outer_grid, fig)
+        # with plt.xkcd():
+            # plot_objective(model, X_sample[-1], plot_limits, vmin, vmax, self.hyperparameters, outer_grid, fig)
+        plot_objective(model, x_max, x_next, plot_limits, vmin, vmax, self.hyperparameters, outer_grid, fig)
 
             # ax = plt.subplot(outer_grid[1, 0])
 
@@ -284,7 +291,7 @@ class Experiment:
         plt.savefig("tmp/opt-plot-{}.png".format(datetime.datetime.now().strftime("%Y-%m-%d_%H%M%S")))
 
 
-def plot_objective(model, X_slice, plot_limits, vmin, vmax, hyperparameters, outer_grid, fig,
+def plot_objective(model, x_slice, x_next, plot_limits, vmin, vmax, hyperparameters, outer_grid, fig,
         levels=10, n_points=40, n_samples=250, size=4, zscale='linear', dimensions=None):
     """Pairwise partial dependence plot of the objective function.
     ----------
@@ -305,24 +312,25 @@ def plot_objective(model, X_slice, plot_limits, vmin, vmax, hyperparameters, out
     # Number of hyperparameters
     n_dims = model.X.shape[1]
 
-    inner_grid = gridspec.GridSpecFromSubplotSpec(n_dims, n_dims, subplot_spec=outer_grid[0, 0])
-    second_grid = gridspec.GridSpecFromSubplotSpec(n_dims, n_dims, subplot_spec=outer_grid[1, 0])
+    inner_grid = gridspec.GridSpecFromSubplotSpec(n_dims, n_dims, subplot_spec=outer_grid[0, 0],
+            hspace=0.2, wspace=0.2)
+    # second_grid = gridspec.GridSpecFromSubplotSpec(n_dims, n_dims, subplot_spec=outer_grid[1, 0])
 
     # fig, ax = plt.subplots(n_dims, n_dims, figsize=(size * n_dims, size * n_dims))
-    plt.suptitle(str(list(map(lambda x: str(round(x, 3)), model.param_array.tolist()))) + " " + str(X_slice.tolist()))
+    plt.suptitle(str(list(map(lambda x: str(round(x, 3)), model.param_array.tolist()))) + " " + str(x_slice.tolist()))
 
-    # fig.subplots_adjust(left=0.05, right=0.95, bottom=0.05, top=0.95,
-    #                     hspace=0.1, wspace=0.1)
+    fig.subplots_adjust(left=0.05, right=0.95, bottom=0.05, top=0.95,
+                        hspace=0.1, wspace=0.1)
 
     for i in range(n_dims):
         for j in range(n_dims):
             ax = plt.Subplot(fig, inner_grid[i * n_dims + j])
-            ax2 = plt.Subplot(fig, second_grid[i * n_dims + j])
+            # ax2 = plt.Subplot(fig, second_grid[i * n_dims + j])
 
             if i == j:
                 fixed_inputs = []
                 for f in list(set(range(n_dims)) - set([i])):
-                    fixed_inputs.append((f, X_slice[f].item()))
+                    fixed_inputs.append((f, x_slice[f].item()))
 
                 model.plot(ax=ax, fixed_inputs=fixed_inputs,
                         plot_limits=[p[i] for p in plot_limits], legend=False)
@@ -337,79 +345,114 @@ def plot_objective(model, X_slice, plot_limits, vmin, vmax, hyperparameters, out
             #                                 n_points=n_points)
             #
             #     ax[i, i].plot(xi, yi)
-                ax.axvline(X_slice[i], linestyle="--", color="r", lw=1)
+                ax.axvline(x_next[i], linestyle="--", color="r", lw=1)
 
             # lower triangle
-            elif i > j:
-                # gx, gy = None # TODO
-                # vmin, vmax = None # TODO
+            else:
                 fixed_inputs = []
                 for f in list(set(range(n_dims)) - set([i, j])):
-                    fixed_inputs.append((f, X_slice[f]))
+                    fixed_inputs.append((f, x_slice[f]))
 
-                # plot_limits = [[gx.min(), gy.min()], [gx.max(), gy.max()]]
                 lims = [np.array(p)[[i, j]] for p in plot_limits]
 
-                model.plot_mean(ax=ax, fixed_inputs=fixed_inputs, cmap="jet", label="Mean",
-                        vmin=vmin, vmax=vmax, plot_limits=lims)
-                ax.set_xlabel(hyperparameters[i].name)
-                ax.set_ylabel(hyperparameters[j].name)
+                if i > j:
+                    # TODO: plot vs plot_mean
+                    model.plot(ax=ax, fixed_inputs=fixed_inputs, cmap="jet", label="Mean",
+                            vmin=vmin, vmax=vmax, plot_limits=lims, legend=False)
+                    ax.set_xlabel(hyperparameters[i].name)
+                    ax.set_ylabel(hyperparameters[j].name)
 
-                # TODO: vratit
-                model.plot_data(ax=ax, alpha=1, cmap=black_cmap, zorder=10, s=60, visible_dims=[i, j])
-                ax.axvline(X_slice[i], linestyle="--", color="r", lw=1)
-                ax.axhline(X_slice[j], linestyle="--", color="r", lw=1)
+                    # TODO: vratit
+                    model.plot_data(ax=ax, alpha=1, cmap=black_cmap, zorder=10, s=60, visible_dims=[i, j])
+                    ax.axvline(x_next[i], linestyle="--", color="r", lw=1)
+                    ax.axhline(x_next[j], linestyle="--", color="r", lw=1)
 
-                ei_for_dims(model, model.X, model.Y, hyperparameters, ax2, [i, j], lims)
+                elif i < j:
+                    ei_ax = ax
 
-                # xi, yi, zi = partial_dependence(space, result.models[-1],
-                #                                 i, j,
-                #                                 rvs_transformed, n_points)
-                # ax[i, j].contourf(xi, yi, zi, levels,
-                #                   locator=locator, cmap='viridis_r')
-                # ax[i, j].scatter(samples[:, j], samples[:, i],
-                #                  c='k', s=10, lw=0.)
-                # ax[i, j].scatter(result.x[j], result.x[i],
-                #                  c=['r'], s=20, lw=0.)
+                    ei_for_dims(model, x_next, hyperparameters, ei_ax, [i, j], lims)
+                    model.plot_data(ax=ei_ax, alpha=1, cmap=black_cmap, zorder=10, s=60, visible_dims=[i, j])
+                    ei_ax.axvline(x_next[i], linestyle="--", color="r", lw=1)
+                    ei_ax.axhline(x_next[j], linestyle="--", color="r", lw=1)
+
+                    # xi, yi, zi = partial_dependence(space, result.models[-1],
+                    #                                 i, j,
+                    #                                 rvs_transformed, n_points)
+                    # ax[i, j].contourf(xi, yi, zi, levels,
+                    #                   locator=locator, cmap='viridis_r')
+                    # ax[i, j].scatter(samples[:, j], samples[:, i],
+                    #                  c='k', s=10, lw=0.)
+                    # ax[i, j].scatter(result.x[j], result.x[i],
+                    #                  c=['r'], s=20, lw=0.)
 
             fig.add_subplot(ax)
-            fig.add_subplot(ax2)
+            # fig.add_subplot(ax2)
 
     # return _format_scatter_plot_axes(ax, space, ylabel="Partial dependence",
     #                                  dim_labels=dimensions)
 
-def ei_for_dims(model, X_sample, y_sample, hyperparameters, ax, dims, plot_limits):
-    Xnew, xx, yy, xmin, xmax = GPy.plotting.gpy_plot.plot_util.x_frame2D(X_sample[:, dims], plot_limits=plot_limits)
-    X_2d = np.c_[xx.ravel(), yy.ravel()]
+def ei_for_dims(model, x_slice, hyperparameters, ax, dims, plot_limits):
+    # x_frame2D only checks shape[1] and not the data when `plot_limits` is provided
+    from GPy.plotting.gpy_plot.plot_util import x_frame2D
 
-    print("xmin: {}, xmax: {}, plot_limits: {}", xmin, xmax, plot_limits)
+    frame_shaped_array = np.zeros((1,2))
 
-    X_2d_pred = np.c_[xx.ravel(), yy.ravel(), np.zeros_like(xx.ravel())]
+    # Xnew, xx, yy, xmin, xmax = x_frame2D(frame_shaped_array, plot_limits=plot_limits)
+    #
+    # X_2d_pred = np.c_[xx.ravel(), yy.ravel(), np.zeros_like(xx.ravel())]
+    resolution = 50
+
+    d1 = np.linspace(plot_limits[0][0], plot_limits[1][0], num=resolution)
+    d2 = np.linspace(plot_limits[0][1], plot_limits[1][1], num=resolution)
+
+    g1, g2 = np.meshgrid(d1, d2)
+
+    gs = [0] * len(x_slice)
+    gs[dims[0]] = g1
+    gs[dims[1]] = g2
+
+    for i in range(len(x_slice)):
+        if i not in dims:
+            gs[i] = g1.copy()
+            gs[i][:] = x_slice[i]
+
+    grid = np.stack(gs, axis=-1)
+
+    # np.stack([g1, g2, g3], axis=-1)
+
+    # grid = np.zeros([resolution, resolution, len(x_slice)])
+    #
+    # for i in range(resolution):
+    #     for j in range(resolution):
+    #         grid[i, j, dims[0]] = x_slice[dims[0]]
+    #         grid[i, j, dims[1]] = x_slice[dims[1]]
+
+
 
     # TODO: stare plotovani, nefunguje na vic nez 2d
-    mu, std = model.predict(X_2d_pred)
-    ei = expected_improvement_f(X_2d, mu, std, y_sample.max())
+    mu, var = model.predict(grid.reshape(resolution * resolution, -1))
 
     # TODO: std or var?
-    std = np.sqrt(std)
+    std = np.sqrt(var)
 
+    ei = expected_improvement_f(mu, std, model.Y.max())
 
-    b1 = hyperparameters[0].range
-    b2 = hyperparameters[1].range
+    # b1 = hyperparameters[0].range
+    # b2 = hyperparameters[1].range
 
     # TODO: fuj
-    mu_mat  = mu.reshape(xx.shape[0], xx.shape[1])
-    std_mat = std.reshape(xx.shape[0], xx.shape[1])
+    # mu_mat  = mu.reshape(xx.shape[0], xx.shape[1])
+    # std_mat = std.reshape(xx.shape[0], xx.shape[1])
 
-    ei_mat  = ei.reshape(xx.shape[0], xx.shape[1])
-    extent  = [b1.low, b1.high, b2.high, b2.low]
+    ei_mat = ei.reshape(resolution, resolution)
+    # extent  = [b1.low, b1.high, b2.high, b2.low]
 
     ei_mat += ei_mat.mean()
 
     ax.set_xlim(left=plot_limits[0][0], right=plot_limits[1][0])
     ax.set_ylim(bottom=plot_limits[0][1], top=plot_limits[1][1])
     # ax.pcolor(xx, yy, ei_mat, cmap="jet")# , vmin=0, vmax=500)
-    ax.contour(xx, yy, ei_mat, cmap="jet")# , vmin=0, vmax=500)
+    ax.contour(g1, g2, ei_mat, cmap="jet")# , vmin=0, vmax=500)
     # ax.colorbar()
 
     # fixed_inputs = [[0, X_sample[-1][0]]]

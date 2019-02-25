@@ -32,7 +32,7 @@ class Sample:
         return Sample(JobLoader.from_dict(data["job"]),
                       model_dict)
 
-    def to_xy(self, output_dir: str) -> Tuple[np.ndarray, float]:
+    def to_x(self) -> np.ndarray:
         param_values = self.job.run_parameters
 
         x = np.zeros(len(param_values), dtype=np.float64)
@@ -41,6 +41,11 @@ class Sample:
             value = param_values[key]
 
             x[i] = value
+
+        return x
+
+    def to_xy(self, output_dir: str) -> Tuple[np.ndarray, float]:
+        x = self.to_x()
 
         y = self.job.get_result(output_dir)
 
