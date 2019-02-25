@@ -427,8 +427,6 @@ def ei_for_dims(model, x_slice, hyperparameters, ax, dims, plot_limits):
     #         grid[i, j, dims[0]] = x_slice[dims[0]]
     #         grid[i, j, dims[1]] = x_slice[dims[1]]
 
-
-
     # TODO: stare plotovani, nefunguje na vic nez 2d
     mu, var = model.predict(grid.reshape(resolution * resolution, -1))
 

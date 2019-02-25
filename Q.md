@@ -5,10 +5,6 @@ http://deepbayes.ru
 
 - fix vmin/vmax
 
-- matice 2d slicu
-- GPy normalizer ! ?
-- store likelihoods
-- last model pryc?
 - yaml sort keys? (custom key order)
 
 
