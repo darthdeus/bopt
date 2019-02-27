@@ -4,7 +4,7 @@ import psutil
 import inspect
 import argparse
 
-from bopt.cli import jobstat, expstat, web, new_exp, run_exp, init_exp
+from bopt.cli import jobstat, expstat, web, new_exp, run_exp, init_exp, plot_exp
 
 
 def main():
@@ -17,6 +17,7 @@ def main():
 
     sp_new = sp.add_parser("new", help="Create a new experiment.")
     sp_init = sp.add_parser("init", help="Initializes a new experiment, ready to run.")
+    sp_plot = sp.add_parser("plot", help="Generate plots for a given experiment.")
     sp_expstat = sp.add_parser("exp", help="Overview status of an experiment.")
     sp_jobstat = sp.add_parser("job", help="Retrieve job status.")
     sp_web = sp.add_parser("web", help="Starts the web interface.")
@@ -75,6 +76,9 @@ def main():
         "--port", type=int, default=5500, help="Port to run the web interface on."
     )
     sp_web.set_defaults(func=web.run)
+
+    sp_plot.add_argument("meta_dir", type=str, help="Directory with the experiment")
+    sp_plot.set_defaults(func=plot_exp.run)
 
     args = parser.parse_args()
     args.func(args)
