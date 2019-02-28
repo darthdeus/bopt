@@ -1,4 +1,7 @@
-default: sfntest
+default: plot
+
+plot:
+	PYTHONPATH=. bopt plot results/sfn
 
 test_serialization:
 	pytest tests/test_todict_fromdict.py

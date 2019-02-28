@@ -16,6 +16,7 @@ def run(args) -> None:
 
         for sample in experiment.samples:
             if sample.model.model_name == "gpy":
+                model = bopt.GPyModel.from_model_params(sample.model, experiment)
                 __import__('ipdb').set_trace()
     else:
         print(f"There is no `meta.yml` at {meta_fname}.")

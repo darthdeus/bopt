@@ -22,12 +22,23 @@ class GPyModel(Model):
         self.model = model
 
     def to_model_params(self) -> ModelParameters:
+        # TODO: kernel
         params = {
             name: float(self.model[name])
             for name in self.model.parameter_names()
         }
 
         return ModelParameters("gpy", params)
+
+    @staticmethod
+    def from_model_params(params: ModelParameters, samples: SampleCollection) -> "GPyModel":
+        __import__('ipdb').set_trace()
+        model = GPRegression()
+
+        for name, value in params.items():
+            __import__('ipdb').set_trace()
+
+        return model
 
     def to_dict(self) -> dict:
         pass

@@ -33,26 +33,21 @@ class NoAliasDumper(yaml.Dumper):
         return True
 
 
-# TODO: fix numpy being stored everywhere when serializing! possibly in hyp.sample? :(
 class Experiment:
     hyperparameters: List[Hyperparameter]
     runner: Runner
     samples: List[Sample]
-    last_model: Optional[ModelParameters]
 
     def __init__(self, hyperparameters: List[Hyperparameter], runner: Runner):
         self.hyperparameters = hyperparameters
         self.runner = runner
         self.samples = []
-        self.last_model = None
 
     def to_dict(self) -> dict:
         return {
             "hyperparameters": {h.name: h.to_dict() for h in self.hyperparameters},
             "samples": [s.to_dict() for s in self.samples],
             "runner": self.runner.to_dict(),
-            # TODO: last_model
-            # "last_model": self.last_model.to_dict() if self.last_model is not None else None
         }
 
     @staticmethod
@@ -63,11 +58,9 @@ class Experiment:
 
         samples = [Sample.from_dict(s) for s in data["samples"]]
         runner = RunnerLoader.from_dict(data["runner"])
-        # last_model = ModelLoader.from_dict(data["last_model"])
 
         experiment = Experiment(hyperparameters, runner)
         experiment.samples = samples
-        # experiment.last_model = last_model
 
         return experiment
 
@@ -77,7 +70,6 @@ class Experiment:
 
         sample_collection = SampleCollection(self.ok_samples(), meta_dir)
 
-        # TODO: pridat normalizaci
         next_params, fitted_model = \
                 model.predict_next(self.hyperparameters, sample_collection)
 
@@ -86,8 +78,6 @@ class Experiment:
         next_sample = Sample(job, fitted_model.to_model_params())
 
         self.samples.append(next_sample)
-
-        self.last_model = next_sample.model
 
         return job, fitted_model, next_sample.to_x()
 
@@ -98,9 +88,6 @@ class Experiment:
         for i in range(n_iter):
             job, fitted_model, x_next = self.run_next(model, meta_dir, str(output_dir))
 
-            ##################################
-            # TODO: plot with GPy!!!
-            ##################################
             self.plot_current(fitted_model, meta_dir, x_next)
 
             while not job.is_finished():
@@ -108,16 +95,6 @@ class Experiment:
                 time.sleep(0.2)
 
             self.serialize(meta_dir)
-
-            # optim_result = self.current_optim_result(meta_dir)
-            #
-            # # TODO: used the job model
-            # # TODO: plot optim from job?
-            # gp = optim_result.fit_gp()
-            #
-            # from bopt.bayesian_optimization import plot_2d_optim_result
-            #
-            # self.plot_current(meta_dir)
 
     def serialize(self, meta_dir: str) -> None:
         dump = yaml.dump(self.to_dict(), default_flow_style=False, Dumper=NoAliasDumper)
