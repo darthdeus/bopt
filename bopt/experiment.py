@@ -3,6 +3,7 @@ import os
 import psutil
 import time
 import pathlib
+import datetime
 import numpy as np
 
 from typing import List, Optional, Tuple
@@ -113,6 +114,7 @@ class Experiment:
     def ok_samples(self) -> List[Sample]:
         return [s for s in self.samples if s.job.is_finished()]
 
+    # TODO: deprecated, delete!
     def current_optim_result(self, meta_dir: str) -> OptimizationResult:
         sample_col = SampleCollection(self.ok_samples(), meta_dir)
 
@@ -150,41 +152,14 @@ class Experiment:
 
 
     def plot_current(self, model: Model, meta_dir: str, x_next: np.ndarray, resolution: float = 30):
-        # TODO: handle more than 2 dimensions properly
-        # assert len(result.params) == 2
-
         lows        = [h.range.low for h in self.hyperparameters]
         highs       = [h.range.high for h in self.hyperparameters]
         plot_limits = [lows, highs]
-
-        # TODO: float64
-        # x1 = np.linspace(b1.low, b1.high, resolution, dtype=np.float64)
-        # x2 = np.linspace(b2.low, b2.high, resolution, dtype=np.float64)
-        #
-        # assert len(x1) < 80, f"too large x1, len = {len(x1)}"
-        # assert len(x2) < 80, f"too large x1, len = {len(x2)}"
-        #
-        # gx, gy = np.meshgrid(x1, x2)
-        #
-        # X_2d = np.c_[gx.ravel(), gy.ravel()]
-        #
-        # bounds = [p.range for p in self.hyperparameters]
-
-        # TODO: nepotrebuju?
-        # X_sample, y_sample = SampleCollection(self.samples, meta_dir).to_xy()
-        #
-        # np.save("tmp/data_X", X_sample)
-        # np.save("tmp/data_Y", y_sample)
 
         if isinstance(model, RandomSearch):
             return
 
         assert model is not None, "gp is None"
-
-        # TODO: with_bounds?
-        # gp = GaussianProcess(kernel=result.kernel.with_bounds(bounds)) \
-        #     .fit(X_sample, result.y_sample) \
-        #     .optimize_kernel()
 
         # TODO: lol :)
         model = model.model
@@ -194,41 +169,12 @@ class Experiment:
                 float(model.kern.lengthscale),
                 float(model.kern.variance),
                 float(model.Gaussian_noise.variance)
-
         )
-        # param_str = str(gp.kern) + " " + str(gp.noise) + f" nll={round(gp.log_prob().numpy().item(), 2)}"
 
-        # TODO: take as input
-        # vmin = y_sample.min()
-        # vmax = y_sample.max()
         vmin = model.Y.min()
         vmax = model.Y.max()
 
-        import matplotlib.pyplot as plt
-        import datetime
-        # assert result.best_x is not None
-
-        # plt.title(f"LBFGS={U_LB} TF={U_TF}   noise={round(gp.noise, 2)} {result.kernel}", fontsize=20)
-        # plt.pcolor(mu_mat, extent=extent, aspect="auto")
-
-
         # TODO: funkcni stary plotovani
-        # plt.figure(figsize=(12, 16))
-        #
-        # plt.suptitle(param_str, fontsize=14)
-        #
-        # plt.subplot(4, 1, 1)
-        # plt.title("Mean")
-        # plt.pcolor(gx, gy, mu_mat, cmap="jet", vmin=vmin, vmax=vmax)
-        # plt.colorbar()
-        # plt.scatter(X_sample[:, 0], X_sample[:, 1], c="k")
-        #
-        # plt.subplot(4, 1, 2)
-        # plt.title("Sigma")
-        # plt.pcolor(gx, gy, std_mat, cmap="jet", vmin=vmin, vmax=vmax)
-        # plt.colorbar()
-        # plt.scatter(X_sample[:, 0], X_sample[:, 1], c="k")
-        #
         # plt.subplot(4, 1, 3)
         # plt.title("Expected Improvement")
         # plt.pcolor(gx, gy, ei_mat, cmap="jet")# , vmin=0, vmax=500)
@@ -245,9 +191,6 @@ class Experiment:
 
         # TODO: new point
         # TODO: plot current max
-        # plt.scatter(
-
-        # plot_limits = [[gx.min(), gy.min()], [gx.max(), gy.max()]]
 
         fig = plt.figure(figsize=(15, 15))
         outer_grid = gridspec.GridSpec(1, 1)
@@ -255,15 +198,8 @@ class Experiment:
         max_idx = model.Y.reshape(-1).argmax()
         x_max = model.X[max_idx]
 
-
         # with plt.xkcd():
-            # plot_objective(model, X_sample[-1], plot_limits, vmin, vmax, self.hyperparameters, outer_grid, fig)
         plot_objective(model, x_max, x_next, plot_limits, vmin, vmax, self.hyperparameters, outer_grid, fig)
-
-            # ax = plt.subplot(outer_grid[1, 0])
-
-            # ei_for_dims(model, X_sample, y_sample, self.hyperparameters, ax, [0, 1])
-
 
         plt.savefig("tmp/opt-plot-{}.png".format(datetime.datetime.now().strftime("%Y-%m-%d_%H%M%S")))
 
@@ -321,7 +257,6 @@ def plot_objective(model, x_slice, x_next, plot_limits, vmin, vmax, hyperparamet
             #                                 sample_points=rvs_transformed,
             #                                 n_points=n_points)
             #
-            #     ax[i, i].plot(xi, yi)
                 ax.axvline(x_next[i], linestyle="--", color="r", lw=1)
 
             # lower triangle
@@ -368,15 +303,13 @@ def plot_objective(model, x_slice, x_next, plot_limits, vmin, vmax, hyperparamet
     # return _format_scatter_plot_axes(ax, space, ylabel="Partial dependence",
     #                                  dim_labels=dimensions)
 
+
 def ei_for_dims(model, x_slice, hyperparameters, ax, dims, plot_limits):
     # x_frame2D only checks shape[1] and not the data when `plot_limits` is provided
     from GPy.plotting.gpy_plot.plot_util import x_frame2D
 
     frame_shaped_array = np.zeros((1,2))
 
-    # Xnew, xx, yy, xmin, xmax = x_frame2D(frame_shaped_array, plot_limits=plot_limits)
-    #
-    # X_2d_pred = np.c_[xx.ravel(), yy.ravel(), np.zeros_like(xx.ravel())]
     resolution = 50
 
     d1 = np.linspace(plot_limits[0][0], plot_limits[1][0], num=resolution)
@@ -395,38 +328,17 @@ def ei_for_dims(model, x_slice, hyperparameters, ax, dims, plot_limits):
 
     grid = np.stack(gs, axis=-1)
 
-    # np.stack([g1, g2, g3], axis=-1)
-
-    # grid = np.zeros([resolution, resolution, len(x_slice)])
-    #
-    # for i in range(resolution):
-    #     for j in range(resolution):
-    #         grid[i, j, dims[0]] = x_slice[dims[0]]
-    #         grid[i, j, dims[1]] = x_slice[dims[1]]
-
-    # TODO: stare plotovani, nefunguje na vic nez 2d
     mu, var = model.predict(grid.reshape(resolution * resolution, -1))
-
-    # TODO: std or var?
     std = np.sqrt(var)
 
     ei = expected_improvement_f(mu, std, model.Y.max())
 
-    # b1 = hyperparameters[0].range
-    # b2 = hyperparameters[1].range
-
-    # TODO: fuj
-    # mu_mat  = mu.reshape(xx.shape[0], xx.shape[1])
-    # std_mat = std.reshape(xx.shape[0], xx.shape[1])
-
     ei_mat = ei.reshape(resolution, resolution)
-    # extent  = [b1.low, b1.high, b2.high, b2.low]
-
+    # TODO: fuj, contour not increasing?
     ei_mat += ei_mat.mean()
 
     ax.set_xlim(left=plot_limits[0][0], right=plot_limits[1][0])
     ax.set_ylim(bottom=plot_limits[0][1], top=plot_limits[1][1])
-    # ax.pcolor(xx, yy, ei_mat, cmap="jet")# , vmin=0, vmax=500)
     ax.contour(g1, g2, ei_mat, cmap="jet")# , vmin=0, vmax=500)
     # ax.colorbar()
 

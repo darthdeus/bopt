@@ -23,8 +23,6 @@ http://deepbayes.ru
 <!--   - mozna TF failuje, protoze to nebezi s restartama? -->
 <!--     - kdyz necham jenom porovnani likelihoodu tak to funguje -->
 
-- GPy !!!
-
 - zamykani - flock, lockfile
 
 - bopt cmdline
