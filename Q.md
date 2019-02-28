@@ -1,14 +1,14 @@
 GPSS.CC !!!!!
 http://deepbayes.ru
 
-- plot STD + ACQ
-
+- plot current max
 - fix vmin/vmax
 
+- GPyOpt?
+
+- plot STD?
 - yaml sort keys? (custom key order)
 
-
-- plot current max
 
 
 - co kdyz mam duplicitni-pid?
@@ -33,15 +33,18 @@ http://deepbayes.ru
       - lock
       - sync
       - run
+      - sync
       - unlock
       - sleep
   - suggest
     - naformatovany command s newlinama
+      bopt manual-run --x=1 --y=3
   - bopt manual-run
   - bopt web
     - sync + render
   - bopt job -c DIR ID
   - bopt exp -c DIR
+  - bopt plot -c DIR
 
 
 

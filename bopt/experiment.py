@@ -269,6 +269,7 @@ def plot_objective(model, x_slice, x_next, plot_limits, vmin, vmax, hyperparamet
 
                 if i > j:
                     # TODO: plot vs plot_mean
+                    # TODO: neplotovat data 2x
                     model.plot(ax=ax, fixed_inputs=fixed_inputs, cmap="jet", label="Mean",
                             vmin=vmin, vmax=vmax, plot_limits=lims, legend=False)
                     ax.set_xlabel(hyperparameters[i].name)
