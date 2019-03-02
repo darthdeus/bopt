@@ -118,7 +118,8 @@ class Experiment:
     def current_optim_result(self, meta_dir: str) -> OptimizationResult:
         sample_col = SampleCollection(self.ok_samples(), meta_dir)
 
-        X_sample, y_sample = sample_col.to_xy()
+        X_sample, Y_sample = sample_col.to_xy()
+        y_sample = Y_sample.reshape(-1)
 
         # TODO: this should be handled better
         params = sorted(self.hyperparameters, key=lambda h: h.name)
@@ -201,7 +202,14 @@ class Experiment:
         # with plt.xkcd():
         plot_objective(model, x_max, x_next, plot_limits, vmin, vmax, self.hyperparameters, outer_grid, fig)
 
-        plt.savefig("tmp/opt-plot-{}.png".format(datetime.datetime.now().strftime("%Y-%m-%d_%H%M%S")))
+        plot_dir = os.path.join(meta_dir, "plots")
+        if not os.path.isdir(plot_dir):
+            os.mkdir(plot_dir)
+
+        plot_fname = "opt-plot-{}.png".format(datetime.datetime.now().strftime("%Y-%m-%d_%H%M%S"))
+        plot_fig_fname = os.path.join(plot_dir, plot_fname)
+
+        plt.savefig(plot_fig_fname)
 
 
 def plot_objective(model, x_slice, x_next, plot_limits, vmin, vmax, hyperparameters, outer_grid, fig,
@@ -245,8 +253,8 @@ def plot_objective(model, x_slice, x_next, plot_limits, vmin, vmax, hyperparamet
                 for f in list(set(range(n_dims)) - set([i])):
                     fixed_inputs.append((f, x_slice[f].item()))
 
-                model.plot(ax=ax, fixed_inputs=fixed_inputs,
-                        plot_limits=[p[i] for p in plot_limits], legend=False)
+                model.plot_mean(ax=ax, fixed_inputs=fixed_inputs,
+                        plot_limits=[p[i] for p in plot_limits])
                 ax.set_xlabel(hyperparameters[i].name)
 
                 model.plot_data(ax=ax, alpha=1, cmap=black_cmap, zorder=10, s=60, visible_dims=[i])
@@ -270,7 +278,7 @@ def plot_objective(model, x_slice, x_next, plot_limits, vmin, vmax, hyperparamet
                 if i > j:
                     # TODO: plot vs plot_mean
                     # TODO: neplotovat data 2x
-                    model.plot(ax=ax, fixed_inputs=fixed_inputs, cmap="jet", label="Mean",
+                    model.plot_mean(ax=ax, fixed_inputs=fixed_inputs, cmap="jet",
                             vmin=vmin, vmax=vmax, plot_limits=lims, legend=False)
                     ax.set_xlabel(hyperparameters[i].name)
                     ax.set_ylabel(hyperparameters[j].name)

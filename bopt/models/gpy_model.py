@@ -31,14 +31,13 @@ class GPyModel(Model):
         return ModelParameters("gpy", params)
 
     @staticmethod
-    def from_model_params(params: ModelParameters, samples: SampleCollection) -> "GPyModel":
-        __import__('ipdb').set_trace()
-        model = GPRegression()
+    def from_model_params(model_params: ModelParameters, X, Y) -> "GPyModel":
+        model = GPRegression(X, Y)
 
-        for name, value in params.items():
-            __import__('ipdb').set_trace()
+        for name, value in model_params.params.items():
+            model[name] = value
 
-        return model
+        return GPyModel(model)
 
     def to_dict(self) -> dict:
         pass
@@ -73,15 +72,14 @@ class GPyModel(Model):
 
     def predict_next(self, hyperparameters: List[Hyperparameter],
                      sample_col: SampleCollection) -> Tuple[dict, "Model"]:
-        X_sample, y_sample = sample_col.to_xy()
+        X_sample, Y_sample = sample_col.to_xy()
 
         # TODO: compare NLL with and without normalizer
 
         # If there is only one sample, .std() == 0 and Y ends up being NaN.
         normalizer = len(X_sample) > 1
 
-        model = GPRegression(X_sample, y_sample.reshape(-1, 1),
-                             normalizer=normalizer)
+        model = GPRegression(X_sample, Y_sample, normalizer=normalizer)
 
         # TODO: zamyslet se
         # model.kern.variance.set_prior(GPy.priors.Gamma(1., 0.1))
@@ -103,7 +101,7 @@ class GPyModel(Model):
 
         x_next = propose_location(expected_improvement,
                 model,
-                y_sample.max(),
+                Y_sample.reshape(-1).max(), # TODO: bez reshape?
                 bounds)
 
         typed_vals = [int(x) if p.range.type == "int" else float(x)

@@ -97,5 +97,6 @@ class SampleCollection:
             y_sample[i] = y
 
         X_sample = np.array(xs, dtype=np.float32)
+        Y_sample = y_sample.reshape(-1, 1)
 
-        return X_sample, y_sample
+        return X_sample, Y_sample

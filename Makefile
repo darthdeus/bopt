@@ -1,6 +1,7 @@
 default: plot
 
 plot:
+	rm -rf results/sfn/plots
 	PYTHONPATH=. bopt plot results/sfn
 
 test_serialization:
@@ -13,7 +14,6 @@ gpy_compare:
 	PYTHONPATH=. python tests/test_gpy_comparison.py
 
 sfntest:
-	rm -f tmp/*
 	rm -rf results/sfn
 	bopt init --param "x:float:0:5" --param "y:float:0:25" \
 		--param "z:float:0:1" --param "w:float:2:7" \
