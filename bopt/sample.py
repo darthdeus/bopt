@@ -12,9 +12,9 @@ class Sample:
     job: Job
     model: ModelParameters
 
-    def __init__(self, job: Job, fitted_model: ModelParameters) -> None:
+    def __init__(self, job: Job, model_params: ModelParameters) -> None:
         self.job = job
-        self.model = fitted_model
+        self.model = model_params
 
     def to_dict(self) -> dict:
         return {

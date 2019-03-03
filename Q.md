@@ -1,6 +1,9 @@
 GPSS.CC !!!!!
 http://deepbayes.ru
 
+# TODO: co kdyz dostanu manual evaluation, zkusit precejenom fitnout model
+#       ale do plotu napsat, ze ten model neni podle ceho byl vybrany?
+
 - plot current max
 - fix vmin/vmax
 
@@ -15,13 +18,6 @@ http://deepbayes.ru
   - job-PID-1
   - pouzivat relativni cesty
 
-
-<!-- - GPR failuje assert u solve -->
-<!--  -->
-<!-- - gpy vs bopt tests :O -->
-<!--   - likelihoody vypadaji stejne ... multimodalni? -->
-<!--   - mozna TF failuje, protoze to nebezi s restartama? -->
-<!--     - kdyz necham jenom porovnani likelihoodu tak to funguje -->
 
 - zamykani - flock, lockfile
 

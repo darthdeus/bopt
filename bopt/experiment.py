@@ -77,23 +77,29 @@ class Experiment:
 
         return next_params, fitted_model
 
-    def run_next(self, model: Model, meta_dir: str, output_dir: str) -> Tuple[Job, Model, np.ndarray]:
+    def run_next(self, model: Model, meta_dir: str) -> Tuple[Job, Model, np.ndarray]:
         next_params, fitted_model = self.suggest(model, meta_dir)
 
-        job = self.runner.start(output_dir, next_params)
-
-        next_sample = Sample(job, fitted_model.to_model_params())
-        self.samples.append(next_sample)
+        job, next_sample = self.manual_run(meta_dir, next_params, fitted_model.to_model_params())
 
         return job, fitted_model, next_sample.to_x()
 
+    def manual_run(self, meta_dir: str, next_params: dict, model_params: ModelParameters) -> Tuple[Job, Sample]:
+        output_dir_path = pathlib.Path(meta_dir) / "output"
+        output_dir_path.mkdir(parents=True, exist_ok=True)
+        output_dir = str(output_dir_path)
+
+        job = self.runner.start(output_dir, next_params)
+
+        next_sample = Sample(job, model_params)
+        self.samples.append(next_sample)
+
+        return job, next_sample
+
     # TODO: fixonut jak se tu predava model
     def run_loop(self, model: Model, meta_dir: str, n_iter=20) -> None:
-        output_dir = pathlib.Path(meta_dir) / "output"
-        output_dir.mkdir(parents=True, exist_ok=True)
-
         for i in range(n_iter):
-            job, fitted_model, x_next = self.run_next(model, meta_dir, str(output_dir))
+            job, fitted_model, x_next = self.run_next(model, meta_dir)
 
             self.plot_current(fitted_model, meta_dir, x_next)
 
@@ -101,6 +107,7 @@ class Experiment:
                 psutil.wait_procs(psutil.Process().children(), timeout=0.01)
                 time.sleep(0.2)
 
+            # TODO: serialize immediately?
             self.serialize(meta_dir)
 
     def serialize(self, meta_dir: str) -> None:

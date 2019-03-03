@@ -5,7 +5,7 @@ import inspect
 import argparse
 
 from bopt.cli import jobstat, expstat, web, new_exp, run_exp, init_exp, plot_exp
-from bopt.cli import suggest
+from bopt.cli import suggest, manual_run
 
 
 def main():
@@ -25,6 +25,7 @@ def main():
     sp_run = sp.add_parser("run", help="Runs an experiment.")
     # TODO: parallel evaluation
     sp_suggest = sp.add_parser("suggest", help="Suggests one next point for evaluation.")
+    sp_manual_run = sp.add_parser("manual-run", help="Run the next evaluation with manually given hyperparameters.")
 
     sp_init.add_argument(
         "--result_parser",
@@ -85,6 +86,20 @@ def main():
 
     sp_suggest.add_argument("meta_dir", type=str, help="Directory with the experiment")
     sp_suggest.set_defaults(func=suggest.run)
+
+    sp_manual_run.add_argument("meta_dir", type=str, help="Directory with the experiment")
+    sp_manual_run.set_defaults(func=manual_run.run)
+
+    parsed, unknown = parser.parse_known_args()
+    # this is an 'internal' method
+    # which returns 'parsed', the same as what parse_args() would return
+    # and 'unknown', the remainder of that
+    # the difference to parse_args() is that it does not exit when it finds redundant arguments
+
+    for arg in unknown:
+        if arg.startswith(("-", "--")):
+            # TODO: fuj
+            sp_manual_run.add_argument(arg.split("=")[0], type=float)
 
     args = parser.parse_args()
     args.func(args)

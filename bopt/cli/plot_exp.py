@@ -7,6 +7,8 @@ from typing import List
 
 import bopt
 
+# TODO: co kdyz dostanu manual evaluation, zkusit precejenom fitnout model
+#       ale do plotu napsat, ze ten model neni podle ceho byl vybrany?
 def run(args) -> None:
     meta_fname = os.path.join(
         args.meta_dir,

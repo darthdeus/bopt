@@ -15,3 +15,7 @@ class ModelParameters:
     @staticmethod
     def from_dict(data: dict) -> "ModelParameters":
         return ModelParameters(data["model_name"], data["params"])
+
+    @staticmethod
+    def manual_run() -> "ModelParameters":
+        return ModelParameters("manual", {})

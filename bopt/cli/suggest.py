@@ -21,10 +21,15 @@ def run(args) -> None:
                 experiment.suggest(bopt.models.gpy_model.GPyModel(), args.meta_dir)
 
         param_str = "\n".join([f"{key}: {value}" for key, value in next_params.items()])
+        param_args = " ".join([f"--{key}={value}" for key, value in next_params.items()])
 
-        print("""PARAMS:
+        print(f"""PARAMS:
 
-{}""".format(param_str))
+{param_str}
+
+To evaluate this manually, run:
+
+bopt manual-run {args.meta_dir} {param_args}""")
     else:
         print(f"There is no `meta.yml` at {meta_fname}.")
         sys.exit(1)
