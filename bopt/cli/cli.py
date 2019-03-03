@@ -5,6 +5,7 @@ import inspect
 import argparse
 
 from bopt.cli import jobstat, expstat, web, new_exp, run_exp, init_exp, plot_exp
+from bopt.cli import suggest
 
 
 def main():
@@ -22,6 +23,8 @@ def main():
     sp_jobstat = sp.add_parser("job", help="Retrieve job status.")
     sp_web = sp.add_parser("web", help="Starts the web interface.")
     sp_run = sp.add_parser("run", help="Runs an experiment.")
+    # TODO: parallel evaluation
+    sp_suggest = sp.add_parser("suggest", help="Suggests one next point for evaluation.")
 
     sp_init.add_argument(
         "--result_parser",
@@ -79,6 +82,9 @@ def main():
 
     sp_plot.add_argument("meta_dir", type=str, help="Directory with the experiment")
     sp_plot.set_defaults(func=plot_exp.run)
+
+    sp_suggest.add_argument("meta_dir", type=str, help="Directory with the experiment")
+    sp_suggest.set_defaults(func=suggest.run)
 
     args = parser.parse_args()
     args.func(args)

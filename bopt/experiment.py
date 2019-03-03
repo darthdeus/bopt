@@ -65,8 +65,9 @@ class Experiment:
 
         return experiment
 
-    def run_next(self, model: Model, meta_dir: str, output_dir: str) -> Tuple[Job, Model, np.ndarray]:
+    def suggest(self, model: Model, meta_dir: str) -> Tuple[dict, Model]:
         if len(self.samples) == 0:
+            print("No existing samples found, overloading suggest with RandomSearch.")
             model = RandomSearch()
 
         sample_collection = SampleCollection(self.ok_samples(), meta_dir)
@@ -74,14 +75,19 @@ class Experiment:
         next_params, fitted_model = \
                 model.predict_next(self.hyperparameters, sample_collection)
 
+        return next_params, fitted_model
+
+    def run_next(self, model: Model, meta_dir: str, output_dir: str) -> Tuple[Job, Model, np.ndarray]:
+        next_params, fitted_model = self.suggest(model, meta_dir)
+
         job = self.runner.start(output_dir, next_params)
 
         next_sample = Sample(job, fitted_model.to_model_params())
-
         self.samples.append(next_sample)
 
         return job, fitted_model, next_sample.to_x()
 
+    # TODO: fixonut jak se tu predava model
     def run_loop(self, model: Model, meta_dir: str, n_iter=20) -> None:
         output_dir = pathlib.Path(meta_dir) / "output"
         output_dir.mkdir(parents=True, exist_ok=True)
@@ -165,11 +171,10 @@ class Experiment:
         # TODO: lol :)
         model = model.model
 
-        # TODO: use paramz properly
         param_str = "ls: {:.3f}, variance: {:.3f}, noise: {:.3f}".format(
-                float(model.kern.lengthscale),
-                float(model.kern.variance),
-                float(model.Gaussian_noise.variance)
+            float(model.kern.lengthscale),
+            float(model.kern.variance),
+            float(model.Gaussian_noise.variance)
         )
 
         vmin = model.Y.min()
