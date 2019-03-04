@@ -23,6 +23,7 @@ def main():
     sp_jobstat = sp.add_parser("job", help="Retrieve job status.")
     sp_web = sp.add_parser("web", help="Starts the web interface.")
     sp_run = sp.add_parser("run", help="Runs an experiment.")
+    sp_run_single = sp.add_parser("run-single", help="Pick the next point and run it, combines suggest & manual-run.")
     # TODO: parallel evaluation
     sp_suggest = sp.add_parser("suggest", help="Suggests one next point for evaluation.")
     sp_manual_run = sp.add_parser("manual-run", help="Run the next evaluation with manually given hyperparameters.")
@@ -91,10 +92,10 @@ def main():
     sp_manual_run.set_defaults(func=manual_run.run)
 
     parsed, unknown = parser.parse_known_args()
-    # this is an 'internal' method
-    # which returns 'parsed', the same as what parse_args() would return
-    # and 'unknown', the remainder of that
-    # the difference to parse_args() is that it does not exit when it finds redundant arguments
+    # this is an 'internal' method which returns 'parsed', the same as what
+    # parse_args() would return and 'unknown', the remainder of that the
+    # difference to parse_args() is that it does not exit when it finds
+    # redundant arguments
 
     for arg in unknown:
         if arg.startswith(("-", "--")):

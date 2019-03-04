@@ -14,12 +14,7 @@ def run(args) -> None:
         print("Found existing meta.yml, resuming experiment.")
         experiment = bopt.Experiment.deserialize(args.meta_dir)
 
-        run_params = vars(args).copy()
-        del run_params["bopt"]
-        del run_params["func"]
-        del run_params["meta_dir"]
-
-        experiment.manual_run(args.meta_dir, run_params, bopt.ModelParameters.manual_run())
+        experiment.run_single(bopt.GPyModel(), args.meta_dir)
     else:
         print(f"There is no `meta.yml` at {meta_fname}.")
         sys.exit(1)

@@ -96,19 +96,25 @@ class Experiment:
 
         return job, next_sample
 
+    def run_single(self, model: Model, meta_dir: str) -> Job:
+        job, fitted_model, x_next = self.run_next(model, meta_dir)
+
+        self.plot_current(fitted_model, meta_dir, x_next)
+        self.serialize(meta_dir)
+
+        return job
+
     # TODO: fixonut jak se tu predava model
     def run_loop(self, model: Model, meta_dir: str, n_iter=20) -> None:
         for i in range(n_iter):
-            job, fitted_model, x_next = self.run_next(model, meta_dir)
-
-            self.plot_current(fitted_model, meta_dir, x_next)
+            job = self.run_single(model, meta_dir)
 
             while not job.is_finished():
                 psutil.wait_procs(psutil.Process().children(), timeout=0.01)
                 time.sleep(0.2)
 
             # TODO: serialize immediately?
-            self.serialize(meta_dir)
+            # self.serialize(meta_dir)
 
     def serialize(self, meta_dir: str) -> None:
         dump = yaml.dump(self.to_dict(), default_flow_style=False, Dumper=NoAliasDumper)
