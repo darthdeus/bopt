@@ -10,6 +10,7 @@ from bopt.cli import suggest, manual_run
 
 def main():
     parser = argparse.ArgumentParser(prog="bopt")
+    parser.add_argument("-C", dest="dir", type=str, default=None, help="Change directory to the one specified before doing anything else.")
     parser.set_defaults()
 
     # TODO: specify this properly
