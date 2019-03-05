@@ -3,8 +3,6 @@
 import sys
 import os
 import inspect
-# import tensorflow as tf
-# tf.enable_eager_execution()
 
 package_dir = os.path.abspath(
     os.path.join(

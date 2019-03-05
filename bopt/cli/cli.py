@@ -57,6 +57,7 @@ def main():
         type=str,
         help="Path to the directory where the experiment data is stored. This is the same path used when creating using \`bopt new\`.",
     )
+    sp_run.add_argument("--n_iter", type=int, default=20, help="Number of iterations to run")
     sp_run.set_defaults(func=run_exp.run)
 
     sp_jobstat.add_argument(
