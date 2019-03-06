@@ -1,17 +1,6 @@
 ## TODO:
 
 - flake8 + black
-- only import tensorflow when needed
-
-!!!!!!!!
-
-- neukladat meta_dir nikde v jobech, rozbiji to relativni cesty
-
-- ukladat kernel parametry v kernelu jako dictionary
-- tape.watch(x)
-- overridovani parametru
-- porovnavat s gpyopt
-- porovnat tfnll a np nll
 
 - experiment
   - hyperparam
@@ -35,9 +24,6 @@
 
 - grafy pro param kernelu
 
-- sgd momentum vs HMC
-
-- [ ] TFE optimizer for SqExp kernel
 - [ ] levenberg marquardt
 
 - test x^2
@@ -51,12 +37,7 @@
 - [x] discrete hyperparameters
   - [ ] https://arxiv.org/pdf/1706.03673.pdf
 - [ ] priors
-- [x] parallel coords graph
-- [x] outer loop for optimization
-- [x] display last line in error in parser when it fails?
 - [ ] UCB acquisition function
-- [ ] do we need L-BFGS?
-  - [ ] compare optimizer performance between L-BFGS & SGD with TF
 - [ ] parallel optimization without cmdline target
 - [ ] expected improvement per second (hyperparam affects training time)
 - [ ] look into approximate GP inference ... at which point would we need it?
@@ -64,8 +45,6 @@
   - [ ] ability to stop a job when it looks like it won't work out
 
 ## Posledni konzultace:
-
-- TFE optimizer for SqExp kernel
 
 - zobrazovat spravne max
 - hodnoty hyperparam videt v bodech ve slicech
