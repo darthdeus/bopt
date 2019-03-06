@@ -24,4 +24,5 @@ kill -9 %1
 # TODO: co kdyz davam hodnotu mimo range?
 # TODO: int !!!
 bopt manual-run -C "$test_dir" --x=0.1 --y=0.3 --z=0.1 --w=4
+bopt exp -C "$test_dir"
 

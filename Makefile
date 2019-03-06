@@ -19,7 +19,7 @@ sfntest:
 	rm -rf results/sfn
 	$(BOPT) init --param "x:float:0:5" --param "y:float:0:25" \
 		--param "z:float:0:1" --param "w:float:2:7" \
-		--dir results/sfn \
+		-C results/sfn \
 		./.venv/bin/python ./experiments/simple_function.py
 	$(BOPT) run results/sfn
 	# convert -delay 100 -loop 0 tmp/*.png anim.gif
@@ -27,12 +27,12 @@ sfntest:
 mctest:
 	rm -f tmp/*
 	rm -rf results/mc
-	$(BOPT) init --param "gamma:float:0:1" --param "epsilon:float:0:1" --dir results/mc ./.venv/bin/python ./experiments/rl/monte_carlo.py
+	$(BOPT) init --param "gamma:float:0:1" --param "epsilon:float:0:1" -C results/mc ./.venv/bin/python ./experiments/rl/monte_carlo.py
 	$(BOPT) run results/mc
 	# convert -delay 100 -loop 0 tmp/*.png anim.gif
 
 init:
-	$(BOPT) init --param "gamma:float:0:1" --param "epsilon:float:0:1" --dir results/mc ./.venv/bin/python ./experiments/rl/monte_carlo.py
+	$(BOPT) init --param "gamma:float:0:1" --param "epsilon:float:0:1" -C results/mc ./.venv/bin/python ./experiments/rl/monte_carlo.py
 
 watch:
 	watch -n1 expstat results/rl-monte-carlo

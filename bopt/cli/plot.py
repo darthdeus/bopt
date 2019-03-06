@@ -15,18 +15,18 @@ def run(args) -> None:
 
     if os.path.exists("meta.yml"):
         print("Found existing meta.yml, resuming experiment.")
-        experiment = bopt.Experiment.deserialize(args.meta_dir)
+        experiment = bopt.Experiment.deserialize(".")
 
         processed_samples: List[bopt.Sample] = []
 
         for sample in tqdm(experiment.samples):
             if sample.model.model_name == "gpy":
-                sample_col = bopt.SampleCollection(processed_samples, args.meta_dir)
+                sample_col = bopt.SampleCollection(processed_samples, ".")
                 X, Y = sample_col.to_xy()
 
                 model = bopt.models.gpy_model.GPyModel.from_model_params(sample.model, X, Y)
 
-                experiment.plot_current(model, args.meta_dir, sample.to_x())
+                experiment.plot_current(model, ".", sample.to_x())
 
             processed_samples.append(sample)
     else:

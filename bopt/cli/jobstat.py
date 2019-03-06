@@ -23,7 +23,7 @@ def run(args) -> None:
     ]
 
     if len(job_ids) == 0:
-        print(f"No jobs found. Check that {args.META_DIR} contains job results.")
+        print(f"No jobs found. Check that {args.dir} contains job results.")
         sys.exit(1)
 
     matched_job_ids = [
@@ -31,10 +31,10 @@ def run(args) -> None:
     ]
 
     if len(matched_job_ids) == 0:
-        print(f"Job with id {args.JOB_ID} not found in '{args.META_DIR}'.")
+        print(f"Job with id {args.JOB_ID} not found in '{args.dir}'.")
         sys.exit(1)
     elif len(matched_job_ids) > 1:
-        print(f"Found more than one job with id {args.JOB_ID} in '{args.META_DIR}'.")
+        print(f"Found more than one job with id {args.JOB_ID} in '{args.dir}'.")
         sys.exit(1)
 
     assert len(matched_job_ids) == 1

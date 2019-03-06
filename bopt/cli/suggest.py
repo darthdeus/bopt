@@ -14,10 +14,10 @@ def run(args) -> None:
     if os.path.exists("meta.yml"):
         print("Found existing meta.yml, resuming experiment.")
 
-        experiment = bopt.Experiment.deserialize(args.meta_dir)
+        experiment = bopt.Experiment.deserialize(".")
 
         next_params, fitted_model = \
-                experiment.suggest(bopt.models.gpy_model.GPyModel(), args.meta_dir)
+                experiment.suggest(bopt.models.gpy_model.GPyModel(), ".")
 
         param_str = "\n".join([f"{key}: {value}" for key, value in next_params.items()])
         param_args = " ".join([f"--{key}={value}" for key, value in next_params.items()])
@@ -28,7 +28,7 @@ def run(args) -> None:
 
 To evaluate this manually, run:
 
-bopt manual-run {args.meta_dir} {param_args}""")
+bopt manual-run {"."} {param_args}""")
     else:
         print("No meta.yml found.")
         sys.exit(1)
