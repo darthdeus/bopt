@@ -7,8 +7,15 @@ def handle_cd(args):
         print(f"Changing directory to {args.dir}", file=sys.stderr)
         os.chdir(args.dir)
 
+class ensure_meta_yml:
+    def __enter__(self):
+        if os.path.exists("meta.yml"):
+            print("Found existing meta.yml.", file=sys.stderr)
+        else:
+            print(f"No meta.yml found in {os.curdir()}", file=sys.stderr)
+            sys.exit(1)
 
-# TODO: neco jako
-# with bopt.ensure_meta_dir():
-    # ...
+    def __exit__(self, type, value, traceback):
+        # print(type, value, traceback)
+        pass
 
