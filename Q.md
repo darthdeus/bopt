@@ -23,8 +23,9 @@
 
 - kam generovat slice v plotu u EI a u 1d/2d?
   - asi option pro `bopt plot`?
+  - nebo generovat hodne slicu? viz jupyter
 
-- GPy priory
+- GPy priory (jupyter notebook)
   - chceme prior nebo jenom bound?
   - https://github.com/SheffieldML/GPy/issues/735
 
