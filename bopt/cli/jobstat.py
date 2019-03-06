@@ -5,12 +5,13 @@ import sys
 import traceback
 
 from bopt.experiment import Experiment
+from bopt.cli.util import handle_cd
 
 
 def run(args) -> None:
-    job_files = glob.glob(
-        os.path.join(args.META_DIR, "**", "job-*.yml"), recursive=True
-    )
+    handle_cd(args)
+
+    job_files = glob.glob(os.path.join("**", "job-*.yml"), recursive=True)
 
     pattern = ".*job-(\\d+).yml"
 

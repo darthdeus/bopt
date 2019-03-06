@@ -1,5 +1,6 @@
 # TODO: get rid of psutil?
 import psutil
+
 from bopt.cli.util import handle_cd
 from bopt.experiment import Experiment
 
@@ -7,7 +8,7 @@ from bopt.experiment import Experiment
 def run(args) -> None:
     handle_cd(args)
 
-    experiment = Experiment.deserialize(args.meta_dir)
+    experiment = Experiment.deserialize(".")
 
     print("Hyperparameters:")
     for param in experiment.hyperparameters:

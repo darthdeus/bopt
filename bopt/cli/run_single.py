@@ -3,18 +3,16 @@ import sys
 import yaml
 
 import bopt
+from bopt.cli.util import handle_cd
 
 def run(args) -> None:
-    meta_fname = os.path.join(
-        args.meta_dir,
-        "meta.yml"
-    )
+    handle_cd(args)
 
-    if os.path.exists(meta_fname):
+    if os.path.exists("meta.yml"):
         print("Found existing meta.yml, resuming experiment.")
         experiment = bopt.Experiment.deserialize(args.meta_dir)
 
         experiment.run_single(bopt.GPyModel(), args.meta_dir)
     else:
-        print(f"There is no `meta.yml` at {meta_fname}.")
+        print("No meta.yml found.")
         sys.exit(1)

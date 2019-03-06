@@ -6,16 +6,14 @@ from tqdm import tqdm
 from typing import List
 
 import bopt
+from bopt.cli.util import handle_cd
 
 # TODO: co kdyz dostanu manual evaluation, zkusit precejenom fitnout model
 #       ale do plotu napsat, ze ten model neni podle ceho byl vybrany?
 def run(args) -> None:
-    meta_fname = os.path.join(
-        args.meta_dir,
-        "meta.yml"
-    )
+    handle_cd(args)
 
-    if os.path.exists(meta_fname):
+    if os.path.exists("meta.yml"):
         print("Found existing meta.yml, resuming experiment.")
         experiment = bopt.Experiment.deserialize(args.meta_dir)
 
@@ -32,5 +30,5 @@ def run(args) -> None:
 
             processed_samples.append(sample)
     else:
-        print(f"There is no `meta.yml` at {meta_fname}.")
+        print("No meta.yml found.")
         sys.exit(1)

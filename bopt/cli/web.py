@@ -1,3 +1,4 @@
+import sys
 import jsonpickle
 import numpy as np
 
@@ -7,7 +8,7 @@ from flask import Flask
 from flask import render_template
 
 import bopt
-import sys
+from bopt.cli.util import handle_cd
 
 class PosteriorSlice(NamedTuple):
     param: bopt.Hyperparameter
@@ -20,6 +21,8 @@ class PosteriorSlice(NamedTuple):
 
 
 def run(args) -> None:
+    handle_cd(args)
+
     import inspect
     import os
     script_dir = os.path.dirname(os.path.abspath(inspect.stack()[0][1]))
@@ -27,7 +30,6 @@ def run(args) -> None:
     app = Flask(__name__, template_folder=os.path.join(script_dir, "..", "templates"))
     app.debug = True
 
-    app.config["meta_dir"] = args.meta_dir
     app.config["port"] = args.port
 
     print("web path", app.root_path)
@@ -36,11 +38,10 @@ def run(args) -> None:
     def index():
         bopt.clear_param_traces()
 
-        meta_dir = app.config.get("meta_dir")
-        experiment = bopt.Experiment.deserialize(meta_dir)
-        optim_result = experiment.current_optim_result(meta_dir)
+        experiment = bopt.Experiment.deserialize(".")
+        optim_result = experiment.current_optim_result(".")
 
-        sample_col = bopt.SampleCollection(experiment.samples, meta_dir)
+        sample_col = bopt.SampleCollection(experiment.samples, ".")
 
         gp = optim_result.fit_gp()
 

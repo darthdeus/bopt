@@ -4,14 +4,16 @@ import psutil
 import inspect
 import argparse
 
-from bopt.cli import jobstat, expstat, web, new_exp, run_exp, init_exp, plot_exp
+from bopt.cli import jobstat, exp, web, new_exp, run_exp, init_exp, plot_exp
 from bopt.cli import suggest, manual_run
 
 
 def main():
     parser = argparse.ArgumentParser(prog="bopt")
-    parser.add_argument("-C", dest="dir", type=str, default=None, help="Change directory to the one specified before doing anything else.")
     parser.set_defaults()
+
+    cd_parser = argparse.ArgumentParser(add_help=None)
+    cd_parser.add_argument("-C", dest="dir", type=str, default=None, help="Change directory to the one specified before doing anything else.")
 
     # TODO: specify this properly
     sp = parser.add_subparsers(dest="bopt")
@@ -20,7 +22,7 @@ def main():
     sp_new = sp.add_parser("new", help="Create a new experiment.")
     sp_init = sp.add_parser("init", help="Initializes a new experiment, ready to run.")
     sp_plot = sp.add_parser("plot", help="Generate plots for a given experiment.")
-    sp_expstat = sp.add_parser("exp", help="Overview status of an experiment.")
+    sp_expstat = sp.add_parser("exp", help="Overview status of an experiment.", parents=[cd_parser])
     sp_jobstat = sp.add_parser("job", help="Retrieve job status.")
     sp_web = sp.add_parser("web", help="Starts the web interface.")
     sp_run = sp.add_parser("run", help="Runs an experiment.")
@@ -68,29 +70,27 @@ def main():
         help="Search subdirectories for job files",
         required=False,
     )
-    sp_jobstat.add_argument(
-        "META_DIR", type=str, default=".", help="Directory with the results.", nargs="?"
-    )
+    # sp_jobstat.add_argument("meta_dir", type=str, default=".", help="Directory with the results.", nargs="?")
     sp_jobstat.add_argument("JOB_ID", type=int, default=".", help="Job to search for.")
     sp_jobstat.set_defaults(func=jobstat.run)
 
-    sp_expstat.add_argument("meta_dir", type=str, help="Directory with the results.")
-    sp_expstat.set_defaults(func=expstat.run)
+    # sp_expstat.add_argument("meta_dir", type=str, help="Directory with the results.")
+    sp_expstat.set_defaults(func=exp.run)
 
-    sp_web.add_argument("meta_dir", type=str, help="Directory with the results.")
+    # sp_web.add_argument("meta_dir", type=str, help="Directory with the results.")
     sp_web.add_argument("--web", action="store_true")
     sp_web.add_argument(
         "--port", type=int, default=5500, help="Port to run the web interface on."
     )
     sp_web.set_defaults(func=web.run)
 
-    sp_plot.add_argument("meta_dir", type=str, help="Directory with the experiment")
+    # sp_plot.add_argument("meta_dir", type=str, help="Directory with the experiment")
     sp_plot.set_defaults(func=plot_exp.run)
 
-    sp_suggest.add_argument("meta_dir", type=str, help="Directory with the experiment")
+    # sp_suggest.add_argument("meta_dir", type=str, help="Directory with the experiment")
     sp_suggest.set_defaults(func=suggest.run)
 
-    sp_manual_run.add_argument("meta_dir", type=str, help="Directory with the experiment")
+    # sp_manual_run.add_argument("meta_dir", type=str, help="Directory with the experiment")
     sp_manual_run.set_defaults(func=manual_run.run)
 
     parsed, unknown = parser.parse_known_args()
