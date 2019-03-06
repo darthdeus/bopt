@@ -1,13 +1,51 @@
-GPSS.CC !!!!!
+# Co chybi / je aktualne broken
+
+- SGE Runner:        neni broken, jenom neni updated na novejsi API
+- intove hyperparam: GPy?
+- parallel evaluace: trivialni, ale neni to :)
+- kernel type:       trivialni, ale neni to :)
+- web:               neni aktualizovano pro GPy
+- multijoby
+- duplicitni PIDy + flock
+
+- kernely! porad nevime ktery se nam libi
+- acq fn   ... to same
+
+# Co je od minule
+
+- GPy
+- cmdline: manual-run, run, run-single, plot, suggest
+- serializace modelu pro kazdy step
+- plotovani vsech kroku
+- konzistentni -C vsude
+
+# Nejasne
+
+- kam generovat slice v plotu u EI a u 1d/2d?
+  - asi option pro `bopt plot`?
+
+- GPy priory
+  - chceme prior nebo jenom bound?
+  - https://github.com/SheffieldML/GPy/issues/735
+
+- GPyOpt? https://github.com/SheffieldML/GPyOpt
+  - asi spis jenom vykrast
+
+
+-----------------------------------------------
+
+GPSS.CC
 http://deepbayes.ru
+
+-----------------------------------------------
+-----------------------------------------------
+-----------------------------------------------
 
 # TODO: co kdyz dostanu manual evaluation, zkusit precejenom fitnout model
 #       ale do plotu napsat, ze ten model neni podle ceho byl vybrany?
 
 - plot current max
 - fix vmin/vmax
-
-- GPyOpt?
 
 - plot STD?
 - yaml sort keys? (custom key order)
@@ -82,10 +120,7 @@ http://deepbayes.ru
 ##                                                  v
 
 
-
 - merit MI mezi dimenzema?
-
-
 
 - double fork pajp.py
 - kde vezmu finish date?

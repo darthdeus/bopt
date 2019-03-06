@@ -24,6 +24,13 @@ sfntest:
 	$(BOPT) run -C results/sfn
 	# convert -delay 100 -loop 0 tmp/*.png anim.gif
 
+sfntest2d:
+	rm -rf results/sfn2d
+	$(BOPT) init --param "x:float:0:5" --param "y:float:0:5" \
+		-C results/sfn2d \
+		$(PWD)/.venv/bin/python $(PWD)/experiments/simple_function2d.py
+	$(BOPT) run -C results/sfn2d
+
 mctest:
 	rm -f tmp/*
 	rm -rf results/mc
