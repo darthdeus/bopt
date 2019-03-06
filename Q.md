@@ -1,15 +1,30 @@
+- sigmoid vs round?
+- interpolace mezi 2 body hyperparam + plot slicu v lib. 0d, 1d, 2d ose
+- burty!
+- okraje v plotech
+
+- vsechny body zobrazit v 2d viz
+  - pca
+
 # Co chybi / je aktualne broken
 
-- SGE Runner:        neni broken, jenom neni updated na novejsi API
-- intove hyperparam: GPy?
-- parallel evaluace: trivialni, ale neni to :)
 - kernel type:       trivialni, ale neni to :)
-- web:               neni aktualizovano pro GPy
-- multijoby
-- duplicitni PIDy + flock
+- acq fn v yml
+- intove hyperparam: GPy?
+- SGE Runner:        neni broken, jenom neni updated na novejsi API
+- parallel evaluace: trivialni, ale neni to :)
+  - u nedobehlych jobu predpokladam ze vysledek je jejich mean
+  - kontrolovat, ze 2x nevyhodnocuju ve stejnym bode
+  - jde to lip nez pouzivat mean?
 
 - kernely! porad nevime ktery se nam libi
 - acq fn   ... to same
+
+- web:               neni aktualizovano pro GPy
+- duplicitni PIDy + flock
+- multijoby
+
+- intermediate results !!!
 
 # Co je od minule
 
@@ -112,8 +127,6 @@ http://deepbayes.ru
 
 - do rezu dat jenom max bod (muzem si ho vybrat)
   - cislo samplu
-- vsechny body zobrazit v 2d viz
-  - pca
 
 
 
