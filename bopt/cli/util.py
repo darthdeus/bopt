@@ -12,7 +12,7 @@ class ensure_meta_yml:
         if os.path.exists("meta.yml"):
             print("Found existing meta.yml.", file=sys.stderr)
         else:
-            print(f"No meta.yml found in {os.curdir()}", file=sys.stderr)
+            print(f"No meta.yml found in {os.path.abspath(os.curdir)}", file=sys.stderr)
             sys.exit(1)
 
     def __exit__(self, type, value, traceback):

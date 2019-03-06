@@ -40,11 +40,6 @@ def main():
     sp_init.add_argument("arguments", type=str, nargs="*", help="Default arguments.")
     sp_init.set_defaults(func=init.run)
 
-    sp_run.add_argument(
-        "DIR",
-        type=str,
-        help="Path to the directory where the experiment data is stored. This is the same path used when creating using \`bopt new\`.",
-    )
     sp_run.add_argument("--n_iter", type=int, default=20, help="Number of iterations to run")
     sp_run.set_defaults(func=run.run)
 
