@@ -8,7 +8,7 @@
 
 # Co chybi / je aktualne broken
 
-- kernel type:       trivialni, ale neni to :)
+- [x] kernel type:       trivialni, ale neni to :)
 - acq fn v yml
 - intove hyperparam: GPy?
 - SGE Runner:        neni broken, jenom neni updated na novejsi API

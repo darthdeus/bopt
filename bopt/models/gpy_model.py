@@ -6,7 +6,7 @@ from GPy.models import GPRegression
 
 from typing import Tuple, List
 
-from bopt.acquisition_functions.acquisition_functions import AcquisitionFunction, expected_improvement
+import bopt.acquisition_functions.acquisition_functions as acq
 from bopt.basic_types import Hyperparameter, Bound
 from bopt.models.model import Model
 from bopt.sample import Sample, SampleCollection
@@ -17,11 +17,14 @@ from bopt.models.parameters import ModelParameters
 # https://arxiv.org/abs/1706.03673
 class GPyModel(Model):
     kernel_names = ["rbf", "Mat32", "Mat52"]
+    acquisition_fn_names = ["ei", "pi"]
 
     model: GPRegression
+    acquisition_fn: acq.AcquisitionFunction
 
-    def __init__(self, model: GPRegression = None) -> None:
+    def __init__(self, model: GPRegression, acquisition_fn: acq.AcquisitionFunction) -> None:
         self.model = model
+        self.acquisition_fn = acquisition_fn
 
     def to_model_params(self) -> ModelParameters:
         # TODO: kernel
@@ -30,7 +33,11 @@ class GPyModel(Model):
             for name in self.model.parameter_names()
         }
 
-        return ModelParameters("gpy", params, self.model.kern.name)
+        return ModelParameters(
+                "gpy",
+                params,
+                self.model.kern.name,
+                self.model.acquisition_fn.name())
 
     @staticmethod
     def from_model_params(model_params: ModelParameters, X, Y) -> "GPyModel":
@@ -42,7 +49,9 @@ class GPyModel(Model):
         for name, value in model_params.params.items():
             model[name] = value
 
-        return GPyModel(model)
+        acquisition_fn = GPyModel.parse_acquisition_fn(model_params.acquisition_fn)
+
+        return GPyModel(model, acquisition_fn)
 
     @staticmethod
     def parse_kernel_name(name):
@@ -53,7 +62,16 @@ class GPyModel(Model):
         elif name == "Mat52":
             return GPy.kern.Matern52
         else:
-            raise NotImplemented(f"Unknown kernel name {name}.")
+            raise NotImplemented(f"Unknown kernel name '{name}'.")
+
+    @staticmethod
+    def parse_acquisition_fn(name):
+        if name == "ei":
+            return acq.ExpectedImprovement()
+        elif name == "pi":
+            return acq.ProbabilityOfImprovement()
+        else:
+            raise NotImplemented(f"Unknown acquisition function '{name}'.")
 
     def to_dict(self) -> dict:
         pass
@@ -115,7 +133,7 @@ class GPyModel(Model):
 
         bounds = [b.range for b in hyperparameters]
 
-        x_next = propose_location(expected_improvement,
+        x_next = propose_location(self.acquisition_fn,
                 model,
                 Y_sample.reshape(-1).max(), # TODO: bez reshape?
                 bounds)
@@ -127,21 +145,20 @@ class GPyModel(Model):
 
         params_dict = dict(zip(names, typed_vals))
 
-        fitted_model = GPyModel()
-        fitted_model.model = model
+        fitted_model = GPyModel(model, self.acquisition_fn)
 
         return params_dict, fitted_model
 
 
 def propose_location(
-    acquisition: AcquisitionFunction,
+    acquisition_fn: acq.AcquisitionFunction,
     gp: GPRegression,
     y_max: float,
     bounds: List[Bound],
     n_restarts: int = 25,
 ) -> np.ndarray:
     def min_obj(X):
-        return -acquisition(gp, X.reshape(1, -1), y_max)
+        return -acquisition_fn(gp, X.reshape(1, -1), y_max)
 
     scipy_bounds = [(bound.low, bound.high) for bound in bounds]
 

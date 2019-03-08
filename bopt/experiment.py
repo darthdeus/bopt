@@ -23,7 +23,7 @@ from bopt.runner.abstract import Job, Runner
 from bopt.runner.runner_loader import RunnerLoader
 
 from bopt.optimization_result import OptimizationResult
-from bopt.acquisition_functions.acquisition_functions import expected_improvement_f
+from bopt.acquisition_functions.acquisition_functions import AcquisitionFunction
 
 
 black_cmap = LinearSegmentedColormap.from_list("black", ["black", "black"])
@@ -171,18 +171,17 @@ class Experiment:
                 opt_fun=None)
 
 
-    def plot_current(self, model: Model, meta_dir: str, x_next: np.ndarray, resolution: float = 30):
+    def plot_current(self, gpy_model: Model, meta_dir: str, x_next: np.ndarray, resolution: float = 30):
         lows        = [h.range.low for h in self.hyperparameters]
         highs       = [h.range.high for h in self.hyperparameters]
         plot_limits = [lows, highs]
 
-        if isinstance(model, RandomSearch):
+        if isinstance(gpy_model, RandomSearch):
             return
 
-        assert model is not None, "gp is None"
+        assert gpy_model is not None, "gp is None"
 
-        # TODO: lol :)
-        model = model.model
+        model = gpy_model.model
 
         param_str = "ls: {:.3f}, variance: {:.3f}, noise: {:.3f}".format(
             float(model.kern.lengthscale),
@@ -218,7 +217,7 @@ class Experiment:
         x_max = model.X[max_idx]
 
         # with plt.xkcd():
-        plot_objective(model, x_max, x_next, plot_limits, vmin, vmax, self.hyperparameters, outer_grid, fig)
+        plot_objective(model, x_max, x_next, plot_limits, vmin, vmax, self.hyperparameters, outer_grid, fig, gpy_model.acquisition_fn)
 
         plot_dir = os.path.join(meta_dir, "plots")
         if not os.path.isdir(plot_dir):
@@ -231,7 +230,7 @@ class Experiment:
 
 
 def plot_objective(model, x_slice, x_next, plot_limits, vmin, vmax, hyperparameters, outer_grid, fig,
-        levels=10, n_points=40, n_samples=250, size=4, zscale='linear', dimensions=None):
+        acq, levels=10, n_points=40, n_samples=250, size=4, zscale='linear', dimensions=None):
     """Pairwise partial dependence plot of the objective function.
     ----------
     * `result` [`OptimizeResult`]
@@ -307,12 +306,12 @@ def plot_objective(model, x_slice, x_next, plot_limits, vmin, vmax, hyperparamet
                     ax.axhline(x_next[j], linestyle="--", color="r", lw=1)
 
                 elif i < j:
-                    ei_ax = ax
+                    acq_ax = ax
 
-                    ei_for_dims(model, x_next, hyperparameters, ei_ax, [i, j], lims)
-                    model.plot_data(ax=ei_ax, alpha=1, cmap=black_cmap, zorder=10, s=60, visible_dims=[i, j])
-                    ei_ax.axvline(x_next[i], linestyle="--", color="r", lw=1)
-                    ei_ax.axhline(x_next[j], linestyle="--", color="r", lw=1)
+                    acq_for_dims(model, acq, x_next, hyperparameters, acq_ax, [i, j], lims)
+                    model.plot_data(ax=acq_ax, alpha=1, cmap=black_cmap, zorder=10, s=60, visible_dims=[i, j])
+                    acq_ax.axvline(x_next[i], linestyle="--", color="r", lw=1)
+                    acq_ax.axhline(x_next[j], linestyle="--", color="r", lw=1)
 
                     # xi, yi, zi = partial_dependence(space, result.models[-1],
                     #                                 i, j,
@@ -331,7 +330,7 @@ def plot_objective(model, x_slice, x_next, plot_limits, vmin, vmax, hyperparamet
     #                                  dim_labels=dimensions)
 
 
-def ei_for_dims(model, x_slice, hyperparameters, ax, dims, plot_limits):
+def acq_for_dims(model, acq: AcquisitionFunction, x_slice, hyperparameters, ax, dims, plot_limits):
     # x_frame2D only checks shape[1] and not the data when `plot_limits` is provided
     from GPy.plotting.gpy_plot.plot_util import x_frame2D
 
@@ -358,7 +357,7 @@ def ei_for_dims(model, x_slice, hyperparameters, ax, dims, plot_limits):
     mu, var = model.predict(grid.reshape(resolution * resolution, -1))
     std = np.sqrt(var)
 
-    ei = expected_improvement_f(mu, std, model.Y.max())
+    ei = acq.raw_call(mu, std, model.Y.max())
 
     ei_mat = ei.reshape(resolution, resolution)
     # TODO: fuj, contour not increasing?
