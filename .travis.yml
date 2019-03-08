@@ -10,3 +10,4 @@ install:
 script:
   - ./.venv/bin/pytest
   - source ./.venv/bin/activate && ./tests/test_cli.sh
+  - make mypy
