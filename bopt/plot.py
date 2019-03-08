@@ -6,9 +6,6 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from matplotlib import cm
-from numpy.random import multivariate_normal
-# from bopt.kernels.kernels import Kernel
-# import bopt.kernels.kernel_opt as kernel_opt
 
 
 def base64_plot():
@@ -21,16 +18,6 @@ def base64_plot():
     return base64.encodebytes(image.getvalue()).decode("ascii")
 
 
-def imshow(data: np.ndarray, a_values: np.ndarray, b_values: np.ndarray,
-           xlabel="sigma", ylabel="lengthscale", title="Kernel marginal likelihood"):
-    plt.figure(figsize=(5,5))
-    plt.xlabel(xlabel)
-    plt.ylabel(ylabel)
-    im = plt.imshow(data, extent=[min(b_values), max(b_values), max(a_values), min(a_values)], aspect="auto")
-    plt.colorbar(im)
-    plt.title(title)
-
-
 def plots(*plots, n_row=3, figsize=(15, 4)):
     num_rows = len(plots) // n_row + 1
 
@@ -41,68 +28,6 @@ def plots(*plots, n_row=3, figsize=(15, 4)):
         plt.imshow(plot)
 
     plt.show()
-
-
-def plot_gp(mu, cov, X, X_train=None, y_train=None, kernel=None, noise: int = 0,
-        num_samples=3, figsize=(7, 3), figure=True, nll=None):
-    assert X.ndim == 1
-
-    std = 2 * np.sqrt(np.diag(cov))
-
-    if figure:
-        plt.figure(figsize=figsize)
-
-    if kernel is not None:
-        # TODO: fuj duplicity
-        if nll is not None:
-            plt.title("Noise: {:.3f}, {}, nll={}".format(noise, kernel, nll))
-        else:
-            plt.title("Noise: {:.3f}, {}".format(noise, kernel))
-
-    plt.fill_between(X, mu + std, mu - std, alpha=0.1)
-    plt.plot(X, mu, label="Mean")
-
-    samples = multivariate_normal(mu, cov, size=num_samples)
-    # print(mu.mean(), cov.mean(), noise)
-
-    for i, sample in enumerate(samples):
-        plt.plot(X, sample, lw=0.7, ls="--",
-                label=f"Sample {i+1}", color="black")
-
-    if X_train is not None:
-        assert X_train.ndim == 1
-        assert y_train.ndim == 1
-        plt.plot(X_train, y_train, "rx", lw=2)
-
-    plt.legend()
-
-
-def plot_approximation(ax, ei_y, X, y, gp, X_sample, y_sample, multiple_x_next: List[np.ndarray], show_legend=False):
-    mu, std = gp.posterior(X).mu_std()
-
-    ax.fill_between(X.ravel(),
-                    mu.ravel() + 1.96 * std,
-                    mu.ravel() - 1.96 * std,
-                    alpha=0.1)
-    l1 = ax.plot(X, y, 'g--', lw=1, label='Objective')
-    l2 = ax.plot(X, mu, 'b-', lw=1, label='GP mean')
-    l3 = ax.plot(X_sample, y_sample, 'kx', mew=3, label='Samples')
-
-    for x_next in multiple_x_next:
-        ax.axvline(x=x_next, ls='--', c='k', lw=1)
-
-    ax2 = ax.twinx()
-
-    l4 = ax2.plot(X, ei_y, 'r-', lw=1, label='Acquisition fn')
-
-    for x_next in multiple_x_next:
-        ax2.axvline(x=x_next, ls='--', c='k', lw=1)
-
-    lns = l1 + l2 + l3 + l4
-    labs = [l.get_label() for l in lns]
-
-    if show_legend:
-        plt.legend(lns, labs)
 
 
 def plot_convergence(X_sample, y_sample, n_init=2):
