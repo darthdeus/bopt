@@ -23,13 +23,12 @@ setuptools.setup(
     install_requires=[
         "numpy>=1.15.4",
         "scipy>=1.1.0",
-        'pyyaml>=4.2b1',
+        "pyyaml>=4.2b1",
         "tqdm~=4.28.1",
         "flask~=1.0.2",
         "psutil~=5.4.8",
         "jsonpickle~=1.0",
-        "livereload==2.5.1",   # TODO: this is only temporary
-        "tf-nightly",
+        "livereload==2.5.1"   # TODO: this is only temporary
     ],
 
     extras_require={
