@@ -18,9 +18,6 @@ def test_exp1():
 
     experiment = bopt.Experiment(hyperparameters, runner)
 
-    # m1 = GPy.models.GPRegression()
-    # m2 = GPy.models.sparse_GP_regression_1D(optimize=True, plot=False)
-
     X = np.random.uniform(-3., 3., (20, 1))
     Y = np.sin(X) + np.random.randn(20, 1) * 0.05
 
@@ -31,10 +28,6 @@ def test_exp1():
         kernel = GPy.kern.RBF(input_dim=1, variance=1., lengthscale=1.)
         m1 = GPy.models.GPRegression(X, Y, kernel)
         gpy_model = bopt.GPyModel(m1, acq_fn)
-
-    # TODO: fuj, pryc s tim ... patri tam jenom parametry :)
-    # TODO: pouzit flat_parameter_names na vylistovani parametru
-    #       a pak jejich zpetne setnuti?
 
     samples = [
         bopt.Sample(bopt.LocalJob(314, { "job": "params" }), gpy_model.to_model_params()),
