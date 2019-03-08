@@ -105,7 +105,7 @@ class Experiment:
         return job
 
     # TODO: fixonut jak se tu predava model
-    def run_loop(self, model: Model, meta_dir: str, n_iter=20) -> None:
+    def run_loop(self, model: Model, meta_dir: str, n_iter=10) -> None:
         for i in range(n_iter):
             job = self.run_single(model, meta_dir)
 

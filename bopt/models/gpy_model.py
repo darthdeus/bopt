@@ -16,6 +16,8 @@ from bopt.models.parameters import ModelParameters
 # TODO: round indexes
 # https://arxiv.org/abs/1706.03673
 class GPyModel(Model):
+    kernel_names = ["rbf", "Mat32", "Mat52"]
+
     model: GPRegression
 
     def __init__(self, model: GPRegression = None) -> None:

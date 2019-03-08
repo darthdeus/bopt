@@ -4,6 +4,7 @@ import psutil
 import inspect
 import argparse
 
+from bopt.models.gpy_model import GPyModel
 from bopt.cli import cli, exp, init, jobstat, manual_run, plot, run, run_single, suggest, util, web
 
 def main():
@@ -34,7 +35,10 @@ def main():
         default="bopt.LastLineLastWordParser",
         help="Module path to the result parser.",
     )
+
+    kernel_names = ",".join(GPyModel.kernel_names)
     sp_init.add_argument("--runner", type=str, default="local", help="Runner type.")
+    sp_init.add_argument("--kernel", type=str, default="rbf", help=f"Specifies the GP kernel. Allowed values are: {kernel_names}")
     sp_init.add_argument("--param", action="append", help="Hyperparameter")
     sp_init.add_argument("command", type=str, help="Command to run.")
     sp_init.add_argument("arguments", type=str, nargs="*", help="Default arguments.")
