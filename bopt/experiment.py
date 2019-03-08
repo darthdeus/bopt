@@ -24,7 +24,6 @@ from bopt.basic_types import Hyperparameter
 from bopt.runner.abstract import Job, Runner
 from bopt.runner.runner_loader import RunnerLoader
 
-from bopt.optimization_result import OptimizationResult
 from bopt.acquisition_functions.acquisition_functions import AcquisitionFunction
 
 
@@ -138,44 +137,6 @@ class Experiment:
 
     def ok_samples(self) -> List[Sample]:
         return [s for s in self.samples if s.job.is_finished()]
-
-    # TODO: deprecated, delete!
-    def current_optim_result(self, meta_dir: str) -> OptimizationResult:
-        sample_col = SampleCollection(self.ok_samples(), meta_dir)
-
-        X_sample, Y_sample = sample_col.to_xy()
-        y_sample = Y_sample.reshape(-1)
-
-        # TODO: this should be handled better
-        params = sorted(self.hyperparameters, key=lambda h: h.name)
-
-        # TODO; normalizace?
-        y_sample = (y_sample - y_sample.mean()) / y_sample.std()
-
-        best_y = None
-        best_x = None
-
-        if len(y_sample) > 0:
-            best_idx = np.argmax(y_sample)
-            best_y = y_sample[best_idx]
-            best_x = X_sample[best_idx]
-
-        # TODO: fuj
-        from bopt.kernels.kernels import SquaredExp
-
-        kernel = SquaredExp()
-        n_iter = len(X_sample)
-
-        return OptimizationResult(
-                X_sample,
-                y_sample,
-                best_x,
-                best_y,
-                params,
-                kernel,
-                n_iter,
-                opt_fun=None)
-
 
     def plot_current(self, gpy_model: Model, meta_dir: str, x_next: np.ndarray, resolution: float = 30):
         lows        = [h.range.low for h in self.hyperparameters]
