@@ -252,7 +252,6 @@ def plot_objective(model, x_slice, x_next, plot_limits, vmin, vmax, hyperparamet
                     ax.set_xlabel(hyperparameters[i].name)
                     ax.set_ylabel(hyperparameters[j].name)
 
-                    # TODO: vratit
                     model.plot_data(ax=ax, alpha=1, cmap=black_cmap, zorder=10, s=60, visible_dims=[i, j])
                     ax.axvline(x_next[i], linestyle="--", color="r", lw=1)
                     ax.axhline(x_next[j], linestyle="--", color="r", lw=1)

@@ -156,8 +156,6 @@ http://deepbayes.ru
 
 
 
-## TODO:
-
 - flake8 + black
 
 - experiment

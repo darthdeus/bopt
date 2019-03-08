@@ -74,6 +74,8 @@ class GPyModel(Model):
         else:
             raise NotImplemented(f"Unknown acquisition function '{name}'.")
 
+    def predict_next(self): raise NotImplemented("This should not be called, deprecated")
+
     @staticmethod
     def predict_next(run_params: RunParams, hyperparameters: List[Hyperparameter],
             X_sample: np.ndarray, Y_sample: np.ndarray) -> Tuple[dict, "Model"]:

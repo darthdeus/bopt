@@ -15,10 +15,6 @@ class Model(abc.ABC):
         pass
 
     @abc.abstractmethod
-    def to_dict(self) -> "Model":
-        pass
-
-    @abc.abstractmethod
     def to_model_params(self) -> ModelParameters:
         pass
 
