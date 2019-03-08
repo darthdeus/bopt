@@ -159,13 +159,6 @@ class Experiment:
         vmax = model.Y.max()
 
         # TODO: funkcni stary plotovani
-        # plt.subplot(4, 1, 3)
-        # plt.title("Expected Improvement")
-        # plt.pcolor(gx, gy, ei_mat, cmap="jet")# , vmin=0, vmax=500)
-        # plt.colorbar()
-        # plt.scatter(X_sample[:, 0], X_sample[:, 1], c="k")
-        # # plt.scatter([result.best_x[0]], [result.best_x[1]], c="r")
-        #
         # ax = plt.subplot(4, 1, 4)
         # plot_limits = [[gx.min(), gy.min()], [gx.max(), gy.max()]]
         # model.plot_mean(ax=ax, vmin=vmin, vmax=vmax, plot_limits=plot_limits, cmap="jet", label="Mean")
@@ -196,15 +189,8 @@ class Experiment:
 
 
 def plot_objective(model, x_slice, x_next, plot_limits, vmin, vmax, hyperparameters, outer_grid, fig,
-        acq, levels=10, n_points=40, n_samples=250, size=4, zscale='linear', dimensions=None):
-    """Pairwise partial dependence plot of the objective function.
-    ----------
-    * `result` [`OptimizeResult`]
-        The result for which to create the scatter plot matrix.
-
-    * `levels` [int, default=10]
-        Number of levels to draw on the contour plot, passed directly
-        to `plt.contour()`.
+        acq, zscale='linear', dimensions=None):
+    """
     * `zscale` [str, default='linear']
         Scale to use for the z axis of the contour plots. Either 'linear'
         or 'log'.
@@ -242,7 +228,7 @@ def plot_objective(model, x_slice, x_next, plot_limits, vmin, vmax, hyperparamet
 
                 model.plot_data(ax=ax, alpha=1, cmap=black_cmap, zorder=10, s=60, visible_dims=[i])
 
-            #
+
             #     xi, yi = partial_dependence(space, result.models[-1], i,
             #                                 j=None,
             #                                 sample_points=rvs_transformed,
