@@ -46,7 +46,6 @@ class Sample:
 
     def to_xy(self, output_dir: str) -> Tuple[np.ndarray, float]:
         x = self.to_x()
-
         y = self.job.get_result(output_dir)
 
         assert isinstance(x, np.ndarray)
@@ -55,7 +54,6 @@ class Sample:
         return x, y
 
     def get_result(self, meta_dir: str) -> float:
-        import os
         # TODO: fuj
         output_dir = os.path.join(meta_dir, "output")
         return self.job.get_result(output_dir)
@@ -76,14 +74,14 @@ class SampleCollection:
 
         y_sample = np.zeros([num_samples], dtype=np.float64)
         # TODO: chci to normalizovat?
-        zero_mean = y_sample - y_sample.mean()
-
-        std = y_sample.std()
-
-        if std > 0:
-            y_sample = zero_mean / std
-        else:
-            y_sample = zero_mean
+        # zero_mean = y_sample - y_sample.mean()
+        #
+        # std = y_sample.std()
+        #
+        # if std > 0:
+        #     y_sample = zero_mean / std
+        # else:
+        #     y_sample = zero_mean
 
         xs = []
 
