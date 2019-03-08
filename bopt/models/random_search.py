@@ -7,8 +7,7 @@ from bopt.models.parameters import ModelParameters
 
 
 class RandomSearch(Model):
-    def predict_next(self, hyperparameters: List[Hyperparameter],
-                     samples: SampleCollection) -> Tuple[dict, "Model"]:
+    def predict_next(self, hyperparameters: List[Hyperparameter]) -> Tuple[dict, "Model"]:
 
         value = {h.name: h.range.sample() for h in hyperparameters}
 

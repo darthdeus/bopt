@@ -21,7 +21,7 @@ sfntest:
 		--param "z:float:0:1" --param "w:float:2:7" \
 		-C results/sfn \
 		$(PWD)/.venv/bin/python $(PWD)/experiments/simple_function.py
-	$(BOPT) run --n_iter=10 -C results/sfn --kernel Mat52
+	$(BOPT) run --n_iter=10 -C results/sfn
 	# convert -delay 100 -loop 0 tmp/*.png anim.gif
 
 sfntest2d:

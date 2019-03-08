@@ -13,11 +13,13 @@ import matplotlib.gridspec as gridspec
 
 import GPy
 
+from bopt.run_params import RunParams
 from bopt.models.model import Model
 from bopt.sample import Sample, SampleCollection
 from bopt.models.model_loader import ModelLoader
 from bopt.models.parameters import ModelParameters
 from bopt.models.random_search import RandomSearch
+from bopt.models.gpy_model import GPyModel
 from bopt.basic_types import Hyperparameter
 from bopt.runner.abstract import Job, Runner
 from bopt.runner.runner_loader import RunnerLoader
@@ -65,20 +67,25 @@ class Experiment:
 
         return experiment
 
-    def suggest(self, model: Model, meta_dir: str) -> Tuple[dict, Model]:
+    def suggest(self, run_params: RunParams, meta_dir: str) -> Tuple[dict, Model]:
         if len(self.samples) == 0:
             print("No existing samples found, overloading suggest with RandomSearch.")
             model = RandomSearch()
 
-        sample_collection = SampleCollection(self.ok_samples(), meta_dir)
+            next_params, fitted_model = \
+                    model.predict_next(self.hyperparameters)
 
-        next_params, fitted_model = \
-                model.predict_next(self.hyperparameters, sample_collection)
+        else:
+            sample_col = SampleCollection(self.ok_samples(), meta_dir)
+            X_sample, Y_sample = sample_col.to_xy()
+
+            next_params, fitted_model = \
+                    GPyModel.predict_next(run_params, self.hyperparameters, X_sample, Y_sample)
 
         return next_params, fitted_model
 
-    def run_next(self, model: Model, meta_dir: str) -> Tuple[Job, Model, np.ndarray]:
-        next_params, fitted_model = self.suggest(model, meta_dir)
+    def run_next(self, run_params: RunParams, meta_dir: str) -> Tuple[Job, Model, np.ndarray]:
+        next_params, fitted_model = self.suggest(run_params, meta_dir)
 
         job, next_sample = self.manual_run(meta_dir, next_params, fitted_model.to_model_params())
 
@@ -96,18 +103,17 @@ class Experiment:
 
         return job, next_sample
 
-    def run_single(self, model: Model, meta_dir: str) -> Job:
-        job, fitted_model, x_next = self.run_next(model, meta_dir)
+    def run_single(self, run_params: RunParams, meta_dir: str) -> Job:
+        job, fitted_model, x_next = self.run_next(run_params, meta_dir)
 
         self.plot_current(fitted_model, meta_dir, x_next)
         self.serialize(meta_dir)
 
         return job
 
-    # TODO: fixonut jak se tu predava model
-    def run_loop(self, model: Model, meta_dir: str, n_iter=10) -> None:
+    def run_loop(self, run_params: RunParams, meta_dir: str, n_iter=10) -> None:
         for i in range(n_iter):
-            job = self.run_single(model, meta_dir)
+            job = self.run_single(run_params, meta_dir)
 
             while not job.is_finished():
                 psutil.wait_procs(psutil.Process().children(), timeout=0.01)

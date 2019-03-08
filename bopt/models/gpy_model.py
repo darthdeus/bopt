@@ -11,8 +11,10 @@ from bopt.basic_types import Hyperparameter, Bound
 from bopt.models.model import Model
 from bopt.sample import Sample, SampleCollection
 from bopt.models.parameters import ModelParameters
+from bopt.run_params import RunParams
 
 
+# TODO: split into multiple, serialization separate?
 # TODO: round indexes
 # https://arxiv.org/abs/1706.03673
 class GPyModel(Model):
@@ -27,7 +29,6 @@ class GPyModel(Model):
         self.acquisition_fn = acquisition_fn
 
     def to_model_params(self) -> ModelParameters:
-        # TODO: kernel
         params = {
             name: float(self.model[name])
             for name in self.model.parameter_names()
@@ -37,7 +38,7 @@ class GPyModel(Model):
                 "gpy",
                 params,
                 self.model.kern.name,
-                self.model.acquisition_fn.name())
+                self.acquisition_fn.name())
 
     @staticmethod
     def from_model_params(model_params: ModelParameters, X, Y) -> "GPyModel":
@@ -73,6 +74,55 @@ class GPyModel(Model):
         else:
             raise NotImplemented(f"Unknown acquisition function '{name}'.")
 
+    @staticmethod
+    def predict_next(run_params: RunParams, hyperparameters: List[Hyperparameter],
+            X_sample: np.ndarray, Y_sample: np.ndarray) -> Tuple[dict, "Model"]:
+        # TODO: compare NLL with and without normalizer
+
+        # If there is only one sample, .std() == 0 and Y ends up being NaN.
+        normalizer = len(X_sample) > 1
+
+        # TODO: zkontrolovat, ze se kernely vyrabi jenom na jednom miste
+        kernel = GPyModel.parse_kernel_name(run_params.kernel)(X_sample.shape[1])
+        acquisition_fn = GPyModel.parse_acquisition_fn(run_params.acquisition_fn)
+
+        # TODO: nechybi normalizer i jinde?
+        # TODO: predava se kernel a acq vsude?
+        model = GPRegression(X_sample, Y_sample, kernel=kernel, normalizer=normalizer)
+
+        # TODO: zamyslet se
+        # model.kern.variance.set_prior(GPy.priors.Gamma(1., 0.1))
+        # model.kern.lengthscale.set_prior(GPy.priors.Gamma(1., 0.1))
+        model.kern.variance.unconstrain()
+        model.kern.variance.constrain_bounded(1e-2, 1e6)
+
+        model.kern.lengthscale.unconstrain()
+        model.kern.lengthscale.constrain_bounded(1e-2, 1e6)
+
+        model.Gaussian_noise.variance.unconstrain()
+        model.Gaussian_noise.variance.constrain_bounded(1e-2, 1e6)
+
+        # model.Gaussian_noise.set_prior(GPy.priors.Gamma(1., 0.1))
+        model.optimize()
+
+        bounds = [b.range for b in hyperparameters]
+
+        x_next = propose_location(acquisition_fn,
+                model,
+                Y_sample.reshape(-1).max(), # TODO: bez reshape?
+                bounds)
+
+        typed_vals = [int(x) if p.range.type == "int" else float(x)
+                      for x, p in zip(x_next, hyperparameters)]
+
+        names = [p.name for p in hyperparameters]
+
+        params_dict = dict(zip(names, typed_vals))
+
+        fitted_model = GPyModel(model, acquisition_fn)
+
+        return params_dict, fitted_model
+
     def to_dict(self) -> dict:
         pass
     #     return {
@@ -103,51 +153,6 @@ class GPyModel(Model):
     #     # gp = GPRegression.from_dict(data)
     #     # gpy_model.model = GPRegression.from_gp(gp)
     #     return gpy_model
-
-    def predict_next(self, hyperparameters: List[Hyperparameter],
-                     sample_col: SampleCollection) -> Tuple[dict, "Model"]:
-        X_sample, Y_sample = sample_col.to_xy()
-
-        # TODO: compare NLL with and without normalizer
-
-        # If there is only one sample, .std() == 0 and Y ends up being NaN.
-        normalizer = len(X_sample) > 1
-
-        model = GPRegression(X_sample, Y_sample, normalizer=normalizer)
-
-        # TODO: zamyslet se
-        # model.kern.variance.set_prior(GPy.priors.Gamma(1., 0.1))
-        # model.kern.lengthscale.set_prior(GPy.priors.Gamma(1., 0.1))
-        model.kern.variance.unconstrain()
-        model.kern.variance.constrain_bounded(1e-2, 1e6)
-
-        model.kern.lengthscale.unconstrain()
-        model.kern.lengthscale.constrain_bounded(1e-2, 1e6)
-
-        model.Gaussian_noise.variance.unconstrain()
-        model.Gaussian_noise.variance.constrain_bounded(1e-2, 1e6)
-
-
-        # model.Gaussian_noise.set_prior(GPy.priors.Gamma(1., 0.1))
-        model.optimize()
-
-        bounds = [b.range for b in hyperparameters]
-
-        x_next = propose_location(self.acquisition_fn,
-                model,
-                Y_sample.reshape(-1).max(), # TODO: bez reshape?
-                bounds)
-
-        typed_vals = [int(x) if p.range.type == "int" else float(x)
-                      for x, p in zip(x_next, hyperparameters)]
-
-        names = [p.name for p in hyperparameters]
-
-        params_dict = dict(zip(names, typed_vals))
-
-        fitted_model = GPyModel(model, self.acquisition_fn)
-
-        return params_dict, fitted_model
 
 
 def propose_location(
