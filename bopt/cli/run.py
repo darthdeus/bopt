@@ -14,5 +14,4 @@ def run(args) -> None:
         print("Found existing meta.yml, resuming experiment.")
         experiment = bopt.Experiment.deserialize(".")
 
-        # TODO: huh, accept from cmdline
         experiment.run_loop(RunParams(args), ".", n_iter=args.n_iter)

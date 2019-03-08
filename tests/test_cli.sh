@@ -7,6 +7,7 @@ test_dir=tests/tmp/cli_test
 rm -rf "$test_dir"
 mkdir -p "$test_dir"
 
+export PATH="./bin:$PATH"
 export PYTHONPATH=.
 
 bopt init -C "$test_dir" --param "x:float:0:5" --param "y:float:0:25" \

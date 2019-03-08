@@ -1,3 +1,6 @@
+- testovat vse na MNISTu a ne RL MC
+
+
 - sigmoid vs round?
 - interpolace mezi 2 body hyperparam + plot slicu v lib. 0d, 1d, 2d ose
 - burty!

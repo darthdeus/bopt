@@ -27,7 +27,6 @@ def main():
     # Create the environment
     env = cart_pole_evaluator.environment()
 
-    # TODO: Implement Monte-Carlo RL algorithm.
     training = True
 
     Q = np.zeros([env.states, env.actions], dtype=np.float32)

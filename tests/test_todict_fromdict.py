@@ -7,7 +7,6 @@ import GPy
 from deepdiff import DeepDiff
 
 
-# TODO: zathura na png?
 def test_exp1():
     hyperparameters = [
             bopt.Hyperparameter("x", bopt.Float(0.1, 0.7)),

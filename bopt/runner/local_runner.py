@@ -15,7 +15,6 @@ from bopt.runner.abstract import Job, Runner, Timestamp, Value
 
 
 class LocalJob(Job):
-    # TODO: unify constructors? call super with shared params
     def job_type(self) -> str:
         return "local_job"
 
