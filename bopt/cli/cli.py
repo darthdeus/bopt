@@ -64,13 +64,13 @@ def main():
     sp_run.add_argument("--n_iter", type=int, default=20, help="Number of iterations to run")
     sp_run.set_defaults(func=run.run)
 
-    sp_run_single = sp.add_parser("run-single", help="Pick the next point and run it, combines suggest & manual-run.", parents=[cd_parser])
+    sp_run_single = sp.add_parser("run-single", help="Pick the next point and run it, combines suggest & manual-run.", parents=[cd_parser, model_parser])
     sp_run_single.set_defaults(func=run_single.run)
 
     sp_plot = sp.add_parser("plot", help="Generate plots for a given experiment.", parents=[cd_parser])
     sp_plot.set_defaults(func=plot.run)
 
-    sp_suggest = sp.add_parser("suggest", help="Suggests one next point for evaluation.", parents=[cd_parser])
+    sp_suggest = sp.add_parser("suggest", help="Suggests one next point for evaluation.", parents=[cd_parser, model_parser])
     sp_suggest.set_defaults(func=suggest.run)
 
     sp_manual_run = sp.add_parser("manual-run", help="Run the next evaluation with manually given hyperparameters.", parents=[cd_parser])

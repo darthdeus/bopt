@@ -15,7 +15,8 @@ def run(args) -> None:
         print(f"\t{param}")
 
     print("Evaluations:")
-    for job in experiment.evaluations:
+    for sample in experiment.samples:
+        job = sample.job
 
         proc_stats = ""
         if psutil.pid_exists(job.job_id):
