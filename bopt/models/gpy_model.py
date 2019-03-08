@@ -28,16 +28,30 @@ class GPyModel(Model):
             for name in self.model.parameter_names()
         }
 
-        return ModelParameters("gpy", params)
+        return ModelParameters("gpy", params, self.model.kern.name)
 
     @staticmethod
     def from_model_params(model_params: ModelParameters, X, Y) -> "GPyModel":
-        model = GPRegression(X, Y)
+        kernel_cls = GPyModel.parse_kernel_name(model_params.kernel)
+        kernel = kernel_cls(input_dim=X.shape[1])
+
+        model = GPRegression(X, Y, kernel=kernel)
 
         for name, value in model_params.params.items():
             model[name] = value
 
         return GPyModel(model)
+
+    @staticmethod
+    def parse_kernel_name(name):
+        if name == "rbf":
+            return GPy.kern.RBF
+        elif name == "Mat32":
+            return GPy.kern.Matern32
+        elif name == "Mat52":
+            return GPy.kern.Matern52
+        else:
+            raise NotImplemented(f"Unknown kernel name {name}.")
 
     def to_dict(self) -> dict:
         pass

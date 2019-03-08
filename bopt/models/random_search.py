@@ -15,7 +15,7 @@ class RandomSearch(Model):
         return value, self
 
     def to_model_params(self) -> ModelParameters:
-        return ModelParameters("random_search", {})
+        return ModelParameters("random_search", {}, None)
 
     def to_dict(self) -> Model:
         return { "model_type": "random_search" }

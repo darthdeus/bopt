@@ -1,10 +1,10 @@
 BOPT=./.venv/bin/python ./bin/bopt
 
-default: plot
+default: sfntest
 
 plot:
 	rm -rf results/sfn/plots
-	PYTHONPATH=. $(BOPT) plot results/sfn
+	PYTHONPATH=. $(BOPT) plot -C results/sfn
 
 test_serialization:
 	pytest tests/test_todict_fromdict.py
