@@ -17,7 +17,6 @@
 - parallel evaluace: trivialni, ale neni to :)
   - u nedobehlych jobu predpokladam ze vysledek je jejich mean
   - kontrolovat, ze 2x nevyhodnocuju ve stejnym bode
-  - jde to lip nez pouzivat mean?
 - intove hyperparam: GPy?
 - SGE Runner:        neni broken, jenom neni updated na novejsi API
 
@@ -30,6 +29,7 @@
 
 # Asi vubec neresime
 
+- paralelni evaluace: jde to lip nez pouzivat mean?
 - web:               neni aktualizovano pro GPy
 - duplicitni PIDy + flock
 - multijoby

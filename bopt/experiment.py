@@ -65,7 +65,18 @@ class Experiment:
 
         return experiment
 
-    def suggest(self, run_params: RunParams, meta_dir: str) -> Tuple[dict, Model]:
+    def get_xy(self, meta_dir: str, include_mean_pred: bool):
+        if include_mean_pred:
+            samples = self.ok_samples()
+        else:
+            samples = self.samples
+
+        sample_col = SampleCollection(samples, meta_dir)
+        X_sample, Y_sample = sample_col.to_xy()
+
+        return X_sample, Y_sample
+
+    def suggest(self, run_params: RunParams, meta_dir: str, include_mean_pred: bool = True) -> Tuple[dict, Model]:
         if len(self.samples) == 0:
             print("No existing samples found, overloading suggest with RandomSearch.")
             model = RandomSearch()
@@ -74,8 +85,7 @@ class Experiment:
                     model.predict_next(self.hyperparameters)
 
         else:
-            sample_col = SampleCollection(self.ok_samples(), meta_dir)
-            X_sample, Y_sample = sample_col.to_xy()
+            X_sample, Y_sample = self.get_xy(meta_dir, include_mean_pred)
 
             next_params, fitted_model = \
                     GPyModel.predict_next(run_params, self.hyperparameters, X_sample, Y_sample)
@@ -85,18 +95,33 @@ class Experiment:
     def run_next(self, run_params: RunParams, meta_dir: str) -> Tuple[Job, Model, np.ndarray]:
         next_params, fitted_model = self.suggest(run_params, meta_dir)
 
-        job, next_sample = self.manual_run(meta_dir, next_params, fitted_model.to_model_params())
+        job, next_sample = self.manual_run(run_params, meta_dir, next_params, fitted_model.to_model_params())
 
         return job, fitted_model, next_sample.to_x()
 
-    def manual_run(self, meta_dir: str, next_params: dict, model_params: ModelParameters) -> Tuple[Job, Sample]:
+    def manual_run(self, run_params: RunParams, meta_dir: str, next_params: dict,
+            model_params: ModelParameters, include_mean_pred: bool = True) -> Tuple[Job, Sample]:
         output_dir_path = pathlib.Path(meta_dir) / "output"
         output_dir_path.mkdir(parents=True, exist_ok=True)
         output_dir = str(output_dir_path)
 
         job = self.runner.start(output_dir, next_params)
 
-        next_sample = Sample(job, model_params)
+        X_sample, Y_sample = self.get_xy(meta_dir, include_mean_pred)
+
+        if model_params.can_predict_mean():
+            # Use the fitted model to predict mu/sigma.
+            gpy_model = GPyModel.from_model_params(model_params)
+            model = gpy_model.model
+
+        else:
+            model = GPyModel.gpy_regression(run_params, X_sample, Y_sample)
+
+        x_next = Sample.param_dict_to_x(next_params)
+        mu, var = model.predict(x_next)
+        sigma = np.sqrt(var)
+
+        next_sample = Sample(job, model_params, mu, sigma)
         self.samples.append(next_sample)
 
         return job, next_sample
@@ -301,14 +326,14 @@ def acq_for_dims(model, acq: AcquisitionFunction, x_slice, hyperparameters, ax, 
     for i in range(len(x_slice)):
         if i not in dims:
             gs[i] = g1.copy()
-            gs[i][:] = x_slice[i]
+            gs[i][:] = x_slice[i] # TODO: neni tohle spatne typ?
 
     grid = np.stack(gs, axis=-1)
 
     mu, var = model.predict(grid.reshape(resolution * resolution, -1))
-    std = np.sqrt(var)
+    sigma = np.sqrt(var)
 
-    ei = acq.raw_call(mu, std, model.Y.max())
+    ei = acq.raw_call(mu, sigma, model.Y.max())
 
     ei_mat = ei.reshape(resolution, resolution)
     # TODO: fuj, contour not increasing?

@@ -29,8 +29,9 @@ def test_exp1():
         gpy_model = bopt.GPyModel(m1, acq_fn)
 
     samples = [
-        bopt.Sample(bopt.LocalJob(314, { "job": "params" }), gpy_model.to_model_params()),
-        bopt.Sample(bopt.SGEJob(314, { "job": "params" }), None)
+        # TODO: add tests for predicting with unfinished jobs
+        bopt.Sample(bopt.LocalJob(314, { "job": "params" }), gpy_model.to_model_params(), 1.0, 1.2),
+        bopt.Sample(bopt.SGEJob(314, { "job": "params" }), None, 1.0, 1.0)
     ]
 
     experiment.samples = samples

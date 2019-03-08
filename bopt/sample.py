@@ -11,15 +11,22 @@ from bopt.models.parameters import ModelParameters
 class Sample:
     job: Job
     model: ModelParameters
+    mu_pred: float
+    sigma_pred: float
 
-    def __init__(self, job: Job, model_params: ModelParameters) -> None:
+    def __init__(self, job: Job, model_params: ModelParameters,
+            mu_pred: float, sigma_pred: float) -> None:
         self.job = job
         self.model = model_params
+        self.mu_pred = mu_pred
+        self.sigma_pred = sigma_pred
 
     def to_dict(self) -> dict:
         return {
             "job": self.job.to_dict(),
             "model": self.model.to_dict() if self.model is not None else None,
+            "mu_pred": self.mu_pred,
+            "sigma_pred": self.sigma_pred
         }
 
     @staticmethod
@@ -30,19 +37,23 @@ class Sample:
             model_dict = ModelParameters.from_dict(data["model"])
 
         return Sample(JobLoader.from_dict(data["job"]),
-                      model_dict)
+                      model_dict,
+                      data["mu_pred"],
+                      data["sigma_pred"])
 
-    def to_x(self) -> np.ndarray:
-        param_values = self.job.run_parameters
+    @staticmethod
+    def param_dict_to_x(param_dict: dict) -> np.ndarray:
+        x = np.zeros(len(param_dict), dtype=np.float64)
 
-        x = np.zeros(len(param_values), dtype=np.float64)
-
-        for i, key in enumerate(sorted(param_values)):
-            value = param_values[key]
+        for i, key in enumerate(sorted(param_dict)):
+            value = param_dict[key]
 
             x[i] = value
 
         return x
+
+    def to_x(self) -> np.ndarray:
+        return Sample.param_dict_to_x(self.job.run_parameters)
 
     def to_xy(self, output_dir: str) -> Tuple[np.ndarray, float]:
         x = self.to_x()

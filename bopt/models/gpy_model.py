@@ -18,6 +18,7 @@ from bopt.run_params import RunParams
 # TODO: round indexes
 # https://arxiv.org/abs/1706.03673
 class GPyModel(Model):
+    model_name = "gpy"
     kernel_names = ["rbf", "Mat32", "Mat52"]
     acquisition_fn_names = ["ei", "pi"]
 
@@ -35,7 +36,7 @@ class GPyModel(Model):
         }
 
         return ModelParameters(
-                "gpy",
+                GPyModel.model_name,
                 params,
                 self.model.kern.name,
                 self.acquisition_fn.name())
@@ -76,18 +77,13 @@ class GPyModel(Model):
 
     def predict_next(self): raise NotImplemented("This should not be called, deprecated")
 
-    @staticmethod
-    def predict_next(run_params: RunParams, hyperparameters: List[Hyperparameter],
-            X_sample: np.ndarray, Y_sample: np.ndarray) -> Tuple[dict, "Model"]:
-        # TODO: compare NLL with and without normalizer
-
+    def gpy_regression(run_params: RunParams,
+            X_sample: np.ndarray, Y_sample: np.ndarray) -> GPRegression:
         # If there is only one sample, .std() == 0 and Y ends up being NaN.
         normalizer = len(X_sample) > 1
 
         # TODO: zkontrolovat, ze se kernely vyrabi jenom na jednom miste
         kernel = GPyModel.parse_kernel_name(run_params.kernel)(X_sample.shape[1])
-        acquisition_fn = GPyModel.parse_acquisition_fn(run_params.acquisition_fn)
-
         # TODO: nechybi normalizer i jinde?
         # TODO: predava se kernel a acq vsude?
         model = GPRegression(X_sample, Y_sample, kernel=kernel, normalizer=normalizer)
@@ -106,6 +102,16 @@ class GPyModel(Model):
 
         # model.Gaussian_noise.set_prior(GPy.priors.Gamma(1., 0.1))
         model.optimize()
+
+        return model
+
+    @staticmethod
+    def predict_next(run_params: RunParams, hyperparameters: List[Hyperparameter],
+            X_sample: np.ndarray, Y_sample: np.ndarray) -> Tuple[dict, "Model"]:
+        # TODO: compare NLL with and without normalizer
+
+        model = GPyModel.gpy_regression(run_params, X_sample, Y_sample)
+        acquisition_fn = GPyModel.parse_acquisition_fn(run_params.acquisition_fn)
 
         bounds = [b.range for b in hyperparameters]
 

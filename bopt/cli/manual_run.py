@@ -17,4 +17,4 @@ def run(args) -> None:
         if "dir" in run_params:
             del run_params["dir"]
 
-        experiment.manual_run(".", run_params, bopt.ModelParameters.manual_run())
+        experiment.manual_run(".", run_params, bopt.ModelParameters.for_manual_run())

@@ -18,6 +18,13 @@ class ModelParameters:
             "acquisition_fn": self.acquisition_fn
         }
 
+    def can_predict_mean(self) -> bool:
+        # This is simply to avoid cyclic imports
+        # TODO: maybe use a global constant config that registers/lists predictive models?
+        from bopt.models.gpy_model import GPyModel
+
+        return self.model_name == GPyModel.model_name
+
     @staticmethod
     def from_dict(data: dict) -> "ModelParameters":
         return ModelParameters(
@@ -27,5 +34,5 @@ class ModelParameters:
                 data["acquisition_fn"])
 
     @staticmethod
-    def manual_run() -> "ModelParameters":
+    def for_manual_run() -> "ModelParameters":
         return ModelParameters("manual", {}, "", "")
