@@ -16,7 +16,6 @@ import GPy
 from bopt.run_params import RunParams
 from bopt.models.model import Model
 from bopt.sample import Sample, SampleCollection
-from bopt.models.model_loader import ModelLoader
 from bopt.models.parameters import ModelParameters
 from bopt.models.random_search import RandomSearch
 from bopt.models.gpy_model import GPyModel
