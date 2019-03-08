@@ -1,4 +1,5 @@
 - testovat vse na MNISTu a ne RL MC
+- u manual-run kontrolovat, ze hodnota je uvnitr range
 
 
 - sigmoid vs round?
