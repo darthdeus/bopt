@@ -123,37 +123,6 @@ class GPyModel(Model):
 
         return params_dict, fitted_model
 
-    def to_dict(self) -> dict:
-        pass
-    #     return {
-    #         "model_type": "gpy",
-    #         "gpy": {name: float(self.model[name])
-    #                 for name in self.model.parameter_names()}
-    #         # {
-    #         #     "kernel": self.model.kern.name,
-    #         #     "input_dim": self.model.kern.input_dim,
-    #         #     "params": self.model.param_array.tolist(),
-    #         #     "X": self.model.X, # TODO: tolist?
-    #         #     "Y": self.model.Y,
-    #         # }
-    #     }
-    #
-    # @staticmethod
-    # def from_dict(data: dict) -> Model:
-    #     # TODO: fuj naming
-    #     gpy_model = GPyModel()
-    #
-    #     # if data["kernel"] == "rbf":
-    #     #     kernel = GPy.kern.RBF(input_dim=data["input_dim"])
-    #     # else:
-    #     #     raise NotImplemented()
-    #
-    #     gpy_model# .model = GPRegression(data["X"], data["Y"], kernel)
-    #
-    #     # gp = GPRegression.from_dict(data)
-    #     # gpy_model.model = GPRegression.from_gp(gp)
-    #     return gpy_model
-
 
 def propose_location(
     acquisition_fn: acq.AcquisitionFunction,

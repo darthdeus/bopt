@@ -9,16 +9,22 @@
 # Co chybi / je aktualne broken
 
 - [x] kernel type:       trivialni, ale neni to :)
-- acq fn v yml
-- intove hyperparam: GPy?
-- SGE Runner:        neni broken, jenom neni updated na novejsi API
+- [x] acq fn v yml
 - parallel evaluace: trivialni, ale neni to :)
   - u nedobehlych jobu predpokladam ze vysledek je jejich mean
   - kontrolovat, ze 2x nevyhodnocuju ve stejnym bode
   - jde to lip nez pouzivat mean?
+- intove hyperparam: GPy?
+- SGE Runner:        neni broken, jenom neni updated na novejsi API
+
+- plot convergence
+
+# Pozdeji
 
 - kernely! porad nevime ktery se nam libi
 - acq fn   ... to same
+
+# Asi vubec neresime
 
 - web:               neni aktualizovano pro GPy
 - duplicitni PIDy + flock
