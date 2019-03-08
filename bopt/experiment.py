@@ -109,17 +109,21 @@ class Experiment:
 
         X_sample, Y_sample = self.get_xy(meta_dir, include_mean_pred)
 
-        if model_params.can_predict_mean():
-            # Use the fitted model to predict mu/sigma.
-            gpy_model = GPyModel.from_model_params(model_params)
-            model = gpy_model.model
+        if len(X_sample) > 0:
+            if model_params.can_predict_mean():
+                # Use the fitted model to predict mu/sigma.
+                gpy_model = GPyModel.from_model_params(model_params)
+                model = gpy_model.model
 
+            else:
+                model = GPyModel.gpy_regression(run_params, X_sample, Y_sample)
+
+            x_next = Sample.param_dict_to_x(next_params)
+            mu, var = model.predict(x_next)
+            sigma = np.sqrt(var)
         else:
-            model = GPyModel.gpy_regression(run_params, X_sample, Y_sample)
-
-        x_next = Sample.param_dict_to_x(next_params)
-        mu, var = model.predict(x_next)
-        sigma = np.sqrt(var)
+            mu = 0.0
+            sigma = 1.0 # TODO: lol :)
 
         next_sample = Sample(job, model_params, mu, sigma)
         self.samples.append(next_sample)
