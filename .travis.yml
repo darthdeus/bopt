@@ -9,4 +9,4 @@ install:
 
 script:
   - ./.venv/bin/pytest
-  - ./tests/test_cli.sh
+  - source ./.venv/bin/activate && ./tests/test_cli.sh
