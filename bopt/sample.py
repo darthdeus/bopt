@@ -1,4 +1,5 @@
 import os
+import logging
 import numpy as np
 
 from typing import Tuple, List
@@ -57,7 +58,12 @@ class Sample:
 
     def to_xy(self, output_dir: str) -> Tuple[np.ndarray, float]:
         x = self.to_x()
-        y = self.job.get_result(output_dir)
+
+        if self.job.is_finished():
+            y = self.job.get_result(output_dir)
+        else:
+            logging.warning(f"Using mean prediction for sample {self}")
+            y = self.mu_pred
 
         assert isinstance(x, np.ndarray)
         assert isinstance(y, float)
@@ -79,8 +85,6 @@ class SampleCollection:
         self.meta_dir = meta_dir
 
     def to_xy(self) -> Tuple[np.ndarray, np.ndarray]:
-        assert all([s.job.is_finished() for s in self.samples])
-
         num_samples = len(self.samples)
 
         y_sample = np.zeros([num_samples], dtype=np.float64)

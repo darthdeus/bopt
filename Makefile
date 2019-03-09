@@ -77,3 +77,6 @@ mypy:
 
 clean-dist:
 	rm -rf bopt.egg-info/ dist/ build/
+
+test:
+	bash -c "source ./.venv/bin/activate && pytest && ./tests/test_cli.sh && make mypy"

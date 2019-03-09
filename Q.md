@@ -1,6 +1,7 @@
 - testovat vse na MNISTu a ne RL MC
 - u manual-run kontrolovat, ze hodnota je uvnitr range
 
+- logging
 
 - sigmoid vs round?
 - interpolace mezi 2 body hyperparam + plot slicu v lib. 0d, 1d, 2d ose
@@ -18,6 +19,7 @@
   - u nedobehlych jobu predpokladam ze vysledek je jejich mean
   - kontrolovat, ze 2x nevyhodnocuju ve stejnym bode
 - intove hyperparam: GPy?
+- diskretni/categorical parametry
 - SGE Runner:        neni broken, jenom neni updated na novejsi API
 
 - plot convergence

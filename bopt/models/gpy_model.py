@@ -139,6 +139,10 @@ def propose_location(
     bounds: List[Bound],
     n_restarts: int = 25,
 ) -> np.ndarray:
+    # TODO: heh
+    # np.seterrcall(lambda *args: __import__('ipdb').set_trace())
+    np.seterr(all="warn")
+
     def min_obj(X):
         return -acquisition_fn(gp, X.reshape(1, -1), y_max)
 
@@ -148,13 +152,18 @@ def propose_location(
     for _ in range(n_restarts):
         starting_points.append(np.array([bound.sample() for bound in bounds]))
 
-    min_val = 1
+    min_val = 1e9
     min_x = None
 
     for x0 in starting_points:
         res = minimize(min_obj, x0=x0, bounds=scipy_bounds, method="L-BFGS-B")
+
+        assert not np.any(np.isnan(res.fun))
+
         if res.fun < min_val:
             min_val = res.fun[0]
             min_x = res.x
+
+    assert min_x is not None
 
     return min_x

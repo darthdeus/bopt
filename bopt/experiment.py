@@ -67,9 +67,9 @@ class Experiment:
 
     def get_xy(self, meta_dir: str, include_mean_pred: bool):
         if include_mean_pred:
-            samples = self.ok_samples()
-        else:
             samples = self.samples
+        else:
+            samples = self.ok_samples()
 
         sample_col = SampleCollection(samples, meta_dir)
         X_sample, Y_sample = sample_col.to_xy()
@@ -147,6 +147,7 @@ class Experiment:
         for i in range(n_iter):
             job = self.run_single(run_params, meta_dir)
 
+            # psutil.wait_procs(psutil.Process().children(), timeout=0.01)
             while not job.is_finished():
                 psutil.wait_procs(psutil.Process().children(), timeout=0.01)
                 time.sleep(0.2)
