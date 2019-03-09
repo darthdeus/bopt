@@ -17,7 +17,7 @@ gpy_compare:
 
 sfntest:
 	rm -rf results/sfn
-	$(BOPT) init --param "x:float:0:5" --param "y:float:0:25" \
+	$(BOPT) init --param "x:int:0:5" --param "y:float:0:25" \
 		--param "z:float:0:1" --param "w:float:2:7" \
 		-C results/sfn \
 		$(PWD)/.venv/bin/python $(PWD)/experiments/simple_function.py

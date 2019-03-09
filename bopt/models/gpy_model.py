@@ -115,10 +115,7 @@ class GPyModel(Model):
 
         bounds = [b.range for b in hyperparameters]
 
-        x_next = propose_location(acquisition_fn,
-                model,
-                Y_sample.reshape(-1).max(), # TODO: bez reshape?
-                bounds)
+        x_next = propose_location(acquisition_fn, model, Y_sample.max(), bounds)
 
         typed_vals = [int(x) if p.range.type == "int" else float(x)
                       for x, p in zip(x_next, hyperparameters)]
