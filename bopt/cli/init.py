@@ -11,26 +11,33 @@ def run(args) -> None:
     hyperparameters: List[Hyperparameter] = []
 
     for param in args.param:
-        name, type, low, high = param.split(":")
+        name, type, *values = param.split(":")
 
         cls: Type
         parser: Callable
 
-        if type == "int":
-            cls = bopt.Integer
-            parser = int
-        elif type == "float":
-            cls = bopt.Float
-            parser = float
+        if type == "discrete":
+            hyp = bopt.Hyperparameter(name, bopt.Discrete(values))
         else:
-            print("Invalid value {} for hyperparameter type, only 'int' and 'float' are permitted.".format(type))
-            sys.exit(1)
+            if type == "int":
+                cls = bopt.Integer
+                parser = int
+                low, high = values
+            elif type == "float":
+                cls = bopt.Float
+                parser = float
+                low, high = values
+            elif type == "discrete":
+                continue
+            else:
+                print("Invalid value {} for hyperparameter type, only 'int', 'float' and 'discrete' are permitted.".format(type))
+                sys.exit(1)
 
-        assert cls is not None
+            assert cls is not None
 
-        hyperparameters.append(
-            bopt.Hyperparameter(name, cls(parser(low), parser(high)))
-        )
+            hyp = bopt.Hyperparameter(name, cls(parser(low), parser(high)))
+
+        hyperparameters.append(hyp)
 
     assert args.result_parser == "bopt.LastLineLastWordParser"
     # TODO: sge

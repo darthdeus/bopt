@@ -1,8 +1,14 @@
+import abc
 import numpy as np
-from typing import Union, NamedTuple
+from typing import Union, NamedTuple, List
 
 
-class Integer:
+# TODO: fix naming convention & typnig errors
+class Bound(abc.ABC):
+    pass
+
+
+class Integer(Bound):
     low: int
     high: int
     type: str
@@ -19,7 +25,7 @@ class Integer:
         return f"Int({self.low}, {self.high})"
 
 
-class Float:
+class Float(Bound):
     low: float
     high: float
     type: str
@@ -36,7 +42,22 @@ class Float:
         return f"Float({self.low}, {self.high})"
 
 
-Bound = Union[Integer, Float]
+class Discrete(Bound):
+    low: float
+    high: float
+    type: str
+
+    def __init__(self, values: List[str]):
+        self.values = values
+        self.type = "discrete"
+        self.low = 0
+        self.high = len(values)
+
+    def sample(self) -> float:
+        return np.random.randint(self.low, self.high)
+
+    def __repr__(self) -> str:
+        return f"Discrete({self.values})"
 
 
 class Hyperparameter(NamedTuple):
@@ -44,22 +65,32 @@ class Hyperparameter(NamedTuple):
     range: Bound
 
     def to_dict(self) -> dict:
-        return {
-            "type": self.range.type,
-            "low": self.range.low,
-            "high": self.range.high
-        }
+        if self.range.type == "discrete":
+            return {
+                "type": "discrete",
+                "values": self.range.values
+            }
+        else:
+            return {
+                "type": self.range.type,
+                "low": self.range.low,
+                "high": self.range.high
+            }
 
     @staticmethod
     def from_dict(name, data: dict) -> "Hyperparameter":
-        if data["type"] == "int":
-            cls = Integer
-            parser = int
-        elif data["type"] == "float":
-            cls = Float
-            parser = float
+        if data["type"] == "discrete":
+            return Hyperparameter(name=name,
+                    range=Discrete(data["values"]))
         else:
-            raise NotImplemented()
+            if data["type"] == "int":
+                cls = Integer
+                parser = int
+            elif data["type"] == "float":
+                cls = Float
+                parser = float
+            else:
+                raise NotImplementedError()
 
-        return Hyperparameter(name=name,
-                range=cls(parser(data["low"]), parser(data["high"])))
+            return Hyperparameter(name=name,
+                    range=cls(parser(data["low"]), parser(data["high"])))

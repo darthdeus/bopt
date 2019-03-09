@@ -18,7 +18,7 @@
 - parallel evaluace: trivialni, ale neni to :)
   - u nedobehlych jobu predpokladam ze vysledek je jejich mean
   - kontrolovat, ze 2x nevyhodnocuju ve stejnym bode
-- intove hyperparam: GPy?
+- [x] intove hyperparam: GPy?
 - diskretni/categorical parametry
 - SGE Runner:        neni broken, jenom neni updated na novejsi API
 
