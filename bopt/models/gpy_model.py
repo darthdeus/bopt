@@ -113,11 +113,10 @@ class GPyModel(Model):
         model = GPyModel.gpy_regression(model_config, X_sample, Y_sample)
         acquisition_fn = GPyModel.parse_acquisition_fn(model_config.acquisition_fn)
 
-        bounds = [b.range for b in hyperparameters]
+        x_next = propose_location(acquisition_fn, model, Y_sample.max(),
+                hyperparameters)
 
-        x_next = propose_location(acquisition_fn, model, Y_sample.max(), bounds)
-
-        job_params = JobParams.mapping_from_vector(x_next, Hyperparameter)
+        job_params = JobParams.mapping_from_vector(x_next, hyperparameters)
 
         fitted_model = GPyModel(model, acquisition_fn)
 
@@ -128,7 +127,7 @@ def propose_location(
     acquisition_fn: acq.AcquisitionFunction,
     gp: GPRegression,
     y_max: float,
-    bounds: List[Bound],
+    hyperparameters: List[Hyperparameter],
     n_restarts: int = 25,
 ) -> np.ndarray:
     # TODO: heh
@@ -138,11 +137,16 @@ def propose_location(
     def min_obj(X):
         return -acquisition_fn(gp, X.reshape(1, -1), y_max)
 
-    scipy_bounds = [(bound.low, bound.high) for bound in bounds]
+    scipy_bounds = [(h.range.low, h.range.high) for h in hyperparameters]
 
     starting_points = []
     for _ in range(n_restarts):
-        starting_points.append(np.array([bound.sample() for bound in bounds]))
+        # TODO: tohle spadne protoze sample z discrete takhle nejde pouzit
+        x_sample = JobParams.sample_params(hyperparameters)
+
+        # starting_points.append(np.array([bound.sample() for bound in
+        # bounds]))
+        starting_points.append(x_sample)
 
     min_val = 1e9
     min_x = None

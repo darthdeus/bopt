@@ -58,7 +58,8 @@ class Experiment:
             [Hyperparameter.from_dict(key, data["hyperparameters"][key])
             for key in data["hyperparameters"].keys()]
 
-        samples = [Sample.from_dict(s) for s in data["samples"]]
+        samples = [Sample.from_dict(s, hyperparameters)
+                for s in data["samples"]]
         runner = RunnerLoader.from_dict(data["runner"])
 
         experiment = Experiment(hyperparameters, runner)
@@ -139,6 +140,7 @@ class Experiment:
     def run_single(self, model_config: ModelConfig, meta_dir: str) -> Job:
         job, fitted_model, x_next = self.run_next(model_config, meta_dir)
 
+        # TODO: nechci radsi JobParams?
         self.plot_current(fitted_model, meta_dir, x_next)
         self.serialize(meta_dir)
 

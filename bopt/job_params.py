@@ -1,10 +1,7 @@
 import numpy as np
 from typing import Dict, List, Union
 
-from bopt.basic_types import Hyperparameter, Discrete
-
-
-ParamTypes = Union[float, int, str]
+from bopt.basic_types import Hyperparameter, Discrete, ParamTypes
 
 
 class JobParams:
@@ -16,12 +13,18 @@ class JobParams:
         self.x = x
 
     def to_dict(self) -> dict:
-        # TODO: chybi, naimplementovat!
-        raise NotImplementedError()
+        return self.x.tolist()
 
     @staticmethod
-    def mapping_from_vector(x: np.ndarray, hyperparameters: List[Hyperparameter]) \
-            -> "JobParams":
+    def sample_params(hyperparameters: List[Hyperparameter]) -> np.ndarray:
+        mapping = {h: h.range.sample() for h in hyperparameters}
+        job_params = JobParams.from_mapping(mapping)
+
+        return job_params.x
+
+    @staticmethod
+    def mapping_from_vector(x: np.ndarray, hyperparameters:
+            List[Hyperparameter]) -> "JobParams":
 
         typed_vals = [int(x) if p.range.is_discrete() else float(x)
                       for x, p in zip(x, hyperparameters)]
@@ -42,6 +45,7 @@ class JobParams:
     # TODO: test! forward and back
     @staticmethod
     def from_mapping(mapping: Dict[Hyperparameter, ParamTypes]) -> np.ndarray:
+        # TODO: 64 or 32 bit?
         x = np.zeros(len(mapping), dtype=np.float64)
 
         for i, key in enumerate(sorted(mapping, key=lambda k: k.name)):
@@ -55,7 +59,7 @@ class JobParams:
             else:
                 x[i] = float(value)
 
-        return x
+        return JobParams(mapping, x)
 
 
     # @property

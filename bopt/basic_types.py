@@ -3,6 +3,8 @@ import numpy as np
 from typing import Union, NamedTuple, List
 
 
+ParamTypes = Union[float, int, str]
+
 # TODO: fix naming convention & typnig errors
 class Bound(abc.ABC):
     low: float
@@ -11,6 +13,11 @@ class Bound(abc.ABC):
 
     @abc.abstractmethod
     def is_discrete(self) -> bool:
+        pass
+
+    # TODO: fix return type object
+    @abc.abstractmethod
+    def sample(self) -> ParamTypes:
         pass
 
 
@@ -54,7 +61,7 @@ class Discrete(Bound):
         self.high = len(values)
 
     def sample(self) -> float:
-        return np.random.randint(self.low, self.high)
+        return self.values[np.random.randint(self.low, self.high)]
 
     def is_discrete(self) -> bool:
         return True

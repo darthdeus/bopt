@@ -4,6 +4,7 @@ import numpy as np
 
 from typing import Tuple, List
 
+from bopt.basic_types import Hyperparameter
 from bopt.job_params import JobParams
 from bopt.runner.abstract import Job
 from bopt.runner.job_loader import JobLoader
@@ -32,13 +33,13 @@ class Sample:
         }
 
     @staticmethod
-    def from_dict(data: dict) -> "Sample":
+    def from_dict(data: dict, hyperparameters: List[Hyperparameter]) -> "Sample":
         model_dict = None
 
         if data["model"] is not None:
             model_dict = ModelParameters.from_dict(data["model"])
 
-        return Sample(JobLoader.from_dict(data["job"]),
+        return Sample(JobLoader.from_dict(data["job"], hyperparameters),
                       model_dict,
                       data["mu_pred"],
                       data["sigma_pred"])
