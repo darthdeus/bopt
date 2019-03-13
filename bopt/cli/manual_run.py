@@ -4,7 +4,6 @@ import yaml
 
 import bopt
 from bopt.cli.util import handle_cd, ensure_meta_yml
-from bopt.run_params import RunParams
 
 
 def run(args) -> None:
@@ -20,5 +19,5 @@ def run(args) -> None:
         if "dir" in model_params:
             del model_params["dir"]
 
-        experiment.manual_run(RunParams.default(), ".", model_params,
+        experiment.manual_run(bopt.ModelConfig.default(), ".", model_params,
                 bopt.ModelParameters.for_manual_run())

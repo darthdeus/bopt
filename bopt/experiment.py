@@ -120,7 +120,6 @@ class Experiment:
             else:
                 model = GPyModel.gpy_regression(model_config, X_sample, Y_sample)
 
-            # x_next = Sample.param_dict_to_x(job_params)
             X_next = np.array([job_params.x])
 
             mu, var = model.predict(X_next)

@@ -28,7 +28,6 @@ class JobParams:
 
         # TODO: map back or just stick both in one struct?
         # TODO: unify naming
-        # RunParams -> ModelConfig?
         # params_dict -> EvaluationArgs
         # ...
         mapping: Dict[Hyperparameter, ParamTypes] = dict(zip(hyperparameters, typed_vals))

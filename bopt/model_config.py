@@ -9,7 +9,7 @@ class ModelConfig:
         self.acquisition_fn = args.acquisition_fn
 
     @staticmethod
-    def default() -> "RunParams":
+    def default() -> "ModelConfig":
         ns = Namespace()
         ns.kernel = "Mat52"
         ns.acquisition_fn = "ei"

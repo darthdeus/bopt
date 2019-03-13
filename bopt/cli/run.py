@@ -3,7 +3,6 @@ import sys
 import yaml
 
 import bopt
-from bopt.run_params import RunParams
 from bopt.cli.util import handle_cd, ensure_meta_yml
 from bopt.models.gpy_model import GPyModel
 
@@ -14,4 +13,4 @@ def run(args) -> None:
         print("Found existing meta.yml, resuming experiment.")
         experiment = bopt.Experiment.deserialize(".")
 
-        experiment.run_loop(RunParams(args), ".", n_iter=args.n_iter)
+        experiment.run_loop(bopt.ModelConfig(args), ".", n_iter=args.n_iter)

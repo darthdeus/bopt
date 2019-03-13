@@ -3,7 +3,6 @@ import sys
 import yaml
 
 import bopt
-from bopt.run_params import RunParams
 from bopt.cli.util import handle_cd, ensure_meta_yml
 
 def run(args) -> None:
@@ -12,4 +11,4 @@ def run(args) -> None:
     with ensure_meta_yml():
         experiment = bopt.Experiment.deserialize(".")
 
-        experiment.run_single(RunParams(args), ".,")
+        experiment.run_single(bopt.ModelConfig(args), ".,")
