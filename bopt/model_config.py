@@ -1,6 +1,6 @@
 from argparse import Namespace
 
-class RunParams:
+class ModelConfig:
     kernel: str
     acquisition_fn: str
 
@@ -14,4 +14,4 @@ class RunParams:
         ns.kernel = "Mat52"
         ns.acquisition_fn = "ei"
 
-        return RunParams(ns)
+        return ModelConfig(ns)

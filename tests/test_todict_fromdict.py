@@ -25,7 +25,7 @@ def test_exp1():
 
         acq_fn = bopt.ExpectedImprovement()
         kernel = GPy.kern.RBF(input_dim=1, variance=1., lengthscale=1.)
-        m1 = GPy.models.GPRegression(X, Y, kernel)
+        m1 = GPy.models.GPRegression(X, Y, kernel, normalizer=len(X) > 1)
         gpy_model = bopt.GPyModel(m1, acq_fn)
 
     samples = [

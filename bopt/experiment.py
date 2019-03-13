@@ -13,7 +13,8 @@ import matplotlib.gridspec as gridspec
 
 import GPy
 
-from bopt.run_params import RunParams
+from bopt.job_params import JobParams
+from bopt.model_config import ModelConfig
 from bopt.models.model import Model
 from bopt.sample import Sample, SampleCollection
 from bopt.models.parameters import ModelParameters
@@ -76,35 +77,37 @@ class Experiment:
 
         return X_sample, Y_sample
 
-    def suggest(self, run_params: RunParams, meta_dir: str, include_mean_pred: bool = True) -> Tuple[dict, Model]:
+    def suggest(self, model_config: ModelConfig, meta_dir: str, include_mean_pred:
+            bool = True) -> Tuple[JobParams, Model]:
         if len(self.samples) == 0:
             print("No existing samples found, overloading suggest with RandomSearch.")
             model = RandomSearch()
 
-            next_params, fitted_model = \
+            job_params, fitted_model = \
                     model.predict_next(self.hyperparameters)
         else:
             X_sample, Y_sample = self.get_xy(meta_dir, include_mean_pred)
 
-            next_params, fitted_model = \
-                    GPyModel.predict_next(run_params, self.hyperparameters, X_sample, Y_sample)
+            job_params, fitted_model = \
+                    GPyModel.predict_next(model_config, self.hyperparameters, X_sample, Y_sample)
 
-        return next_params, fitted_model
+        return job_params, fitted_model
 
-    def run_next(self, run_params: RunParams, meta_dir: str) -> Tuple[Job, Model, np.ndarray]:
-        next_params, fitted_model = self.suggest(run_params, meta_dir)
+    def run_next(self, model_config: ModelConfig, meta_dir: str) -> Tuple[Job, Model, np.ndarray]:
+        job_params, fitted_model = self.suggest(model_config, meta_dir)
 
-        job, next_sample = self.manual_run(run_params, meta_dir, next_params, fitted_model.to_model_params())
+        job, next_sample = self.manual_run(model_config, meta_dir, job_params,
+                fitted_model.to_model_params())
 
         return job, fitted_model, next_sample.to_x()
 
-    def manual_run(self, run_params: RunParams, meta_dir: str, next_params: dict,
+    def manual_run(self, model_config: ModelConfig, meta_dir: str, job_params: JobParams,
             model_params: ModelParameters, include_mean_pred: bool = True) -> Tuple[Job, Sample]:
         output_dir_path = pathlib.Path(meta_dir) / "output"
         output_dir_path.mkdir(parents=True, exist_ok=True)
         output_dir = str(output_dir_path)
 
-        job = self.runner.start(output_dir, next_params)
+        job = self.runner.start(output_dir, job_params)
 
         X_sample, Y_sample = self.get_xy(meta_dir, include_mean_pred)
 
@@ -115,10 +118,10 @@ class Experiment:
                 model = gpy_model.model
 
             else:
-                model = GPyModel.gpy_regression(run_params, X_sample, Y_sample)
+                model = GPyModel.gpy_regression(model_config, X_sample, Y_sample)
 
-            x_next = Sample.param_dict_to_x(next_params)
-            X_next = np.array([x_next])
+            # x_next = Sample.param_dict_to_x(job_params)
+            X_next = np.array([job_params.x])
 
             mu, var = model.predict(X_next)
             sigma = np.sqrt(var)
@@ -134,17 +137,17 @@ class Experiment:
 
         return job, next_sample
 
-    def run_single(self, run_params: RunParams, meta_dir: str) -> Job:
-        job, fitted_model, x_next = self.run_next(run_params, meta_dir)
+    def run_single(self, model_config: ModelConfig, meta_dir: str) -> Job:
+        job, fitted_model, x_next = self.run_next(model_config, meta_dir)
 
         self.plot_current(fitted_model, meta_dir, x_next)
         self.serialize(meta_dir)
 
         return job
 
-    def run_loop(self, run_params: RunParams, meta_dir: str, n_iter=10) -> None:
+    def run_loop(self, model_config: ModelConfig, meta_dir: str, n_iter=10) -> None:
         for i in range(n_iter):
-            job = self.run_single(run_params, meta_dir)
+            job = self.run_single(model_config, meta_dir)
 
             # psutil.wait_procs(psutil.Process().children(), timeout=0.01)
             while not job.is_finished():
@@ -171,7 +174,8 @@ class Experiment:
     def ok_samples(self) -> List[Sample]:
         return [s for s in self.samples if s.job.is_finished()]
 
-    def plot_current(self, gpy_model: Model, meta_dir: str, x_next: np.ndarray, resolution: float = 30):
+    def plot_current(self, gpy_model: Model, meta_dir: str,
+            x_next: np.ndarray, resolution: float = 30) -> None:
         lows        = [h.range.low for h in self.hyperparameters]
         highs       = [h.range.high for h in self.hyperparameters]
         plot_limits = [lows, highs]
@@ -210,7 +214,9 @@ class Experiment:
         x_max = model.X[max_idx]
 
         # with plt.xkcd():
-        plot_objective(model, x_max, x_next, plot_limits, vmin, vmax, self.hyperparameters, outer_grid, fig, gpy_model.acquisition_fn)
+        plot_objective(model, x_max, x_next, plot_limits, vmin, vmax,
+                self.hyperparameters, outer_grid, fig,
+                gpy_model.acquisition_fn)
 
         plot_dir = os.path.join(meta_dir, "plots")
         if not os.path.isdir(plot_dir):
@@ -222,8 +228,9 @@ class Experiment:
         plt.savefig(plot_fig_fname)
 
 
-def plot_objective(model, x_slice, x_next, plot_limits, vmin, vmax, hyperparameters, outer_grid, fig,
-        acq, zscale='linear', dimensions=None):
+def plot_objective(model, x_slice, x_next, plot_limits, vmin, vmax,
+        hyperparameters, outer_grid, fig,
+        acq, zscale='linear', dimensions=None) -> None:
     """
     * `zscale` [str, default='linear']
         Scale to use for the z axis of the contour plots. Either 'linear'
@@ -241,7 +248,8 @@ def plot_objective(model, x_slice, x_next, plot_limits, vmin, vmax, hyperparamet
     # second_grid = gridspec.GridSpecFromSubplotSpec(n_dims, n_dims, subplot_spec=outer_grid[1, 0])
 
     # fig, ax = plt.subplots(n_dims, n_dims, figsize=(size * n_dims, size * n_dims))
-    plt.suptitle(str(list(map(lambda x: str(round(x, 3)), model.param_array.tolist()))) + " " + str(x_slice.tolist()))
+    plt.suptitle(str(list(map(lambda x: str(round(x, 3)),
+        model.param_array.tolist()))) + " " + str(x_slice.tolist()))
 
     fig.subplots_adjust(left=0.05, right=0.95, bottom=0.05, top=0.95,
                         hspace=0.1, wspace=0.1)
@@ -260,7 +268,8 @@ def plot_objective(model, x_slice, x_next, plot_limits, vmin, vmax, hyperparamet
                         plot_limits=[p[i] for p in plot_limits])
                 ax.set_xlabel(hyperparameters[i].name)
 
-                model.plot_data(ax=ax, alpha=1, cmap=black_cmap, zorder=10, s=60, visible_dims=[i])
+                model.plot_data(ax=ax, alpha=1, cmap=black_cmap, zorder=10,
+                        s=60, visible_dims=[i])
 
 
             #     xi, yi = partial_dependence(space, result.models[-1], i,
@@ -283,10 +292,13 @@ def plot_objective(model, x_slice, x_next, plot_limits, vmin, vmax, hyperparamet
                     # TODO: neplotovat data 2x
                     model.plot(ax=ax, fixed_inputs=fixed_inputs, cmap="jet",
                             vmin=vmin, vmax=vmax, plot_limits=lims, legend=False)
+
                     ax.set_xlabel(hyperparameters[i].name)
                     ax.set_ylabel(hyperparameters[j].name)
 
-                    model.plot_data(ax=ax, alpha=1, cmap=black_cmap, zorder=10, s=60, visible_dims=[i, j])
+                    model.plot_data(ax=ax, alpha=1, cmap=black_cmap, zorder=10,
+                            s=60, visible_dims=[i, j])
+
                     ax.axvline(x_next[i], linestyle="--", color="r", lw=1)
                     ax.axhline(x_next[j], linestyle="--", color="r", lw=1)
 
@@ -294,7 +306,9 @@ def plot_objective(model, x_slice, x_next, plot_limits, vmin, vmax, hyperparamet
                     acq_ax = ax
 
                     acq_for_dims(model, acq, x_next, hyperparameters, acq_ax, [i, j], lims)
-                    model.plot_data(ax=acq_ax, alpha=1, cmap=black_cmap, zorder=10, s=60, visible_dims=[i, j])
+                    model.plot_data(ax=acq_ax, alpha=1, cmap=black_cmap,
+                            zorder=10, s=60, visible_dims=[i, j])
+
                     acq_ax.axvline(x_next[i], linestyle="--", color="r", lw=1)
                     acq_ax.axhline(x_next[j], linestyle="--", color="r", lw=1)
 
@@ -315,7 +329,8 @@ def plot_objective(model, x_slice, x_next, plot_limits, vmin, vmax, hyperparamet
     #                                  dim_labels=dimensions)
 
 
-def acq_for_dims(model, acq: AcquisitionFunction, x_slice, hyperparameters, ax, dims, plot_limits):
+def acq_for_dims(model, acq: AcquisitionFunction, x_slice, hyperparameters, ax,
+        dims, plot_limits) -> None:
     # x_frame2D only checks shape[1] and not the data when `plot_limits` is provided
     from GPy.plotting.gpy_plot.plot_util import x_frame2D
 

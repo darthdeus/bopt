@@ -11,7 +11,8 @@ from bopt.basic_types import Hyperparameter, Bound, Discrete
 from bopt.models.model import Model
 from bopt.sample import Sample, SampleCollection
 from bopt.models.parameters import ModelParameters
-from bopt.run_params import RunParams
+from bopt.model_config import ModelConfig
+from bopt.job_params import JobParams
 
 
 # TODO: split into multiple, serialization separate?
@@ -46,7 +47,7 @@ class GPyModel(Model):
         kernel_cls = GPyModel.parse_kernel_name(model_params.kernel)
         kernel = kernel_cls(input_dim=X.shape[1])
 
-        model = GPRegression(X, Y, kernel=kernel)
+        model = GPRegression(X, Y, kernel=kernel, normalizer=len(X) > 1)
 
         for name, value in model_params.params.items():
             model[name] = value
@@ -77,16 +78,15 @@ class GPyModel(Model):
 
     def predict_next(self): raise NotImplemented("This should not be called, deprecated")
 
-    def gpy_regression(run_params: RunParams,
+    def gpy_regression(model_config: ModelConfig,
             X_sample: np.ndarray, Y_sample: np.ndarray) -> GPRegression:
-        # If there is only one sample, .std() == 0 and Y ends up being NaN.
-        normalizer = len(X_sample) > 1
 
         # TODO: zkontrolovat, ze se kernely vyrabi jenom na jednom miste
-        kernel = GPyModel.parse_kernel_name(run_params.kernel)(X_sample.shape[1])
-        # TODO: nechybi normalizer i jinde?
+        kernel = GPyModel.parse_kernel_name(model_config.kernel)(X_sample.shape[1])
         # TODO: predava se kernel a acq vsude?
-        model = GPRegression(X_sample, Y_sample, kernel=kernel, normalizer=normalizer)
+
+        # If there is only one sample, .std() == 0 and Y ends up being NaN.
+        model = GPRegression(X_sample, Y_sample, kernel=kernel, normalizer=len(X_sample) > 1)
 
         # TODO: zamyslet se
         # model.kern.variance.set_prior(GPy.priors.Gamma(1., 0.1))
@@ -106,36 +106,22 @@ class GPyModel(Model):
         return model
 
     @staticmethod
-    def predict_next(run_params: RunParams, hyperparameters: List[Hyperparameter],
-            X_sample: np.ndarray, Y_sample: np.ndarray) -> Tuple[dict, "Model"]:
+    def predict_next(model_config: ModelConfig, hyperparameters: List[Hyperparameter],
+            X_sample: np.ndarray, Y_sample: np.ndarray) -> Tuple[JobParams, "Model"]:
         # TODO: compare NLL with and without normalizer
 
-        model = GPyModel.gpy_regression(run_params, X_sample, Y_sample)
-        acquisition_fn = GPyModel.parse_acquisition_fn(run_params.acquisition_fn)
+        model = GPyModel.gpy_regression(model_config, X_sample, Y_sample)
+        acquisition_fn = GPyModel.parse_acquisition_fn(model_config.acquisition_fn)
 
         bounds = [b.range for b in hyperparameters]
 
         x_next = propose_location(acquisition_fn, model, Y_sample.max(), bounds)
 
-        typed_vals = [int(x) if p.range.is_discrete() else float(x)
-                      for x, p in zip(x_next, hyperparameters)]
-
-        names = [p.name for p in hyperparameters]
-
-        # TODO: map back or just stick both in one struct?
-        # TODO: unify naming
-        # RunParams -> ModelConfig?
-        # params_dict -> EvaluationArgs
-        # ...
-        params_dict = dict(zip(names, typed_vals))
-
-        for p in hyperparameters:
-            if isinstance(p.range, Discrete):
-                params_dict[p.name] = p.range.inverse_map(params_dict[p.name])
+        job_params = JobParams.mapping_from_vector(x_next, Hyperparameter)
 
         fitted_model = GPyModel(model, acquisition_fn)
 
-        return params_dict, fitted_model
+        return job_params, fitted_model
 
 
 def propose_location(

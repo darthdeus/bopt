@@ -4,6 +4,7 @@ import numpy as np
 
 from typing import Tuple, List
 
+from bopt.job_params import JobParams
 from bopt.runner.abstract import Job
 from bopt.runner.job_loader import JobLoader
 from bopt.models.parameters import ModelParameters
@@ -42,19 +43,9 @@ class Sample:
                       data["mu_pred"],
                       data["sigma_pred"])
 
-    @staticmethod
-    def param_dict_to_x(param_dict: dict) -> np.ndarray:
-        x = np.zeros(len(param_dict), dtype=np.float64)
-
-        for i, key in enumerate(sorted(param_dict)):
-            value = param_dict[key]
-
-            x[i] = value
-
-        return x
-
     def to_x(self) -> np.ndarray:
-        return Sample.param_dict_to_x(self.job.run_parameters)
+        return self.job.run_parameters.x
+        # return Sample.param_dict_to_x(self.job.run_parameters)
 
     def to_xy(self, output_dir: str) -> Tuple[np.ndarray, float]:
         x = self.to_x()

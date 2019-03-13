@@ -59,6 +59,9 @@ class Discrete(Bound):
     def is_discrete(self) -> bool:
         return True
 
+    def map(self, value) -> int:
+        return self.values.index(value)
+
     def inverse_map(self, value) -> str:
         return self.values[value]
 
