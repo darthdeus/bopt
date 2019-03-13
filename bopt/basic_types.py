@@ -5,14 +5,16 @@ from typing import Union, NamedTuple, List
 
 # TODO: fix naming convention & typnig errors
 class Bound(abc.ABC):
-    pass
+    low: float
+    high: float
+    type: str
+
+    @abc.abstractmethod
+    def is_discrete(self) -> bool:
+        pass
 
 
 class Integer(Bound):
-    low: int
-    high: int
-    type: str
-
     def __init__(self, low: int, high: int):
         self.low = low
         self.high = high
@@ -21,15 +23,14 @@ class Integer(Bound):
     def sample(self) -> float:
         return np.random.randint(self.low, self.high)
 
+    def is_discrete(self) -> bool:
+        return True
+
     def __repr__(self) -> str:
         return f"Int({self.low}, {self.high})"
 
 
 class Float(Bound):
-    low: float
-    high: float
-    type: str
-
     def __init__(self, low: float, high: float):
         self.low = low
         self.high = high
@@ -38,15 +39,14 @@ class Float(Bound):
     def sample(self) -> float:
         return np.random.uniform(self.low, self.high)
 
+    def is_discrete(self) -> bool:
+        return False
+
     def __repr__(self) -> str:
         return f"Float({self.low}, {self.high})"
 
 
 class Discrete(Bound):
-    low: float
-    high: float
-    type: str
-
     def __init__(self, values: List[str]):
         self.values = values
         self.type = "discrete"
@@ -55,6 +55,12 @@ class Discrete(Bound):
 
     def sample(self) -> float:
         return np.random.randint(self.low, self.high)
+
+    def is_discrete(self) -> bool:
+        return True
+
+    def inverse_map(self, value) -> str:
+        return self.values[value]
 
     def __repr__(self) -> str:
         return f"Discrete({self.values})"
@@ -65,7 +71,7 @@ class Hyperparameter(NamedTuple):
     range: Bound
 
     def to_dict(self) -> dict:
-        if self.range.type == "discrete":
+        if isinstance(self.range, Discrete):
             return {
                 "type": "discrete",
                 "values": self.range.values

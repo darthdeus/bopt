@@ -83,7 +83,6 @@ class Experiment:
 
             next_params, fitted_model = \
                     model.predict_next(self.hyperparameters)
-
         else:
             X_sample, Y_sample = self.get_xy(meta_dir, include_mean_pred)
 

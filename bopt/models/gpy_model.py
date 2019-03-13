@@ -7,7 +7,7 @@ from GPy.models import GPRegression
 from typing import Tuple, List
 
 import bopt.acquisition_functions.acquisition_functions as acq
-from bopt.basic_types import Hyperparameter, Bound
+from bopt.basic_types import Hyperparameter, Bound, Discrete
 from bopt.models.model import Model
 from bopt.sample import Sample, SampleCollection
 from bopt.models.parameters import ModelParameters
@@ -117,12 +117,21 @@ class GPyModel(Model):
 
         x_next = propose_location(acquisition_fn, model, Y_sample.max(), bounds)
 
-        typed_vals = [int(x) if p.range.type == "int" else float(x)
+        typed_vals = [int(x) if p.range.is_discrete() else float(x)
                       for x, p in zip(x_next, hyperparameters)]
 
         names = [p.name for p in hyperparameters]
 
+        # TODO: map back or just stick both in one struct?
+        # TODO: unify naming
+        # RunParams -> ModelConfig?
+        # params_dict -> EvaluationArgs
+        # ...
         params_dict = dict(zip(names, typed_vals))
+
+        for p in hyperparameters:
+            if isinstance(p.range, Discrete):
+                params_dict[p.name] = p.range.inverse_map(params_dict[p.name])
 
         fitted_model = GPyModel(model, acquisition_fn)
 
