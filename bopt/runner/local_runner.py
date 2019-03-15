@@ -50,7 +50,7 @@ class LocalRunner(Runner):
             # , stderr=subprocess.STDOUT)
 
             job_id = process.pid
-            job_fname = os.path.join(output_dir, f"job-{job_id}.out")
+            job_fname = os.path.join(output_dir, f"job.o{job_id}")
 
             print(f"START {job_id}") # :\t{' '.join(cmd)}")
 

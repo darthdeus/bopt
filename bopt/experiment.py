@@ -111,6 +111,9 @@ class Experiment:
             model_params: ModelParameters, include_mean_pred: bool = True) -> Tuple[Job, Sample]:
         output_dir_path = pathlib.Path(meta_dir) / "output"
         output_dir_path.mkdir(parents=True, exist_ok=True)
+
+        logging.info("Output set to {}, absolute path: {}".format(output_dir_path, output_dir_path.absolute()))
+
         output_dir = str(output_dir_path)
 
         job = self.runner.start(output_dir, job_params)

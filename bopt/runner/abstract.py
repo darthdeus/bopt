@@ -46,11 +46,12 @@ class Job(abc.ABC):
     def is_finished(self) -> bool: pass
 
     def get_result(self, output_dir: str) -> float:
-        fname = os.path.join(output_dir, f"job-{self.job_id}.out")
+        fname = os.path.join(output_dir, f"job.o{self.job_id}")
 
         # TODO: handle errors
         with open(fname, "r") as f:
-            return float(f.read())
+            contents = f.read()
+            return float(contents.split("\n")[0])
 
     # def is_success(self) -> bool:
     #     if self.is_finished():
