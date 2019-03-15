@@ -40,8 +40,8 @@ class SGERunner(Runner):
     def start(self, output_dir: str, run_parameters: JobParams) -> Job:
         cmdline_run_params = [f"--{h.name}={value}" for h, value in run_parameters.mapping.items()]
 
-        # qsub_params: List[str] = ["-N", "job", "-o", output_dir]
-        qsub_params: List[str] = ["-N", "job"]
+        qsub_params: List[str] = ["-N", "job", "-o", output_dir]
+        # qsub_params: List[str] = ["-N", "job"]
         cmd = ["qsub", *qsub_params, self.script_path, *self.arguments, *cmdline_run_params]
 
         print(f"Starting a new job: {' '.join(cmd)}")
