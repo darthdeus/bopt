@@ -5,6 +5,7 @@ import datetime
 
 import numpy as np
 from typing import Union, List, Optional, Tuple
+from bopt.job_params import JobParams
 from bopt.parsers.result_parser import ResultParser, JobResult
 
 Timestamp = int
@@ -13,11 +14,11 @@ Value = float
 
 class Job(abc.ABC):
     job_id: int
-    run_parameters: dict
+    run_parameters: JobParams
     started_at: Optional[datetime.datetime]
     finished_at: Optional[datetime.datetime]
 
-    def __init__(self, job_id: int, run_parameters: dict) -> None:
+    def __init__(self, job_id: int, run_parameters: JobParams) -> None:
         self.job_id = job_id
         self.run_parameters = run_parameters
         self.started_at = None
@@ -27,7 +28,7 @@ class Job(abc.ABC):
         return {
             "job_type": self.job_type(),
             "job_id": self.job_id,
-            "run_parameters": self.run_parameters,
+            "run_parameters": self.run_parameters.to_dict(),
             "started_at": self.started_at,
             "finished_at": self.finished_at,
         }
@@ -111,7 +112,7 @@ class Runner(abc.ABC):
         self.arguments = arguments
 
     @abc.abstractmethod
-    def start(self, output_dir: str, run_parameters: dict) -> Job: pass
+    def start(self, output_dir: str, run_parameters: JobParams) -> Job: pass
 
     @abc.abstractmethod
     def runner_type(self) -> str: pass

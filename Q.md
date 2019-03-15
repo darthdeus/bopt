@@ -1,7 +1,7 @@
 - testovat vse na MNISTu a ne RL MC
 - u manual-run kontrolovat, ze hodnota je uvnitr range
 
-- logging
+- logging !!!!
 
 - sigmoid vs round?
 - interpolace mezi 2 body hyperparam + plot slicu v lib. 0d, 1d, 2d ose

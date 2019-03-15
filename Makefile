@@ -19,6 +19,7 @@ sfntest:
 	rm -rf results/sfn
 	$(BOPT) init --param "x:int:0:5" --param "y:float:0:25" \
 		--param "z:float:0:1" --param "w:float:2:7" \
+		--param "activation:discrete:relu:sigmoid:tanh" \
 		-C results/sfn \
 		$(PWD)/.venv/bin/python $(PWD)/experiments/simple_function.py
 	$(BOPT) run --n_iter=10 -C results/sfn

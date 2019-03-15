@@ -5,6 +5,7 @@ if __name__ == "__main__":
     import argparse
 
     parser = argparse.ArgumentParser()
+    parser.add_argument("--activation", default="relu", type=str, help="activation")
     parser.add_argument("--x", default=1.0, type=float, help="X")
     parser.add_argument("--y", default=1.0, type=float, help="Y")
     parser.add_argument("--z", default=1.0, type=float, help="Z")

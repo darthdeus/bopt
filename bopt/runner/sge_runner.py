@@ -8,6 +8,7 @@ import pathlib
 from glob import glob
 from typing import Union, List, Optional, Tuple
 
+from bopt.job_params import JobParams
 from bopt.basic_types import Hyperparameter
 from bopt.runner.abstract import Job, Runner, Timestamp, Value
 
@@ -32,11 +33,11 @@ class SGERunner(Runner):
     def runner_type(self) -> str:
         return "sge_runner"
 
-    def start(self, output_dir: str, run_parameters: dict) -> Job:
-        run_params = [f"--{name}={value}" for name, value in run_parameters.items()]
+    def start(self, output_dir: str, run_parameters: JobParams) -> Job:
+        cmdline_run_params = [f"--{h.name}={value}" for h, value in run_parameters.mapping.items()]
 
         qsub_params: List[str] = ["-N", "job", "-o", output_dir]
-        cmd = ["qsub", *qsub_params, self.script_path, *self.arguments, *run_params]
+        cmd = ["qsub", *qsub_params, self.script_path, *self.arguments, *cmdline_run_params]
 
         print(f"Starting a new job: {' '.join(cmd)}")
         output = subprocess.check_output(cmd, stderr=subprocess.STDOUT).decode("ascii")

@@ -1,3 +1,4 @@
+import logging
 import numpy as np
 from scipy.optimize import minimize
 
@@ -7,11 +8,12 @@ from GPy.models import GPRegression
 from typing import Tuple, List
 
 import bopt.acquisition_functions.acquisition_functions as acq
-from bopt.basic_types import Hyperparameter, Bound
+from bopt.basic_types import Hyperparameter, Bound, Discrete
 from bopt.models.model import Model
 from bopt.sample import Sample, SampleCollection
 from bopt.models.parameters import ModelParameters
-from bopt.run_params import RunParams
+from bopt.model_config import ModelConfig
+from bopt.job_params import JobParams
 
 
 # TODO: split into multiple, serialization separate?
@@ -46,7 +48,7 @@ class GPyModel(Model):
         kernel_cls = GPyModel.parse_kernel_name(model_params.kernel)
         kernel = kernel_cls(input_dim=X.shape[1])
 
-        model = GPRegression(X, Y, kernel=kernel)
+        model = GPRegression(X, Y, kernel=kernel, normalizer=len(X) > 1)
 
         for name, value in model_params.params.items():
             model[name] = value
@@ -77,90 +79,99 @@ class GPyModel(Model):
 
     def predict_next(self): raise NotImplemented("This should not be called, deprecated")
 
-    def gpy_regression(run_params: RunParams,
+    def gpy_regression(model_config: ModelConfig,
             X_sample: np.ndarray, Y_sample: np.ndarray) -> GPRegression:
-        # If there is only one sample, .std() == 0 and Y ends up being NaN.
-        normalizer = len(X_sample) > 1
 
         # TODO: zkontrolovat, ze se kernely vyrabi jenom na jednom miste
-        kernel = GPyModel.parse_kernel_name(run_params.kernel)(X_sample.shape[1])
-        # TODO: nechybi normalizer i jinde?
+        kernel = GPyModel.parse_kernel_name(model_config.kernel)(X_sample.shape[1])
         # TODO: predava se kernel a acq vsude?
-        model = GPRegression(X_sample, Y_sample, kernel=kernel, normalizer=normalizer)
+
+        # If there is only one sample, .std() == 0 and Y ends up being NaN.
+        model = GPRegression(X_sample, Y_sample, kernel=kernel, normalizer=len(X_sample) > 1)
 
         # TODO: zamyslet se
         # model.kern.variance.set_prior(GPy.priors.Gamma(1., 0.1))
         # model.kern.lengthscale.set_prior(GPy.priors.Gamma(1., 0.1))
+
+        min_bound = 1e-2
+        max_bound = 1e3
+
+        logging.info("GPY hyperparam optimization start")
+
         model.kern.variance.unconstrain()
-        model.kern.variance.constrain_bounded(1e-2, 1e6)
+        model.kern.variance.constrain_bounded(min_bound, max_bound)
 
         model.kern.lengthscale.unconstrain()
-        model.kern.lengthscale.constrain_bounded(1e-2, 1e6)
+        model.kern.lengthscale.constrain_bounded(min_bound, max_bound)
 
         model.Gaussian_noise.variance.unconstrain()
-        model.Gaussian_noise.variance.constrain_bounded(1e-2, 1e6)
+        model.Gaussian_noise.variance.constrain_bounded(min_bound, max_bound)
 
         # model.Gaussian_noise.set_prior(GPy.priors.Gamma(1., 0.1))
         model.optimize()
 
+        logging.info("GPY hyperparam optimization DONE, params: {}".format(model.param_array))
+
         return model
 
     @staticmethod
-    def predict_next(run_params: RunParams, hyperparameters: List[Hyperparameter],
-            X_sample: np.ndarray, Y_sample: np.ndarray) -> Tuple[dict, "Model"]:
+    def predict_next(model_config: ModelConfig, hyperparameters: List[Hyperparameter],
+            X_sample: np.ndarray, Y_sample: np.ndarray) -> Tuple[JobParams, "Model"]:
         # TODO: compare NLL with and without normalizer
 
-        model = GPyModel.gpy_regression(run_params, X_sample, Y_sample)
-        acquisition_fn = GPyModel.parse_acquisition_fn(run_params.acquisition_fn)
+        model = GPyModel.gpy_regression(model_config, X_sample, Y_sample)
+        acquisition_fn = GPyModel.parse_acquisition_fn(model_config.acquisition_fn)
 
-        bounds = [b.range for b in hyperparameters]
+        x_next = GPyModel.propose_location(acquisition_fn, model, Y_sample.max(),
+                hyperparameters)
 
-        x_next = propose_location(acquisition_fn, model, Y_sample.max(), bounds)
+        logging.info("New proposed location at x = {}".format(x_next))
 
-        typed_vals = [int(x) if p.range.type == "int" else float(x)
-                      for x, p in zip(x_next, hyperparameters)]
-
-        names = [p.name for p in hyperparameters]
-
-        params_dict = dict(zip(names, typed_vals))
+        job_params = JobParams.mapping_from_vector(x_next, hyperparameters)
 
         fitted_model = GPyModel(model, acquisition_fn)
 
-        return params_dict, fitted_model
+        return job_params, fitted_model
 
+    @staticmethod
+    def propose_location( acquisition_fn: acq.AcquisitionFunction, gp:
+            GPRegression, y_max: float, hyperparameters: List[Hyperparameter],
+            n_restarts: int = 25,) -> np.ndarray:
+        # TODO: heh
+        # np.seterrcall(lambda *args: __import__('ipdb').set_trace())
+        np.seterr(all="warn")
 
-def propose_location(
-    acquisition_fn: acq.AcquisitionFunction,
-    gp: GPRegression,
-    y_max: float,
-    bounds: List[Bound],
-    n_restarts: int = 25,
-) -> np.ndarray:
-    # TODO: heh
-    # np.seterrcall(lambda *args: __import__('ipdb').set_trace())
-    np.seterr(all="warn")
+        def min_obj(X):
+            return -acquisition_fn(gp, X.reshape(1, -1), y_max)
 
-    def min_obj(X):
-        return -acquisition_fn(gp, X.reshape(1, -1), y_max)
+        scipy_bounds = [(h.range.low, h.range.high) for h in hyperparameters]
 
-    scipy_bounds = [(bound.low, bound.high) for bound in bounds]
+        starting_points = []
+        for _ in range(n_restarts):
+            # TODO: tohle spadne protoze sample z discrete takhle nejde pouzit
+            x_sample = JobParams.sample_params(hyperparameters)
 
-    starting_points = []
-    for _ in range(n_restarts):
-        starting_points.append(np.array([bound.sample() for bound in bounds]))
+            # starting_points.append(np.array([bound.sample() for bound in
+            # bounds]))
+            starting_points.append(x_sample)
 
-    min_val = 1e9
-    min_x = None
+        min_val = 1e9
+        min_x = None
 
-    for x0 in starting_points:
-        res = minimize(min_obj, x0=x0, bounds=scipy_bounds, method="L-BFGS-B")
+        logging.info("Starting propose_location")
 
-        assert not np.any(np.isnan(res.fun))
+        for x0 in starting_points:
+            res = minimize(min_obj, x0=x0, bounds=scipy_bounds, method="L-BFGS-B")
 
-        if res.fun < min_val:
-            min_val = res.fun[0]
-            min_x = res.x
+            assert not np.any(np.isnan(res.fun))
 
-    assert min_x is not None
+            if res.fun < min_val:
+                min_val = res.fun[0]
+                min_x = res.x
 
-    return min_x
+        assert min_x is not None
+
+        new_point_str = " ".join(map(lambda xx: str(round(xx, 2)), min_x.tolist()))
+        logging.info("Finished optimizing acq_fn, got a new min at {}".format(new_point_str))
+
+        return min_x

@@ -1,6 +1,6 @@
 from argparse import Namespace
 
-class RunParams:
+class ModelConfig:
     kernel: str
     acquisition_fn: str
 
@@ -9,9 +9,13 @@ class RunParams:
         self.acquisition_fn = args.acquisition_fn
 
     @staticmethod
-    def default() -> "RunParams":
+    def default() -> "ModelConfig":
         ns = Namespace()
         ns.kernel = "Mat52"
         ns.acquisition_fn = "ei"
 
-        return RunParams(ns)
+        return ModelConfig(ns)
+
+    def __str__(self) -> str:
+        return "kernel: {}, acq_fn: {}".format(self.kernel,
+                self.acquisition_fn)

@@ -1,17 +1,17 @@
 import numpy as np
 from typing import List, Tuple
 
+from bopt.job_params import JobParams
 from bopt.models.model import Model, SampleCollection
 from bopt.basic_types import Hyperparameter, Bound
 from bopt.models.parameters import ModelParameters
 
 
 class RandomSearch(Model):
-    def predict_next(self, hyperparameters: List[Hyperparameter]) -> Tuple[dict, "Model"]:
+    def predict_next(self, hyperparameters: List[Hyperparameter]) -> Tuple[JobParams, "Model"]:
+        mapping = {h: h.range.sample() for h in hyperparameters}
 
-        value = {h.name: h.range.sample() for h in hyperparameters}
-
-        return value, self
+        return JobParams.from_mapping(mapping), self
 
     def to_model_params(self) -> ModelParameters:
         return ModelParameters("random_search", {}, "", "")

@@ -6,7 +6,6 @@ from tqdm import tqdm
 from typing import List
 
 import bopt
-from bopt.run_params import RunParams
 from bopt.cli.util import handle_cd
 
 def run(args) -> None:
@@ -18,7 +17,7 @@ def run(args) -> None:
         experiment = bopt.Experiment.deserialize(".")
 
         next_params, fitted_model = \
-                experiment.suggest(RunParams(args), ".")
+                experiment.suggest(bopt.ModelConfig(args), ".")
 
         param_str = "\n".join([f"{key}: {value}" for key, value in next_params.items()])
         param_args = " ".join([f"--{key}={value}" for key, value in next_params.items()])
