@@ -25,7 +25,7 @@ class JobLoader:
         cls = JOB_MAPPING[data["job_type"]]
 
         # TODO: 64 or 32 bit?
-        x = np.ndarray(data["run_parameters"], dtype=np.float64)
+        x = np.array(data["run_parameters"], dtype=np.float64)
         job_params = JobParams.mapping_from_vector(x, hyperprameters)
 
         job = cls(data["job_id"], job_params)

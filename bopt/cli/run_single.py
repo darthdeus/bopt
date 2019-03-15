@@ -11,4 +11,4 @@ def run(args) -> None:
     with ensure_meta_yml():
         experiment = bopt.Experiment.deserialize(".")
 
-        experiment.run_single(bopt.ModelConfig(args), ".,")
+        experiment.run_single(bopt.ModelConfig(args), ".")

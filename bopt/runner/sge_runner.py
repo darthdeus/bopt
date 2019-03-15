@@ -18,7 +18,11 @@ class SGEJob(Job):
         return "sge_job"
 
     def is_finished(self) -> bool:
-        raise NotImplementedError()
+        try:
+            subprocess.check_output(["qstat", "-j", str(self.job_id)])
+            return False
+        except subprocess.CalledProcessError:
+            return True
 
     def state(self) -> str:
         return subprocess.check_output(["qstat"]).decode("ascii")
@@ -36,7 +40,8 @@ class SGERunner(Runner):
     def start(self, output_dir: str, run_parameters: JobParams) -> Job:
         cmdline_run_params = [f"--{h.name}={value}" for h, value in run_parameters.mapping.items()]
 
-        qsub_params: List[str] = ["-N", "job", "-o", output_dir]
+        # qsub_params: List[str] = ["-N", "job", "-o", output_dir]
+        qsub_params: List[str] = ["-N", "job"]
         cmd = ["qsub", *qsub_params, self.script_path, *self.arguments, *cmdline_run_params]
 
         print(f"Starting a new job: {' '.join(cmd)}")

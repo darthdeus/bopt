@@ -27,6 +27,10 @@ from bopt.runner.runner_loader import RunnerLoader
 
 from bopt.acquisition_functions.acquisition_functions import AcquisitionFunction
 
+# logging.getLogger().setLevel(logging.INFO)
+logging.getLogger().setLevel(logging.DEBUG)
+logging.getLogger("matplotlib").setLevel(logging.INFO)
+
 
 black_cmap = LinearSegmentedColormap.from_list("black", ["black", "black"])
 
@@ -136,6 +140,9 @@ class Experiment:
         next_sample = Sample(job, model_params, float(mu), float(sigma))
         self.samples.append(next_sample)
 
+        self.serialize(meta_dir)
+        logging.debug("Serialization done")
+
         return job, next_sample
 
     def run_single(self, model_config: ModelConfig, meta_dir: str) -> Job:
@@ -145,16 +152,10 @@ class Experiment:
         logging.debug("Starting to plot")
         self.plot_current(fitted_model, meta_dir, x_next)
         logging.debug("Plotting done")
-        self.serialize(meta_dir)
-        logging.debug("Serialization done")
 
         return job
 
     def run_loop(self, model_config: ModelConfig, meta_dir: str, n_iter=10) -> None:
-        # logging.getLogger().setLevel(logging.INFO)
-        logging.getLogger().setLevel(logging.DEBUG)
-        # logging.getLogger("matplotlib").setLevel(logging.INFO)
-
         for i in range(n_iter):
             job = self.run_single(model_config, meta_dir)
             logging.info("Started a new job {} with config {}".format(job.job_id, model_config))
