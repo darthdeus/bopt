@@ -92,13 +92,13 @@ class GPyModel(Model):
         # model.kern.variance.set_prior(GPy.priors.Gamma(1., 0.1))
         # model.kern.lengthscale.set_prior(GPy.priors.Gamma(1., 0.1))
         model.kern.variance.unconstrain()
-        model.kern.variance.constrain_bounded(1e-2, 1e6)
+        model.kern.variance.constrain_bounded(1e-2, 1e3)
 
         model.kern.lengthscale.unconstrain()
-        model.kern.lengthscale.constrain_bounded(1e-2, 1e6)
+        model.kern.lengthscale.constrain_bounded(1e-2, 1e3)
 
         model.Gaussian_noise.variance.unconstrain()
-        model.Gaussian_noise.variance.constrain_bounded(1e-2, 1e6)
+        model.Gaussian_noise.variance.constrain_bounded(1e-2, 1e3)
 
         # model.Gaussian_noise.set_prior(GPy.priors.Gamma(1., 0.1))
         model.optimize()
