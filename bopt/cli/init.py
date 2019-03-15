@@ -40,14 +40,18 @@ def run(args) -> None:
         hyperparameters.append(hyp)
 
     assert args.result_parser == "bopt.LastLineLastWordParser"
-    # TODO: sge
-    assert args.runner == "local"
 
     meta_dir = args.dir
     script_path = args.command
     default_arguments = args.arguments
 
-    runner = bopt.LocalRunner(script_path, default_arguments)
+    if args.runner == "local":
+        runner = bopt.LocalRunner(script_path, default_arguments)
+    elif args.runner == "sge":
+        runner = bopt.SGERunner(script_path, default_arguments)
+    else:
+        print("Invalid value {} for runner, only 'local' and 'sge' are allowed.".format(args.runner))
+
     experiment = bopt.Experiment(hyperparameters, runner)
 
     import pathlib
