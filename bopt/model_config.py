@@ -15,3 +15,7 @@ class ModelConfig:
         ns.acquisition_fn = "ei"
 
         return ModelConfig(ns)
+
+    def __str__(self) -> str:
+        return "kernel: {}, acq_fn: {}".format(self.kernel,
+                self.acquisition_fn)

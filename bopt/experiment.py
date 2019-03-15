@@ -4,6 +4,7 @@ import psutil
 import time
 import pathlib
 import datetime
+import logging
 import numpy as np
 
 from typing import List, Optional, Tuple
@@ -141,19 +142,33 @@ class Experiment:
         job, fitted_model, x_next = self.run_next(model_config, meta_dir)
 
         # TODO: nechci radsi JobParams?
+        logging.debug("Starting to plot")
         self.plot_current(fitted_model, meta_dir, x_next)
+        logging.debug("Plotting done")
         self.serialize(meta_dir)
+        logging.debug("Serialization done")
 
         return job
 
     def run_loop(self, model_config: ModelConfig, meta_dir: str, n_iter=10) -> None:
+        # logging.getLogger().setLevel(logging.INFO)
+        logging.getLogger().setLevel(logging.DEBUG)
+        # logging.getLogger("matplotlib").setLevel(logging.INFO)
+
         for i in range(n_iter):
             job = self.run_single(model_config, meta_dir)
+            logging.info("Started a new job {} with config {}".format(job.job_id, model_config))
+
+            start_time = time.time()
 
             # psutil.wait_procs(psutil.Process().children(), timeout=0.01)
             while not job.is_finished():
                 psutil.wait_procs(psutil.Process().children(), timeout=0.01)
                 time.sleep(0.2)
+
+            end_time = time.time()
+
+            logging.info("Job {} finished after {}".format(job.job_id, end_time - start_time))
 
             # TODO: serialize immediately?
             # self.serialize(meta_dir)
