@@ -19,7 +19,7 @@
   - u nedobehlych jobu predpokladam ze vysledek je jejich mean
   - kontrolovat, ze 2x nevyhodnocuju ve stejnym bode
 - [x] intove hyperparam: GPy?
-- diskretni/categorical parametry
+- [x] diskretni/categorical parametry
 - SGE Runner:        neni broken, jenom neni updated na novejsi API
 
 - plot convergence
