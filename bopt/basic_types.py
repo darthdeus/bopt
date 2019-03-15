@@ -58,7 +58,7 @@ class Discrete(Bound):
         self.values = values
         self.type = "discrete"
         self.low = 0
-        self.high = len(values)
+        self.high = len(values) - 1 + 1e-6
 
     def sample(self) -> float:
         return self.values[np.random.randint(self.low, self.high)]
