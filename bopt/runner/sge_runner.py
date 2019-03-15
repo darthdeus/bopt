@@ -4,6 +4,7 @@ import yaml
 import re
 import subprocess
 import pathlib
+import logging
 
 from glob import glob
 from typing import Union, List, Optional, Tuple
@@ -44,12 +45,13 @@ class SGERunner(Runner):
         # qsub_params: List[str] = ["-N", "job"]
         cmd = ["qsub", *qsub_params, self.script_path, *self.arguments, *cmdline_run_params]
 
-        print(f"Starting a new job: {' '.join(cmd)}")
+        logging.info(f"SGE_JOB_START: {' '.join(cmd)}")
         output = subprocess.check_output(cmd, stderr=subprocess.STDOUT).decode("ascii")
-        print(output)
+        logging.info(output)
 
-        matches = re.match(pattern=r"Your job (\d+) \(\".*\"\) has been submitted",
-                           string=output)
+        matches = re.match(
+                pattern=r"Your job (\d+) \(\".*\"\) has been submitted",
+                string=output)
 
         assert matches is not None
         job_id = int(matches.group(1))

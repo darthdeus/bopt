@@ -125,7 +125,9 @@ class GPyModel(Model):
         x_next = GPyModel.propose_location(acquisition_fn, model, Y_sample.max(),
                 hyperparameters)
 
-        logging.info("New proposed location at x = {}".format(x_next))
+        new_point_str = " ".join(map(lambda xx: str(round(xx, 2)), x_next.tolist()))
+
+        logging.info("New proposed location at x = {}".format(new_point_str))
 
         job_params = JobParams.mapping_from_vector(x_next, hyperparameters)
 
@@ -158,7 +160,7 @@ class GPyModel(Model):
         min_val = 1e9
         min_x = None
 
-        logging.info("Starting propose_location")
+        logging.debug("Starting propose_location")
 
         for x0 in starting_points:
             res = minimize(min_obj, x0=x0, bounds=scipy_bounds, method="L-BFGS-B")
@@ -171,7 +173,6 @@ class GPyModel(Model):
 
         assert min_x is not None
 
-        new_point_str = " ".join(map(lambda xx: str(round(xx, 2)), min_x.tolist()))
-        logging.info("Finished optimizing acq_fn, got a new min at {}".format(new_point_str))
+        logging.debug("Finished propose_location")
 
         return min_x

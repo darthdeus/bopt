@@ -6,6 +6,7 @@ import subprocess
 import pathlib
 import psutil
 import tempfile
+import logging
 
 from glob import glob
 from typing import Union, List, Optional, Tuple, Callable
@@ -52,7 +53,7 @@ class LocalRunner(Runner):
             job_id = process.pid
             job_fname = os.path.join(output_dir, f"job.o{job_id}")
 
-            print(f"START {job_id}") # :\t{' '.join(cmd)}")
+            logging.info(f"JOB_START {job_id}") # :\t{' '.join(cmd)}")
 
             os.rename(temp_fname, job_fname)
 

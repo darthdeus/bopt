@@ -27,9 +27,10 @@ from bopt.runner.runner_loader import RunnerLoader
 
 from bopt.acquisition_functions.acquisition_functions import AcquisitionFunction
 
-# logging.getLogger().setLevel(logging.INFO)
-logging.getLogger().setLevel(logging.DEBUG)
-logging.getLogger("matplotlib").setLevel(logging.INFO)
+logging.getLogger().setLevel(logging.INFO)
+logging.getLogger("GP").setLevel(logging.WARNING)
+# logging.getLogger().setLevel(logging.DEBUG)
+# logging.getLogger("matplotlib").setLevel(logging.INFO)
 
 
 black_cmap = LinearSegmentedColormap.from_list("black", ["black", "black"])
