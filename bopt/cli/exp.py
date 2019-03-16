@@ -14,6 +14,23 @@ def run(args) -> None:
     for param in experiment.hyperparameters:
         print(f"\t{param}")
 
+    print("BEST:")
+
+    best_res = None
+    best_sample = None
+
+    for sample in experiment.samples:
+        if sample.job.is_finished():
+            res = sample.get_result(".")
+
+            if best_res is None or res > best_res:
+                best_res = res
+                best_sample = sample
+
+    print("objective: {}".format(best_res))
+    print(best_sample.job.run_parameters)
+    print()
+
     print("Evaluations:")
     for sample in experiment.samples:
         job = sample.job
@@ -27,4 +44,4 @@ def run(args) -> None:
             # TODO fix this on osx, shared={mem.shared}"
             proc_stats += f", rss={mem.rss}, vms={mem.vms}"
 
-        print(f"{job}\t{proc_stats}")
+        print(f"{sample}\t{proc_stats}")

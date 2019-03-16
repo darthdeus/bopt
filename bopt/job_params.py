@@ -15,6 +15,10 @@ class JobParams:
     def to_dict(self) -> dict:
         return self.x.tolist()
 
+    def __str__(self) -> str:
+        return str({h.name: value for h, value in
+                self.mapping.items()})
+
     @staticmethod
     def sample_params(hyperparameters: List[Hyperparameter]) -> np.ndarray:
         mapping = {h: h.range.sample() for h in hyperparameters}
@@ -33,7 +37,8 @@ class JobParams:
         # TODO: unify naming
         # params_dict -> EvaluationArgs
         # ...
-        mapping: Dict[Hyperparameter, ParamTypes] = dict(zip(hyperparameters, typed_vals))
+        mapping: Dict[Hyperparameter, ParamTypes] = dict(zip(hyperparameters,
+            typed_vals))
 
         for p in hyperparameters:
             if isinstance(p.range, Discrete):

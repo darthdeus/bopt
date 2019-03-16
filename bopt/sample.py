@@ -67,6 +67,29 @@ class Sample:
         output_dir = os.path.join(meta_dir, "output")
         return self.job.get_result(output_dir)
 
+    def __str__(self) -> str:
+        s = f"{self.job.job_id}\t"
+        is_finished = self.job.is_finished()
+
+        if self.job.is_finished():
+            # TODO: handle failed
+            # if self.is_success():
+                # TODO: meta_dir not needed since we're always cding?
+                final_result = self.get_result(".")
+
+                rounded_params = {h.name: value for h, value in
+                        self.job.run_parameters.mapping.items()}
+
+                assert isinstance(final_result, float)
+                s += f"{is_finished}\t{final_result:.3f}\t{rounded_params}"
+            # else:
+            #     s += f"FAILED: {self.err()}"
+        else:
+            s += "RUNNING"
+
+        return s
+
+
 
 class SampleCollection:
     samples: List[Sample]

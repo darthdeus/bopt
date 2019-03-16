@@ -85,25 +85,6 @@ class Job(abc.ABC):
         # TODO: failed status
 
 
-    def __str__(self) -> str:
-        s = f"{self.job_id}\t"
-        is_finished = self.is_finished()
-
-        if self.is_finished():
-            if self.is_success():
-                final_result = self.final_result()
-
-                rounded_params = {name: round(value, 4)
-                        for name, value in self.run_parameters.items()}
-                assert isinstance(final_result, float)
-                s += f"{is_finished}\t{final_result:.3f}\t{rounded_params}"
-            else:
-                s += f"FAILED: {self.err()}"
-        else:
-            s += "RUNNING"
-
-        return s
-
 class Runner(abc.ABC):
     script_path: str
     arguments: List[str]
