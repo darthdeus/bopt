@@ -34,7 +34,7 @@ lab02-cartpole:
 		--param "units:int:5:500" \
 		-C results/l2cartpole \
 		$(HOME)/projects/npfl114/labs/02/bopt_cartpole.sh
-	$(BOPT) run --n_iter=10 -C results/l2cartpole
+	$(BOPT) run --n_iter=30 -C results/l2cartpole
 		# $(PWD)/.venv/bin/python $(PWD)/experiments/simple_function.py
 	# convert -delay 100 -loop 0 tmp/*.png anim.gif
 

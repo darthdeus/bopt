@@ -1,5 +1,6 @@
 # TODO: get rid of psutil?
 import psutil
+import logging
 
 from bopt.cli.util import handle_cd
 from bopt.experiment import Experiment
@@ -19,13 +20,22 @@ def run(args) -> None:
     best_res = None
     best_sample = None
 
+    ok_samples = []
+
     for sample in experiment.samples:
         if sample.job.is_finished():
-            res = sample.get_result(".")
+            try:
+                res = sample.get_result(".")
 
-            if best_res is None or res > best_res:
-                best_res = res
-                best_sample = sample
+                if best_res is None or res > best_res:
+                    best_res = res
+                    best_sample = sample
+            except ValueError:
+                job_id = sample.job.job_id if sample.job else "NOJOB_ERR"
+                logging.error("Sample {} failed to parse".format(job_id))
+                continue
+
+        ok_samples.append(sample)
 
     print("objective: {}".format(best_res))
 
@@ -36,7 +46,7 @@ def run(args) -> None:
         print()
 
         print("Evaluations:")
-        for sample in experiment.samples:
+        for sample in ok_samples:
             job = sample.job
 
             proc_stats = ""
