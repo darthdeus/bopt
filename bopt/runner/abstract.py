@@ -2,6 +2,8 @@ import abc
 import os
 import yaml
 import datetime
+import logging
+import traceback
 
 import numpy as np
 from typing import Union, List, Optional, Tuple
@@ -50,8 +52,10 @@ class Job(abc.ABC):
 
         # TODO: handle errors
         with open(fname, "r") as f:
-            contents = f.read()
-            return float(contents.split("\n")[0])
+            # TODO: handle endings properly
+            contents = f.read().rstrip("\n")
+            last = contents.split("\n")[-1]
+            return float(last)
 
     # def is_success(self) -> bool:
     #     if self.is_finished():

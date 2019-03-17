@@ -1,5 +1,6 @@
 import os
 import logging
+import traceback
 import numpy as np
 
 from typing import Tuple, List
@@ -52,7 +53,13 @@ class Sample:
         x = self.to_x()
 
         if self.job.is_finished():
-            y = self.job.get_result(output_dir)
+            try:
+                y = self.job.get_result(output_dir)
+            except ValueError as e:
+                traceback_str = "".join(traceback.format_tb(e.__traceback__))
+                logging.error("Parsing failed with error, using mean prediction instead:\n{}\n\n".format(e, traceback_str))
+
+                y = self.mu_pred
         else:
             logging.warning(f"Using mean prediction for sample {self}")
             y = self.mu_pred

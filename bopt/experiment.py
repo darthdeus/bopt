@@ -5,6 +5,8 @@ import time
 import pathlib
 import datetime
 import logging
+import traceback
+
 import numpy as np
 
 from typing import List, Optional, Tuple
@@ -154,7 +156,13 @@ class Experiment:
 
         # TODO: nechci radsi JobParams?
         logging.debug("Starting to plot")
-        self.plot_current(fitted_model, meta_dir, x_next)
+
+        try:
+            self.plot_current(fitted_model, meta_dir, x_next)
+        except ValueError as e:
+            traceback_str = "".join(traceback.format_tb(e.__traceback__))
+            logging.error("Plotting failed, error:\n{}\n\n".format(e, traceback_str))
+
         logging.debug("Plotting done")
 
         return job
