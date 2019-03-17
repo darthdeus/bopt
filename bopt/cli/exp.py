@@ -15,8 +15,6 @@ def run(args) -> None:
     for param in experiment.hyperparameters:
         print(f"\t{param}")
 
-    print("BEST:")
-
     best_res = None
     best_sample = None
 
@@ -37,7 +35,7 @@ def run(args) -> None:
 
         ok_samples.append(sample)
 
-    print("objective: {}".format(best_res))
+    print("\nBEST (id={}): {}".format(best_sample.job.job_id, best_res))
 
     assert best_sample is not None
 
