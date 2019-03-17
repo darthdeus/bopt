@@ -25,6 +25,20 @@ sfntest:
 	$(BOPT) run --n_iter=10 -C results/sfn
 	# convert -delay 100 -loop 0 tmp/*.png anim.gif
 
+lab02-cartpole:
+	rm -rf results/l2cartpole
+	$(BOPT) init \
+		--param "batch_size:int:8:100" \
+		--param "epochs:int:1:1000" \
+		--param "layers:int:1:10" \
+		--param "units:int:5:500" \
+		-C results/l2cartpole \
+		$(HOME)/projects/npfl114/labs/02/bopt_cartpole.sh
+	$(BOPT) run --n_iter=10 -C results/l2cartpole
+		# $(PWD)/.venv/bin/python $(PWD)/experiments/simple_function.py
+	# convert -delay 100 -loop 0 tmp/*.png anim.gif
+
+
 sfntest-sge:
 	rm -rf results/sfn
 	$(BOPT) init --param "x:int:0:5" --param "y:float:0:25" \
@@ -35,7 +49,6 @@ sfntest-sge:
 		$(PWD)/.venv/bin/python $(PWD)/experiments/simple_function.py
 	# $(BOPT) run --n_iter=10 -C results/sfn
 	# convert -delay 100 -loop 0 tmp/*.png anim.gif
-
 
 sfntest2d:
 	rm -rf results/sfn2d
