@@ -1,3 +1,4 @@
+import logging
 import numpy as np
 from typing import Dict, List, Union
 
@@ -18,6 +19,21 @@ class JobParams:
     def __str__(self) -> str:
         return str({h.name: value for h, value in
                 self.mapping.items()})
+
+    def validate(self) -> bool:
+        all_valid = True
+        for param, value in self.mapping.items():
+            param_valid = param.validate(value)
+
+            if not param_valid:
+                logging.error("Invalid hyperparam value {} for {}".format(value, param))
+
+            all_valid = all_valid and param_valid
+
+        if all_valid:
+            logging.debug("All parameter values passed validation")
+
+        return all_valid
 
     @staticmethod
     def sample_params(hyperparameters: List[Hyperparameter]) -> np.ndarray:

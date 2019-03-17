@@ -19,5 +19,7 @@ def run(args) -> None:
         if "dir" in model_params:
             del model_params["dir"]
 
-        experiment.manual_run(bopt.ModelConfig.default(), ".", model_params,
-                bopt.ModelParameters.for_manual_run())
+        __import__('ipdb').set_trace()
+
+        experiment.manual_run(bopt.ModelConfig.default(), ".",
+                model_params, bopt.ModelParameters.for_manual_run())

@@ -15,9 +15,12 @@ class Bound(abc.ABC):
     def is_discrete(self) -> bool:
         pass
 
-    # TODO: fix return type object
     @abc.abstractmethod
     def sample(self) -> ParamTypes:
+        pass
+
+    @abc.abstractmethod
+    def validate(self, value: ParamTypes) -> bool:
         pass
 
 
@@ -32,6 +35,10 @@ class Integer(Bound):
 
     def is_discrete(self) -> bool:
         return True
+
+    def validate(self, value: ParamTypes) -> bool:
+        assert isinstance(value, int)
+        return self.low <= value < self.high
 
     def __repr__(self) -> str:
         return f"Int({self.low}, {self.high})"
@@ -49,6 +56,10 @@ class Float(Bound):
     def is_discrete(self) -> bool:
         return False
 
+    def validate(self, value: ParamTypes) -> bool:
+        assert isinstance(value, float)
+        return self.low <= value < self.high
+
     def __repr__(self) -> str:
         return f"Float({self.low}, {self.high})"
 
@@ -62,6 +73,10 @@ class Discrete(Bound):
 
     def sample(self) -> float:
         return self.values[np.random.randint(self.low, self.high)]
+
+    def validate(self, value: ParamTypes) -> bool:
+        assert isinstance(value, str)
+        return value in self.values
 
     def is_discrete(self) -> bool:
         return True
@@ -92,6 +107,9 @@ class Hyperparameter(NamedTuple):
                 "low": self.range.low,
                 "high": self.range.high
             }
+
+    def validate(self, value) -> bool:
+        return self.range.validate(value)
 
     @staticmethod
     def from_dict(name, data: dict) -> "Hyperparameter":

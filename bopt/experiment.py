@@ -117,6 +117,8 @@ class Experiment:
 
         logging.info("Output set to {}, absolute path: {}".format(output_dir_path, output_dir_path.absolute()))
 
+        job_params.validate()
+
         output_dir = str(output_dir_path)
 
         job = self.runner.start(output_dir, job_params)

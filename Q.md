@@ -1,4 +1,6 @@
-- testovat vse na MNISTu a ne RL MC
+!!!!!!!!!!!! manual run broken1!!!!!
+
+- [x] testovat vse na MNISTu a ne RL MC
 - u manual-run kontrolovat, ze hodnota je uvnitr range
 
 - logging !!!!
@@ -15,12 +17,12 @@
 
 - [x] kernel type:       trivialni, ale neni to :)
 - [x] acq fn v yml
-- parallel evaluace: trivialni, ale neni to :)
-  - u nedobehlych jobu predpokladam ze vysledek je jejich mean
+- [x] parallel evaluace: trivialni, ale neni to :)
+  - [x] u nedobehlych jobu predpokladam ze vysledek je jejich mean
   - kontrolovat, ze 2x nevyhodnocuju ve stejnym bode
 - [x] intove hyperparam: GPy?
 - [x] diskretni/categorical parametry
-- SGE Runner:        neni broken, jenom neni updated na novejsi API
+- [x] SGE Runner:        neni broken, jenom neni updated na novejsi API
 
 - plot convergence
 
