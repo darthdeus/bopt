@@ -6,7 +6,7 @@ from tqdm import tqdm
 from typing import List
 
 import bopt
-from bopt.cli.util import handle_cd, ensure_meta_yml
+from bopt.cli.util import handle_cd, ensure_meta_yml, acquire_lock
 from bopt.models.gpy_model import GPyModel
 
 # TODO: co kdyz dostanu manual evaluation, zkusit precejenom fitnout model
@@ -14,7 +14,7 @@ from bopt.models.gpy_model import GPyModel
 def run(args) -> None:
     handle_cd(args)
 
-    with ensure_meta_yml():
+    with acquire_lock(), ensure_meta_yml():
         experiment = bopt.Experiment.deserialize(".")
 
         processed_samples: List[bopt.Sample] = []

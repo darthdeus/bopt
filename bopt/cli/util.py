@@ -1,11 +1,15 @@
 import os
 import sys
+import filelock
 
 
 def handle_cd(args):
     if args.dir is not None:
         print(f"Changing directory to {args.dir}", file=sys.stderr)
         os.chdir(args.dir)
+
+def acquire_lock():
+    return filelock.FileLock(".lockfile")
 
 class ensure_meta_yml:
     def __enter__(self):

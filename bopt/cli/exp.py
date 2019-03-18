@@ -1,59 +1,65 @@
 # TODO: get rid of psutil?
 import psutil
 import logging
+import sys
 
-from bopt.cli.util import handle_cd
+from bopt.cli.util import handle_cd, acquire_lock
 from bopt.experiment import Experiment
 
 
 def run(args) -> None:
     handle_cd(args)
 
-    experiment = Experiment.deserialize(".")
+    with acquire_lock():
+        experiment = Experiment.deserialize(".")
 
-    print("Hyperparameters:")
-    for param in experiment.hyperparameters:
-        print(f"\t{param}")
+        print("Hyperparameters:")
+        for param in experiment.hyperparameters:
+            print(f"\t{param}")
 
-    best_res = None
-    best_sample = None
+        best_res = None
+        best_sample = None
 
-    ok_samples = []
+        ok_samples = []
 
-    for sample in experiment.samples:
-        if sample.job.is_finished():
-            try:
-                res = sample.get_result(".")
+        for sample in experiment.samples:
+            if sample.job.is_finished():
+                try:
+                    res = sample.get_result(".")
 
-                if best_res is None or res > best_res:
-                    best_res = res
-                    best_sample = sample
-            except ValueError:
-                job_id = sample.job.job_id if sample.job else "NOJOB_ERR"
-                logging.error("Sample {} failed to parse".format(job_id))
-                continue
+                    if best_res is None or res > best_res:
+                        best_res = res
+                        best_sample = sample
+                except ValueError:
+                    job_id = sample.job.job_id if sample.job else "NOJOB_ERR"
+                    logging.error("Sample {} failed to parse".format(job_id))
+                    continue
 
-        ok_samples.append(sample)
+            ok_samples.append(sample)
 
-    print("\nBEST (id={}): {}".format(best_sample.job.job_id, best_res))
+        if best_sample is None:
+            print("No samples finished evaluating yet.")
+            sys.exit(0)
 
-    assert best_sample is not None
+        print("\nBEST (id={}): {}".format(best_sample.job.job_id, best_res))
 
-    if best_sample.job is not None:
-        print(best_sample.job.run_parameters)
-        print()
+        assert best_sample is not None
 
-        print("Evaluations:")
-        for sample in ok_samples:
-            job = sample.job
+        if best_sample.job is not None:
+            print(best_sample.job.run_parameters)
+            print()
 
-            proc_stats = ""
-            if psutil.pid_exists(job.job_id):
-                process = psutil.Process(job.job_id)
-                mem = process.memory_info()
-                proc_stats += f"Process:{process.status()}"
-                proc_stats += f", cpu={process.cpu_percent()}"
-                # TODO fix this on osx, shared={mem.shared}"
-                proc_stats += f", rss={mem.rss}, vms={mem.vms}"
+            print("Evaluations:")
+            for sample in ok_samples:
+                job = sample.job
 
-            print(f"{sample}\t{proc_stats}")
+                proc_stats = ""
+                if psutil.pid_exists(job.job_id):
+                    process = psutil.Process(job.job_id)
+                    mem = process.memory_info()
+                    proc_stats += f"Process:{process.status()}"
+                    proc_stats += f", cpu={process.cpu_percent()}"
+                    # TODO fix this on osx, shared={mem.shared}"
+                    proc_stats += f", rss={mem.rss}, vms={mem.vms}"
+
+                print(f"{sample}\t{proc_stats}")

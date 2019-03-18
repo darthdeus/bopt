@@ -42,11 +42,11 @@
 
 # Co je od minule
 
-- GPy
-- cmdline: manual-run, run, run-single, plot, suggest
-- serializace modelu pro kazdy step
-- plotovani vsech kroku
-- konzistentni -C vsude
+- [x] GPy
+- [x] cmdline: manual-run, run, run-single, plot, suggest
+- [x] serializace modelu pro kazdy step
+- [x] plotovani vsech kroku
+- [x] konzistentni -C vsude
 
 # Nejasne
 
