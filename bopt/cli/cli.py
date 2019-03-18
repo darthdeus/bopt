@@ -65,6 +65,7 @@ def main():
     sp_run.set_defaults(func=run.run)
 
     sp_run_single = sp.add_parser("run-single", help="Pick the next point and run it, combines suggest & manual-run.", parents=[cd_parser, model_parser])
+    sp_run_single.add_argument("--n_parallel", type=int, default=1, help="Number of instances to launch in parallel.")
     sp_run_single.set_defaults(func=run_single.run)
 
     sp_plot = sp.add_parser("plot", help="Generate plots for a given experiment.", parents=[cd_parser])

@@ -1,4 +1,5 @@
 import os
+import logging
 import sys
 import yaml
 
@@ -11,4 +12,8 @@ def run(args) -> None:
     with acquire_lock(), ensure_meta_yml():
         experiment = bopt.Experiment.deserialize(".")
 
-        experiment.run_single(bopt.ModelConfig(args), ".")
+        assert args.n_parallel > 0
+
+        for i in range(args.n_parallel):
+            logging.info("Starting {}/{}".format(i, args.n_parallel))
+            experiment.run_single(bopt.ModelConfig(args), ".")
