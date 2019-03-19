@@ -2,6 +2,7 @@
 
 - [x] testovat vse na MNISTu a ne RL MC
 - u manual-run kontrolovat, ze hodnota je uvnitr range
+  - suggest vraci hodnoty mimo horni range
 
 - [x] logging !!!!
 
@@ -19,6 +20,7 @@
 - [x] acq fn v yml
 - [x] parallel evaluace: trivialni, ale neni to :)
   - [x] u nedobehlych jobu predpokladam ze vysledek je jejich mean
+  - moznost pustit run s -j 10
   - kontrolovat, ze 2x nevyhodnocuju ve stejnym bode
 - [x] intove hyperparam: GPy?
 - [x] diskretni/categorical parametry
