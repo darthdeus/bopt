@@ -13,6 +13,15 @@ from bopt.parsers.result_parser import ResultParser, JobResult
 Timestamp = int
 Value = float
 
+from enum import Enum
+
+class JobStatus(Enum):
+    QUEUED = 1
+    RUNNING = 2
+    FAILED = 3
+    CANCELED = 4
+    FINISHED = 5
+
 
 class Job(abc.ABC):
     job_id: int

@@ -1,5 +1,17 @@
 # TODO
 
+- garbage collecteni resultu
+
+- regex parsujici result
+- collectit resulty do yamlu
+  - v ramci toho ziskat i finished_at
+
+- nepocitam s failnutyma jobama
+  - predpokladam, ze priste uspeje
+  - kontrolovat zaokrouhlene jestli ho nepoustim znova
+    - vytvorim manual sample s mean_pred - sigma_pred (nejak aby byl videt) a
+      uz nepoustim dal
+
 - [x] bopt debug - ipdb with bopt imports
 
 - davat mean kdyz delam znovu stejny bod
@@ -15,16 +27,6 @@
   - sigmoid vs round?
 
 - zdetekovat duplicitni ID a spadnout
-
-- regex parsujici result
-- collectit resulty do yamlu
-  - v ramci toho ziskat i finished_at
-
-- nepocitam s failnutyma jobama
-  - predpokladam, ze priste uspeje
-  - kontrolovat zaokrouhlene jestli ho nepoustim znova
-    - vytvorim manual sample s mean_pred - sigma_pred (nejak aby byl videt) a
-      uz nepoustim dal
 
 -----------------------------------
 
