@@ -146,6 +146,8 @@ class GPyModel(Model):
         def min_obj(X):
             return -acquisition_fn(gp, X.reshape(1, -1), y_max)
 
+        # TODO: int muze byt i == upper bound
+
         scipy_bounds = [(h.range.low, h.range.high) for h in hyperparameters]
 
         starting_points = []

@@ -42,7 +42,6 @@ class SGERunner(Runner):
         cmdline_run_params = [f"--{h.name}={value}" for h, value in run_parameters.mapping.items()]
 
         qsub_params: List[str] = ["-N", "job", "-o", output_dir]
-        # qsub_params: List[str] = ["-N", "job"]
         cmd = ["qsub", *qsub_params, self.script_path, *self.arguments, *cmdline_run_params]
 
         logging.info(f"SGE_JOB_START: {' '.join(cmd)}")

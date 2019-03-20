@@ -1,15 +1,40 @@
-!!!!!!!!!!!! manual run broken1!!!!!
+# TODO
+
+- davat mean kdyz delam znovu stejny bod
+- ignorovat underflow dokud nedelaj problem :)
+
+- web
+  - interpolace mezi 2 body hyperparam + plot slicu v lib. 0d, 1d, 2d ose
+  - burty!
+  - okraje v plotech
+
+- logscale
+- diskretni hyperparam - onehot nebo fixni lengthscale na konkretni hyperparam
+  - sigmoid vs round?
+
+- zdetekovat duplicitni ID a spadnout
+
+- regex parsujici result
+- collectit resulty do yamlu
+  - v ramci toho ziskat i finished_at
+
+- nepocitam s failnutyma jobama
+  - predpokladam, ze priste uspeje
+  - kontrolovat zaokrouhlene jestli ho nepoustim znova
+    - vytvorim manual sample s mean_pred - sigma_pred (nejak aby byl videt) a
+      uz nepoustim dal
+
+-----------------------------------
+
+- manual run nefunguje
+- JOB_ID env variable
+- int range high
 
 - [x] testovat vse na MNISTu a ne RL MC
 - u manual-run kontrolovat, ze hodnota je uvnitr range
   - suggest vraci hodnoty mimo horni range
 
 - [x] logging !!!!
-
-- sigmoid vs round?
-- interpolace mezi 2 body hyperparam + plot slicu v lib. 0d, 1d, 2d ose
-- burty!
-- okraje v plotech
 
 - vsechny body zobrazit v 2d viz
   - pca
@@ -36,8 +61,7 @@
 # Asi vubec neresime
 
 - paralelni evaluace: jde to lip nez pouzivat mean?
-- web:               neni aktualizovano pro GPy
-- duplicitni PIDy + flock
+- duplicitni PIDy
 - multijoby
 
 - intermediate results !!!

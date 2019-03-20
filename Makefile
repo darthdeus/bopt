@@ -28,13 +28,13 @@ sfntest:
 lab02-cartpole:
 	rm -rf results/l2cartpole
 	$(BOPT) init \
-		--param "batch_size:int:8:100" \
-		--param "epochs:int:1:100" \
+		--param "batch_size:int:16:100" \
+		--param "epochs:int:5:50" \
 		--param "layers:int:2:10" \
-		--param "units:int:5:30" \
+		--param "units:int:5:10" \
 		-C results/l2cartpole \
 		$(HOME)/projects/npfl114/labs/02/bopt_cartpole.sh
-	$(BOPT) run --n_iter=80 -C results/l2cartpole
+	$(BOPT) run --n_iter=10 -C results/l2cartpole
 		# $(PWD)/.venv/bin/python $(PWD)/experiments/simple_function.py
 	# convert -delay 100 -loop 0 tmp/*.png anim.gif
 
