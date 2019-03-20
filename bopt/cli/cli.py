@@ -5,7 +5,7 @@ import inspect
 import argparse
 
 from bopt.models.gpy_model import GPyModel
-from bopt.cli import cli, exp, init, jobstat, manual_run, plot, run, run_single, suggest, util, web
+from bopt.cli import cli, exp, init, jobstat, manual_run, plot, run, run_single, suggest, util, web, debug
 
 def main():
     parser = argparse.ArgumentParser(prog="bopt")
@@ -76,6 +76,9 @@ def main():
 
     sp_manual_run = sp.add_parser("manual-run", help="Run the next evaluation with manually given hyperparameters.", parents=[cd_parser])
     sp_manual_run.set_defaults(func=manual_run.run)
+
+    sp_debug = sp.add_parser("debug", help="Load an experiment and start iPDB", parents=[cd_parser])
+    sp_debug.set_defaults(func=debug.run)
 
     parsed, unknown = parser.parse_known_args()
     # this is an 'internal' method which returns 'parsed', the same as what
