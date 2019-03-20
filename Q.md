@@ -1,5 +1,7 @@
 # TODO
 
+- bopt debug - ipdb with bopt imports
+
 - davat mean kdyz delam znovu stejny bod
 - ignorovat underflow dokud nedelaj problem :)
 
