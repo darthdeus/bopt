@@ -92,7 +92,7 @@ class Experiment:
     def suggest(self, model_config: ModelConfig, meta_dir: str, include_mean_pred:
             bool = True) -> Tuple[JobParams, Model]:
         if len(self.samples) == 0:
-            print("No existing samples found, overloading suggest with RandomSearch.")
+            logging.info("No existing samples found, overloading suggest with RandomSearch.")
             model = RandomSearch()
 
             job_params, fitted_model = \
