@@ -66,6 +66,9 @@ class Experiment:
             [Hyperparameter.from_dict(key, data["hyperparameters"][key])
             for key in data["hyperparameters"].keys()]
 
+        if data["samples"] is None:
+            data["samples"] = []
+
         samples = [Sample.from_dict(s, hyperparameters)
                 for s in data["samples"]]
         runner = RunnerLoader.from_dict(data["runner"])
