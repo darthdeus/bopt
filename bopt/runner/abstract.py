@@ -30,6 +30,7 @@ class Job(abc.ABC):
     finished_at: Optional[datetime.datetime]
 
     def __init__(self, job_id: int, run_parameters: JobParams) -> None:
+        assert isinstance(run_parameters, JobParams)
         self.job_id = job_id
         self.run_parameters = run_parameters
         self.started_at = None

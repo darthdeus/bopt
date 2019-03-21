@@ -60,17 +60,26 @@ class Experiment:
             "runner": self.runner.to_dict(),
         }
 
+    def collect_results(self) -> None:
+        for sample in self.samples:
+            try:
+                sample.result = sample.get_result(".")
+            except ValueError as e:
+                logging.error("Failed to parse job result {}".format(e))
+                continue
+
     @staticmethod
     def from_dict(data: dict) -> "Experiment":
         hyperparameters = \
             [Hyperparameter.from_dict(key, data["hyperparameters"][key])
             for key in data["hyperparameters"].keys()]
 
-        if data["samples"] is None:
-            data["samples"] = []
+        if data["samples"] and len(data["samples"]) > 0:
+            samples = [Sample.from_dict(s, hyperparameters)
+                    for s in data["samples"]]
+        else:
+            samples = []
 
-        samples = [Sample.from_dict(s, hyperparameters)
-                for s in data["samples"]]
         runner = RunnerLoader.from_dict(data["runner"])
 
         experiment = Experiment(hyperparameters, runner)
@@ -203,7 +212,11 @@ class Experiment:
             contents = f.read()
             obj = yaml.load(contents)
 
-        return Experiment.from_dict(obj)
+        experiment = Experiment.from_dict(obj)
+        experiment.collect_results()
+        experiment.serialize(meta_dir)
+
+        return experiment
 
     def ok_samples(self) -> List[Sample]:
         return [s for s in self.samples if s.job.is_finished()]

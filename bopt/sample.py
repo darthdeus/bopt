@@ -3,7 +3,7 @@ import logging
 import traceback
 import numpy as np
 
-from typing import Tuple, List
+from typing import Tuple, List, Optional
 
 from bopt.basic_types import Hyperparameter
 from bopt.job_params import JobParams
@@ -14,6 +14,7 @@ from bopt.models.parameters import ModelParameters
 
 class Sample:
     job: Job
+    result: Optional[float]
     model: ModelParameters
     mu_pred: float
     sigma_pred: float
@@ -24,11 +25,13 @@ class Sample:
         self.model = model_params
         self.mu_pred = mu_pred
         self.sigma_pred = sigma_pred
+        self.result = None
 
     def to_dict(self) -> dict:
         return {
             "job": self.job.to_dict(),
             "model": self.model.to_dict() if self.model is not None else None,
+            "result": self.result,
             "mu_pred": self.mu_pred,
             "sigma_pred": self.sigma_pred
         }
@@ -40,10 +43,14 @@ class Sample:
         if data["model"] is not None:
             model_dict = ModelParameters.from_dict(data["model"])
 
-        return Sample(JobLoader.from_dict(data["job"], hyperparameters),
-                      model_dict,
-                      data["mu_pred"],
-                      data["sigma_pred"])
+        job = JobLoader.from_dict(data["job"], hyperparameters)
+        sample = Sample(job,
+                model_dict,
+                data["mu_pred"],
+                data["sigma_pred"])
+        sample.result = data["result"]
+
+        return sample
 
     def to_x(self) -> np.ndarray:
         return self.job.run_parameters.x
