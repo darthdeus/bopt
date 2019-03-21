@@ -89,7 +89,7 @@ def main():
     for arg in unknown:
         if arg.startswith(("-", "--")):
             # TODO: fuj
-            sp_manual_run.add_argument(arg.split("=")[0], type=float)
+            sp_manual_run.add_argument(arg.split("=")[0], type=str)
 
     args = parser.parse_args()
     args.func(args)

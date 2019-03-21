@@ -23,6 +23,10 @@ class Bound(abc.ABC):
     def validate(self, value: ParamTypes) -> bool:
         pass
 
+    @abc.abstractmethod
+    def parse(self, value: str) -> ParamTypes:
+        return value
+
 
 class Integer(Bound):
     def __init__(self, low: int, high: int):
@@ -43,6 +47,9 @@ class Integer(Bound):
     def __repr__(self) -> str:
         return f"Int({self.low}, {self.high})"
 
+    def parse(self, value: str) -> ParamTypes:
+        return int(value)
+
 
 class Float(Bound):
     def __init__(self, low: float, high: float):
@@ -62,6 +69,9 @@ class Float(Bound):
 
     def __repr__(self) -> str:
         return f"Float({self.low}, {self.high})"
+
+    def parse(self, value: str) -> ParamTypes:
+        return float(value)
 
 
 class Discrete(Bound):
@@ -89,6 +99,9 @@ class Discrete(Bound):
 
     def __repr__(self) -> str:
         return f"Discrete({self.values})"
+
+    def parse(self, value: str) -> ParamTypes:
+        return value
 
 
 class Hyperparameter(NamedTuple):

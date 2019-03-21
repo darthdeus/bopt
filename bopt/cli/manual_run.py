@@ -19,7 +19,12 @@ def run(args) -> None:
         if "dir" in model_params:
             del model_params["dir"]
 
-        __import__('ipdb').set_trace()
+        mapping = {}
+
+        for hyperparam in experiment.hyperparameters:
+            mapping[hyperparam] = hyperparam.range.parse(model_params[hyperparam.name])
+
+        job_params = bopt.JobParams.from_mapping(mapping)
 
         experiment.manual_run(bopt.ModelConfig.default(), ".",
-                model_params, bopt.ModelParameters.for_manual_run())
+                job_params, bopt.ModelParameters.for_manual_run())

@@ -11,7 +11,7 @@ export PATH="./bin:$PATH"
 export PYTHONPATH=.
 
 bopt init -C "$test_dir" --param "x:float:0:5" --param "y:float:0:25" \
-  --param "z:float:0:1" --param "w:discrete:relu:sigmoid" \
+  --param "z:int:0:2" --param "w:discrete:relu:sigmoid" \
   $PWD/.venv/bin/python $PWD/experiments/simple_function.py
 
 bopt run-single -C "$test_dir"
@@ -23,7 +23,7 @@ sleep 3
 kill -9 %1
 
 # TODO: check out tests/tmp ... fix ",." dir
-bopt manual-run -C "$test_dir" --x=0.1 --y=0.3 --z=0.1 --w=2
+bopt manual-run -C "$test_dir" --x=0.1 --y=0.3 --z=1 --w=sigmoid
 # TODO: test out of bounds
 bopt exp -C "$test_dir"
 

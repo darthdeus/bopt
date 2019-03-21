@@ -124,6 +124,8 @@ class Experiment:
 
     def manual_run(self, model_config: ModelConfig, meta_dir: str, job_params: JobParams,
             model_params: ModelParameters, include_mean_pred: bool = True) -> Tuple[Job, Sample]:
+        assert isinstance(job_params, JobParams)
+
         output_dir_path = pathlib.Path(meta_dir) / "output"
         output_dir_path.mkdir(parents=True, exist_ok=True)
 
