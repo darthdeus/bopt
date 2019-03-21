@@ -53,7 +53,7 @@ class TestToDictFromDict(unittest.TestCase):
         dd = experiment.to_dict()
         deserialized = bopt.Experiment.from_dict(dd)
 
-        diff = DeepDiff(experiment, deserialized)
+        diff = DeepDiff(experiment.to_dict(), deserialized.to_dict())
         self.assertDictEqual({}, diff)
 
 
