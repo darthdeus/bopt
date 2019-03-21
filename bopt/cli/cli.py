@@ -18,6 +18,7 @@ from bopt.cli import (
     util,
     web,
     debug,
+    clean
 )
 
 
@@ -150,6 +151,11 @@ def main():
         "debug", help="Load an experiment and start iPDB", parents=[cd_parser]
     )
     sp_debug.set_defaults(func=debug.run)
+
+    sp_clean = sp.add_parser(
+        "clean", help="Delete all samples, kill all jobs.", parents=[cd_parser]
+    )
+    sp_clean.set_defaults(func=clean.run)
 
     parsed, unknown = parser.parse_known_args()
     # this is an 'internal' method which returns 'parsed', the same as what
