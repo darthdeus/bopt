@@ -148,7 +148,8 @@ class GPyModel(Model):
 
         # TODO: int muze byt i == upper bound
 
-        scipy_bounds = [(h.range.low, h.range.high) for h in hyperparameters]
+        scipy_bounds = [h.range.scipy_bound_tuple() for h in
+                hyperparameters]
 
         starting_points = []
         for _ in range(n_restarts):

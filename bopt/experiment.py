@@ -16,6 +16,7 @@ import matplotlib.gridspec as gridspec
 
 import GPy
 
+from bopt.basic_types import Hyperparameter, JobStatus
 from bopt.job_params import JobParams
 from bopt.model_config import ModelConfig
 from bopt.models.model import Model
@@ -23,12 +24,12 @@ from bopt.sample import Sample, SampleCollection
 from bopt.models.parameters import ModelParameters
 from bopt.models.random_search import RandomSearch
 from bopt.models.gpy_model import GPyModel
-from bopt.basic_types import Hyperparameter
 from bopt.runner.abstract import Job, Runner
 from bopt.runner.runner_loader import RunnerLoader
 
 from bopt.acquisition_functions.acquisition_functions import AcquisitionFunction
 
+# TODO: set this at a proper global place
 logging.getLogger().setLevel(logging.INFO)
 logging.getLogger("GP").setLevel(logging.WARNING)
 # logging.getLogger().setLevel(logging.DEBUG)
@@ -225,7 +226,7 @@ class Experiment:
         return experiment
 
     def ok_samples(self) -> List[Sample]:
-        return [s for s in self.samples if s.job.is_finished()]
+        return [s for s in self.samples if s.status() == JobStatus.FINISHED]
 
     def plot_current(self, gpy_model: Model, meta_dir: str,
             x_next: np.ndarray, resolution: float = 30) -> None:

@@ -1,7 +1,7 @@
 import abc
 import numpy as np
 from enum import Enum
-from typing import Union, NamedTuple, List
+from typing import Union, NamedTuple, List, Tuple
 
 
 ParamTypes = Union[float, int, str]
@@ -37,6 +37,10 @@ class Bound(abc.ABC):
     def parse(self, value: str) -> ParamTypes:
         return value
 
+    @abc.abstractmethod
+    def scipy_bound_tuple(self) -> Tuple[float, float]:
+        pass
+
 
 class Integer(Bound):
     def __init__(self, low: int, high: int):
@@ -59,6 +63,9 @@ class Integer(Bound):
 
     def parse(self, value: str) -> ParamTypes:
         return int(value)
+
+    def scipy_bound_tuple(self) -> Tuple[float, float]:
+        return (self.low, (self.high - 1))
 
 
 class Float(Bound):
@@ -83,13 +90,16 @@ class Float(Bound):
     def parse(self, value: str) -> ParamTypes:
         return float(value)
 
+    def scipy_bound_tuple(self) -> Tuple[float, float]:
+        return (self.low, self.high)
+
 
 class Discrete(Bound):
     def __init__(self, values: List[str]):
         self.values = values
         self.type = "discrete"
         self.low = 0
-        self.high = len(values) - 1 + 1e-6
+        self.high = len(values)
 
     def sample(self) -> float:
         return self.values[np.random.randint(self.low, self.high)]
@@ -112,6 +122,10 @@ class Discrete(Bound):
 
     def parse(self, value: str) -> ParamTypes:
         return value
+
+    def scipy_bound_tuple(self) -> Tuple[float, float]:
+        return (self.low, (self.high - 1))
+
 
 
 class Hyperparameter(NamedTuple):
