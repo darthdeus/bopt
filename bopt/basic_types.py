@@ -127,7 +127,6 @@ class Discrete(Bound):
         return (self.low, (self.high - 1))
 
 
-
 class Hyperparameter(NamedTuple):
     name: str
     range: Bound

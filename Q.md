@@ -4,8 +4,8 @@
 - job status (sample status?)
 
 - regex parsujici result
-- collectit resulty do yamlu
-  - v ramci toho ziskat i finished_at
+- [x] collectit resulty do yamlu
+  - [x] v ramci toho ziskat i finished_at
 
 - nepocitam s failnutyma jobama
   - predpokladam, ze priste uspeje

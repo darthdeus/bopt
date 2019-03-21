@@ -22,7 +22,12 @@ def run(args) -> None:
         mapping = {}
 
         for hyperparam in experiment.hyperparameters:
-            mapping[hyperparam] = hyperparam.range.parse(model_params[hyperparam.name])
+            if hyperparam.name in model_params:
+                mapping[hyperparam] = \
+                    hyperparam.range.parse(model_params[hyperparam.name])
+            else:
+                print("\nMissing value for: {}".format(hyperparam.name))
+                sys.exit(1)
 
         job_params = bopt.JobParams.from_mapping(mapping)
 
