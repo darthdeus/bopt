@@ -1,9 +1,19 @@
 import abc
 import numpy as np
+from enum import Enum
 from typing import Union, NamedTuple, List
 
 
 ParamTypes = Union[float, int, str]
+
+
+class JobStatus(Enum):
+    QUEUED = 1
+    RUNNING = 2
+    FAILED = 3
+    CANCELED = 4
+    FINISHED = 5
+
 
 # TODO: fix naming convention & typnig errors
 class Bound(abc.ABC):

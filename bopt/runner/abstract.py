@@ -7,20 +7,12 @@ import traceback
 
 import numpy as np
 from typing import Union, List, Optional, Tuple
+from bopt.basic_types import JobStatus
 from bopt.job_params import JobParams
 from bopt.parsers.result_parser import ResultParser, JobResult
 
 Timestamp = int
 Value = float
-
-from enum import Enum
-
-class JobStatus(Enum):
-    QUEUED = 1
-    RUNNING = 2
-    FAILED = 3
-    CANCELED = 4
-    FINISHED = 5
 
 
 class Job(abc.ABC):
@@ -49,7 +41,7 @@ class Job(abc.ABC):
     def job_type(self) -> str: pass
 
     @abc.abstractmethod
-    def state(self): pass
+    def status(self) -> JobStatus: pass
 
     @abc.abstractmethod
     def kill(self) -> None: pass
@@ -57,7 +49,7 @@ class Job(abc.ABC):
     @abc.abstractmethod
     def is_finished(self) -> bool: pass
 
-    def get_result(self, output_dir: str) -> float:
+    def get_result(self, output_dir: str = "output") -> float:
         fname = os.path.join(output_dir, f"job.o{self.job_id}")
 
         # TODO: handle errors

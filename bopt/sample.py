@@ -5,7 +5,7 @@ import numpy as np
 
 from typing import Tuple, List, Optional
 
-from bopt.basic_types import Hyperparameter
+from bopt.basic_types import Hyperparameter, JobStatus
 from bopt.job_params import JobParams
 from bopt.runner.abstract import Job
 from bopt.runner.job_loader import JobLoader
@@ -35,6 +35,15 @@ class Sample:
             "mu_pred": self.mu_pred,
             "sigma_pred": self.sigma_pred
         }
+
+    def status(self) -> JobStatus:
+        if self.result is not None:
+            return JobStatus.FINISHED
+        elif self.job is not None:
+            return self.job.status()
+        else:
+            logging.error("Somehow created a sample with no job and no result.")
+            return JobStatus.FAILED
 
     @staticmethod
     def from_dict(data: dict, hyperparameters: List[Hyperparameter]) -> "Sample":

@@ -12,7 +12,7 @@ from glob import glob
 from typing import Union, List, Optional, Tuple, Callable
 
 from bopt.job_params import JobParams
-from bopt.basic_types import Hyperparameter
+from bopt.basic_types import Hyperparameter, JobStatus
 from bopt.runner.abstract import Job, Runner, Timestamp, Value
 
 
@@ -23,8 +23,16 @@ class LocalJob(Job):
     def is_finished(self) -> bool:
         return not psutil.pid_exists(self.job_id)
 
-    def state(self) -> bool:
-        pass
+    def status(self) -> JobStatus:
+        if not self.is_finished():
+            return JobStatus.RUNNING
+        else:
+            try:
+                result = self.get_result()
+                return JobStatus.FINISHED
+            except ValueError as e:
+                logging.error("Failed to parse result {}".format(e))
+                return JobStatus.FAILED
 
     def kill(self) -> None:
         if psutil.pid_exists(self.job_id):
