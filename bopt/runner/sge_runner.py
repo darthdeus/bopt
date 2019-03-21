@@ -40,9 +40,10 @@ class SGEJob(Job):
     #     return subprocess.check_output(["qstat"]).decode("ascii")
 
     def kill(self):
-        output = subprocess.check_output(["qdel", str(self.job_id)]).decode("ascii")
+        output = subprocess.check_output(["qdel",
+            str(self.job_id)]).decode("ascii")
 
-        assert re.match(pattern=".*has registered.*", string=output) is not None
+        assert re.match(pattern=".*has registered.*", string=output)
 
 
 class SGERunner(Runner):
@@ -50,13 +51,17 @@ class SGERunner(Runner):
         return "sge_runner"
 
     def start(self, output_dir: str, run_parameters: JobParams) -> Job:
-        cmdline_run_params = [f"--{h.name}={value}" for h, value in run_parameters.mapping.items()]
+        cmdline_run_params = [f"--{h.name}={value}"
+                for h, value in run_parameters.mapping.items()]
 
         qsub_params: List[str] = ["-N", "job", "-o", output_dir]
-        cmd = ["qsub", *qsub_params, self.script_path, *self.arguments, *cmdline_run_params]
+        cmd = ["qsub", *qsub_params, self.script_path, *self.arguments,
+                *cmdline_run_params]
 
         logging.info(f"SGE_JOB_START: {' '.join(cmd)}")
-        output = subprocess.check_output(cmd, stderr=subprocess.STDOUT).decode("ascii")
+        output = subprocess.check_output(cmd,
+                stderr=subprocess.STDOUT).decode("ascii")
+
         logging.info(output)
 
         matches = re.match(

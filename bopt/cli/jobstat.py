@@ -50,7 +50,7 @@ def run(args) -> None:
 
         is_finished = job.is_finished()
 
-        print(f"Status:\t\t{job.status_str()}")
+        print(f"Status:\t\t{job.status()}")
         if is_finished:
             try:
                 if job.is_success():
