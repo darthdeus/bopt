@@ -40,10 +40,13 @@ class SGEJob(Job):
     #     return subprocess.check_output(["qstat"]).decode("ascii")
 
     def kill(self):
-        output = subprocess.check_output(["qdel",
-            str(self.job_id)]).decode("ascii")
+        try:
+            output = subprocess.check_output(["qdel",
+                str(self.job_id)]).decode("ascii")
 
-        assert re.match(pattern=".*has registered.*", string=output)
+            # assert re.match(pattern=".*has registered.*", string=output)
+        except subprocess.CalledProcessError as e:
+            logging.error("Failed to kill a job {} with error {}".format(self.job_id, e))
 
 
 class SGERunner(Runner):
