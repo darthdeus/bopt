@@ -40,7 +40,7 @@
 
 - [x] testovat vse na MNISTu a ne RL MC
 - [x] u manual-run kontrolovat, ze hodnota je uvnitr range
-  - suggest vraci hodnoty mimo horni range
+  - [x] suggest vraci hodnoty mimo horni range
 
 - [x] logging !!!!
 

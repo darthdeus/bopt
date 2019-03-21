@@ -106,6 +106,12 @@ def main():
     sp_run.add_argument(
         "--n_iter", type=int, default=20, help="Number of iterations to run"
     )
+    sp_run.add_argument(
+        "--n_parallel",
+        type=int,
+        default=1,
+        help="Number of instances to launch in parallel.",
+    )
     sp_run.set_defaults(func=run.run)
 
     sp_run_single = sp.add_parser(

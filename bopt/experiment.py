@@ -186,26 +186,47 @@ class Experiment:
 
         return job
 
-    def run_loop(self, model_config: ModelConfig, meta_dir: str, n_iter=10) -> None:
-        for i in range(n_iter):
-            job = self.run_single(model_config, meta_dir)
-            logging.info("Started a new job {} with config {}".format(job.job_id, model_config))
+    def run_loop(self, model_config: ModelConfig, meta_dir: str,
+            n_iter=10, n_parallel=1) -> None:
 
-            start_time = time.time()
+        n_started = 0
 
-            # psutil.wait_procs(psutil.Process().children(), timeout=0.01)
-            while not job.is_finished():
-                psutil.wait_procs(psutil.Process().children(), timeout=0.01)
-                time.sleep(0.2)
+        while n_started < n_iter:
+            for sample in self.samples:
+                print(sample.job.job_id, sample.status(), sep="\t")
 
-            end_time = time.time()
+            print()
 
-            logging.info("Job {} finished after {}".format(job.job_id, end_time - start_time))
+            if self.num_running() < n_parallel:
+                job = self.run_single(model_config, meta_dir)
 
-            self.collect_results()
+                n_started += 1
 
-            # TODO: serialize immediately?
-            # self.serialize(meta_dir)
+                self.serialize(meta_dir)
+
+                logging.info("Started a new job {} with config {}".format(job.job_id, model_config))
+
+            psutil.wait_procs(psutil.Process().children(), timeout=0.01)
+            time.sleep(1.0)
+
+
+        # for i in range(n_iter):
+        #     job = self.run_single(model_config, meta_dir)
+        #     logging.info("Started a new job {} with config {}".format(job.job_id, model_config))
+        #
+        #     start_time = time.time()
+        #
+        #     # psutil.wait_procs(psutil.Process().children(), timeout=0.01)
+        #     while not job.is_finished():
+        #         psutil.wait_procs(psutil.Process().children(), timeout=0.01)
+        #         time.sleep(0.2)
+        #
+        #     end_time = time.time()
+        #
+        #     logging.info("Job {} finished after {}".format(job.job_id, end_time - start_time))
+        #
+        #     self.collect_results()
+        #     self.serialize(meta_dir)
 
     def serialize(self, meta_dir: str) -> None:
         dump = yaml.dump(self.to_dict(), default_flow_style=False, Dumper=NoAliasDumper)
@@ -227,6 +248,9 @@ class Experiment:
 
     def ok_samples(self) -> List[Sample]:
         return [s for s in self.samples if s.status() == JobStatus.FINISHED]
+
+    def num_running(self) -> int:
+        return len([s for s in self.samples if s.status() == JobStatus.RUNNING])
 
     def plot_current(self, gpy_model: Model, meta_dir: str,
             x_next: np.ndarray, resolution: float = 30) -> None:

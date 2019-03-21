@@ -14,6 +14,7 @@ if __name__ == "__main__":
 
     import math
     import random
+    import time
 
     result = math.sin(args.x) * math.sin(args.y) \
             + random.random() * 0.05 + 2*math.cos(args.z) * math.cos(args.w)
