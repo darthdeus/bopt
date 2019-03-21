@@ -31,5 +31,8 @@ def run(args) -> None:
 
         job_params = bopt.JobParams.from_mapping(mapping)
 
+        if not job_params.validate():
+            sys.exit(1)
+
         experiment.manual_run(bopt.ModelConfig.default(), ".",
                 job_params, bopt.ModelParameters.for_manual_run())
