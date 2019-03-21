@@ -57,7 +57,8 @@ class Sample:
                 model_dict,
                 data["mu_pred"],
                 data["sigma_pred"])
-        sample.result = data["result"]
+
+        sample.result = data.get("result", None)
 
         return sample
 
