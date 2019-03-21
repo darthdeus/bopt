@@ -20,16 +20,20 @@ def run(args) -> None:
             next_params, fitted_model = \
                     experiment.suggest(bopt.ModelConfig(args), ".")
 
-            param_str = "\n".join([f"{key}: {value}" for key, value in next_params.items()])
-            param_args = " ".join([f"--{key}={value}" for key, value in next_params.items()])
+            param_str = "\n".join([f"{key.name}: {value}"
+                for key, value in next_params.mapping.items()])
+
+            param_args = " ".join([f"--{key.name}={value}"
+                for key, value in next_params.mapping.items()])
 
             print(f"""PARAMS:
 
-    {param_str}
+{param_str}
 
-    To evaluate this manually, run:
+To evaluate this manually, run:
 
-    bopt manual-run {"."} {param_args}""")
+bopt manual-run {"."} {param_args}
+""")
         else:
             print("No meta.yml found.")
             sys.exit(1)
