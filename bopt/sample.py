@@ -68,17 +68,19 @@ class Sample:
     def to_xy(self, output_dir: str) -> Tuple[np.ndarray, float]:
         x = self.to_x()
 
-        if self.job.is_finished():
-            try:
-                y = self.job.get_result(output_dir)
-            except ValueError as e:
-                traceback_str = "".join(traceback.format_tb(e.__traceback__))
-                logging.error("Parsing failed with error, using mean prediction instead:\n{}\n\n".format(e, traceback_str))
+        status = self.status()
 
-                y = self.mu_pred
-        else:
-            logging.warning(f"Using mean prediction for sample {self}")
+        assert self.result or self.job
+
+        if status == JobStatus.FINISHED:
+            # TODO: collect first?
+            y = self.result or self.job.get_result(output_dir)
+        elif status == JobStatus.RUNNING:
+            logging.info("Using mean prediction for a running job {}".format(self.job.job_id))
             y = self.mu_pred
+        else:
+            logging.error("Tried to get xy for a job {} which is {}".format(self.job.job_id, status))
+            raise ValueError(self)
 
         assert isinstance(x, np.ndarray)
         assert isinstance(y, float)

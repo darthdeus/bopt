@@ -91,7 +91,7 @@ class Float(Bound):
         return float(value)
 
     def scipy_bound_tuple(self) -> Tuple[float, float]:
-        return (self.low, self.high)
+        return (self.low, self.high - 1e-8)
 
 
 class Discrete(Bound):
