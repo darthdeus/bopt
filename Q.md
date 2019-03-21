@@ -1,6 +1,7 @@
 # TODO
 
-- garbage collecteni resultu
+- [x] garbage collecteni resultu
+- job status (sample status?)
 
 - regex parsujici result
 - collectit resulty do yamlu

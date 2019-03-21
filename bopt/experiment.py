@@ -63,7 +63,9 @@ class Experiment:
     def collect_results(self) -> None:
         for sample in self.samples:
             try:
-                sample.result = sample.get_result(".")
+                if sample.result is None:
+                    sample.result = sample.get_result(".")
+                    sample.job.finished_at = datetime.datetime.now()
             except ValueError as e:
                 logging.error("Failed to parse job result {}".format(e))
                 continue
@@ -198,6 +200,8 @@ class Experiment:
             end_time = time.time()
 
             logging.info("Job {} finished after {}".format(job.job_id, end_time - start_time))
+
+            self.collect_results()
 
             # TODO: serialize immediately?
             # self.serialize(meta_dir)
