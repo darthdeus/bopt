@@ -8,6 +8,7 @@ from typing import List
 
 import bopt
 from bopt.cli.util import handle_cd, ensure_meta_yml, acquire_lock
+from bopt.plot import plot_current
 
 # TODO: co kdyz dostanu manual evaluation, zkusit precejenom fitnout model
 #       ale do plotu napsat, ze ten model neni podle ceho byl vybrany?
@@ -29,7 +30,7 @@ def run(args) -> None:
                 model = GPyModel.from_model_params(sample.model, X, Y)
 
                 try:
-                    experiment.plot_current(model, ".", sample.to_x())
+                    plot_current(experiment, model, ".", sample.to_x())
                 except ValueError as e:
                     logging.error("Plotting failed {}".format(e))
 
