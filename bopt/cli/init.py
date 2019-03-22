@@ -47,9 +47,6 @@ def run(args) -> None:
 
             hyperparameters.append(hyp)
 
-        # TODO: remove result parser
-        assert args.result_parser == "bopt.LastLineLastWordParser"
-
         script_path = args.command
         default_arguments = args.arguments
 

@@ -10,7 +10,6 @@ import numpy as np
 from typing import Union, List, Optional, Tuple
 from bopt.basic_types import JobStatus
 from bopt.job_params import JobParams
-from bopt.parsers.result_parser import ResultParser, JobResult
 
 Timestamp = int
 Value = float
@@ -46,37 +45,6 @@ class Job(abc.ABC):
 
     @abc.abstractmethod
     def is_finished(self) -> bool: pass
-
-    # def is_success(self) -> bool:
-    #     if self.is_finished():
-    #         return self.result_parser.safe_final_result(self).is_ok()
-    #     else:
-    #         return False
-    #
-    # def result_or_err(self) -> str:
-    #     if self.is_finished():
-    #         if self.is_success():
-    #             return str(self.final_result())
-    #         else:
-    #             return self.err()
-    #     else:
-    #         return "RUNNING"
-    #
-    # def err(self) -> str:
-    #     return self.result_parser.safe_final_result(self).err()
-    #
-    # def intermediate_results(self) -> List[float]:
-    #     return self.result_parser.intermediate_results(self)
-    #
-    # def final_result(self) -> float:
-    #     return self.result_parser.final_result(self)
-
-    def status_str(self) -> str:
-        if self.is_finished():
-            return "FINISHED"
-        else:
-            return "RUNNING"
-        # TODO: failed status
 
 
 class Runner(abc.ABC):

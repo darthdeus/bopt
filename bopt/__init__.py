@@ -12,6 +12,5 @@ from bopt.model_config import *
 # from bopt.runner.abstract import *
 # from bopt.runner.sge_runner import *
 # from bopt.runner.local_runner import *
-# from bopt.runner.result_parser import *
 
 name = "bopt"

@@ -63,13 +63,6 @@ def main():
 
     # TODO: parallel evaluation
 
-    sp_init.add_argument(
-        "--result_parser",
-        type=str,
-        default="bopt.LastLineLastWordParser",
-        help="Module path to the result parser.",
-    )
-
     sp_init.add_argument("--runner", type=str, default="local", help="Runner type.")
     sp_init.add_argument("--param", action="append", help="Hyperparameter")
     sp_init.add_argument("command", type=str, help="Command to run.")
