@@ -139,7 +139,7 @@ class GPyModel(Model):
             n_restarts: int = 25,) -> np.ndarray:
         # TODO: heh
         # np.seterrcall(lambda *args: __import__('ipdb').set_trace())
-        np.seterr(all="warn")
+        # np.seterr(all="warn")
 
         def min_obj(X):
             return -acquisition_fn(gp, X.reshape(1, -1), y_max)
