@@ -96,13 +96,16 @@ class Experiment:
 
                     with open(fname, "r") as f:
                         contents = f.read().rstrip("\n")
+                        found = False
 
                         for line in contents.split("\n"):
                             matches = re.match(self.result_regex, line)
                             if matches:
                                 sample.result = float(matches.groups()[0])
+                                found = True
 
-                        logging.error("Job {} seems to have failed, it finished running and its result cannot be parsed.".format(sample.job.job_id))
+                        if not found:
+                            logging.error("Job {} seems to have failed, it finished running and its result cannot be parsed.".format(sample.job.job_id))
                 else:
                     logging.error("Output file not found for job {} even though it finished. It will be considered as a failed job.".format(sample.job.job_id))
 
