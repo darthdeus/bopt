@@ -1,5 +1,6 @@
 import yaml
 import os
+import re
 import psutil
 import time
 import pathlib
@@ -85,17 +86,25 @@ class Experiment:
 
     def collect_results(self) -> None:
         for sample in self.samples:
-            try:
-                if sample.result is None:
-                    # TODO: assuming we're in the right dir
+            if sample.result is None and sample.job and sample.job.is_finished():
+                # Sine we're using `handle_cd` we always assume the working directory
+                # is where meta.yml is.
+                fname = os.path.join("output", f"job.o{sample.job.job_id}")
+
+                if os.path.exists(fname):
                     sample.job.finished_at = datetime.datetime.now()
-                    sample.result = sample.job.get_result(self.result_regex, "output")
-            except ValueError as e:
-                logging.error("Failed to parse job result {}".format(e))
-                continue
-            except FileNotFoundError as e:
-                logging.error("Output file not found for job {}".format(e))
-                continue
+
+                    with open(fname, "r") as f:
+                        contents = f.read().rstrip("\n")
+
+                        for line in contents.split("\n"):
+                            matches = re.match(self.result_regex, line)
+                            if matches:
+                                sample.result = float(matches.groups()[0])
+
+                        logging.error("Job {} seems to have failed, it finished running and its result cannot be parsed.".format(sample.job.job_id))
+                else:
+                    logging.error("Output file not found for job {} even though it finished. It will be considered as a failed job.".format(sample.job.job_id))
 
     def get_xy(self, meta_dir: str):
         samples = self.ok_samples()
@@ -106,6 +115,7 @@ class Experiment:
         return X_sample, Y_sample
 
     def suggest(self, model_config: ModelConfig, meta_dir: str) -> Tuple[JobParams, Model]:
+        # TODO: overit, ze by to fungovalo i na ok+running a mean_pred
         if len(self.ok_samples()) == 0:
             logging.info("No existing samples found, overloading suggest with RandomSearch.")
             model = RandomSearch()

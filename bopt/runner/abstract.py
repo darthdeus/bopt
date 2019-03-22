@@ -47,20 +47,6 @@ class Job(abc.ABC):
     @abc.abstractmethod
     def is_finished(self) -> bool: pass
 
-    def get_result(self, result_regex: str, output_dir: str = "output") -> float:
-        fname = os.path.join(output_dir, f"job.o{self.job_id}")
-
-        # TODO: handle errors
-        with open(fname, "r") as f:
-            contents = f.read().rstrip("\n")
-
-            for line in contents.split("\n"):
-                matches = re.match(result_regex, line)
-                if matches:
-                    return float(matches.groups()[0])
-
-            raise ValueError("None of the lines match the given regex: {}".format(result_regex))
-
     # def is_success(self) -> bool:
     #     if self.is_finished():
     #         return self.result_parser.safe_final_result(self).is_ok()
