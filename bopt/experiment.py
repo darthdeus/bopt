@@ -217,7 +217,7 @@ class Experiment:
     def deserialize(meta_dir: str) -> "Experiment":
         with open(os.path.join(meta_dir, "meta.yml"), "r") as f:
             contents = f.read()
-            obj = yaml.load(contents, Loader=yaml.FullLoader)
+            obj = yaml.load(contents, Loader=yaml.SafeLoader)
 
         experiment = Experiment.from_dict(obj)
         experiment.collect_results()

@@ -1,5 +1,5 @@
 import numpy as np
-from typing import List
+from typing import List, Union, Type, Dict
 
 from bopt.job_params import JobParams
 from bopt.basic_types import Hyperparameter
@@ -7,7 +7,10 @@ from bopt.runner.abstract import Job
 from bopt.runner.local_runner import LocalJob
 from bopt.runner.sge_runner import SGEJob
 
-JOB_MAPPING = {
+JobTypes = Union[Type[LocalJob], Type[SGEJob]]
+
+
+JOB_MAPPING: Dict[str, JobTypes] = {
     "local_job": LocalJob,
     "sge_job": SGEJob,
 }
@@ -22,7 +25,7 @@ class JobLoader:
         if job_type not in JOB_MAPPING:
             raise NotImplemented()
 
-        cls = JOB_MAPPING[data["job_type"]]
+        cls: JobTypes = JOB_MAPPING[data["job_type"]]
 
         # TODO: 64 or 32 bit?
         x = np.array(data["run_parameters"], dtype=np.float64)
