@@ -23,17 +23,6 @@ class LocalJob(Job):
     def is_finished(self) -> bool:
         return not psutil.pid_exists(self.job_id)
 
-    def status(self) -> JobStatus:
-        if not self.is_finished():
-            return JobStatus.RUNNING
-        else:
-            try:
-                result = self.get_result()
-                return JobStatus.FINISHED
-            except ValueError as e:
-                logging.error("Failed to parse result {}".format(e))
-                return JobStatus.FAILED
-
     def kill(self) -> None:
         if psutil.pid_exists(self.job_id):
             psutil.Process(self.job_id).kill()

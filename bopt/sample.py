@@ -40,7 +40,10 @@ class Sample:
         if self.result is not None:
             return JobStatus.FINISHED
         elif self.job is not None:
-            return self.job.status()
+            if self.job.is_finished():
+                return JobStatus.FAILED
+            else:
+                return JobStatus.RUNNING
         else:
             logging.error("Somehow created a sample with no job and no result.")
             return JobStatus.FAILED
@@ -66,7 +69,7 @@ class Sample:
         return self.job.run_parameters.x
         # return Sample.param_dict_to_x(self.job.run_parameters)
 
-    def to_xy(self, output_dir: str) -> Tuple[np.ndarray, float]:
+    def to_xy(self) -> Tuple[np.ndarray, float]:
         x = self.to_x()
 
         status = self.status()
@@ -75,7 +78,9 @@ class Sample:
 
         if status == JobStatus.FINISHED:
             # TODO: collect first?
-            y = self.result or self.job.get_result(output_dir)
+            # TODO: TADY SEM SE VRATIT :PPP
+            y = self.result
+            # y = self.result or self.job.get_result(output_dir)
         elif status == JobStatus.RUNNING:
             logging.info("Using mean prediction for a running job {}".format(self.job.job_id))
             y = self.mu_pred
@@ -88,37 +93,27 @@ class Sample:
 
         return x, y
 
-    def get_result(self, meta_dir: str) -> float:
-        # TODO: fuj
-        output_dir = os.path.join(meta_dir, "output")
-        return self.job.get_result(output_dir)
-
     def __str__(self) -> str:
         s = f"{self.job.job_id}\t"
-        is_finished = self.job.is_finished()
+        is_finished = self.status() == JobStatus.FINISHED
 
-        if self.job.is_finished():
-            # TODO: handle failed
-            # if self.is_success():
-                # TODO: meta_dir not needed since we're always cding?
-                final_result = self.get_result(".")
+        # TODO: proper status check
 
-                rounded_params = {h.name: value for h, value in
-                        self.job.run_parameters.mapping.items()}
+        if self.result:
+            rounded_params = {h.name: value for h, value in
+                    self.job.run_parameters.mapping.items()}
 
-                assert isinstance(final_result, float)
-                s += f"{is_finished}\t{final_result:.3f}\t{rounded_params}"
-            # else:
-            #     s += f"FAILED: {self.err()}"
+            assert isinstance(self.result, float)
+            s += f"{is_finished}\t{self.result:.3f}\t{rounded_params}"
         else:
-            s += "RUNNING"
+            s += str(self.status())
 
         return s
 
 
-
 class SampleCollection:
     samples: List[Sample]
+    # TODO: tohle nechci
     meta_dir: str
 
     def __init__(self, samples: List[Sample], meta_dir: str) -> None:
@@ -142,10 +137,10 @@ class SampleCollection:
         xs = []
 
         # TODO: "output" as a global constant
-        output_dir = os.path.join(self.meta_dir, "output")
+        # output_dir = os.path.join(self.meta_dir, "output")
 
         for i, sample in enumerate(self.samples):
-            x, y = sample.to_xy(output_dir)
+            x, y = sample.to_xy()
 
             xs.append(x)
             y_sample[i] = y

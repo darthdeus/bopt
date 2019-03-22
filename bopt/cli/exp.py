@@ -25,7 +25,7 @@ def run(args) -> None:
         for sample in experiment.samples:
             if sample.job.is_finished():
                 try:
-                    res = sample.get_result(".")
+                    res = sample.result
 
                     if best_res is None or res > best_res:
                         best_res = res

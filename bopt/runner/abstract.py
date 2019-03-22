@@ -4,6 +4,7 @@ import yaml
 import datetime
 import logging
 import traceback
+import re
 
 import numpy as np
 from typing import Union, List, Optional, Tuple
@@ -41,23 +42,24 @@ class Job(abc.ABC):
     def job_type(self) -> str: pass
 
     @abc.abstractmethod
-    def status(self) -> JobStatus: pass
-
-    @abc.abstractmethod
     def kill(self) -> None: pass
 
     @abc.abstractmethod
     def is_finished(self) -> bool: pass
 
-    def get_result(self, output_dir: str = "output") -> float:
+    def get_result(self, result_regex: str, output_dir: str = "output") -> float:
         fname = os.path.join(output_dir, f"job.o{self.job_id}")
 
         # TODO: handle errors
         with open(fname, "r") as f:
-            # TODO: handle endings properly
             contents = f.read().rstrip("\n")
-            last = contents.split("\n")[-1]
-            return float(last)
+
+            for line in contents.split("\n"):
+                matches = re.match(result_regex, line)
+                if matches:
+                    return float(matches.groups()[0])
+
+            raise ValueError("None of the lines match the given regex: {}".format(result_regex))
 
     # def is_success(self) -> bool:
     #     if self.is_finished():

@@ -25,20 +25,6 @@ class SGEJob(Job):
         except subprocess.CalledProcessError:
             return True
 
-    def status(self) -> JobStatus:
-        if not self.is_finished():
-            return JobStatus.RUNNING
-        else:
-            try:
-                result = self.get_result()
-                return JobStatus.FINISHED
-            except ValueError as e:
-                logging.error("Failed to parse result {}".format(e))
-                return JobStatus.FAILED
-
-    # def state(self) -> str:
-    #     return subprocess.check_output(["qstat"]).decode("ascii")
-
     def kill(self):
         try:
             output = subprocess.check_output(["qdel",

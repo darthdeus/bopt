@@ -2,8 +2,10 @@ import yaml
 import os
 import sys
 import inspect
-import bopt
+import pathlib
 from typing import Type, Callable, List
+
+import bopt
 from bopt import Hyperparameter
 
 
@@ -52,9 +54,8 @@ def run(args) -> None:
     else:
         print("Invalid value {} for runner, only 'local' and 'sge' are allowed.".format(args.runner))
 
-    experiment = bopt.Experiment(hyperparameters, runner)
-
-    import pathlib
+    default_result_regex = "RESULT=(.*)"
+    experiment = bopt.Experiment(hyperparameters, runner, default_result_regex)
 
     pathlib.Path(meta_dir).mkdir(parents=True, exist_ok=True)
 

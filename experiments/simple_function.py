@@ -20,4 +20,4 @@ if __name__ == "__main__":
             + random.random() * 0.05 + 2*math.cos(args.z) * math.cos(args.w)
 
     # result = args.x + 2 * args.y - args.z**2
-    print(result)
+    print("RESULT={}".format(result))

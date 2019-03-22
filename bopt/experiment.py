@@ -48,28 +48,21 @@ class Experiment:
     hyperparameters: List[Hyperparameter]
     runner: Runner
     samples: List[Sample]
+    result_regex: str
 
-    def __init__(self, hyperparameters: List[Hyperparameter], runner: Runner):
+    def __init__(self, hyperparameters: List[Hyperparameter], runner: Runner, result_regex: str):
         self.hyperparameters = hyperparameters
         self.runner = runner
         self.samples = []
+        self.result_regex = result_regex
 
     def to_dict(self) -> dict:
         return {
             "hyperparameters": {h.name: h.to_dict() for h in self.hyperparameters},
             "samples": [s.to_dict() for s in self.samples],
             "runner": self.runner.to_dict(),
+            "result_regex": self.result_regex
         }
-
-    def collect_results(self) -> None:
-        for sample in self.samples:
-            try:
-                if sample.result is None:
-                    sample.result = sample.get_result(".")
-                    sample.job.finished_at = datetime.datetime.now()
-            except ValueError as e:
-                logging.error("Failed to parse job result {}".format(e))
-                continue
 
     @staticmethod
     def from_dict(data: dict) -> "Experiment":
@@ -85,24 +78,31 @@ class Experiment:
 
         runner = RunnerLoader.from_dict(data["runner"])
 
-        experiment = Experiment(hyperparameters, runner)
+        experiment = Experiment(hyperparameters, runner, data["result_regex"])
         experiment.samples = samples
 
         return experiment
 
-    def get_xy(self, meta_dir: str, include_mean_pred: bool):
-        if include_mean_pred:
-            samples = self.samples
-        else:
-            samples = self.ok_samples()
+    def collect_results(self) -> None:
+        for sample in self.samples:
+            try:
+                if sample.result is None:
+                    # TODO: assuming we're in the right dir
+                    sample.job.finished_at = datetime.datetime.now()
+                    sample.result = sample.job.get_result(self.result_regex, "output")
+            except ValueError as e:
+                logging.error("Failed to parse job result {}".format(e))
+                continue
+
+    def get_xy(self, meta_dir: str):
+        samples = self.ok_samples()
 
         sample_col = SampleCollection(samples, meta_dir)
         X_sample, Y_sample = sample_col.to_xy()
 
         return X_sample, Y_sample
 
-    def suggest(self, model_config: ModelConfig, meta_dir: str, include_mean_pred:
-            bool = True) -> Tuple[JobParams, Model]:
+    def suggest(self, model_config: ModelConfig, meta_dir: str) -> Tuple[JobParams, Model]:
         if len(self.samples) == 0:
             logging.info("No existing samples found, overloading suggest with RandomSearch.")
             model = RandomSearch()
@@ -110,7 +110,7 @@ class Experiment:
             job_params, fitted_model = \
                     model.predict_next(self.hyperparameters)
         else:
-            X_sample, Y_sample = self.get_xy(meta_dir, include_mean_pred)
+            X_sample, Y_sample = self.get_xy(meta_dir)
 
             job_params, fitted_model = \
                     GPyModel.predict_next(model_config, self.hyperparameters, X_sample, Y_sample)
@@ -126,7 +126,7 @@ class Experiment:
         return job, fitted_model, next_sample.to_x()
 
     def manual_run(self, model_config: ModelConfig, meta_dir: str, job_params: JobParams,
-            model_params: ModelParameters, include_mean_pred: bool = True) -> Tuple[Job, Sample]:
+            model_params: ModelParameters) -> Tuple[Job, Sample]:
         assert isinstance(job_params, JobParams)
 
         output_dir_path = pathlib.Path(meta_dir) / "output"
@@ -140,7 +140,7 @@ class Experiment:
 
         job = self.runner.start(output_dir, job_params)
 
-        X_sample, Y_sample = self.get_xy(meta_dir, include_mean_pred)
+        X_sample, Y_sample = self.get_xy(meta_dir)
 
         if len(X_sample) > 0:
             if model_params.can_predict_mean():
@@ -192,12 +192,9 @@ class Experiment:
         n_started = 0
 
         while n_started < n_iter:
-            for sample in self.samples:
-                print(sample.job.job_id, sample.status(), sep="\t")
-
-            print()
-
             if self.num_running() < n_parallel:
+                self.collect_results()
+
                 job = self.run_single(model_config, meta_dir)
 
                 n_started += 1
@@ -247,7 +244,7 @@ class Experiment:
         return experiment
 
     def ok_samples(self) -> List[Sample]:
-        return [s for s in self.samples if s.status() == JobStatus.FINISHED]
+        return [s for s in self.samples if s.result]
 
     def num_running(self) -> int:
         return len([s for s in self.samples if s.status() == JobStatus.RUNNING])

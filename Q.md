@@ -1,5 +1,8 @@
 # TODO
 
+- collect na vsech spravnych mistech
+  - nikde nepouzivat meta_dir (neni potreba, delame cd)
+
 - [x] garbage collecteni resultu
 - job status (sample status?)
 
@@ -10,7 +13,7 @@
 - nepocitam s failnutyma jobama
   - predpokladam, ze priste uspeje
   - kontrolovat zaokrouhlene jestli ho nepoustim znova
-    - vytvorim manual sample s mean_pred - sigma_pred (nejak aby byl videt) a
+    - vytvorim manual sample s mean_pred-sigma_pred (nejak aby byl videt) a
       uz nepoustim dal
 
 - [x] bopt debug - ipdb with bopt imports
