@@ -7,6 +7,10 @@ from typing import Union, NamedTuple, List, Tuple
 ParamTypes = Union[float, int, str]
 
 
+class OptimizationFailed(Exception):
+    pass
+
+
 class JobStatus(Enum):
     QUEUED = 1
     RUNNING = 2

@@ -15,7 +15,7 @@ from matplotlib.colors import LinearSegmentedColormap
 import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
 
-from bopt.basic_types import Hyperparameter, JobStatus
+from bopt.basic_types import Hyperparameter, JobStatus, OptimizationFailed
 from bopt.job_params import JobParams
 from bopt.model_config import ModelConfig
 from bopt.models.model import Model
@@ -121,17 +121,18 @@ class Experiment:
         # TODO: overit, ze by to fungovalo i na ok+running a mean_pred
         if len(self.ok_samples()) == 0:
             logging.info("No existing samples found, overloading suggest with RandomSearch.")
-            model = RandomSearch()
 
-            job_params, fitted_model = \
-                    model.predict_next(self.hyperparameters)
+            job_params, fitted_model = RandomSearch().predict_next(self.hyperparameters)
         else:
             from bopt.models.gpy_model import GPyModel
 
             X_sample, Y_sample = self.get_xy(meta_dir)
 
-            job_params, fitted_model = \
-                    GPyModel.predict_next(model_config, self.hyperparameters, X_sample, Y_sample)
+            try:
+                job_params, fitted_model = GPyModel.predict_next(model_config, self.hyperparameters, X_sample, Y_sample)
+            except OptimizationFailed as e:
+                logging.error("Optimization failed, retrying with RandomSearch: {}".format(e))
+                job_params, fitted_model = RandomSearch().predict_next(self.hyperparameters)
 
         return job_params, fitted_model
 

@@ -8,7 +8,7 @@ from GPy.models import GPRegression
 from typing import Tuple, List
 
 import bopt.acquisition_functions.acquisition_functions as acq
-from bopt.basic_types import Hyperparameter, Bound, Discrete
+from bopt.basic_types import Hyperparameter, Bound, Discrete, OptimizationFailed
 from bopt.models.model import Model
 from bopt.sample import Sample, SampleCollection
 from bopt.models.parameters import ModelParameters
@@ -163,16 +163,19 @@ class GPyModel(Model):
 
         logging.debug("Starting propose_location")
 
-        for x0 in starting_points:
+        for i, x0 in enumerate(starting_points):
             res = minimize(min_obj, x0=x0, bounds=scipy_bounds, method="L-BFGS-B")
 
-            assert not np.any(np.isnan(res.fun))
+            if np.any(np.isnan(res.fun[0])):
+                logging.error("Ran into NAN during {}/{} acq fn optimization, got {}".format(i, len(starting_points), res.fun))
 
             if res.fun < min_val:
                 min_val = res.fun[0]
                 min_x = res.x
 
-        assert min_x is not None
+        if min_x is None:
+            logging.error("Optimization failed {}-times with GP params {}".format(len(starting_points), gp.param_array))
+            raise OptimizationFailed(gp.param_array)
 
         logging.debug("Finished propose_location")
 

@@ -28,6 +28,8 @@ setuptools.setup(
         "flask~=1.0.2",
         "psutil~=5.4.8",
         "jsonpickle~=1.0",
+        "GPy[plotting]~=1.9.6",
+        "filelock~=3.0.10",
         "livereload==2.5.1"   # TODO: this is only temporary
     ],
 
