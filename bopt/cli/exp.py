@@ -40,12 +40,16 @@ def run(args) -> None:
             print("No samples finished evaluating yet.")
             sys.exit(0)
 
-        print("\nBEST (id={}): {}".format(best_sample.job.job_id, best_res))
 
+        print("\nBEST (id={}): {}".format(best_sample.job.job_id, best_res))
         assert best_sample is not None
 
         if best_sample.job is not None:
-            print(best_sample.job.run_parameters)
+            run_str = experiment.runner.script_path + " \\\n   "
+            for h, v in best_sample.job.run_parameters.mapping.items():
+                run_str += " --{}={}".format(h.name, v)
+
+            print(run_str)
             print()
 
             print("Evaluations:")

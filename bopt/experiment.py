@@ -283,6 +283,7 @@ class Experiment:
         plot_fig_fname = os.path.join(plot_dir, plot_fname)
 
         plt.savefig(plot_fig_fname)
+        plt.close()
 
 
 def plot_objective(model, x_slice, x_next, plot_limits, vmin, vmax,

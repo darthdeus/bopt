@@ -1,4 +1,5 @@
 import os
+import logging
 import sys
 import yaml
 from tqdm import tqdm
@@ -20,13 +21,16 @@ def run(args) -> None:
 
         processed_samples: List[bopt.Sample] = []
 
-        for sample in tqdm(experiment.samples):
+        for sample in tqdm(experiment.ok_samples()):
             if sample.model.model_name == GPyModel.model_name:
                 sample_col = bopt.SampleCollection(processed_samples, ".")
                 X, Y = sample_col.to_xy()
 
                 model = GPyModel.from_model_params(sample.model, X, Y)
 
-                experiment.plot_current(model, ".", sample.to_x())
+                try:
+                    experiment.plot_current(model, ".", sample.to_x())
+                except ValueError as e:
+                    logging.error("Plotting failed {}".format(e))
 
             processed_samples.append(sample)
