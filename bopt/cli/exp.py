@@ -25,12 +25,11 @@ def run(args) -> None:
         for sample in experiment.samples:
             if sample.job.is_finished():
                 try:
-                    res = sample.result
-
-                    if best_res is None or res > best_res:
-                        best_res = res
+                    if best_res is None or (sample.result and sample.result > best_res):
+                        best_res = sample.result
                         best_sample = sample
                 except ValueError:
+                    # TODO: cleanup checks
                     job_id = sample.job.job_id if sample.job else "NOJOB_ERR"
                     logging.error("Sample {} failed to parse".format(job_id))
                     continue
