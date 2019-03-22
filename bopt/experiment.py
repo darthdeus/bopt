@@ -14,8 +14,6 @@ from matplotlib.colors import LinearSegmentedColormap
 import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
 
-import GPy
-
 from bopt.basic_types import Hyperparameter, JobStatus
 from bopt.job_params import JobParams
 from bopt.model_config import ModelConfig
@@ -23,7 +21,6 @@ from bopt.models.model import Model
 from bopt.sample import Sample, SampleCollection
 from bopt.models.parameters import ModelParameters
 from bopt.models.random_search import RandomSearch
-from bopt.models.gpy_model import GPyModel
 from bopt.runner.abstract import Job, Runner
 from bopt.runner.runner_loader import RunnerLoader
 
@@ -45,6 +42,9 @@ class NoAliasDumper(yaml.Dumper):
 
 
 class Experiment:
+    kernel_names = ["rbf", "Mat32", "Mat52"]
+    acquisition_fn_names = ["ei", "pi"]
+
     hyperparameters: List[Hyperparameter]
     runner: Runner
     samples: List[Sample]
@@ -110,6 +110,8 @@ class Experiment:
             job_params, fitted_model = \
                     model.predict_next(self.hyperparameters)
         else:
+            from bopt.models.gpy_model import GPyModel
+
             X_sample, Y_sample = self.get_xy(meta_dir)
 
             job_params, fitted_model = \
@@ -143,6 +145,8 @@ class Experiment:
         X_sample, Y_sample = self.get_xy(meta_dir)
 
         if len(X_sample) > 0:
+            from bopt.models.gpy_model import GPyModel
+
             if model_params.can_predict_mean():
                 # Use the fitted model to predict mu/sigma.
                 gpy_model = GPyModel.from_model_params(model_params, X_sample, Y_sample)

@@ -3,6 +3,7 @@ import warnings
 
 import numpy as np
 import bopt
+from bopt.models.gpy_model import GPyModel
 import GPy
 from deepdiff import DeepDiff
 
@@ -15,7 +16,7 @@ def test_exp1():
 
     runner = bopt.LocalRunner("/bin/bash", ["--help", "me"])
 
-    experiment = bopt.Experiment(hyperparameters, runner)
+    experiment = bopt.Experiment(hyperparameters, runner, r"(\d+)")
 
     X = np.random.uniform(-3., 3., (20, 1))
     Y = np.sin(X) + np.random.randn(20, 1) * 0.05
@@ -26,7 +27,7 @@ def test_exp1():
         acq_fn = bopt.ExpectedImprovement()
         kernel = GPy.kern.RBF(input_dim=1, variance=1., lengthscale=1.)
         m1 = GPy.models.GPRegression(X, Y, kernel, normalizer=len(X) > 1)
-        gpy_model = bopt.GPyModel(m1, acq_fn)
+        gpy_model = GPyModel(m1, acq_fn)
 
     sp1 = bopt.JobParams.sample_params(hyperparameters)
     sp2 = bopt.JobParams.sample_params(hyperparameters)

@@ -7,11 +7,12 @@ from typing import List
 
 import bopt
 from bopt.cli.util import handle_cd, ensure_meta_yml, acquire_lock
-from bopt.models.gpy_model import GPyModel
 
 # TODO: co kdyz dostanu manual evaluation, zkusit precejenom fitnout model
 #       ale do plotu napsat, ze ten model neni podle ceho byl vybrany?
 def run(args) -> None:
+    from bopt.models.gpy_model import GPyModel
+
     handle_cd(args)
 
     with acquire_lock(), ensure_meta_yml():

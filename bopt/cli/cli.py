@@ -4,7 +4,7 @@ import psutil
 import inspect
 import argparse
 
-from bopt.models.gpy_model import GPyModel
+from bopt.experiment import Experiment
 from bopt.cli import (
     cli,
     exp,
@@ -35,8 +35,8 @@ def main():
         help="Change directory to the one specified before doing anything else.",
     )
 
-    kernel_names = ",".join(GPyModel.kernel_names)
-    acq_fn_names = ",".join(GPyModel.acquisition_fn_names)
+    kernel_names = ",".join(Experiment.kernel_names)
+    acq_fn_names = ",".join(Experiment.acquisition_fn_names)
 
     model_parser = argparse.ArgumentParser(add_help=None)
     model_parser.add_argument(

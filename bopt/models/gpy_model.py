@@ -21,8 +21,6 @@ from bopt.job_params import JobParams
 # https://arxiv.org/abs/1706.03673
 class GPyModel(Model):
     model_name = "gpy"
-    kernel_names = ["rbf", "Mat32", "Mat52"]
-    acquisition_fn_names = ["ei", "pi"]
 
     model: GPRegression
     acquisition_fn: acq.AcquisitionFunction
