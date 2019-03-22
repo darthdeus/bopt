@@ -35,7 +35,7 @@ def run(args) -> None:
                     logging.info("Started a new job {} with config {}".format(job.job_id, model_config))
 
             psutil.wait_procs(psutil.Process().children(), timeout=0.01)
-            time.sleep(1.0)
+            time.sleep(args.sleep)
 
         # TODO: delete old code
 

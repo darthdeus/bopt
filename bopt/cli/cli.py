@@ -105,7 +105,10 @@ def main():
         "run", help="Runs an experiment.", parents=[cd_parser, model_parser]
     )
     sp_run.add_argument(
-        "--n_iter", type=int, default=20, help="Number of iterations to run"
+        "--n_iter", type=int, default=20, help="Number of iterations to run."
+    )
+    sp_run.add_argument(
+        "--sleep", type=float, default=1.0, help="Number of seconds to sleep between iterations."
     )
     sp_run.add_argument(
         "--n_parallel",

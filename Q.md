@@ -3,6 +3,7 @@
 - collect na vsech spravnych mistech
   - nikde nepouzivat meta_dir (neni potreba, delame cd)
 
+- moznost nadefinovat qsub param (a nebo obecne spoustejici param co se pridaji u runneru)
 - replace print with logging
 
 - [x] garbage collecteni resultu
