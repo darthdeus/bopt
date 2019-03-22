@@ -1,7 +1,7 @@
 import abc
 import numpy as np
 from enum import Enum
-from typing import Union, NamedTuple, List, Tuple
+from typing import Union, NamedTuple, List, Tuple, Type
 
 
 ParamTypes = Union[float, int, str]
@@ -156,15 +156,11 @@ class Hyperparameter(NamedTuple):
         if data["type"] == "discrete":
             return Hyperparameter(name=name,
                     range=Discrete(data["values"]))
-        else:
-            if data["type"] == "int":
-                cls = Integer
-                parser = int
-            elif data["type"] == "float":
-                cls = Float
-                parser = float
-            else:
-                raise NotImplementedError()
-
+        elif data["type"] == "int":
             return Hyperparameter(name=name,
-                    range=cls(parser(data["low"]), parser(data["high"])))
+                    range=Integer(int(data["low"]), int(data["high"])))
+        elif data["type"] == "float":
+            return Hyperparameter(name=name,
+                    range=Float(float(data["low"]), float(data["high"])))
+        else:
+            raise NotImplementedError()
