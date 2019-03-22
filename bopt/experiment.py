@@ -106,7 +106,7 @@ class Experiment:
         return X_sample, Y_sample
 
     def suggest(self, model_config: ModelConfig, meta_dir: str) -> Tuple[JobParams, Model]:
-        if len(self.samples) == 0:
+        if len(self.ok_samples()) == 0:
             logging.info("No existing samples found, overloading suggest with RandomSearch.")
             model = RandomSearch()
 

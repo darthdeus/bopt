@@ -3,6 +3,8 @@
 - collect na vsech spravnych mistech
   - nikde nepouzivat meta_dir (neni potreba, delame cd)
 
+- replace print with logging
+
 - [x] garbage collecteni resultu
 - job status (sample status?)
 
