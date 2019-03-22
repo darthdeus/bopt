@@ -203,45 +203,6 @@ class Experiment:
 
         return job
 
-    def run_loop(self, model_config: ModelConfig, meta_dir: str,
-            n_iter=10, n_parallel=1) -> None:
-
-        n_started = 0
-
-        while n_started < n_iter:
-            if self.num_running() < n_parallel:
-                self.collect_results()
-
-                job = self.run_single(model_config, meta_dir)
-
-                n_started += 1
-
-                self.serialize(meta_dir)
-
-                logging.info("Started a new job {} with config {}".format(job.job_id, model_config))
-
-            psutil.wait_procs(psutil.Process().children(), timeout=0.01)
-            time.sleep(1.0)
-
-
-        # for i in range(n_iter):
-        #     job = self.run_single(model_config, meta_dir)
-        #     logging.info("Started a new job {} with config {}".format(job.job_id, model_config))
-        #
-        #     start_time = time.time()
-        #
-        #     # psutil.wait_procs(psutil.Process().children(), timeout=0.01)
-        #     while not job.is_finished():
-        #         psutil.wait_procs(psutil.Process().children(), timeout=0.01)
-        #         time.sleep(0.2)
-        #
-        #     end_time = time.time()
-        #
-        #     logging.info("Job {} finished after {}".format(job.job_id, end_time - start_time))
-        #
-        #     self.collect_results()
-        #     self.serialize(meta_dir)
-
     def serialize(self, meta_dir: str) -> None:
         dump = yaml.dump(self.to_dict(), default_flow_style=False, Dumper=NoAliasDumper)
 
