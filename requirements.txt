@@ -5,7 +5,7 @@ numpy==1.15.4
 Cython
 GPy[plotting]
 tqdm
-pyyaml
+pyyaml==5.1
 flask
 psutil
 ipdb
