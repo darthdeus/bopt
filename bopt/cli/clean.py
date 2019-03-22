@@ -20,5 +20,5 @@ def run(args) -> None:
         experiment.samples = []
         experiment.serialize(".")
 
-        for f in (glob.glob("outputs/*") + glob.glob("plots/*")):
+        for f in (glob.glob("output/*") + glob.glob("plots/*")):
             os.remove(f)

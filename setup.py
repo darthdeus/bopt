@@ -30,6 +30,7 @@ setuptools.setup(
         "jsonpickle~=1.0",
         "GPy[plotting]~=1.9.6",
         "filelock~=3.0.10",
+        "ipdb~=0.11",
         "livereload==2.5.1"   # TODO: this is only temporary
     ],
 
