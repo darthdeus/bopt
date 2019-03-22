@@ -20,7 +20,8 @@ class SGEJob(Job):
 
     def is_finished(self) -> bool:
         try:
-            subprocess.check_output(["qstat", "-j", str(self.job_id)])
+            fnull = open(os.devnull, "w")
+            subprocess.check_output(["qstat", "-j", str(self.job_id)], stderr=fnull)
             return False
         except subprocess.CalledProcessError:
             return True
