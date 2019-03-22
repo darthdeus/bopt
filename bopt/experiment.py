@@ -93,6 +93,9 @@ class Experiment:
             except ValueError as e:
                 logging.error("Failed to parse job result {}".format(e))
                 continue
+            except FileNotFoundError as e:
+                logging.error("Output file not found for job {}".format(e))
+                continue
 
     def get_xy(self, meta_dir: str):
         samples = self.ok_samples()

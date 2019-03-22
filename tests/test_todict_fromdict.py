@@ -3,12 +3,13 @@ import warnings
 
 import numpy as np
 import bopt
-from bopt.models.gpy_model import GPyModel
-import GPy
 from deepdiff import DeepDiff
 
 
 def test_exp1():
+    from bopt.models.gpy_model import GPyModel
+    import GPy
+
     hyperparameters = [
         bopt.Hyperparameter("x", bopt.Float(0.1, 0.7)),
         bopt.Hyperparameter("pi", bopt.Integer(24, 42))
