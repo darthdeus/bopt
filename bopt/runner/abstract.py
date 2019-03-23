@@ -8,7 +8,6 @@ import re
 
 import numpy as np
 from typing import Union, List, Optional, Tuple
-from bopt.basic_types import JobStatus
 from bopt.job_params import JobParams
 
 Timestamp = int

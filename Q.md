@@ -1,15 +1,15 @@
 # TODO
 
 - collect na vsech spravnych mistech
-  - nikde nepouzivat meta_dir (neni potreba, delame cd)
+  - [x] nikde nepouzivat meta_dir (neni potreba, delame cd)
 
 - moznost nadefinovat qsub param (a nebo obecne spoustejici param co se pridaji u runneru)
 - replace print with logging
 
 - [x] garbage collecteni resultu
-- job status (sample status?)
+- [x] job status (sample status?)
 
-- regex parsujici result
+- [x] regex parsujici result
 - [x] collectit resulty do yamlu
   - [x] v ramci toho ziskat i finished_at
 

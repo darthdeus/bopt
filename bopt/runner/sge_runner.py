@@ -10,7 +10,7 @@ from glob import glob
 from typing import Union, List, Optional, Tuple
 
 from bopt.job_params import JobParams
-from bopt.basic_types import Hyperparameter, JobStatus
+from bopt.basic_types import Hyperparameter
 from bopt.runner.abstract import Job, Runner, Timestamp, Value
 
 

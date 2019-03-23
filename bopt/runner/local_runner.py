@@ -12,7 +12,7 @@ from glob import glob
 from typing import Union, List, Optional, Tuple, Callable
 
 from bopt.job_params import JobParams
-from bopt.basic_types import Hyperparameter, JobStatus
+from bopt.basic_types import Hyperparameter
 from bopt.runner.abstract import Job, Runner, Timestamp, Value
 
 
@@ -33,7 +33,8 @@ class LocalRunner(Runner):
         return "local_runner"
 
     def start(self, output_dir: str, run_parameters: JobParams) -> Job:
-        cmdline_run_params = [f"--{h.name}={value}" for h, value in run_parameters.mapping.items()]
+        cmdline_run_params = [f"--{h.name}={value}"
+                for h, value in run_parameters.mapping.items()]
 
         cmd = list(map(lambda x: os.path.expanduser(x), [
             self.script_path,
