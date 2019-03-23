@@ -27,3 +27,8 @@ bopt manual-run -C "$test_dir" --x=0.1 --y=0.3 --z=1 --w=sigmoid
 # TODO: test out of bounds
 bopt exp -C "$test_dir"
 
+bopt debug -C "$test_dir" &
+sleep 3
+kill -9 %1
+
+# TODO: overit ze se vola vsechno

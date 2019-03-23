@@ -109,7 +109,7 @@ def plot_current(experiment: Experiment, gpy_model: Model, meta_dir: str,
             experiment.hyperparameters, outer_grid, fig,
             gpy_model.acquisition_fn)
 
-    plot_dir = os.path.join(meta_dir, "plots")
+    plot_dir = "plots"
     if not os.path.isdir(plot_dir):
         os.mkdir(plot_dir)
 

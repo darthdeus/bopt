@@ -9,7 +9,7 @@ def run(args) -> None:
     handle_cd(args)
 
     with acquire_lock():
-        experiment = Experiment.deserialize(".")
+        experiment = Experiment.deserialize()
 
         __import__('ipdb').set_trace()
 

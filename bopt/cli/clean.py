@@ -11,14 +11,14 @@ def run(args) -> None:
     handle_cd(args)
 
     with acquire_lock():
-        experiment = Experiment.deserialize(".")
+        experiment = Experiment.deserialize()
 
         for sample in experiment.samples:
             if sample.job:
                 sample.job.kill()
 
         experiment.samples = []
-        experiment.serialize(".")
+        experiment.serialize()
 
         for f in (glob.glob("output/*") + glob.glob("plots/*")):
             os.remove(f)

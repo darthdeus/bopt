@@ -38,10 +38,10 @@ def run(args) -> None:
     def index():
         bopt.clear_param_traces()
 
-        experiment = bopt.Experiment.deserialize(".")
-        optim_result = experiment.current_optim_result(".")
+        experiment = bopt.Experiment.deserialize()
+        optim_result = experiment.current_optim_result()
 
-        sample_col = bopt.SampleCollection(experiment.samples, ".")
+        sample_col = bopt.SampleCollection(experiment.samples)
 
         gp = optim_result.fit_gp()
 

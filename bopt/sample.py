@@ -113,12 +113,9 @@ class Sample:
 
 class SampleCollection:
     samples: List[Sample]
-    # TODO: tohle nechci
-    meta_dir: str
 
-    def __init__(self, samples: List[Sample], meta_dir: str) -> None:
+    def __init__(self, samples: List[Sample]) -> None:
         self.samples = samples
-        self.meta_dir = meta_dir
 
     def to_xy(self) -> Tuple[np.ndarray, np.ndarray]:
         num_samples = len(self.samples)
@@ -135,9 +132,6 @@ class SampleCollection:
         #     y_sample = zero_mean
 
         xs = []
-
-        # TODO: "output" as a global constant
-        # output_dir = os.path.join(self.meta_dir, "output")
 
         for i, sample in enumerate(self.samples):
             x, y = sample.to_xy()

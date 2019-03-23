@@ -10,7 +10,7 @@ def run(args) -> None:
     handle_cd(args)
 
     with acquire_lock(), ensure_meta_yml():
-        experiment = bopt.Experiment.deserialize(".")
+        experiment = bopt.Experiment.deserialize()
 
         # TODO: unify naming run_params vs model_params
         model_params = vars(args).copy()
@@ -34,5 +34,5 @@ def run(args) -> None:
         if not job_params.validate():
             sys.exit(1)
 
-        experiment.manual_run(bopt.ModelConfig.default(), ".",
+        experiment.manual_run(bopt.ModelConfig.default(),
                 job_params, bopt.ModelParameters.for_manual_run())

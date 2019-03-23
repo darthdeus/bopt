@@ -61,6 +61,6 @@ def run(args) -> None:
         default_result_regex = "RESULT=(.*)"
         experiment = bopt.Experiment(hyperparameters, runner, default_result_regex)
 
-        experiment.serialize(".")
+        experiment.serialize()
 
         logging.info(f"Experiment created, run `bopt run -C {args.dir}` to start.")

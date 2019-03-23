@@ -104,15 +104,15 @@ class Experiment:
                 else:
                     logging.error("Output file not found for job {} even though it finished. It will be considered as a failed job.".format(sample.job.job_id))
 
-    def get_xy(self, meta_dir: str):
+    def get_xy(self):
         samples = self.ok_samples()
 
-        sample_col = SampleCollection(samples, meta_dir)
+        sample_col = SampleCollection(samples)
         X_sample, Y_sample = sample_col.to_xy()
 
         return X_sample, Y_sample
 
-    def suggest(self, model_config: ModelConfig, meta_dir: str) -> Tuple[JobParams, Model]:
+    def suggest(self, model_config: ModelConfig) -> Tuple[JobParams, Model]:
         # TODO: overit, ze by to fungovalo i na ok+running a mean_pred
         if len(self.ok_samples()) == 0:
             logging.info("No existing samples found, overloading suggest with RandomSearch.")
@@ -121,7 +121,7 @@ class Experiment:
         else:
             from bopt.models.gpy_model import GPyModel
 
-            X_sample, Y_sample = self.get_xy(meta_dir)
+            X_sample, Y_sample = self.get_xy()
 
             try:
                 job_params, fitted_model = GPyModel.predict_next(model_config, self.hyperparameters, X_sample, Y_sample)
@@ -131,19 +131,19 @@ class Experiment:
 
         return job_params, fitted_model
 
-    def run_next(self, model_config: ModelConfig, meta_dir: str) -> Tuple[Job, Model, np.ndarray]:
-        job_params, fitted_model = self.suggest(model_config, meta_dir)
+    def run_next(self, model_config: ModelConfig) -> Tuple[Job, Model, np.ndarray]:
+        job_params, fitted_model = self.suggest(model_config)
 
-        job, next_sample = self.manual_run(model_config, meta_dir, job_params,
+        job, next_sample = self.manual_run(model_config, job_params,
                 fitted_model.to_model_params())
 
         return job, fitted_model, next_sample.to_x()
 
-    def manual_run(self, model_config: ModelConfig, meta_dir: str, job_params: JobParams,
+    def manual_run(self, model_config: ModelConfig, job_params: JobParams,
             model_params: ModelParameters) -> Tuple[Job, Sample]:
         assert isinstance(job_params, JobParams)
 
-        output_dir_path = pathlib.Path(meta_dir) / "output"
+        output_dir_path = pathlib.Path("output")
         output_dir_path.mkdir(parents=True, exist_ok=True)
 
         logging.info("Output set to {}, absolute path: {}".format(output_dir_path, output_dir_path.absolute()))
@@ -154,7 +154,7 @@ class Experiment:
 
         job = self.runner.start(output_dir, job_params)
 
-        X_sample, Y_sample = self.get_xy(meta_dir)
+        X_sample, Y_sample = self.get_xy()
 
         if len(X_sample) > 0:
             from bopt.models.gpy_model import GPyModel
@@ -181,13 +181,13 @@ class Experiment:
         next_sample = Sample(job, model_params, float(mu), float(sigma))
         self.samples.append(next_sample)
 
-        self.serialize(meta_dir)
+        self.serialize()
         logging.debug("Serialization done")
 
         return job, next_sample
 
-    def run_single(self, model_config: ModelConfig, meta_dir: str) -> Job:
-        job, fitted_model, x_next = self.run_next(model_config, meta_dir)
+    def run_single(self, model_config: ModelConfig) -> Job:
+        job, fitted_model, x_next = self.run_next(model_config)
 
         # # TODO: nechci radsi JobParams?
         # logging.debug("Starting to plot")
@@ -202,21 +202,21 @@ class Experiment:
 
         return job
 
-    def serialize(self, meta_dir: str) -> None:
+    def serialize(self) -> None:
         dump = yaml.dump(self.to_dict(), default_flow_style=False, Dumper=NoAliasDumper)
 
-        with open(os.path.join(meta_dir, "meta.yml"), "w") as f:
+        with open("meta.yml", "w") as f:
             f.write(dump)
 
     @staticmethod
-    def deserialize(meta_dir: str) -> "Experiment":
-        with open(os.path.join(meta_dir, "meta.yml"), "r") as f:
+    def deserialize() -> "Experiment":
+        with open("meta.yml", "r") as f:
             contents = f.read()
             obj = yaml.load(contents, Loader=yaml.SafeLoader)
 
         experiment = Experiment.from_dict(obj)
         experiment.collect_results()
-        experiment.serialize(meta_dir)
+        experiment.serialize()
 
         return experiment
 

@@ -21,18 +21,19 @@ def run(args) -> None:
 
         while n_started < args.n_iter:
             with acquire_lock():
-                experiment = bopt.Experiment.deserialize(".")
+                experiment = bopt.Experiment.deserialize()
 
                 if experiment.num_running() < args.n_parallel:
                     experiment.collect_results()
 
-                    job = experiment.run_single(model_config, ".")
+                    job = experiment.run_single(model_config)
 
                     n_started += 1
 
-                    experiment.serialize(".")
+                    experiment.serialize()
 
-                    logging.info("Started a new job {} with config {}".format(job.job_id, model_config))
+                    logging.info("Started a new job {} with config {}" \
+                            .format(job.job_id, model_config))
 
             psutil.wait_procs(psutil.Process().children(), timeout=0.01)
             time.sleep(args.sleep)

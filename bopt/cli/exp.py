@@ -11,7 +11,7 @@ def run(args) -> None:
     handle_cd(args)
 
     with acquire_lock():
-        experiment = Experiment.deserialize(".")
+        experiment = Experiment.deserialize()
 
         print("Hyperparameters:")
         for param in experiment.hyperparameters:

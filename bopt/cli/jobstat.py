@@ -9,6 +9,10 @@ from bopt.cli.util import handle_cd, acquire_lock
 
 
 def run(args) -> None:
+    # TODO: this is completely outdated and broken at this point
+    raise NotImplementedError()
+
+
     handle_cd(args)
 
     with acquire_lock():
@@ -42,11 +46,10 @@ def run(args) -> None:
 
         fname, job_id = matched_job_ids[0]
 
-        meta_dir = os.path.dirname(fname)
-        experiment = Experiment.deserialize(meta_dir)
+        experiment = Experiment.deserialize()
 
         # TODO: this is most likely not needed.
-        job = experiment.runner.deserialize_job(meta_dir, job_id)
+        job = experiment.runner.deserialize_job(job_id)
 
         is_finished = job.is_finished()
 
