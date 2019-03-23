@@ -16,9 +16,9 @@ def run(args) -> None:
             print("Found existing meta.yml, resuming experiment.")
 
             experiment = bopt.Experiment.deserialize()
+            experiment.collect_results()
 
-            next_params, fitted_model = \
-                    experiment.suggest(bopt.ModelConfig(args))
+            next_params, fitted_model = experiment.suggest(bopt.ModelConfig(args))
 
             param_str = "\n".join([f"{key.name}: {value}"
                 for key, value in next_params.mapping.items()])
