@@ -20,7 +20,6 @@ class ModelParameters:
 
     def can_predict_mean(self) -> bool:
         # This is simply to avoid cyclic imports
-        # TODO: maybe use a global constant config that registers/lists predictive models?
         from bopt.models.gpy_model import GPyModel
 
         return self.model_name == GPyModel.model_name

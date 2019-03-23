@@ -4,7 +4,7 @@
   - [x] nikde nepouzivat meta_dir (neni potreba, delame cd)
 
 - moznost nadefinovat qsub param (a nebo obecne spoustejici param co se pridaji u runneru)
-- replace print with logging
+- [x] replace print with logging
 
 - [x] garbage collecteni resultu
 - [x] job status (sample status?)
@@ -34,6 +34,8 @@
   - sigmoid vs round?
 
 - zdetekovat duplicitni ID a spadnout
+
+- smazat benchmarks/ az bude cas udelat to poradne
 
 -----------------------------------
 

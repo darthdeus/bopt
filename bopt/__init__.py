@@ -9,8 +9,4 @@ from bopt.plot import *
 from bopt.cli import *
 from bopt.model_config import *
 
-# from bopt.runner.abstract import *
-# from bopt.runner.sge_runner import *
-# from bopt.runner.local_runner import *
-
 name = "bopt"

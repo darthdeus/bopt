@@ -17,7 +17,6 @@ JOB_MAPPING: Dict[str, JobTypes] = {
 
 
 class JobLoader:
-
     @staticmethod
     def from_dict(data: dict, hyperprameters: List[Hyperparameter]) -> Job:
         job_type = data["job_type"]

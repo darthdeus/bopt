@@ -28,10 +28,10 @@ class SGEJob(Job):
 
     def kill(self):
         try:
-            output = subprocess.check_output(["qdel",
-                str(self.job_id)]).decode("ascii")
+            output = subprocess.check_output(["qdel", str(self.job_id)]).decode("ascii")
 
-            # assert re.match(pattern=".*has registered.*", string=output)
+            if not re.match(pattern=".*has registered.*", string=output):
+                logging.error("qdel returned unexpected output: {}".format(output))
         except subprocess.CalledProcessError as e:
             logging.error("Failed to kill a job {} with error {}".format(self.job_id, e))
 

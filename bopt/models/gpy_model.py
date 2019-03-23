@@ -137,26 +137,16 @@ class GPyModel(Model):
     def propose_location( acquisition_fn: acq.AcquisitionFunction, gp:
             GPRegression, y_max: float, hyperparameters: List[Hyperparameter],
             n_restarts: int = 25,) -> np.ndarray:
-        # TODO: heh
-        # np.seterrcall(lambda *args: __import__('ipdb').set_trace())
-        # np.seterr(all="warn")
 
         def min_obj(X):
             return -acquisition_fn(gp, X.reshape(1, -1), y_max)
-
-        # TODO: int muze byt i == upper bound
 
         scipy_bounds = [h.range.scipy_bound_tuple() for h in
                 hyperparameters]
 
         starting_points = []
         for _ in range(n_restarts):
-            # TODO: tohle spadne protoze sample z discrete takhle nejde pouzit
-            x_sample = JobParams.sample_params(hyperparameters)
-
-            # starting_points.append(np.array([bound.sample() for bound in
-            # bounds]))
-            starting_points.append(x_sample)
+            starting_points.append(JobParams.sample_params(hyperparameters))
 
         min_val = 1e9
         min_x = None
