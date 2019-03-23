@@ -9,12 +9,21 @@ if __name__ == "__main__":
     parser.add_argument("--x", default=1.0, type=float, help="X")
     parser.add_argument("--y", default=1.0, type=float, help="Y")
     parser.add_argument("--z", default=1.0, type=float, help="Z")
-    parser.add_argument("--w", default=1.0, type=float, help="W")
+    parser.add_argument("--w", default="sigmoid", type=str, help="W")
     args = parser.parse_args()
 
     import math
     import random
     import time
+
+    if args.w == "sigmoid":
+        args.w = 1.0
+    elif args.w == "relu":
+        args.w = 0.0
+    elif args.w == "tanh":
+        args.w = -1.0
+    else:
+        args.w = 2.0
 
     result = math.sin(args.x) * math.sin(args.y) \
             + random.random() * 0.05 + 2*math.cos(args.z) * math.cos(args.w)
