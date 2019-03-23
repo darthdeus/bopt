@@ -65,7 +65,7 @@ def plot_convergence(X_sample, y_sample, n_init=2):
     plt.title('Value of best selected sample')
 
 
-def plot_current(experiment: Experiment, gpy_model: Model, meta_dir: str,
+def plot_current(experiment: Experiment, gpy_model: Model,
         x_next: np.ndarray, resolution: float = 30) -> None:
     lows        = [h.range.low for h in experiment.hyperparameters]
     highs       = [h.range.high for h in experiment.hyperparameters]

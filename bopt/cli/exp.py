@@ -46,7 +46,7 @@ def run(args) -> None:
 
         if best_sample.job is not None:
             run_str = experiment.runner.script_path + " \\\n   "
-            for h, v in best_sample.job.run_parameters.mapping.items():
+            for h, v in best_sample.hyperparam_values.mapping.items():
                 run_str += " --{}={}".format(h.name, v)
 
             print(run_str)

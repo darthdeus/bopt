@@ -13,7 +13,7 @@ import numpy as np
 from typing import List, Optional, Tuple
 
 from bopt.basic_types import Hyperparameter, JobStatus, OptimizationFailed
-from bopt.job_params import JobParams
+from bopt.hyperparam_values import HyperparamValues
 from bopt.model_config import ModelConfig
 from bopt.models.model import Model
 from bopt.sample import Sample, SampleCollection
@@ -82,13 +82,13 @@ class Experiment:
     def collect_results(self) -> None:
         for sample in self.samples:
             if sample.result is None and sample.job and sample.job.is_finished():
+                sample.job.finished_at = datetime.datetime.now()
+
                 # Sine we're using `handle_cd` we always assume the working directory
                 # is where meta.yml is.
                 fname = os.path.join("output", f"job.o{sample.job.job_id}")
 
                 if os.path.exists(fname):
-                    sample.job.finished_at = datetime.datetime.now()
-
                     with open(fname, "r") as f:
                         contents = f.read().rstrip("\n")
                         found = False
@@ -112,11 +112,7 @@ class Experiment:
 
         return X_sample, Y_sample
 
-    def params_already_evaluated(self, job_params: JobParams) -> bool:
-        return any([s.job.run_parameters.similar_to(job_params)
-                    for s in self.samples if s.job])
-
-    def suggest(self, model_config: ModelConfig) -> Tuple[JobParams, Model]:
+    def suggest(self, model_config: ModelConfig) -> Tuple[HyperparamValues, Model]:
         # TODO: overit, ze by to fungovalo i na ok+running a mean_pred
         if len(self.ok_samples()) == 0:
             logging.info("No existing samples found, overloading suggest with RandomSearch.")
@@ -135,70 +131,87 @@ class Experiment:
 
         return job_params, fitted_model
 
-    def run_next(self, model_config: ModelConfig) -> Tuple[Job, Model, np.ndarray]:
+    def run_next(self, model_config: ModelConfig) -> Tuple[Model, Sample]:
         job_params, fitted_model = self.suggest(model_config)
 
-        job, next_sample = self.manual_run(model_config, job_params,
+        next_sample = self.manual_run(model_config, job_params,
                 fitted_model.to_model_params())
 
-        return job, fitted_model, next_sample.to_x()
+        return fitted_model, next_sample
 
-    def manual_run(self, model_config: ModelConfig, job_params: JobParams,
-            model_params: ModelParameters) -> Tuple[Job, Sample]:
-        assert isinstance(job_params, JobParams)
+    def manual_run(self, model_config: ModelConfig,
+            hyperparam_values: HyperparamValues,
+            model_params: ModelParameters) -> Sample:
+        assert isinstance(hyperparam_values, HyperparamValues)
 
         output_dir_path = pathlib.Path("output")
         output_dir_path.mkdir(parents=True, exist_ok=True)
 
         logging.info("Output set to {}, absolute path: {}".format(output_dir_path, output_dir_path.absolute()))
 
-        job_params.validate()
+        hyperparam_values.validate()
 
         output_dir = str(output_dir_path)
 
+        similar_samples = [s for s in self.samples if s.job and s.hyperparam_values.similar_to(hyperparam_values)]
 
-        if self.params_already_evaluated(job_params):
-            # TODO: opravit:
-            #   - sample nemusi mit mu/sigma predikci
-            #   - pokud uz byl vyhodnoceny, chci preskocit pousteni jobu a udelat "ManualSample"?
-            raise NotImplementedError()
+        if len(similar_samples) > 0:
+            finished_similar_samples = [s for s in similar_samples if s.status() == JobStatus.FINISHED]
 
-        job = self.runner.start(output_dir, job_params)
+            if len(finished_similar_samples) > 0:
+                logging.warning("Found finished similar sample, creating MANUAL_SAMPLE with equal hyperparam values and result.")
 
-        X_sample, Y_sample = self.get_xy()
+                similar_sample = finished_similar_samples[0]
+                assert similar_sample.result
 
-        if len(X_sample) > 0:
-            from bopt.models.gpy_model import GPyModel
-
-            if model_params.can_predict_mean():
-                # Use the fitted model to predict mu/sigma.
-                gpy_model = GPyModel.from_model_params(model_params, X_sample, Y_sample)
-                model = gpy_model.model
-
+                next_sample = Sample(None, model_params, similar_sample.hyperparam_values,
+                                     similar_sample.mu_pred, similar_sample.sigma_pred)
+                next_sample.result = similar_sample.result
+                next_sample.comment = "created as similar of {}".format(similar_sample)
             else:
-                model = GPyModel.gpy_regression(model_config, X_sample, Y_sample)
+                # TODO: opravit:
+                #   - sample nemusi mit mu/sigma predikci
+                #   - pokud uz byl vyhodnoceny, chci preskocit pousteni jobu a udelat "ManualSample"?
+                raise NotImplementedError()
 
-            X_next = np.array([job_params.x])
-
-            mu, var = model.predict(X_next)
-            sigma = np.sqrt(var)
-
-            assert mu.size == 1
-            assert sigma.size == 1
         else:
-            mu = 0.0
-            sigma = 1.0 # TODO: lol :)
+            job = self.runner.start(output_dir, hyperparam_values)
 
-        next_sample = Sample(job, model_params, float(mu), float(sigma))
+            X_sample, Y_sample = self.get_xy()
+
+            if len(X_sample) > 0:
+                from bopt.models.gpy_model import GPyModel
+
+                if model_params.can_predict_mean():
+                    # Use the fitted model to predict mu/sigma.
+                    gpy_model = GPyModel.from_model_params(model_params, X_sample, Y_sample)
+                    model = gpy_model.model
+
+                else:
+                    model = GPyModel.gpy_regression(model_config, X_sample, Y_sample)
+
+                X_next = np.array([hyperparam_values.x])
+
+                mu, var = model.predict(X_next)
+                sigma = np.sqrt(var)
+
+                assert mu.size == 1
+                assert sigma.size == 1
+            else:
+                mu = 0.0
+                sigma = 1.0 # TODO: lol :)
+
+            next_sample = Sample(job, model_params, hyperparam_values, float(mu), float(sigma))
+
         self.samples.append(next_sample)
 
         self.serialize()
         logging.debug("Serialization done")
 
-        return job, next_sample
+        return next_sample
 
-    def run_single(self, model_config: ModelConfig) -> Job:
-        job, fitted_model, x_next = self.run_next(model_config)
+    def run_single(self, model_config: ModelConfig) -> Sample:
+        fitted_model, next_sample = self.run_next(model_config)
 
         # # TODO: nechci radsi JobParams?
         # logging.debug("Starting to plot")
@@ -211,7 +224,7 @@ class Experiment:
         #
         # logging.debug("Plotting done")
 
-        return job
+        return next_sample
 
     def serialize(self) -> None:
         dump = yaml.dump(self.to_dict(), default_flow_style=False, Dumper=NoAliasDumper)

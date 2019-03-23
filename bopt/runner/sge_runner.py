@@ -9,7 +9,7 @@ import logging
 from glob import glob
 from typing import Union, List, Optional, Tuple
 
-from bopt.job_params import JobParams
+from bopt.hyperparam_values import HyperparamValues
 from bopt.basic_types import Hyperparameter
 from bopt.runner.abstract import Job, Runner, Timestamp, Value
 
@@ -40,9 +40,9 @@ class SGERunner(Runner):
     def runner_type(self) -> str:
         return "sge_runner"
 
-    def start(self, output_dir: str, run_parameters: JobParams) -> Job:
+    def start(self, output_dir: str, hyperparam_values: HyperparamValues) -> Job:
         cmdline_run_params = [f"--{h.name}={value}"
-                for h, value in run_parameters.mapping.items()]
+                for h, value in hyperparam_values.mapping.items()]
 
         # TODO: fuj tohle nema byt nahardcodeny
         qsub_params: List[str] = ["-N", "job", "-o", output_dir, "-q", "cpu-troja.q"]
@@ -62,7 +62,7 @@ class SGERunner(Runner):
         assert matches is not None
         job_id = int(matches.group(1))
 
-        sge_job = SGEJob(job_id, run_parameters)
+        sge_job = SGEJob(job_id)
         sge_job.started_at = datetime.datetime.now()
 
         return sge_job

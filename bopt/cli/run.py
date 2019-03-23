@@ -26,14 +26,17 @@ def run(args) -> None:
                 if experiment.num_running() < args.n_parallel:
                     experiment.collect_results()
 
-                    job = experiment.run_single(model_config)
+                    sample = experiment.run_single(model_config)
 
                     n_started += 1
 
                     experiment.serialize()
 
-                    logging.info("Started a new job {} with config {}" \
-                            .format(job.job_id, model_config))
+                    if sample.job:
+                        logging.info("Started a new job {} with config {}" \
+                                .format(sample.job.job_id, model_config))
+                    else:
+                        logging.error("Run loop created a sample without job.")
 
             psutil.wait_procs(psutil.Process().children(), timeout=0.01)
             time.sleep(args.sleep)

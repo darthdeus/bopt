@@ -13,7 +13,7 @@ from bopt.models.model import Model
 from bopt.sample import Sample, SampleCollection
 from bopt.models.parameters import ModelParameters
 from bopt.model_config import ModelConfig
-from bopt.job_params import JobParams
+from bopt.hyperparam_values import HyperparamValues
 
 
 # TODO: split into multiple, serialization separate?
@@ -114,7 +114,7 @@ class GPyModel(Model):
 
     @staticmethod
     def predict_next(model_config: ModelConfig, hyperparameters: List[Hyperparameter],
-            X_sample: np.ndarray, Y_sample: np.ndarray) -> Tuple[JobParams, "Model"]:
+            X_sample: np.ndarray, Y_sample: np.ndarray) -> Tuple[HyperparamValues, "Model"]:
         # TODO: compare NLL with and without normalizer
 
         model = GPyModel.gpy_regression(model_config, X_sample, Y_sample)
@@ -127,7 +127,7 @@ class GPyModel(Model):
 
         logging.info("New proposed location at x = {}".format(new_point_str))
 
-        job_params = JobParams.mapping_from_vector(x_next, hyperparameters)
+        job_params = HyperparamValues.mapping_from_vector(x_next, hyperparameters)
 
         fitted_model = GPyModel(model, acquisition_fn)
 
@@ -146,7 +146,7 @@ class GPyModel(Model):
 
         starting_points = []
         for _ in range(n_restarts):
-            starting_points.append(JobParams.sample_params(hyperparameters))
+            starting_points.append(HyperparamValues.sample_params(hyperparameters))
 
         min_val = 1e9
         min_x = None

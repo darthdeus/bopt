@@ -15,8 +15,9 @@ class JobStatus(Enum):
     QUEUED = 1
     RUNNING = 2
     FAILED = 3
-    CANCELED = 4
-    FINISHED = 5
+    WAITING_FOR_SIMILAR = 4
+    CANCELED = 5
+    FINISHED = 6
 
 
 # TODO: fix naming convention & typnig errors

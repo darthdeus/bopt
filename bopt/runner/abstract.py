@@ -8,7 +8,7 @@ import re
 
 import numpy as np
 from typing import Union, List, Optional, Tuple
-from bopt.job_params import JobParams
+from bopt.hyperparam_values import HyperparamValues
 
 Timestamp = int
 Value = float
@@ -16,14 +16,11 @@ Value = float
 
 class Job(abc.ABC):
     job_id: int
-    run_parameters: JobParams
     started_at: Optional[datetime.datetime]
     finished_at: Optional[datetime.datetime]
 
-    def __init__(self, job_id: int, run_parameters: JobParams) -> None:
-        assert isinstance(run_parameters, JobParams)
+    def __init__(self, job_id: int) -> None:
         self.job_id = job_id
-        self.run_parameters = run_parameters
         self.started_at = None
         self.finished_at = None
 
@@ -31,7 +28,6 @@ class Job(abc.ABC):
         return {
             "job_type": self.job_type(),
             "job_id": self.job_id,
-            "run_parameters": self.run_parameters.to_dict(),
             "started_at": self.started_at,
             "finished_at": self.finished_at,
         }
@@ -54,8 +50,9 @@ class Runner(abc.ABC):
         self.script_path = script_path
         self.arguments = arguments
 
+    # TODO: start by nemelo brat output_dir
     @abc.abstractmethod
-    def start(self, output_dir: str, run_parameters: JobParams) -> Job: pass
+    def start(self, output_dir: str, hyperparam_values: HyperparamValues) -> Job: pass
 
     @abc.abstractmethod
     def runner_type(self) -> str: pass

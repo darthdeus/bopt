@@ -6,35 +6,33 @@ import numpy as np
 from typing import Tuple, List, Optional
 
 from bopt.basic_types import Hyperparameter, JobStatus
-from bopt.job_params import JobParams
+from bopt.hyperparam_values import HyperparamValues
 from bopt.runner.abstract import Job
 from bopt.runner.job_loader import JobLoader
 from bopt.models.parameters import ModelParameters
 
 
 class Sample:
-    job: Job
-    result: Optional[float]
+    job: Optional[Job]
     model: ModelParameters
+    hyperparam_values: HyperparamValues
+    result: Optional[float]
     mu_pred: float
     sigma_pred: float
+    comment: Optional[str]
 
-    def __init__(self, job: Job, model_params: ModelParameters,
-            mu_pred: float, sigma_pred: float) -> None:
+    def __init__(self, job: Optional[Job],
+            model_params: ModelParameters,
+            hyperparam_values: HyperparamValues,
+            mu_pred: float,
+            sigma_pred: float) -> None:
         self.job = job
         self.model = model_params
+        self.hyperparam_values = hyperparam_values
         self.mu_pred = mu_pred
         self.sigma_pred = sigma_pred
         self.result = None
-
-    def to_dict(self) -> dict:
-        return {
-            "job": self.job.to_dict(),
-            "model": self.model.to_dict() if self.model is not None else None,
-            "result": self.result,
-            "mu_pred": self.mu_pred,
-            "sigma_pred": self.sigma_pred
-        }
+        self.comment = None
 
     def status(self) -> JobStatus:
         if self.result is not None:
@@ -48,26 +46,47 @@ class Sample:
             logging.error("Somehow created a sample with no job and no result.")
             return JobStatus.FAILED
 
+    def to_dict(self) -> dict:
+        return {
+            "job": self.job.to_dict() if self.job else None,
+            "model": self.model.to_dict() if self.model else None,
+            "hyperparam_values": self.hyperparam_values.to_dict(),
+            "result": self.result,
+            "mu_pred": self.mu_pred,
+            "sigma_pred": self.sigma_pred,
+            "comment": self.comment
+        }
+
     @staticmethod
     def from_dict(data: dict, hyperparameters: List[Hyperparameter]) -> "Sample":
         model_dict = None
 
-        if data["model"] is not None:
+        if data["model"]:
             model_dict = ModelParameters.from_dict(data["model"])
 
-        job = JobLoader.from_dict(data["job"], hyperparameters)
+
+        # TODO: 64 or 32 bit?
+        x = np.array(data["hyperparam_values"], dtype=np.float64)
+        hyperparam_values = HyperparamValues.mapping_from_vector(x, hyperparameters)
+
+        if "job" in data and data["job"] is not None:
+            job = JobLoader.from_dict(data["job"])
+        else:
+            job = None
+
         sample = Sample(job,
                 model_dict,
+                hyperparam_values,
                 data["mu_pred"],
                 data["sigma_pred"])
 
+        sample.comment = data.get("comment", None)
         sample.result = data.get("result", None)
 
         return sample
 
     def to_x(self) -> np.ndarray:
-        return self.job.run_parameters.x
-        # return Sample.param_dict_to_x(self.job.run_parameters)
+        return self.hyperparam_values.x
 
     def to_xy(self) -> Tuple[np.ndarray, float]:
         x = self.to_x()
@@ -80,12 +99,14 @@ class Sample:
             # TODO: collect first?
             # TODO: TADY SEM SE VRATIT :PPP
             y = self.result
-            # y = self.result or self.job.get_result(output_dir)
         elif status == JobStatus.RUNNING:
-            logging.info("Using mean prediction for a running job {}".format(self.job.job_id))
-            y = self.mu_pred
+            if self.job:
+                logging.info("Using mean prediction for a running job {}".format(self.job.job_id))
+                y = self.mu_pred
+            else:
+                raise ValueError("Sample has status RUNNING but no job.")
         else:
-            logging.error("Tried to get xy for a job {} which is {}".format(self.job.job_id, status))
+            logging.error("Tried to get xy for a sample {} which is {}".format(self, status))
             raise ValueError(self)
 
         assert isinstance(x, np.ndarray)
@@ -94,14 +115,18 @@ class Sample:
         return x, y
 
     def __str__(self) -> str:
-        s = f"{self.job.job_id}\t"
+        if self.job:
+            s = f"{self.job.job_id}\t"
+        else:
+            s = "manual\t"
+
         is_finished = self.status() == JobStatus.FINISHED
 
         # TODO: proper status check
 
         if self.result:
             rounded_params = {h.name: value for h, value in
-                    self.job.run_parameters.mapping.items()}
+                    self.hyperparam_values.mapping.items()}
 
             assert isinstance(self.result, float)
             s += f"{is_finished}\t{self.result:.3f}\t{rounded_params}"
