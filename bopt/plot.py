@@ -243,7 +243,9 @@ def acq_for_dims(model, acq: AcquisitionFunction, x_slice, hyperparameters, ax,
     for i in range(len(x_slice)):
         if i not in dims:
             gs[i] = g1.copy()
-            gs[i][:] = x_slice[i] # TODO: neni tohle spatne typ?
+
+            raise NotImplementedError()
+            # gs[i][:] = x_slice[i] # TODO: neni tohle spatne typ?
 
     grid = np.stack(gs, axis=-1)
 
