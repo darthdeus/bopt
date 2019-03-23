@@ -112,6 +112,10 @@ class Experiment:
 
         return X_sample, Y_sample
 
+    def params_already_evaluated(self, job_params: JobParams) -> bool:
+        return any([s.job.run_parameters.similar_to(job_params)
+                    for s in self.samples if s.job])
+
     def suggest(self, model_config: ModelConfig) -> Tuple[JobParams, Model]:
         # TODO: overit, ze by to fungovalo i na ok+running a mean_pred
         if len(self.ok_samples()) == 0:
@@ -151,6 +155,13 @@ class Experiment:
         job_params.validate()
 
         output_dir = str(output_dir_path)
+
+
+        if self.params_already_evaluated(job_params):
+            # TODO: opravit:
+            #   - sample nemusi mit mu/sigma predikci
+            #   - pokud uz byl vyhodnoceny, chci preskocit pousteni jobu a udelat "ManualSample"?
+            raise NotImplementedError()
 
         job = self.runner.start(output_dir, job_params)
 

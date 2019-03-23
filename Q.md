@@ -3,7 +3,6 @@
 - collect na vsech spravnych mistech
   - [x] nikde nepouzivat meta_dir (neni potreba, delame cd)
 
-- moznost nadefinovat qsub param (a nebo obecne spoustejici param co se pridaji u runneru)
 - [x] replace print with logging
 
 - [x] garbage collecteni resultu
@@ -36,6 +35,8 @@
 - zdetekovat duplicitni ID a spadnout
 
 - smazat benchmarks/ az bude cas udelat to poradne
+
+- moznost nadefinovat qsub param (a nebo obecne spoustejici param co se pridaji u runneru)
 
 -----------------------------------
 

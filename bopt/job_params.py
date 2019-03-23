@@ -35,6 +35,10 @@ class JobParams:
 
         return all_valid
 
+    def similar_to(self, other: "JobParams") -> bool:
+        return any([param.range.compare_values(value, other.mapping[param])
+                    for param, value in self.mapping.items()])
+
     @staticmethod
     def sample_params(hyperparameters: List[Hyperparameter]) -> np.ndarray:
         mapping = {h: h.range.sample() for h in hyperparameters}

@@ -45,6 +45,10 @@ class Bound(abc.ABC):
     def scipy_bound_tuple(self) -> Tuple[float, float]:
         pass
 
+    @abc.abstractmethod
+    def compare_values(self, a: ParamTypes, b: ParamTypes) -> bool:
+        pass
+
 
 class Integer(Bound):
     def __init__(self, low: int, high: int):
@@ -71,6 +75,12 @@ class Integer(Bound):
     def scipy_bound_tuple(self) -> Tuple[float, float]:
         return (self.low, (self.high - 1))
 
+    def compare_values(self, a: ParamTypes, b: ParamTypes) -> bool:
+        assert isinstance(a, int)
+        assert isinstance(b, int)
+
+        return a == b
+
 
 class Float(Bound):
     def __init__(self, low: float, high: float):
@@ -96,6 +106,15 @@ class Float(Bound):
 
     def scipy_bound_tuple(self) -> Tuple[float, float]:
         return (self.low, self.high - 1e-8)
+
+    def compare_values(self, a: ParamTypes, b: ParamTypes) -> bool:
+        assert isinstance(a, float)
+        assert isinstance(b, float)
+
+        diff = abs(a - b)
+        # We set the threshold at 5% of the range
+        threshold = (self.high - self.low) * 0.05
+        return diff < threshold
 
 
 class Discrete(Bound):
@@ -129,6 +148,12 @@ class Discrete(Bound):
 
     def scipy_bound_tuple(self) -> Tuple[float, float]:
         return (self.low, (self.high - 1))
+
+    def compare_values(self, a: ParamTypes, b: ParamTypes) -> bool:
+        assert isinstance(a, str)
+        assert isinstance(b, str)
+
+        return a == b
 
 
 class Hyperparameter(NamedTuple):
