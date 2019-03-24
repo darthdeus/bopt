@@ -5,7 +5,7 @@ from typing import Dict, List, Union
 from bopt.basic_types import Hyperparameter, Discrete, ParamTypes
 
 
-class JobParams:
+class HyperparamValues:
     mapping: Dict[Hyperparameter, ParamTypes]
     x: np.ndarray
 
@@ -17,8 +17,9 @@ class JobParams:
         return self.x.tolist()
 
     def __str__(self) -> str:
-        return str({h.name: value for h, value in
-                self.mapping.items()})
+        # TODO: use this instead of other variants
+        return str({h.name: (round(v, 2) if isinstance(v, float) else v)
+                    for h, v in self.mapping.items()})
 
     def validate(self) -> bool:
         all_valid = True
@@ -35,16 +36,20 @@ class JobParams:
 
         return all_valid
 
+    def similar_to(self, other: "HyperparamValues") -> bool:
+        return all([param.range.compare_values(value, other.mapping[param])
+                    for param, value in self.mapping.items()])
+
     @staticmethod
     def sample_params(hyperparameters: List[Hyperparameter]) -> np.ndarray:
         mapping = {h: h.range.sample() for h in hyperparameters}
-        job_params = JobParams.from_mapping(mapping)
+        job_params = HyperparamValues.from_mapping(mapping)
 
         return job_params.x
 
     @staticmethod
     def mapping_from_vector(x: np.ndarray, hyperparameters:
-            List[Hyperparameter]) -> "JobParams":
+            List[Hyperparameter]) -> "HyperparamValues":
 
         typed_vals = [int(x) if p.range.is_discrete() else float(x)
                       for x, p in zip(x, hyperparameters)]
@@ -60,7 +65,7 @@ class JobParams:
             if isinstance(p.range, Discrete):
                 mapping[p] = p.range.inverse_map(mapping[p])
 
-        return JobParams(mapping, x)
+        return HyperparamValues(mapping, x)
 
 
     # TODO: test! forward and back
@@ -80,7 +85,7 @@ class JobParams:
             else:
                 x[i] = float(value)
 
-        return JobParams(mapping, x)
+        return HyperparamValues(mapping, x)
 
 
     # @property

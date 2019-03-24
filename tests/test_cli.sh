@@ -15,6 +15,8 @@ bopt init -C "$test_dir" --param "x:float:0:5" --param "y:float:0:25" \
   $PWD/.venv/bin/python $PWD/experiments/simple_function.py
 
 bopt run-single -C "$test_dir"
+# sleep 5
+bopt run -C "$test_dir" --n_iter=2 --n_parallel=2
 
 bopt plot -C "$test_dir"
 bopt suggest -C "$test_dir"

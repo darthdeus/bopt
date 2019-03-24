@@ -29,10 +29,11 @@ def run(args) -> None:
                 print("\nMissing value for: {}".format(hyperparam.name))
                 sys.exit(1)
 
-        job_params = bopt.JobParams.from_mapping(mapping)
+        hyperparam_values = bopt.HyperparamValues.from_mapping(mapping)
 
-        if not job_params.validate():
+        if not hyperparam_values.validate():
             sys.exit(1)
 
+        # TODO: check return value?
         experiment.manual_run(bopt.ModelConfig.default(),
-                job_params, bopt.ModelParameters.for_manual_run())
+                hyperparam_values, bopt.ModelParameters.for_manual_run())

@@ -23,7 +23,7 @@ def run(args) -> None:
         ok_samples = []
 
         for sample in experiment.samples:
-            if sample.job.is_finished():
+            if sample.result:
                 try:
                     if best_res is None or (sample.result and sample.result > best_res):
                         best_res = sample.result
@@ -44,9 +44,11 @@ def run(args) -> None:
         print("\nBEST (id={}): {}".format(best_sample.job.job_id, best_res))
         assert best_sample is not None
 
-        if best_sample.job is not None:
+        if best_sample.job:
             run_str = experiment.runner.script_path + " \\\n   "
-            for h, v in best_sample.job.run_parameters.mapping.items():
+            for h, v in best_sample.hyperparam_values.mapping.items():
+                if isinstance(v, float):
+                    v = round(v, 2)
                 run_str += " --{}={}".format(h.name, v)
 
             print(run_str)
@@ -57,7 +59,7 @@ def run(args) -> None:
                 job = sample.job
 
                 proc_stats = ""
-                if psutil.pid_exists(job.job_id):
+                if job and psutil.pid_exists(job.job_id):
                     process = psutil.Process(job.job_id)
                     mem = process.memory_info()
                     proc_stats += f"Process:{process.status()}"

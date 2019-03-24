@@ -12,11 +12,15 @@ class OptimizationFailed(Exception):
 
 
 class JobStatus(Enum):
-    QUEUED = 1
+    # TODO: before adding any of the other ones back, check that we
+    #       can properly test for failed an cancelled
+
+    # QUEUED = 1
     RUNNING = 2
     FAILED = 3
-    CANCELED = 4
-    FINISHED = 5
+    WAITING_FOR_SIMILAR = 4
+    # CANCELED = 5
+    FINISHED = 6
 
 
 # TODO: fix naming convention & typnig errors
@@ -45,6 +49,10 @@ class Bound(abc.ABC):
     def scipy_bound_tuple(self) -> Tuple[float, float]:
         pass
 
+    @abc.abstractmethod
+    def compare_values(self, a: ParamTypes, b: ParamTypes) -> bool:
+        pass
+
 
 class Integer(Bound):
     def __init__(self, low: int, high: int):
@@ -71,6 +79,12 @@ class Integer(Bound):
     def scipy_bound_tuple(self) -> Tuple[float, float]:
         return (self.low, (self.high - 1))
 
+    def compare_values(self, a: ParamTypes, b: ParamTypes) -> bool:
+        assert isinstance(a, int)
+        assert isinstance(b, int)
+
+        return a == b
+
 
 class Float(Bound):
     def __init__(self, low: float, high: float):
@@ -96,6 +110,16 @@ class Float(Bound):
 
     def scipy_bound_tuple(self) -> Tuple[float, float]:
         return (self.low, self.high - 1e-8)
+
+    def compare_values(self, a: ParamTypes, b: ParamTypes) -> bool:
+        assert isinstance(a, float)
+        assert isinstance(b, float)
+
+        diff = abs(a - b)
+        # TODO: logscale will need this adjusted
+        # We set the threshold at 1% of the range
+        threshold = (self.high - self.low) * 0.01
+        return diff < threshold
 
 
 class Discrete(Bound):
@@ -129,6 +153,12 @@ class Discrete(Bound):
 
     def scipy_bound_tuple(self) -> Tuple[float, float]:
         return (self.low, (self.high - 1))
+
+    def compare_values(self, a: ParamTypes, b: ParamTypes) -> bool:
+        assert isinstance(a, str)
+        assert isinstance(b, str)
+
+        return a == b
 
 
 class Hyperparameter(NamedTuple):

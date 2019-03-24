@@ -30,18 +30,18 @@ def test_exp1():
         m1 = GPy.models.GPRegression(X, Y, kernel, normalizer=len(X) > 1)
         gpy_model = GPyModel(m1, acq_fn)
 
-    sp1 = bopt.JobParams.sample_params(hyperparameters)
-    sp2 = bopt.JobParams.sample_params(hyperparameters)
+    sp1 = bopt.HyperparamValues.sample_params(hyperparameters)
+    sp2 = bopt.HyperparamValues.sample_params(hyperparameters)
 
-    p1 = bopt.JobParams.mapping_from_vector(sp1, hyperparameters)
-    p2 = bopt.JobParams.mapping_from_vector(sp2, hyperparameters)
+    p1 = bopt.HyperparamValues.mapping_from_vector(sp1, hyperparameters)
+    p2 = bopt.HyperparamValues.mapping_from_vector(sp2, hyperparameters)
 
     manual_params = bopt.ModelParameters.for_manual_run()
 
     samples = [
         # TODO: add tests for predicting with unfinished jobs
-        bopt.Sample(bopt.LocalJob(314, p1), manual_params, 1.0, 1.2),
-        bopt.Sample(bopt.SGEJob(314, p2), manual_params, 1.0, 1.0)
+        bopt.Sample(bopt.LocalJob(314), manual_params, p1, 1.0, 1.2),
+        bopt.Sample(bopt.SGEJob(314), manual_params, p2, 1.0, 1.0)
     ]
 
     experiment.samples = samples

@@ -1,11 +1,23 @@
 # TODO
 
+- job by mel byt optional
+  - manual sample nema job
+
+  - [x] presunout run_params pod sample
+  - [x] oznacit status WAITING_FOR_SIMILAR
+  - brat WAITING_FOR_SIMILAR v potaz behem bopt
+  - zprocessit WAITING_FOR_SIMILAR v collect_results
+
+  - manual_run - vyberu hyperparam rucne
+  - manual_sample - reknu kolik to vyslo "rucne"
+
+- zkontrolovat, ze se mu_pred + sigma_pred pouziva ve spravnych mistech
+  - u bezicich jobu bych mel brat mu_pred misto result (jeste ho nemam)
+
 - collect na vsech spravnych mistech
   - [x] nikde nepouzivat meta_dir (neni potreba, delame cd)
 
-- moznost nadefinovat qsub param (a nebo obecne spoustejici param co se pridaji u runneru)
 - [x] replace print with logging
-
 - [x] garbage collecteni resultu
 - [x] job status (sample status?)
 
@@ -36,6 +48,8 @@
 - zdetekovat duplicitni ID a spadnout
 
 - smazat benchmarks/ az bude cas udelat to poradne
+
+- moznost nadefinovat qsub param (a nebo obecne spoustejici param co se pridaji u runneru)
 
 -----------------------------------
 
