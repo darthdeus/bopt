@@ -2,31 +2,43 @@ import os
 import logging
 import traceback
 import numpy as np
+from enum import Enum
 
 from typing import Tuple, List, Optional
 
-from bopt.basic_types import Hyperparameter, JobStatus
+from bopt.basic_types import Hyperparameter
 from bopt.hyperparam_values import HyperparamValues
 from bopt.runner.abstract import Job
 from bopt.runner.job_loader import JobLoader
 from bopt.models.parameters import ModelParameters
 
 
+class CollectFlag(Enum):
+    WAITING_FOR_JOB = 1
+    WAITING_FOR_SIMILAR = 2
+    COLLECT_FAILED = 3
+    COLLECT_OK = 4
+
+
 class Sample:
     job: Optional[Job]
     model: ModelParameters
+
     hyperparam_values: HyperparamValues
-    result: Optional[float]
+
     mu_pred: float
     sigma_pred: float
+    collect_flag: CollectFlag
+
+    result: Optional[float]
     comment: Optional[str]
-    waiting_for_similar: bool
 
     def __init__(self, job: Optional[Job],
             model_params: ModelParameters,
             hyperparam_values: HyperparamValues,
             mu_pred: float,
-            sigma_pred: float) -> None:
+            sigma_pred: float,
+            collect_flag: CollectFlag) -> None:
         self.job = job
         self.model = model_params
         self.hyperparam_values = hyperparam_values
@@ -34,21 +46,24 @@ class Sample:
         self.sigma_pred = sigma_pred
         self.result = None
         self.comment = None
-        self.waiting_for_similar = False
+        self.collect_flag = collect_flag
 
-    def status(self) -> JobStatus:
-        if self.waiting_for_similar:
-            return JobStatus.WAITING_FOR_SIMILAR
-        elif self.result is not None:
-            return JobStatus.FINISHED
-        elif self.job is not None:
-            if self.job.is_finished():
-                return JobStatus.FAILED
-            else:
-                return JobStatus.RUNNING
-        else:
-            logging.error("Somehow created a sample with no job and no result.")
-            return JobStatus.FAILED
+    def status(self) -> CollectFlag:
+        return self.collect_flag
+
+    # def status(self) -> JobStatus:
+    #     if self.result:
+    #         return JobStatus.FINISHED
+    #     if self.collect_flag == CollectFlag.WAITING_FOR_SIMILAR:
+    #         return JobStatus.WAITING_FOR_SIMILAR
+    #     elif self.job and not self.job.is_finished():
+    #         return JobStatus.RUNNING
+    #     elif self.collect_flag == CollectFlag.CONFIRMED_FAILURE:
+    #         return JobStatus.FAILED
+    #     else:
+    #         
+    #         logging.error("Somehow created a sample with no job and no result.")
+    #         return JobStatus.FAILED
 
     def to_dict(self) -> dict:
         return {
@@ -59,7 +74,7 @@ class Sample:
             "mu_pred": self.mu_pred,
             "sigma_pred": self.sigma_pred,
             "comment": self.comment,
-            "waiting_for_similar": self.waiting_for_similar
+            "collect_flag": self.collect_flag
         }
 
     @staticmethod
@@ -83,9 +98,9 @@ class Sample:
                 model_dict,
                 hyperparam_values,
                 data["mu_pred"],
-                data["sigma_pred"])
+                data["sigma_pred"],
+                data["collect_flag"])
 
-        sample.waiting_for_similar = data["waiting_for_similar"]
         sample.comment = data.get("comment", None)
         sample.result = data.get("result", None)
 
@@ -101,18 +116,10 @@ class Sample:
 
         assert self.result or self.job
 
-        if status == JobStatus.FINISHED:
-            # TODO: collect first?
-            # TODO: TADY SEM SE VRATIT :PPP
+        if status == CollectFlag.COLLECT_OK:
             y = self.result
-        elif status == JobStatus.WAITING_FOR_SIMILAR:
+        elif status == CollectFlag.WAITING_FOR_JOB or status == CollectFlag.WAITING_FOR_SIMILAR:
             y = self.mu_pred
-        elif status == JobStatus.RUNNING:
-            if self.job:
-                logging.info("Using mean prediction for a running job {}".format(self.job.job_id))
-                y = self.mu_pred
-            else:
-                raise ValueError("Sample has status RUNNING but no job.")
         else:
             raise ValueError("Tried to get xy for a sample {} which is {}".format(self, status))
 
@@ -127,7 +134,7 @@ class Sample:
         else:
             s = "manual\t"
 
-        is_finished = self.status() == JobStatus.FINISHED
+        is_finished = self.status() == CollectFlag.COLLECT_OK
 
         # TODO: proper status check
 

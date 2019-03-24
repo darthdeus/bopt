@@ -23,7 +23,10 @@ def run(args) -> None:
             with acquire_lock():
                 experiment = bopt.Experiment.deserialize()
 
-                if experiment.num_running() < args.n_parallel:
+                num_running = len([s for s in experiment.samples
+                                   if s.job and not s.job.is_finished()])
+
+                if num_running < args.n_parallel:
                     experiment.collect_results()
 
                     sample = experiment.run_single(model_config)

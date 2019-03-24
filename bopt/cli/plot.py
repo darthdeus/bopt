@@ -22,7 +22,7 @@ def run(args) -> None:
 
         processed_samples: List[bopt.Sample] = []
 
-        for sample in tqdm(experiment.ok_samples()):
+        for sample in tqdm(experiment.samples_for_prediction()):
             if sample.model.model_name == GPyModel.model_name:
                 sample_col = bopt.SampleCollection(processed_samples)
                 X, Y = sample_col.to_xy()

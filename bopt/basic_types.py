@@ -11,16 +11,16 @@ class OptimizationFailed(Exception):
     pass
 
 
-class JobStatus(Enum):
-    # TODO: before adding any of the other ones back, check that we
-    #       can properly test for failed an cancelled
-
-    # QUEUED = 1
-    RUNNING = 2
-    FAILED = 3
-    WAITING_FOR_SIMILAR = 4
-    # CANCELED = 5
-    FINISHED = 6
+# class JobStatus(Enum):
+#     # TODO: before adding any of the other ones back, check that we
+#     #       can properly test for failed an cancelled
+#
+#     # QUEUED = 1
+#     RUNNING = 2
+#     FAILED = 3
+#     WAITING_FOR_SIMILAR = 4
+#     # CANCELED = 5
+#     FINISHED = 6
 
 
 # TODO: fix naming convention & typnig errors

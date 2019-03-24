@@ -12,11 +12,11 @@ import numpy as np
 
 from typing import List, Optional, Tuple
 
-from bopt.basic_types import Hyperparameter, JobStatus, OptimizationFailed
+from bopt.basic_types import Hyperparameter, OptimizationFailed
 from bopt.hyperparam_values import HyperparamValues
 from bopt.model_config import ModelConfig
 from bopt.models.model import Model
-from bopt.sample import Sample, SampleCollection
+from bopt.sample import Sample, CollectFlag, SampleCollection
 from bopt.models.parameters import ModelParameters
 from bopt.models.random_search import RandomSearch
 from bopt.runner.abstract import Job, Runner
@@ -82,7 +82,9 @@ class Experiment:
 
     def collect_results(self) -> None:
         for sample in self.samples:
-            if sample.waiting_for_similar:
+            if sample.collect_flag == CollectFlag.WAITING_FOR_SIMILAR:
+                assert sample.result is None
+
                 finished_similar_samples = self.get_finished_similar_samples(sample.hyperparam_values)
 
                 if len(finished_similar_samples) > 0:
@@ -91,36 +93,43 @@ class Experiment:
                     picked_similar = finished_similar_samples[0]
 
                     sample.result = picked_similar.result
-                    sample.waiting_for_similar = False
+                    sample.collect_flag = CollectFlag.COLLECT_OK
 
-            elif sample.result is None and sample.job and sample.job.is_finished():
-                sample.job.finished_at = datetime.datetime.now()
+            elif sample.collect_flag == CollectFlag.WAITING_FOR_JOB:
+                assert sample.job
+                assert sample.result is None
 
-                # Sine we're using `handle_cd` we always assume the working directory
-                # is where meta.yml is.
-                fname = os.path.join("output", f"job.o{sample.job.job_id}")
+                if sample.job.is_finished():
+                    sample.job.finished_at = datetime.datetime.now()
 
-                if os.path.exists(fname):
-                    with open(fname, "r") as f:
-                        contents = f.read().rstrip("\n")
-                        found = False
+                    # Sine we're using `handle_cd` we always assume the working directory
+                    # is where meta.yml is.
+                    fname = os.path.join("output", f"job.o{sample.job.job_id}")
 
-                        for line in contents.split("\n"):
-                            matches = re.match(self.result_regex, line)
-                            if matches:
-                                sample.result = float(matches.groups()[0])
-                                found = True
+                    if os.path.exists(fname):
+                        with open(fname, "r") as f:
+                            contents = f.read().rstrip("\n")
+                            found = False
 
-                        if not found:
-                            logging.error("Job {} seems to have failed, it finished running and its result cannot be parsed.".format(sample.job.job_id))
-                else:
-                    logging.error("Output file not found for job {} even though it finished. It will be considered as a failed job.".format(sample.job.job_id))
+                            for line in contents.split("\n"):
+                                matches = re.match(self.result_regex, line)
+                                if matches:
+                                    sample.result = float(matches.groups()[0])
+                                    sample.collect_flag = CollectFlag.COLLECT_OK
+                                    found = True
 
-    def ok_samples(self) -> List[Sample]:
-        return [s for s in self.samples if s.status() != JobStatus.FAILED]
+                            if not found:
+                                logging.error("Job {} seems to have failed, it finished running and its result cannot be parsed.".format(sample.job.job_id))
+                                sample.collect_flag = CollectFlag.COLLECT_FAILED
+                    else:
+                        logging.error("Output file not found for job {} even though it finished. It will be considered as a failed job.".format(sample.job.job_id))
+                        sample.collect_flag = CollectFlag.COLLECT_FAILED
+
+    def samples_for_prediction(self) -> List[Sample]:
+        return [s for s in self.samples if s.status() != CollectFlag.COLLECT_FAILED]
 
     def get_xy(self):
-        samples = self.ok_samples()
+        samples = self.samples_for_prediction()
 
         sample_col = SampleCollection(samples)
         X_sample, Y_sample = sample_col.to_xy()
@@ -129,7 +138,7 @@ class Experiment:
 
     def suggest(self, model_config: ModelConfig) -> Tuple[HyperparamValues, Model]:
         # TODO: overit, ze by to fungovalo i na ok+running a mean_pred
-        if len(self.ok_samples()) == 0:
+        if len(self.samples_for_prediction()) == 0:
             logging.info("No existing samples found, overloading suggest with RandomSearch.")
 
             job_params, fitted_model = RandomSearch().predict_next(self.hyperparameters)
@@ -167,7 +176,7 @@ class Experiment:
     def get_finished_similar_samples(self, hyperparam_values: HyperparamValues) -> List[Sample]:
         # Double filtering, but we don't care since there are only a few samples anyway.
         return [s for s in self.get_similar_samples(hyperparam_values)
-                if s.status() == JobStatus.FINISHED]
+                if s.status() == CollectFlag.COLLECT_OK]
 
     def manual_run(self, model_config: ModelConfig,
             hyperparam_values: HyperparamValues,
@@ -200,7 +209,8 @@ class Experiment:
                 assert similar_sample.result
 
                 next_sample = Sample(None, model_params, hyperparam_values,
-                                     similar_sample.mu_pred, similar_sample.sigma_pred)
+                                     similar_sample.mu_pred, similar_sample.sigma_pred,
+                                     CollectFlag.COLLECT_OK)
                 next_sample.result = similar_sample.result
                 next_sample.comment = "created as similar of {}".format(similar_sample)
             else:
@@ -209,8 +219,8 @@ class Experiment:
                 #   - pokud uz byl vyhodnoceny, chci preskocit pousteni jobu a udelat "ManualSample"?
 
                 next_sample = Sample(None, model_params, hyperparam_values,
-                                     similar_sample.mu_pred, similar_sample.sigma_pred)
-                next_sample.waiting_for_similar = True
+                                     similar_sample.mu_pred, similar_sample.sigma_pred,
+                                     CollectFlag.WAITING_FOR_SIMILAR)
                 next_sample.comment = "created as similar of {}".format(similar_sample)
         else:
             job = self.runner.start(output_dir, hyperparam_values)
@@ -239,7 +249,8 @@ class Experiment:
                 mu = 0.0
                 sigma = 1.0 # TODO: lol :)
 
-            next_sample = Sample(job, model_params, hyperparam_values, float(mu), float(sigma))
+            next_sample = Sample(job, model_params, hyperparam_values,
+                    float(mu), float(sigma), CollectFlag.WAITING_FOR_JOB)
 
         self.samples.append(next_sample)
 
@@ -274,13 +285,10 @@ class Experiment:
     def deserialize() -> "Experiment":
         with open("meta.yml", "r") as f:
             contents = f.read()
-            obj = yaml.load(contents, Loader=yaml.SafeLoader)
+            obj = yaml.load(contents, Loader=yaml.FullLoader)
 
         experiment = Experiment.from_dict(obj)
         experiment.collect_results()
         experiment.serialize()
 
         return experiment
-
-    def num_running(self) -> int:
-        return len([s for s in self.samples if s.status() == JobStatus.RUNNING])

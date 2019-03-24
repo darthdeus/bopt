@@ -40,8 +40,10 @@ def test_exp1():
 
     samples = [
         # TODO: add tests for predicting with unfinished jobs
-        bopt.Sample(bopt.LocalJob(314), manual_params, p1, 1.0, 1.2),
-        bopt.Sample(bopt.SGEJob(314), manual_params, p2, 1.0, 1.0)
+        bopt.Sample(bopt.LocalJob(314), manual_params, p1, 1.0, 1.2,
+            bopt.CollectFlag.WAITING_FOR_JOB),
+        bopt.Sample(bopt.SGEJob(314), manual_params, p2, 1.0, 1.0,
+            bopt.CollectFlag.WAITING_FOR_JOB)
     ]
 
     experiment.samples = samples
