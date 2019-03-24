@@ -17,8 +17,9 @@ class HyperparamValues:
         return self.x.tolist()
 
     def __str__(self) -> str:
-        return str({h.name: value for h, value in
-                self.mapping.items()})
+        # TODO: use this instead of other variants
+        return str({h.name: (round(v, 2) if isinstance(v, float) else v)
+                    for h, v in self.mapping.items()})
 
     def validate(self) -> bool:
         all_valid = True

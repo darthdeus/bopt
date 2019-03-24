@@ -10,7 +10,7 @@ from typing import Tuple, List
 import bopt.acquisition_functions.acquisition_functions as acq
 from bopt.basic_types import Hyperparameter, Bound, Discrete, OptimizationFailed
 from bopt.models.model import Model
-from bopt.sample import Sample, SampleCollection
+from bopt.sample import Sample
 from bopt.models.parameters import ModelParameters
 from bopt.model_config import ModelConfig
 from bopt.hyperparam_values import HyperparamValues
@@ -124,8 +124,6 @@ class GPyModel(Model):
                 hyperparameters)
 
         new_point_str = " ".join(map(lambda xx: str(round(xx, 2)), x_next.tolist()))
-
-        logging.debug("New proposed location at x = {}".format(new_point_str))
 
         job_params = HyperparamValues.mapping_from_vector(x_next, hyperparameters)
 

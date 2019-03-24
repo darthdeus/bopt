@@ -116,6 +116,9 @@ class Experiment:
                 else:
                     logging.error("Output file not found for job {} even though it finished. It will be considered as a failed job.".format(sample.job.job_id))
 
+    def ok_samples(self) -> List[Sample]:
+        return [s for s in self.samples if s.status() != JobStatus.FAILED]
+
     def get_xy(self):
         samples = self.ok_samples()
 
@@ -143,11 +146,17 @@ class Experiment:
 
         return job_params, fitted_model
 
-    def run_next(self, model_config: ModelConfig) -> Tuple[Model, Sample]:
-        job_params, fitted_model = self.suggest(model_config)
+    def run_next(self, model_config: ModelConfig, num_similar_retries: int = 5) -> Tuple[Model, Sample]:
+        found_similar = True
 
-        next_sample = self.manual_run(model_config, job_params,
-                fitted_model.to_model_params())
+        # This makes sure we try at least `num_similar_retries` times to re-run the job.
+        while found_similar and num_similar_retries > 0:
+            num_similar_retries -= 1
+
+            job_params, fitted_model = self.suggest(model_config)
+
+            next_sample, found_similar = self.manual_run(model_config, job_params,
+                    fitted_model.to_model_params())
 
         return fitted_model, next_sample
 
@@ -162,21 +171,22 @@ class Experiment:
 
     def manual_run(self, model_config: ModelConfig,
             hyperparam_values: HyperparamValues,
-            model_params: ModelParameters) -> Sample:
+            model_params: ModelParameters) -> Tuple[Sample, bool]:
         assert isinstance(hyperparam_values, HyperparamValues)
 
         output_dir_path = pathlib.Path("output")
         output_dir_path.mkdir(parents=True, exist_ok=True)
 
-        logging.info("Output set to {}, absolute path: {}".format(output_dir_path, output_dir_path.absolute()))
+        logging.debug("Output set to: {}".format(output_dir_path, output_dir_path.absolute()))
 
         hyperparam_values.validate()
 
         output_dir = str(output_dir_path)
 
         similar_samples = self.get_similar_samples(hyperparam_values)
+        found_similar = len(similar_samples) > 0
 
-        if len(similar_samples) > 0:
+        if found_similar:
             finished_similar_samples = self.get_finished_similar_samples(hyperparam_values)
 
             if len(finished_similar_samples) > 0:
@@ -189,7 +199,7 @@ class Experiment:
                 similar_sample = finished_similar_samples[0]
                 assert similar_sample.result
 
-                next_sample = Sample(None, model_params, similar_sample.hyperparam_values,
+                next_sample = Sample(None, model_params, hyperparam_values,
                                      similar_sample.mu_pred, similar_sample.sigma_pred)
                 next_sample.result = similar_sample.result
                 next_sample.comment = "created as similar of {}".format(similar_sample)
@@ -198,7 +208,7 @@ class Experiment:
                 #   - sample nemusi mit mu/sigma predikci
                 #   - pokud uz byl vyhodnoceny, chci preskocit pousteni jobu a udelat "ManualSample"?
 
-                next_sample = Sample(None, model_params, similar_sample.hyperparam_values,
+                next_sample = Sample(None, model_params, hyperparam_values,
                                      similar_sample.mu_pred, similar_sample.sigma_pred)
                 next_sample.waiting_for_similar = True
                 next_sample.comment = "created as similar of {}".format(similar_sample)
@@ -236,7 +246,7 @@ class Experiment:
         self.serialize()
         logging.debug("Serialization done")
 
-        return next_sample
+        return next_sample, found_similar
 
     def run_single(self, model_config: ModelConfig) -> Sample:
         fitted_model, next_sample = self.run_next(model_config)
@@ -271,9 +281,6 @@ class Experiment:
         experiment.serialize()
 
         return experiment
-
-    def ok_samples(self) -> List[Sample]:
-        return [s for s in self.samples if s.result]
 
     def num_running(self) -> int:
         return len([s for s in self.samples if s.status() == JobStatus.RUNNING])

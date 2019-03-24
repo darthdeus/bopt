@@ -12,11 +12,14 @@ class OptimizationFailed(Exception):
 
 
 class JobStatus(Enum):
-    QUEUED = 1
+    # TODO: before adding any of the other ones back, check that we
+    #       can properly test for failed an cancelled
+
+    # QUEUED = 1
     RUNNING = 2
     FAILED = 3
     WAITING_FOR_SIMILAR = 4
-    CANCELED = 5
+    # CANCELED = 5
     FINISHED = 6
 
 
@@ -113,8 +116,9 @@ class Float(Bound):
         assert isinstance(b, float)
 
         diff = abs(a - b)
-        # We set the threshold at 5% of the range
-        threshold = (self.high - self.low) * 0.05
+        # TODO: logscale will need this adjusted
+        # We set the threshold at 1% of the range
+        threshold = (self.high - self.low) * 0.01
         return diff < threshold
 
 

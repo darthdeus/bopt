@@ -105,6 +105,8 @@ class Sample:
             # TODO: collect first?
             # TODO: TADY SEM SE VRATIT :PPP
             y = self.result
+        elif status == JobStatus.WAITING_FOR_SIMILAR:
+            y = self.mu_pred
         elif status == JobStatus.RUNNING:
             if self.job:
                 logging.info("Using mean prediction for a running job {}".format(self.job.job_id))
@@ -131,8 +133,8 @@ class Sample:
         # TODO: proper status check
 
         if self.result:
-            rounded_params = {h.name: value for h, value in
-                    self.hyperparam_values.mapping.items()}
+            rounded_params = {h.name: (round(v, 3) if isinstance(v, float) else v)
+                    for h, v in self.hyperparam_values.mapping.items()}
 
             assert isinstance(self.result, float)
             s += f"{is_finished}\t{self.result:.3f}\t{rounded_params}"
