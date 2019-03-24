@@ -36,7 +36,9 @@ def run(args) -> None:
                         logging.info("Started a new job {} with config {}" \
                                 .format(sample.job.job_id, model_config))
                     else:
-                        logging.error("Run loop created a sample without job.")
+                        # TODO: Checking for comment is ugly, but we don't have a flag.
+                        if not sample.waiting_for_similar and not sample.comment:
+                            logging.error("Run loop created a sample without job.")
 
             psutil.wait_procs(psutil.Process().children(), timeout=0.01)
             time.sleep(args.sleep)

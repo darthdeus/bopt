@@ -36,7 +36,7 @@ class HyperparamValues:
         return all_valid
 
     def similar_to(self, other: "HyperparamValues") -> bool:
-        return any([param.range.compare_values(value, other.mapping[param])
+        return all([param.range.compare_values(value, other.mapping[param])
                     for param, value in self.mapping.items()])
 
     @staticmethod

@@ -94,7 +94,7 @@ class GPyModel(Model):
         min_bound = 1e-2
         max_bound = 1e3
 
-        logging.info("GPY hyperparam optimization start")
+        logging.debug("GPY hyperparam optimization start")
 
         model.kern.variance.unconstrain()
         model.kern.variance.constrain_bounded(min_bound, max_bound)
@@ -108,7 +108,7 @@ class GPyModel(Model):
         # model.Gaussian_noise.set_prior(GPy.priors.Gamma(1., 0.1))
         model.optimize()
 
-        logging.info("GPY hyperparam optimization DONE, params: {}".format(model.param_array))
+        logging.debug("GPY hyperparam optimization DONE, params: {}".format(model.param_array))
 
         return model
 
@@ -125,7 +125,7 @@ class GPyModel(Model):
 
         new_point_str = " ".join(map(lambda xx: str(round(xx, 2)), x_next.tolist()))
 
-        logging.info("New proposed location at x = {}".format(new_point_str))
+        logging.debug("New proposed location at x = {}".format(new_point_str))
 
         job_params = HyperparamValues.mapping_from_vector(x_next, hyperparameters)
 

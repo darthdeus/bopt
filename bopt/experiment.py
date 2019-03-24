@@ -27,6 +27,7 @@ from bopt.acquisition_functions.acquisition_functions import AcquisitionFunction
 # TODO: set this at a proper global place
 logging.getLogger().setLevel(logging.INFO)
 logging.getLogger("GP").setLevel(logging.WARNING)
+logging.getLogger("filelock").setLevel(logging.WARNING)
 # logging.getLogger().setLevel(logging.DEBUG)
 # logging.getLogger("matplotlib").setLevel(logging.INFO)
 
@@ -81,7 +82,18 @@ class Experiment:
 
     def collect_results(self) -> None:
         for sample in self.samples:
-            if sample.result is None and sample.job and sample.job.is_finished():
+            if sample.waiting_for_similar:
+                finished_similar_samples = self.get_finished_similar_samples(sample.hyperparam_values)
+
+                if len(finished_similar_samples) > 0:
+                    logging.info("Waiting for similar DONE, copying over results at {}".format(sample.hyperparam_values))
+
+                    picked_similar = finished_similar_samples[0]
+
+                    sample.result = picked_similar.result
+                    sample.waiting_for_similar = False
+
+            elif sample.result is None and sample.job and sample.job.is_finished():
                 sample.job.finished_at = datetime.datetime.now()
 
                 # Sine we're using `handle_cd` we always assume the working directory
@@ -139,6 +151,15 @@ class Experiment:
 
         return fitted_model, next_sample
 
+    def get_similar_samples(self, hyperparam_values: HyperparamValues) -> List[Sample]:
+        return [s for s in self.samples
+                if s.job and s.hyperparam_values.similar_to(hyperparam_values)]
+
+    def get_finished_similar_samples(self, hyperparam_values: HyperparamValues) -> List[Sample]:
+        # Double filtering, but we don't care since there are only a few samples anyway.
+        return [s for s in self.get_similar_samples(hyperparam_values)
+                if s.status() == JobStatus.FINISHED]
+
     def manual_run(self, model_config: ModelConfig,
             hyperparam_values: HyperparamValues,
             model_params: ModelParameters) -> Sample:
@@ -153,13 +174,17 @@ class Experiment:
 
         output_dir = str(output_dir_path)
 
-        similar_samples = [s for s in self.samples if s.job and s.hyperparam_values.similar_to(hyperparam_values)]
+        similar_samples = self.get_similar_samples(hyperparam_values)
 
         if len(similar_samples) > 0:
-            finished_similar_samples = [s for s in similar_samples if s.status() == JobStatus.FINISHED]
+            finished_similar_samples = self.get_finished_similar_samples(hyperparam_values)
 
             if len(finished_similar_samples) > 0:
-                logging.warning("Found finished similar sample, creating MANUAL_SAMPLE with equal hyperparam values and result.")
+                warning_str = "Found finished similar sample, "
+                warning_str += "creating MANUAL_SAMPLE with equal hyperparam values and result"
+                warning_str += "... param values:\n{}\n{}".format(hyperparam_values, finished_similar_samples[0].hyperparam_values)
+
+                logging.warning(warning_str)
 
                 similar_sample = finished_similar_samples[0]
                 assert similar_sample.result
