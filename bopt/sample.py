@@ -20,6 +20,7 @@ class Sample:
     mu_pred: float
     sigma_pred: float
     comment: Optional[str]
+    waiting_for_similar: bool
 
     def __init__(self, job: Optional[Job],
             model_params: ModelParameters,
@@ -33,9 +34,12 @@ class Sample:
         self.sigma_pred = sigma_pred
         self.result = None
         self.comment = None
+        self.waiting_for_similar = False
 
     def status(self) -> JobStatus:
-        if self.result is not None:
+        if self.waiting_for_similar:
+            return JobStatus.WAITING_FOR_SIMILAR
+        elif self.result is not None:
             return JobStatus.FINISHED
         elif self.job is not None:
             if self.job.is_finished():
@@ -54,7 +58,8 @@ class Sample:
             "result": self.result,
             "mu_pred": self.mu_pred,
             "sigma_pred": self.sigma_pred,
-            "comment": self.comment
+            "comment": self.comment,
+            "waiting_for_similar": self.waiting_for_similar
         }
 
     @staticmethod
@@ -80,6 +85,7 @@ class Sample:
                 data["mu_pred"],
                 data["sigma_pred"])
 
+        sample.waiting_for_similar = data["waiting_for_similar"]
         sample.comment = data.get("comment", None)
         sample.result = data.get("result", None)
 

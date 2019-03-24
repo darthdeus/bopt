@@ -172,8 +172,11 @@ class Experiment:
                 # TODO: opravit:
                 #   - sample nemusi mit mu/sigma predikci
                 #   - pokud uz byl vyhodnoceny, chci preskocit pousteni jobu a udelat "ManualSample"?
-                raise NotImplementedError()
 
+                next_sample = Sample(None, model_params, similar_sample.hyperparam_values,
+                                     similar_sample.mu_pred, similar_sample.sigma_pred)
+                next_sample.waiting_for_similar = True
+                next_sample.comment = "created as similar of {}".format(similar_sample)
         else:
             job = self.runner.start(output_dir, hyperparam_values)
 

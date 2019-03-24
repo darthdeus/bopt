@@ -4,7 +4,8 @@
   - manual sample nema job
 
   - [x] presunout run_params pod sample
-  - oznacit status WAITING_FOR_SIMILAR
+  - [x] oznacit status WAITING_FOR_SIMILAR
+  - brat WAITING_FOR_SIMILAR v potaz behem bopt
   - zprocessit WAITING_FOR_SIMILAR v collect_results
 
   - manual_run - vyberu hyperparam rucne
