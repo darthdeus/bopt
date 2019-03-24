@@ -114,8 +114,7 @@ class Sample:
             else:
                 raise ValueError("Sample has status RUNNING but no job.")
         else:
-            logging.error("Tried to get xy for a sample {} which is {}".format(self, status))
-            raise ValueError(self)
+            raise ValueError("Tried to get xy for a sample {} which is {}".format(self, status))
 
         assert isinstance(x, np.ndarray)
         assert isinstance(y, float)
