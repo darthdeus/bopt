@@ -51,20 +51,6 @@ class Sample:
     def status(self) -> CollectFlag:
         return self.collect_flag
 
-    # def status(self) -> JobStatus:
-    #     if self.result:
-    #         return JobStatus.FINISHED
-    #     if self.collect_flag == CollectFlag.WAITING_FOR_SIMILAR:
-    #         return JobStatus.WAITING_FOR_SIMILAR
-    #     elif self.job and not self.job.is_finished():
-    #         return JobStatus.RUNNING
-    #     elif self.collect_flag == CollectFlag.CONFIRMED_FAILURE:
-    #         return JobStatus.FAILED
-    #     else:
-    #         
-    #         logging.error("Somehow created a sample with no job and no result.")
-    #         return JobStatus.FAILED
-
     def to_dict(self) -> dict:
         return {
             "job": self.job.to_dict() if self.job else None,
