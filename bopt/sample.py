@@ -125,6 +125,7 @@ class Sample:
 
         # TODO: proper status check
 
+        # TODO: hyperparam values __str__ a pouzivat to i jinde
         if self.result:
             rounded_params = {h.name: (round(v, 3) if isinstance(v, float) else v)
                     for h, v in self.hyperparam_values.mapping.items()}

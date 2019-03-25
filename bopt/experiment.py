@@ -118,6 +118,8 @@ class Experiment:
                                     sample.collect_flag = CollectFlag.COLLECT_OK
                                     found = True
 
+                                    logging.info("Collect got result {} for sample {}".format(sample.result, sample))
+
                             if not found:
                                 logging.error("Job {} seems to have failed, it finished running and its result cannot be parsed.".format(sample.job.job_id))
                                 sample.collect_flag = CollectFlag.COLLECT_FAILED
@@ -126,7 +128,7 @@ class Experiment:
                         sample.collect_flag = CollectFlag.COLLECT_FAILED
 
     def samples_for_prediction(self) -> List[Sample]:
-        return [s for s in self.samples if not s.model.sampled_from_random_search()]
+        return [s for s in self.samples if s.result or not s.model.sampled_from_random_search()]
 
     def get_xy(self):
         samples = self.samples_for_prediction()

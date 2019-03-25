@@ -2,6 +2,10 @@
 
 - gpy numpy error
 - vyresit, proc propose location vraci NAN
+- zaokrouhlovaci kernel
+  - diskretni hyperparam - onehot nebo fixni lengthscale na konkretni hyperparam
+    - sigmoid vs round?
+- logscale
 
 - [x] job by mel byt optional
   - [x] manual sample nema job
@@ -29,10 +33,9 @@
   - [x] v ramci toho ziskat i finished_at
 
 - nepocitam s failnutyma jobama
-  - predpokladam, ze priste uspeje
-  - kontrolovat zaokrouhlene jestli ho nepoustim znova
-    - vytvorim manual sample s mean_pred-sigma_pred (nejak aby byl videt) a
-      uz nepoustim dal
+  - [!!!] predpokladam, ze priste uspeje - tohle nedelam, nikdy nedelam retry, nepocitam s docasnyma chybama
+  - [x] kontrolovat zaokrouhlene jestli ho nepoustim znova
+    - [x] vytvorim manual sample s mean_pred - sigma_pred (nejak aby byl videt) a uz nepoustim dal
 
 - [x] bopt debug - ipdb with bopt imports
 
@@ -43,10 +46,6 @@
   - interpolace mezi 2 body hyperparam + plot slicu v lib. 0d, 1d, 2d ose
   - burty!
   - okraje v plotech
-
-- logscale
-- diskretni hyperparam - onehot nebo fixni lengthscale na konkretni hyperparam
-  - sigmoid vs round?
 
 - zdetekovat duplicitni ID a spadnout
 
