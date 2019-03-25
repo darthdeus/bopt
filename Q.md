@@ -1,15 +1,17 @@
 # TODO
 
-- job by mel byt optional
-  - manual sample nema job
+- vyresit, proc propose location vraci NAN
+
+- [x] job by mel byt optional
+  - [x] manual sample nema job
 
   - [x] presunout run_params pod sample
   - [x] oznacit status WAITING_FOR_SIMILAR
-  - brat WAITING_FOR_SIMILAR v potaz behem bopt
-  - zprocessit WAITING_FOR_SIMILAR v collect_results
+  - [x] brat WAITING_FOR_SIMILAR v potaz behem bopt
+  - [x] zprocessit WAITING_FOR_SIMILAR v collect_results
 
-  - manual_run - vyberu hyperparam rucne
-  - manual_sample - reknu kolik to vyslo "rucne"
+  - [x] manual_run - vyberu hyperparam rucne
+  - [x] manual_sample - reknu kolik to vyslo "rucne"
 
 - zkontrolovat, ze se mu_pred + sigma_pred pouziva ve spravnych mistech
   - u bezicich jobu bych mel brat mu_pred misto result (jeste ho nemam)
@@ -33,8 +35,8 @@
 
 - [x] bopt debug - ipdb with bopt imports
 
-- davat mean kdyz delam znovu stejny bod
-- ignorovat underflow dokud nedelaj problem :)
+- [x] davat mean kdyz delam znovu stejny bod
+- [x] ignorovat underflow dokud nedelaj problem :)
 
 - web
   - interpolace mezi 2 body hyperparam + plot slicu v lib. 0d, 1d, 2d ose
