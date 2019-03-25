@@ -70,7 +70,6 @@ class Sample:
         if data["model"]:
             model_dict = ModelParameters.from_dict(data["model"])
 
-
         # TODO: 64 or 32 bit?
         x = np.array(data["hyperparam_values"], dtype=np.float64)
         hyperparam_values = HyperparamValues.mapping_from_vector(x, hyperparameters)
@@ -106,6 +105,8 @@ class Sample:
             y = self.result
         elif status == CollectFlag.WAITING_FOR_JOB or status == CollectFlag.WAITING_FOR_SIMILAR:
             y = self.mu_pred
+        elif status == CollectFlag.COLLECT_FAILED:
+            y = self.mu_pred - self.sigma_pred
         else:
             raise ValueError("Tried to get xy for a sample {} which is {}".format(self, status))
 

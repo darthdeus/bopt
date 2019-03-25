@@ -126,12 +126,12 @@ class Experiment:
                         sample.collect_flag = CollectFlag.COLLECT_FAILED
 
     def samples_for_prediction(self) -> List[Sample]:
-        return [s for s in self.samples if s.status() != CollectFlag.COLLECT_FAILED]
+        return [s for s in self.samples if not s.model.sampled_from_random_search()]
 
     def get_xy(self):
         samples = self.samples_for_prediction()
 
-        sample_col = SampleCollection(samples)
+        sample_col = SampleCollection(self.samples)
         X_sample, Y_sample = sample_col.to_xy()
 
         return X_sample, Y_sample

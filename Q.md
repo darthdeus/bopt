@@ -1,5 +1,6 @@
 # TODO
 
+- gpy numpy error
 - vyresit, proc propose location vraci NAN
 
 - [x] job by mel byt optional

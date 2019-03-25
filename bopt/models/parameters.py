@@ -18,6 +18,9 @@ class ModelParameters:
             "acquisition_fn": self.acquisition_fn
         }
 
+    def sampled_from_random_search(self) -> bool:
+        return self.model_name == "random_search"
+
     def can_predict_mean(self) -> bool:
         # This is simply to avoid cyclic imports
         from bopt.models.gpy_model import GPyModel
