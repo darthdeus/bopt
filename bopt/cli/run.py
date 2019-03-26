@@ -21,18 +21,22 @@ def run(args) -> None:
 
         while n_started < args.n_iter:
             with acquire_lock():
+                logging.info("deserialize")
                 experiment = bopt.Experiment.deserialize()
 
                 num_running = len([s for s in experiment.samples
                                    if s.job and not s.job.is_finished()])
 
                 if num_running < args.n_parallel:
+                    logging.info("collect")
                     experiment.collect_results()
 
+                    logging.info("run_single")
                     sample = experiment.run_single(model_config)
 
                     n_started += 1
 
+                    logging.info("serialize")
                     experiment.serialize()
 
                     if not sample.job:
@@ -40,7 +44,9 @@ def run(args) -> None:
                         if not sample.waiting_for_similar and not sample.comment:
                             logging.error("Run loop created a sample without job.")
 
+            logging.info("wait children")
             psutil.wait_procs(psutil.Process().children(), timeout=0.01)
+            logging.info("sleep")
             time.sleep(args.sleep)
 
         # TODO: delete old code

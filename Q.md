@@ -1,5 +1,7 @@
 # TODO
 
+- backupit yml predtim nez ho prepisuju
+
 - gpy numpy error
 - vyresit, proc propose location vraci NAN
 - zaokrouhlovaci kernel
