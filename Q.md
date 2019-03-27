@@ -1,5 +1,7 @@
 # TODO
 
+- log timings
+
 - graf acq fn
 - grafy v dalsim bode
 - expected improvement per second
