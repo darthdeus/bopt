@@ -1,6 +1,16 @@
 # TODO
 
+- graf acq fn
+- grafy v dalsim bode
+- expected improvement per second
+- parsovat bash -c time pokud tam je, pokud ne tak beru finished_at jako ted
+- videt jak se meni hyperparam v case (s kazdym novym bodem + konvergence hyperparam)
+  - porovnat s optmizer_restarts()
+- konvergencni graf
+
+
 - backupit yml predtim nez ho prepisuju
+- qstat jenom na joby co bezi
 
 - gpy numpy error
 - vyresit, proc propose location vraci NAN
@@ -34,8 +44,8 @@
 - [x] collectit resulty do yamlu
   - [x] v ramci toho ziskat i finished_at
 
-- nepocitam s failnutyma jobama
-  - [!!!] predpokladam, ze priste uspeje - tohle nedelam, nikdy nedelam retry, nepocitam s docasnyma chybama
+- [x] nepocitam s failnutyma jobama
+  - [x] predpokladam, ze priste uspeje - tohle nedelam, nikdy nedelam retry, nepocitam s docasnyma chybama
   - [x] kontrolovat zaokrouhlene jestli ho nepoustim znova
     - [x] vytvorim manual sample s mean_pred - sigma_pred (nejak aby byl videt) a uz nepoustim dal
 
@@ -54,6 +64,9 @@
 - smazat benchmarks/ az bude cas udelat to poradne
 
 - moznost nadefinovat qsub param (a nebo obecne spoustejici param co se pridaji u runneru)
+
+- bopt delete job_id
+- bopt resubmit job_id
 
 -----------------------------------
 
