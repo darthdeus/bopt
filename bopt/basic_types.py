@@ -18,15 +18,28 @@ class Bound(abc.ABC):
     type: str
 
     @abc.abstractmethod
+    def map(self, value) -> ParamTypes:
+        pass
+
+    @abc.abstractmethod
+    def inverse_map(self, value) -> ParamTypes:
+        pass
+
+    @abc.abstractmethod
     def is_discrete(self) -> bool:
         pass
 
+    # TODO: is this before or after transform?
     @abc.abstractmethod
     def sample(self) -> ParamTypes:
         pass
 
     @abc.abstractmethod
     def validate(self, value: ParamTypes) -> bool:
+        pass
+
+    @abc.abstractmethod
+    def should_transform(self) -> bool:
         pass
 
     @abc.abstractmethod
@@ -51,8 +64,17 @@ class Integer(Bound):
     def sample(self) -> float:
         return np.random.randint(self.low, self.high)
 
+    def map(self, value) -> ParamTypes:
+        return value
+
+    def inverse_map(self, value) -> ParamTypes:
+        return int(value)
+
     def is_discrete(self) -> bool:
         return True
+
+    def should_transform(self) -> bool:
+        return False
 
     def validate(self, value: ParamTypes) -> bool:
         assert isinstance(value, int)
@@ -83,7 +105,16 @@ class Float(Bound):
     def sample(self) -> float:
         return np.random.uniform(self.low, self.high)
 
+    def map(self, value) -> ParamTypes:
+        return value
+
+    def inverse_map(self, value) -> ParamTypes:
+        return value
+
     def is_discrete(self) -> bool:
+        return False
+
+    def should_transform(self) -> bool:
         return False
 
     def validate(self, value: ParamTypes) -> bool:
@@ -110,24 +141,68 @@ class Float(Bound):
         return diff < threshold
 
 
-class Logscale(Bound):
+class LogscaleInt(Bound):
     def __init__(self, low: float, high: float):
         self.low = low
         self.high = high
-        self.type = "logscale"
+        self.type = "logscale_int"
 
     def sample(self) -> float:
-        return np.random.uniform(np.log2(self.low), np.log2(self.high))
+        return int(2.0 ** np.random.uniform(np.log2(self.low), np.log2(self.high)))
+
+    def is_discrete(self) -> bool:
+        return True
+
+    def should_transform(self) -> bool:
+        return True
+
+    def validate(self, value: ParamTypes) -> bool:
+        assert isinstance(value, int)
+        return self.low <= value < self.high
+
+    def __repr__(self) -> str:
+        return f"LogscaleFloat({self.low}, {self.high})"
+
+    def map(self, value) -> float:
+        return np.log2(value)
+
+    def inverse_map(self, value) -> int:
+        return int(2.0 ** value)
+
+    def parse(self, value: str) -> ParamTypes:
+        return float(value)
+
+    def scipy_bound_tuple(self) -> Tuple[float, float]:
+        return (np.log2(self.low), np.log2(self.high) - 1e-8)
+
+    def compare_values(self, a: ParamTypes, b: ParamTypes) -> bool:
+        assert isinstance(a, int)
+        assert isinstance(b, int)
+
+        return a == b
+
+
+class LogscaleFloat(Bound):
+    def __init__(self, low: float, high: float):
+        self.low = low
+        self.high = high
+        self.type = "logscale_float"
+
+    def sample(self) -> float:
+        return 2.0 ** np.random.uniform(np.log2(self.low), np.log2(self.high))
 
     def is_discrete(self) -> bool:
         return False
+
+    def should_transform(self) -> bool:
+        return True
 
     def validate(self, value: ParamTypes) -> bool:
         assert isinstance(value, float)
         return self.low <= value < self.high
 
     def __repr__(self) -> str:
-        return f"Logscale({self.low}, {self.high})"
+        return f"LogscaleFloat({self.low}, {self.high})"
 
     def map(self, value) -> float:
         return np.log2(value)
@@ -167,6 +242,9 @@ class Discrete(Bound):
         return value in self.values
 
     def is_discrete(self) -> bool:
+        return True
+
+    def should_transform(self) -> bool:
         return True
 
     def map(self, value) -> int:
@@ -219,9 +297,12 @@ class Hyperparameter(NamedTuple):
         elif data["type"] == "int":
             return Hyperparameter(name=name,
                     range=Integer(int(data["low"]), int(data["high"])))
-        elif data["type"] == "logscale":
+        elif data["type"] == "logscale_float":
             return Hyperparameter(name=name,
-                    range=Logscale(float(data["low"]), float(data["high"])))
+                    range=LogscaleFloat(float(data["low"]), float(data["high"])))
+        elif data["type"] == "logscale_int":
+            return Hyperparameter(name=name,
+                    range=LogscaleInt(int(data["low"]), int(data["high"])))
         elif data["type"] == "float":
             return Hyperparameter(name=name,
                     range=Float(float(data["low"]), float(data["high"])))

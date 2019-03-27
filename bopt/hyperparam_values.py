@@ -2,7 +2,7 @@ import logging
 import numpy as np
 from typing import Dict, List, Union
 
-from bopt.basic_types import Hyperparameter, Discrete, ParamTypes, Logscale
+from bopt.basic_types import Hyperparameter, Discrete, ParamTypes, LogscaleFloat
 
 
 class HyperparamValues:
@@ -51,6 +51,7 @@ class HyperparamValues:
     def mapping_from_vector(x: np.ndarray, hyperparameters:
             List[Hyperparameter]) -> "HyperparamValues":
 
+        # TODO: fuj, use map instead?
         typed_vals = [int(x) if p.range.is_discrete() else float(x)
                       for x, p in zip(x, hyperparameters)]
 
@@ -64,8 +65,8 @@ class HyperparamValues:
         for p in hyperparameters:
             # TODO: properly check for map/inverse_map
             # TODO: rename map -> transform
-            if isinstance(p.range, Discrete) or isinstance(p.range, Logscale):
-                mapping[p] = p.range.inverse_map(mapping[p])
+            # if p.range.should_transform():
+            mapping[p] = p.range.inverse_map(mapping[p])
 
         return HyperparamValues(mapping, x)
 
@@ -76,17 +77,20 @@ class HyperparamValues:
         x = np.zeros(len(mapping), dtype=np.float64)
 
         for i, key in enumerate(sorted(mapping, key=lambda k: k.name)):
-            value = mapping[key]
+            x[i] = key.range.map(mapping[key])
 
-            if key.range.is_discrete():
-                if isinstance(key.range, Discrete):
-                    x[i] = key.range.map(value)
-                else:
-                    x[i] = int(value)
-            elif isinstance(key.range, Logscale):
-                x[i] = key.range.map(value)
-            else:
-                x[i] = float(value)
+            # TODO: smazat fuj, uz neni potreba :)
+            # value = mapping[key]
+            #
+            # if key.range.is_discrete():
+            #     if isinstance(key.range, Discrete):
+            #         x[i] = key.range.map(value)
+            #     else:
+            #         x[i] = int(value)
+            # elif isinstance(key.range, LogscaleFloat):
+            #     x[i] = key.range.map(value)
+            # else:
+            #     x[i] = float(value)
 
         return HyperparamValues(mapping, x)
 

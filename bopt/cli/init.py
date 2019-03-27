@@ -35,13 +35,18 @@ def run(args) -> None:
                     cls = bopt.Float
                     parser = float
                     low, high = values
-                elif type == "logscale":
-                    cls = bopt.Logscale
+                elif type == "logscale_float":
+                    cls = bopt.LogscaleFloat
                     parser = float
+                    low, high = values
+                elif type == "logscale_int":
+                    cls = bopt.LogscaleInt
+                    parser = int
                     low, high = values
                 elif type == "discrete":
                     continue
                 else:
+                    # TODO: pouzit reflexi, nehardcodit to
                     logging.error("Invalid value {} for hyperparameter type, only 'int', 'float' and 'discrete' are permitted.".format(type))
                     sys.exit(1)
 

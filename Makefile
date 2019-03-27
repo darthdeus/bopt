@@ -17,8 +17,8 @@ gpy_compare:
 
 sfntest:
 	rm -rf results/sfn
-	$(BOPT) init --param "x:int:0:5" --param "y:float:0:25" \
-		--param "z:float:0:1" --param "w:logscale:2:7" \
+	$(BOPT) init --param "x:int:0:5" --param "y:logscale_int:1:25" \
+		--param "z:float:0:1" --param "w:logscale_float:2:7" \
 		--param "activation:discrete:relu:sigmoid:tanh" \
 		-C results/sfn \
 		$(PWD)/.venv/bin/python $(PWD)/experiments/simple_function.py
