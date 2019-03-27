@@ -7,6 +7,7 @@ import pathlib
 import datetime
 import logging
 import traceback
+import tempfile
 
 import numpy as np
 
@@ -280,8 +281,12 @@ class Experiment:
     def serialize(self) -> None:
         dump = yaml.dump(self.to_dict(), default_flow_style=False, Dumper=NoAliasDumper)
 
-        with open("meta.yml", "w") as f:
+        temp_meta_fname = tempfile.mktemp(dir=".")
+
+        with open(temp_meta_fname, "w") as f:
             f.write(dump)
+
+        os.rename(temp_meta_fname, "meta.yml")
 
     @staticmethod
     def deserialize() -> "Experiment":

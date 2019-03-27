@@ -11,7 +11,7 @@
 - konvergencni graf
 
 
-- backupit yml predtim nez ho prepisuju
+- [x] backupit yml predtim nez ho prepisuju
 - [x] qstat jenom na joby co nemaji result
 
 - gpy numpy error
@@ -19,7 +19,7 @@
 - zaokrouhlovaci kernel
   - diskretni hyperparam - onehot nebo fixni lengthscale na konkretni hyperparam
     - sigmoid vs round?
-- logscale
+- [x] logscale
 
 - [x] job by mel byt optional
   - [x] manual sample nema job
