@@ -35,6 +35,10 @@ def run(args) -> None:
                     cls = bopt.Float
                     parser = float
                     low, high = values
+                elif type == "logscale":
+                    cls = bopt.Logscale
+                    parser = float
+                    low, high = values
                 elif type == "discrete":
                     continue
                 else:

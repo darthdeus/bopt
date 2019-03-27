@@ -118,7 +118,7 @@ class Experiment:
                                     sample.collect_flag = CollectFlag.COLLECT_OK
                                     found = True
 
-                                    logging.info("Collect got result {} for sample {}".format(sample.result, sample))
+                                    logging.info("Collect got result {}".format(sample.result))
 
                             if not found:
                                 logging.error("Job {} seems to have failed, it finished running and its result cannot be parsed.".format(sample.job.job_id))

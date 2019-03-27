@@ -110,6 +110,48 @@ class Float(Bound):
         return diff < threshold
 
 
+class Logscale(Bound):
+    def __init__(self, low: float, high: float):
+        self.low = low
+        self.high = high
+        self.type = "logscale"
+
+    def sample(self) -> float:
+        return np.random.uniform(np.log2(self.low), np.log2(self.high))
+
+    def is_discrete(self) -> bool:
+        return False
+
+    def validate(self, value: ParamTypes) -> bool:
+        assert isinstance(value, float)
+        return self.low <= value < self.high
+
+    def __repr__(self) -> str:
+        return f"Logscale({self.low}, {self.high})"
+
+    def map(self, value) -> float:
+        return np.log2(value)
+
+    def inverse_map(self, value) -> float:
+        return 2.0 ** value
+
+    def parse(self, value: str) -> ParamTypes:
+        return float(value)
+
+    def scipy_bound_tuple(self) -> Tuple[float, float]:
+        return (np.log2(self.low), np.log2(self.high) - 1e-8)
+
+    def compare_values(self, a: ParamTypes, b: ParamTypes) -> bool:
+        assert isinstance(a, float)
+        assert isinstance(b, float)
+
+        diff = abs(a - b)
+        # TODO: logscale will need this adjusted
+        # We set the threshold at 1% of the range
+        threshold = (np.log2(self.high) - np.log2(self.low)) * 0.01
+        return diff < threshold
+
+
 class Discrete(Bound):
     def __init__(self, values: List[str]):
         self.values = values
@@ -177,6 +219,9 @@ class Hyperparameter(NamedTuple):
         elif data["type"] == "int":
             return Hyperparameter(name=name,
                     range=Integer(int(data["low"]), int(data["high"])))
+        elif data["type"] == "logscale":
+            return Hyperparameter(name=name,
+                    range=Logscale(float(data["low"]), float(data["high"])))
         elif data["type"] == "float":
             return Hyperparameter(name=name,
                     range=Float(float(data["low"]), float(data["high"])))

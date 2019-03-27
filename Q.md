@@ -12,7 +12,7 @@
 
 
 - backupit yml predtim nez ho prepisuju
-- qstat jenom na joby co bezi
+- [x] qstat jenom na joby co nemaji result
 
 - gpy numpy error
 - vyresit, proc propose location vraci NAN

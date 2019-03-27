@@ -2,7 +2,7 @@ import logging
 import numpy as np
 from typing import Dict, List, Union
 
-from bopt.basic_types import Hyperparameter, Discrete, ParamTypes
+from bopt.basic_types import Hyperparameter, Discrete, ParamTypes, Logscale
 
 
 class HyperparamValues:
@@ -62,11 +62,12 @@ class HyperparamValues:
             typed_vals))
 
         for p in hyperparameters:
-            if isinstance(p.range, Discrete):
+            # TODO: properly check for map/inverse_map
+            # TODO: rename map -> transform
+            if isinstance(p.range, Discrete) or isinstance(p.range, Logscale):
                 mapping[p] = p.range.inverse_map(mapping[p])
 
         return HyperparamValues(mapping, x)
-
 
     # TODO: test! forward and back
     @staticmethod
@@ -82,6 +83,8 @@ class HyperparamValues:
                     x[i] = key.range.map(value)
                 else:
                     x[i] = int(value)
+            elif isinstance(key.range, Logscale):
+                x[i] = key.range.map(value)
             else:
                 x[i] = float(value)
 
