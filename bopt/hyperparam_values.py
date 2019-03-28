@@ -52,6 +52,9 @@ class HyperparamValues:
             List[Hyperparameter]) -> "HyperparamValues":
 
         # TODO: fuj, use map instead?
+
+        # TODO: tady nastava problem, protoze log je aplikovany az potom, a tim ze
+        #       se to rovnou zaokrouhli pak dostavam jenom 2^n
         typed_vals = [int(x) if p.range.is_discrete() else float(x)
                       for x, p in zip(x, hyperparameters)]
 

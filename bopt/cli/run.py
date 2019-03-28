@@ -30,6 +30,7 @@ def run(args) -> None:
                     experiment.collect_results()
 
                     sample = experiment.run_single(model_config)
+                    logging.info("[{}/{}] Started a new evaluation".format(n_started, args.n_iter))
 
                     n_started += 1
 

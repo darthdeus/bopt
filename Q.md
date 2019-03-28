@@ -1,5 +1,9 @@
 # TODO
 
+- logscale int je spatne, protoze dava jenom 2^n a zadne mezi?
+
+- logovat jak dlouho uz job bezi v bopt exp
+
 - log timings
 
 - graf acq fn
@@ -15,7 +19,7 @@
 - [x] qstat jenom na joby co nemaji result
 
 - gpy numpy error
-- vyresit, proc propose location vraci NAN
+- [x] vyresit, proc propose location vraci NAN
 - zaokrouhlovaci kernel
   - diskretni hyperparam - onehot nebo fixni lengthscale na konkretni hyperparam
     - sigmoid vs round?
