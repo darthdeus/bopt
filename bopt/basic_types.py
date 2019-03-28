@@ -68,7 +68,7 @@ class Integer(Bound):
         return value
 
     def inverse_map(self, value) -> ParamTypes:
-        return int(value)
+        return round(value)
 
     def is_discrete(self) -> bool:
         return True
@@ -167,7 +167,7 @@ class LogscaleInt(Bound):
         return np.log2(value)
 
     def inverse_map(self, value) -> int:
-        return int(2.0 ** value)
+        return round(2.0 ** value)
 
     def parse(self, value: str) -> ParamTypes:
         return float(value)
