@@ -1,3 +1,4 @@
+import math
 import yaml
 import os
 import re
@@ -134,7 +135,7 @@ class Experiment:
     def get_xy(self):
         samples = self.samples_for_prediction()
 
-        sample_col = SampleCollection(self.samples)
+        sample_col = SampleCollection(samples)
         X_sample, Y_sample = sample_col.to_xy()
 
         return X_sample, Y_sample
@@ -248,6 +249,9 @@ class Experiment:
 
                 assert mu.size == 1
                 assert sigma.size == 1
+
+                assert not math.isnan(float(mu))
+                assert not math.isnan(float(sigma))
             else:
                 mu = 0.0
                 sigma = 1.0 # TODO: lol :)

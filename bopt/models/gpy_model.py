@@ -15,7 +15,6 @@ from bopt.models.parameters import ModelParameters
 from bopt.model_config import ModelConfig
 from bopt.hyperparam_values import HyperparamValues
 
-
 # TODO: split into multiple, serialization separate?
 # TODO: round indexes
 # https://arxiv.org/abs/1706.03673
@@ -116,6 +115,7 @@ class GPyModel(Model):
     def predict_next(model_config: ModelConfig, hyperparameters: List[Hyperparameter],
             X_sample: np.ndarray, Y_sample: np.ndarray) -> Tuple[HyperparamValues, "Model"]:
         # TODO: compare NLL with and without normalizer
+        assert not np.any(np.isnan(Y_sample))
 
         model = GPyModel.gpy_regression(model_config, X_sample, Y_sample)
         acquisition_fn = GPyModel.parse_acquisition_fn(model_config.acquisition_fn)

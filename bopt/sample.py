@@ -1,3 +1,4 @@
+import math
 import os
 import logging
 import traceback
@@ -112,6 +113,8 @@ class Sample:
 
         assert isinstance(x, np.ndarray)
         assert isinstance(y, float)
+
+        assert not math.isnan(y)
 
         return x, y
 

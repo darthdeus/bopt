@@ -11,6 +11,7 @@ from scipy.stats import norm
 
 
 class AcquisitionFunction(abc.ABC):
+    # TODO: xi default value 0.01 or tweak it?
     def __call__(self, gp: GPRegression, X: np.ndarray, f_s: float, xi: float=0.001) -> np.ndarray:
         assert X is not None
 
