@@ -221,6 +221,7 @@ class Experiment:
                 # TODO: opravit:
                 #   - sample nemusi mit mu/sigma predikci
                 #   - pokud uz byl vyhodnoceny, chci preskocit pousteni jobu a udelat "ManualSample"?
+                similar_sample = similar_samples[0]
 
                 next_sample = Sample(None, model_params, hyperparam_values,
                                      similar_sample.mu_pred, similar_sample.sigma_pred,
