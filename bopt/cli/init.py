@@ -63,6 +63,7 @@ def run(args) -> None:
             runner = bopt.LocalRunner(script_path, default_arguments)
         elif args.runner == "sge":
             runner = bopt.SGERunner(script_path, default_arguments)
+            runner.qsub_arguments = ["-q", "cpu-troja.q"]
         else:
             logging.error("Invalid value {} for runner, only 'local' and 'sge' are allowed.".format(args.runner))
             sys.exit(1)

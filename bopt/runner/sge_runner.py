@@ -37,15 +37,22 @@ class SGEJob(Job):
 
 
 class SGERunner(Runner):
+    qsub_arguments: List[str]
+
+    def __init__(self, script_path: str, arguments: List[str], qsub_arguments: List[str]) \
+            -> None:
+        super().__init__(script_path, arguments)
+        self.qsub_arguments = qsub_arguments
+
     def runner_type(self) -> str:
         return "sge_runner"
 
     def start(self, output_dir: str, hyperparam_values: HyperparamValues) -> Job:
+        # TODO: lol naming :)
         cmdline_run_params = [f"--{h.name}={value}"
                 for h, value in hyperparam_values.mapping.items()]
 
-        # TODO: fuj tohle nema byt nahardcodeny
-        qsub_params: List[str] = ["-N", "job", "-o", output_dir, "-q", "cpu-troja.q"]
+        qsub_params = ["-N", "job", "-o", output_dir, *self.qsub_arguments]
         cmd = ["qsub", *qsub_params, self.script_path, *self.arguments,
                 *cmdline_run_params]
 

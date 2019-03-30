@@ -1,5 +1,7 @@
 # TODO
 
+- moznost nadefinovat qsub param (a nebo obecne spoustejici param co se pridaji u runneru)
+
 - collect nejak dlouho trva
 
 - logscale int je spatne, protoze dava jenom 2^n a zadne mezi?
@@ -70,8 +72,6 @@
 - zdetekovat duplicitni ID a spadnout
 
 - smazat benchmarks/ az bude cas udelat to poradne
-
-- moznost nadefinovat qsub param (a nebo obecne spoustejici param co se pridaji u runneru)
 
 - bopt delete job_id
 - bopt resubmit job_id
