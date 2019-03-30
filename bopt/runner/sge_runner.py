@@ -73,3 +73,12 @@ class SGERunner(Runner):
         sge_job.started_at = datetime.datetime.now()
 
         return sge_job
+
+    def to_dict(self) -> dict:
+        return {
+            "runner_type": self.runner_type(),
+            "script_path": self.script_path,
+            "arguments": self.arguments,
+            "qsub_arguments": self.qsub_arguments,
+        }
+

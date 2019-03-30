@@ -13,10 +13,9 @@ class RunnerLoader:
         cls: Union[Type[LocalRunner], Type[SGERunner]]
 
         if runner_type == "local_runner":
-            cls = LocalRunner
+            return LocalRunner(data["script_path"], data["arguments"])
         elif runner_type == "sge_runner":
-            cls = SGERunner
+            return SGERunner(data["script_path"], data["arguments"], data["qsub_arguments"])
         else:
             raise NotImplemented()
 
-        return cls(data["script_path"], data["arguments"])
