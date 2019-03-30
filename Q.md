@@ -1,5 +1,7 @@
 # TODO
 
+- collect nejak dlouho trva
+
 - logscale int je spatne, protoze dava jenom 2^n a zadne mezi?
 
 - logovat jak dlouho uz job bezi v bopt exp

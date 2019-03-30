@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width">
+    <title>OptBoard</title>
+
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css" integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS" crossorigin="anonymous">
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.6/umd/popper.min.js" integrity="sha384-wHAiFfRlMFy6i5SRaxvfOCifBUQy1xHdJ/yoi7FRNXMRBu5WHdZYu1hA6ZOblgut" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/js/bootstrap.min.js" integrity="sha384-B0UglyR+jN6CkvvICOB2joaf5I4l3gm9GU6Hc1og6Ls7i6U/mkkaduKaBhlAXv9k" crossorigin="anonymous"></script>
+
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+
+    <link rel="stylesheet" href="//cdn.datatables.net/1.10.19/css/jquery.dataTables.min.css">
+    <script src="//cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js"></script>
+
+    <style type="text/css" media="all">
+      /* .modebar{ */
+      /*   display: none !important; */
+      /* } */
+    </style>
+
+    <script type="text/javascript">
+      $(document).ready( function () {
+        $("table").DataTable();
+      });
+
+    </script>
+
+    <script type="text/javascript">
+      window.exp_data = {{json_data|safe}};
+    </script>
+  </head>
+  <body>
+    <div class="container">
+      <h2>Experiment: {{experiment.meta_dir}}</h2>
+
+      <p>Best params: {{data.best_x}}, fitness: {{data.best_y}}</p>
+
+      <p>Value range [{{data.minval}} - {{data.maxval}}]</p>
+      <div class="row">
+        <div class="col-md">
+          <p>
+            ls: {{result_gp.kernel.params["lengthscale"].numpy()}}<br>
+            sigma: {{result_gp.kernel.params["sigma"].numpy()}}<br>
+            noise: {{result_gp.noise}}
+          </p>
+          <div id="heatmap"></div>
+        </div>
+
+        <div class="col-md">
+          <div id="param-trace-plot"></div>
+          <div id="param-nll-plot"></div>
+          <script>
+            Plotly.plot("param-trace-plot", [
+              {% for trace_name, trace_vals in param_traces.items() %}
+              {
+                y: {{trace_vals|safe}},
+                name: "{{trace_name}}"
+              },
+              {% endfor %}
+            ]);
+            Plotly.plot("param-nll-plot", [
+              {
+                y: {{nll_trace|safe}},
+                name: "nll"
+              }
+            ]);
+          </script>
+        </div>
+
+      </div>
+
+      <div class="col-md">
+        <div id="parallel-coord"></div>
+      </div>
+
+      <script type="text/javascript">
+        var m = 20;
+        Plotly.plot("heatmap", [
+          {
+            type: "heatmap",
+            z: exp_data.heatmap.z,
+            x: exp_data.heatmap.x,
+            y: exp_data.heatmap.y,
+            colorscale: "Jet",
+            showscale: true,
+            zauto: false,
+            zmin: {{data.minval}},
+            zmax: {{data.maxval}}
+          },
+          {
+            x: exp_data.heatmap.sx,
+            y: exp_data.heatmap.sy,
+            mode: "markers",
+            type: "scatter",
+            marker: {
+              size: 15,
+              color: "#000000",
+            },
+          },
+          // TODO: fix highlighted max
+          {
+            x: [exp_data.best_x[0]],
+            y: [exp_data.best_x[1]],
+            // y: [exp_data.best_y],
+            mode: "markers",
+            type: "scatter",
+            marker: {
+              size: 15,
+              color: "#FAFAFA",
+            },
+          }
+        ],
+        );
+      </script>
+
+
+      <script type="text/javascript">
+        Plotly.plot('parallel-coord', [
+          {
+            type: 'parcoords',
+            line: {
+              color: exp_data.colors,
+              showscale: true,
+              colorscale: "Jet",
+              cmin: {{data.minval}},
+              cmax: {{data.maxval}}
+            },
+
+            dimensions: exp_data.dimensions,
+          }
+        ]);
+      </script>
+
+      <h3>Hyperparameters</h3>
+
+      <div class="row">
+        {% for slice in data.posterior_slices %}
+          <div class="col-md">
+            <p>
+              <strong>{{slice.gp.kernel}} - {{slice.gp.noise}}</strong>
+            </p>
+            <div id="param-{{slice.param.name}}"></div>
+          </div>
+        {% endfor %}
+      </div>
+
+      <div id="all-param-slices">
+      </div>
+
+      <script type="text/javascript">
+        Plotly.plot("all-param-slices", [
+          {% for slice in data.posterior_slices %}
+            {
+              x: {{slice.x}},
+              y: {{slice.y}},
+              name: "{{slice.param.name}}: ({{slice.param.range.low}}, {{slice.param.range.high}})"
+            },
+          {% endfor %}
+        ], {
+          yaxis: { range: [exp_data.minval, exp_data.maxval] }
+        });
+      </script>
+
+      {% for slice in data.posterior_slices %}
+          <script type="text/javascript">
+            Plotly.plot("param-{{slice.param.name}}", [
+              {
+                x: {{slice.x}},
+                y: {{slice.y}},
+                error_y: {
+                  type: "data",
+                  array: {{slice.std}},
+                  visible: true
+                }
+              },
+              {
+                x: {{slice.points_x}},
+                y: {{slice.points_y}},
+                mode: "markers",
+                type: "scatter",
+                marker: {
+                  size: 15,
+                  color: "#000000",
+                },
+
+              }
+            ], {
+              title: { text: "{{slice.param.name}}: ({{slice.param.range.low}}, {{slice.param.range.high}})" },
+              yaxis: { range: [exp_data.minval, exp_data.maxval] }
+            });
+          </script>
+      {% endfor %}
+
+      <h3>Intermediate results</h3>
+
+      <div id="job-all"></div>
+      <script>
+        Plotly.plot("job-all", [
+          {% for sample in sample_col.samples %}
+          {
+            y: {# sample.intermediate_results()|safe #}
+          },
+          {% endfor %}
+        ], {
+          yaxis: { range: [exp_data.minval, exp_data.maxval] }
+        });
+      </script>
+
+      <table data-toggle="table" class="table table-bordered table-striped">
+        <thead>
+          <tr>
+            <th>JobID</th>
+            <th>Hyperparams</th>
+            <th>Final value</th>
+            <th>Intermediate</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          {% for sample in sample_col.samples[:5] %}
+          <tr>
+            <td>{{sample.job.job_id}}</td>
+            <td>{{sample.job.run_parameters}}</td>
+            <td>{{sample.get_result(sample_col.meta_dir)}}</td>
+            <td>
+              <div id="job-{{sample.job.job_id}}" style="width:400px;height:75px;"></div>
+              <script>
+                Plotly.plot("job-{{sample.job.job_id}}", [
+                  {
+                    y: {#sample.job.intermediate_results()|safe#}
+                  }
+                ], {
+                  yaxis: {
+                    range: [0, 500]
+                  }
+                });
+              </script>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+
+    </div>
+  </body>
+</html>
