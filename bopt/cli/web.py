@@ -1,3 +1,4 @@
+import math
 import sys
 import jsonpickle
 import numpy as np
@@ -42,11 +43,32 @@ def run(args) -> None:
         sample_results = [s.result for s in experiment.samples if s.result]
         sample_results_cummax = np.maximum.accumulate(sample_results).tolist()
 
+        noise_values = []
+        ls_values = []
+        sigma_values = []
+
+        kernel_params_list = [
+            ("noise", noise_values),
+            ("lengthscale", ls_values),
+            ("sigma", sigma_values)
+        ]
+
+        # TODO: sort by time
+        for sample in experiment.samples:
+            if sample.model.sampled_from_random_search():
+                continue
+
+            p = sample.model.params
+
+            noise_values.append(p["Gaussian_noise.variance"])
+            ls_values.append(p["rbf.lengthscale"])
+            sigma_values.append(math.sqrt(p["rbf.variance"]))
+
         return render_template("index.html",
                 experiment=experiment,
                 sample_results=sample_results,
                 sample_results_cummax=sample_results_cummax,
-                )
+                kernel_params_list=kernel_params_list)
 
 
     # @app.route("/")

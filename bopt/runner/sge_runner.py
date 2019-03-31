@@ -60,8 +60,6 @@ class SGERunner(Runner):
         output = subprocess.check_output(cmd,
                 stderr=subprocess.STDOUT).decode("ascii")
 
-        logging.info(output)
-
         matches = re.match(
                 pattern=r"Your job (\d+) \(\".*\"\) has been submitted",
                 string=output)

@@ -32,6 +32,22 @@
     <div class="container">
       <h2>Experiment: {{experiment}}</h2>
 
+      <div id="kernel-params-plot"></div>
+      <script>
+        Plotly.plot("kernel-params-plot", [
+          {% for name, kernel_params in kernel_params_list %}
+            {
+              y: {{kernel_params|safe}},
+              name: "{{name}}"
+            },
+          {% endfor %}
+        ], {
+          xaxis: { title: "samples" },
+          yaxis: { title: "value" }
+        });
+      </script>
+
+
       <div id="convergence-plot"></div>
       <script>
         Plotly.plot("convergence-plot", [

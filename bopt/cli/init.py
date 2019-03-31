@@ -47,7 +47,8 @@ def run(args) -> None:
                     continue
                 else:
                     # TODO: pouzit reflexi, nehardcodit to
-                    logging.error("Invalid value {} for hyperparameter type, only 'int', 'float' and 'discrete' are permitted.".format(type))
+                    logging.error("Invalid value {} for hyperparameter type,"
+                        " only 'int', 'float' and 'discrete' are permitted.".format(type))
                     sys.exit(1)
 
                 assert cls is not None
@@ -59,13 +60,15 @@ def run(args) -> None:
         script_path = args.command
         default_arguments = args.arguments
 
+
+        __import__('ipdb').set_trace()
         if args.runner == "local":
             runner = bopt.LocalRunner(script_path, default_arguments)
         elif args.runner == "sge":
-            qsub_arguments = ["-q", "cpu-troja.q"]
-            runner = bopt.SGERunner(script_path, default_arguments, qsub_arguments)
+            runner = bopt.SGERunner(script_path, default_arguments, args.qsub)
         else:
-            logging.error("Invalid value {} for runner, only 'local' and 'sge' are allowed.".format(args.runner))
+            logging.error("Invalid value {} for runner,"
+                "only 'local' and 'sge' are allowed.".format(args.runner))
             sys.exit(1)
 
         default_result_regex = "RESULT=(.*)"

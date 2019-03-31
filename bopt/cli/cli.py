@@ -65,6 +65,7 @@ def main():
 
     sp_init.add_argument("--runner", type=str, default="local", help="Runner type.")
     sp_init.add_argument("--param", action="append", help="Hyperparameter")
+    sp_init.add_argument("--qsub", action="append", help="Arguments for qsub.")
     sp_init.add_argument("command", type=str, help="Command to run.")
     sp_init.add_argument("arguments", type=str, nargs="*", help="Default arguments.")
     sp_init.set_defaults(func=init.run)

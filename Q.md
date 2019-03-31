@@ -1,9 +1,9 @@
 # TODO
 
-- moznost nadefinovat qsub param (a nebo obecne spoustejici param co se pridaji u runneru)
+- proc softmax v posledni vrstve s 1 outputem vadi misto sigmoidu?
 
+- [x] moznost nadefinovat qsub param (a nebo obecne spoustejici param co se pridaji u runneru)
 - collect nejak dlouho trva
-
 - logscale int je spatne, protoze dava jenom 2^n a zadne mezi?
 
 - logovat jak dlouho uz job bezi v bopt exp
@@ -16,7 +16,7 @@
 - parsovat bash -c time pokud tam je, pokud ne tak beru finished_at jako ted
 - videt jak se meni hyperparam v case (s kazdym novym bodem + konvergence hyperparam)
   - porovnat s optmizer_restarts()
-- konvergencni graf
+- [x] konvergencni graf
 
 
 - [x] backupit yml predtim nez ho prepisuju
