@@ -60,8 +60,6 @@ def run(args) -> None:
         script_path = args.command
         default_arguments = args.arguments
 
-
-        __import__('ipdb').set_trace()
         if args.runner == "local":
             runner = bopt.LocalRunner(script_path, default_arguments)
         elif args.runner == "sge":
