@@ -17,10 +17,6 @@ class RandomSearch(Model):
     def to_model_params(self) -> ModelParameters:
         return ModelParameters("random_search", {}, "", "")
 
-    # TODO: spatne typ
-    def to_dict(self) -> Model:
-        return { "model_type": "random_search" }
-
 
 # TODO: delete
 # def default_from_bounds(bounds: List[Bound]) -> np.ndarray:

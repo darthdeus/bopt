@@ -1,3 +1,4 @@
+# TODO: difference between this and ModelConfig?
 class ModelParameters:
     model_name: str
     params: dict

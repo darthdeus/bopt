@@ -125,10 +125,16 @@ class Experiment:
                                     logging.info("Collect got result {}".format(sample.result))
 
                             if not found:
-                                logging.error("Job {} seems to have failed, it finished running and its result cannot be parsed.".format(sample.job.job_id))
+                                logging.error("Job {} seems to have failed, "
+                                    "it finished running and its result cannot "
+                                    "be parsed.".format(sample.job.job_id))
+
                                 sample.collect_flag = CollectFlag.COLLECT_FAILED
                     else:
-                        logging.error("Output file not found for job {} even though it finished. It will be considered as a failed job.".format(sample.job.job_id))
+                        logging.error("Output file not found for job {} "
+                            "even though it finished. It will be considered "
+                            "as a failed job.".format(sample.job.job_id))
+
                         sample.collect_flag = CollectFlag.COLLECT_FAILED
 
     def samples_for_prediction(self) -> List[Sample]:
@@ -148,7 +154,8 @@ class Experiment:
 
         # TODO: overit, ze by to fungovalo i na ok+running a mean_pred
         if len(self.samples_for_prediction()) == 0:
-            logging.info("No existing samples found, overloading suggest with RandomSearch.")
+            logging.info("No existing samples found, overloading suggest "
+                "with RandomSearch.")
 
             job_params = RandomSearch.predict_next(self.hyperparameters)
             fitted_model = RandomSearch()
@@ -160,7 +167,9 @@ class Experiment:
             try:
                 job_params, fitted_model = GPyModel.predict_next(model_config, self.hyperparameters, X_sample, Y_sample)
             except OptimizationFailed as e:
-                logging.error("Optimization failed, retrying with RandomSearch: {}".format(e))
+                logging.error("Optimization failed, retrying with RandomSearch: "
+                    "{}".format(e))
+
                 job_params = RandomSearch.predict_next(self.hyperparameters)
                 fitted_model = RandomSearch()
 
@@ -180,12 +189,15 @@ class Experiment:
 
         return fitted_model, next_sample
 
-    def get_similar_samples(self, hyperparam_values: HyperparamValues) -> List[Sample]:
+    def get_similar_samples(self, hyperparam_values: HyperparamValues) \
+            -> List[Sample]:
         return [s for s in self.samples
                 if s.job and s.hyperparam_values.similar_to(hyperparam_values)]
 
-    def get_finished_similar_samples(self, hyperparam_values: HyperparamValues) -> List[Sample]:
-        # Double filtering, but we don't care since there are only a few samples anyway.
+    def get_finished_similar_samples(self, hyperparam_values: HyperparamValues) \
+            -> List[Sample]:
+        # Double filtering, but we don't care since there are only a few
+        # samples anyway.
         return [s for s in self.get_similar_samples(hyperparam_values)
                 if s.status() == CollectFlag.COLLECT_OK]
 
@@ -197,7 +209,8 @@ class Experiment:
         output_dir_path = pathlib.Path("output")
         output_dir_path.mkdir(parents=True, exist_ok=True)
 
-        logging.debug("Output set to: {}".format(output_dir_path, output_dir_path.absolute()))
+        logging.debug("Output set to: {}".format(output_dir_path,
+            output_dir_path.absolute()))
 
         hyperparam_values.validate()
 
@@ -222,12 +235,15 @@ class Experiment:
                 created_at = datetime.datetime.now()
 
                 next_sample = Sample(None, model_params, hyperparam_values,
-                                     similar_sample.mu_pred, similar_sample.sigma_pred,
-                                     CollectFlag.COLLECT_OK, created_at)
+                        similar_sample.mu_pred, similar_sample.sigma_pred,
+                        CollectFlag.COLLECT_OK, created_at)
+
                 next_sample.collected_at = created_at
                 next_sample.run_time = 0.0
                 next_sample.result = similar_sample.result
-                next_sample.comment = "created as similar of {}".format(similar_sample)
+                next_sample.comment = "created as similar of {}"\
+                        .format(similar_sample)
+
             else:
                 # TODO: opravit:
                 #   - sample nemusi mit mu/sigma predikci
@@ -235,9 +251,13 @@ class Experiment:
                 similar_sample = similar_samples[0]
 
                 next_sample = Sample(None, model_params, hyperparam_values,
-                                     similar_sample.mu_pred, similar_sample.sigma_pred,
-                                     CollectFlag.WAITING_FOR_SIMILAR, datetime.datetime.now())
-                next_sample.comment = "created as similar of {}".format(similar_sample)
+                        similar_sample.mu_pred, similar_sample.sigma_pred,
+                        CollectFlag.WAITING_FOR_SIMILAR,
+                        datetime.datetime.now())
+
+                next_sample.comment = "created as similar of {}"\
+                        .format(similar_sample)
+
         else:
             job = self.runner.start(output_dir, hyperparam_values)
 
@@ -248,7 +268,9 @@ class Experiment:
 
                 if model_params.can_predict_mean():
                     # Use the fitted model to predict mu/sigma.
-                    gpy_model = GPyModel.from_model_params(model_params, X_sample, Y_sample)
+                    gpy_model = GPyModel.from_model_params(model_params,
+                            X_sample, Y_sample)
+
                     model = gpy_model.model
 
                 else:

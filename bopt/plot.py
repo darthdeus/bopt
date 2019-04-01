@@ -15,6 +15,7 @@ from matplotlib.colors import LinearSegmentedColormap
 from bopt.experiment import Experiment
 from bopt.acquisition_functions.acquisition_functions import AcquisitionFunction
 from bopt.models.random_search import RandomSearch
+from bopt.models.gpy_model import GPyModel
 from bopt.models.model import Model
 
 black_cmap = LinearSegmentedColormap.from_list("black", ["black", "black"])
@@ -73,6 +74,8 @@ def plot_current(experiment: Experiment, gpy_model: Model,
 
     if isinstance(gpy_model, RandomSearch):
         return
+
+    assert isinstance(gpy_model, GPyModel)
 
     assert gpy_model is not None, "gp is None"
 

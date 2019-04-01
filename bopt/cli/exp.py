@@ -40,8 +40,9 @@ def run(args) -> None:
             print("No samples finished evaluating yet.")
             sys.exit(0)
 
+        best_job_id = best_sample.job.job_id if best_sample.job else "NO_JOB"
 
-        print("\nBEST (id={}): {}".format(best_sample.job.job_id, best_res))
+        print("\nBEST (id={}): {}".format(best_job_id, best_res))
         assert best_sample is not None
 
         if best_sample.job:
