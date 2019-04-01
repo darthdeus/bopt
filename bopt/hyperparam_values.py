@@ -51,6 +51,16 @@ class HyperparamValues:
     def mapping_from_vector(x: np.ndarray, hyperparameters:
             List[Hyperparameter]) -> "HyperparamValues":
 
+        ########################
+        # mapping: Dict[Hyperparameter, ParamTypes] = dict()
+        #
+        # for val, p in zip(x, hyperparameters):
+        #     mapping[p] = p.range.inverse_map(val)
+        #
+        # return HyperparamValues(mapping, x)
+        ######################
+
+
         # TODO: fuj, use map instead?
 
         # TODO: tady nastava problem, protoze log je aplikovany az potom, a tim ze

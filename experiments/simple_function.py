@@ -25,7 +25,7 @@ if __name__ == "__main__":
     else:
         args.w = 2.0
 
-    result = math.sin(args.x) * math.sin(args.y) \
+    result = math.sin(args.x) * args.y**0.3 \
             + random.random() * 0.05 + 2*math.cos(args.z) * math.cos(args.w)
 
     # result = args.x + 2 * args.y - args.z**2

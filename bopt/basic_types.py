@@ -151,7 +151,8 @@ class LogscaleInt(Bound):
         return int(2.0 ** np.random.uniform(np.log2(self.low), np.log2(self.high)))
 
     def is_discrete(self) -> bool:
-        return True
+        # TODO: fuj, prejmenovat na neco jako should_round_before_map? :D
+        return False
 
     def should_transform(self) -> bool:
         return True
@@ -251,7 +252,7 @@ class Discrete(Bound):
         return self.values.index(value)
 
     def inverse_map(self, value) -> str:
-        return self.values[value]
+        return self.values[int(value)]
 
     def __repr__(self) -> str:
         return f"Discrete({self.values})"
