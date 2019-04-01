@@ -10,6 +10,7 @@ def run(args) -> None:
 
     with acquire_lock():
         experiment = Experiment.deserialize()
+        experiment.collect_results()
 
         __import__('ipdb').set_trace()
 

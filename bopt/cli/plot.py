@@ -19,6 +19,7 @@ def run(args) -> None:
 
     with acquire_lock(), ensure_meta_yml():
         experiment = bopt.Experiment.deserialize()
+        experiment.collect_results()
 
         processed_samples: List[bopt.Sample] = []
 

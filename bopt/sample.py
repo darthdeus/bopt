@@ -146,6 +146,9 @@ class Sample:
         else:
             s = "manual\t"
 
+        s += "s: {}\tf: {}\tc: {}\tr: {}\t".format(self.created_at,
+                self.finished_at, self.collected_at, self.run_time)
+
         is_finished = self.status() == CollectFlag.COLLECT_OK
 
         # TODO: proper status check

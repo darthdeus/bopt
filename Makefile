@@ -23,7 +23,7 @@ sfntest:
 		--qsub=-q \
 		--qsub=cpu-troja.q \
 		-C results/sfn \
-		$(PWD)/.venv/bin/python $(PWD)/experiments/simple_function.py
+		$(PWD)/experiments/time_sfn_runner.sh $(PWD)
 	$(BOPT) run --n_iter=10 -C results/sfn
 
 lab02-cartpole:

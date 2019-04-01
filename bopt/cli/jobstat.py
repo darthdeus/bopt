@@ -47,6 +47,7 @@ def run(args) -> None:
         fname, job_id = matched_job_ids[0]
 
         experiment = Experiment.deserialize()
+        experiment.collect_results()
 
         # TODO: this is most likely not needed.
         job = experiment.runner.deserialize_job(job_id)

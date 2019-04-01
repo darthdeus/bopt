@@ -11,6 +11,7 @@ def run(args) -> None:
 
     with acquire_lock(), ensure_meta_yml():
         experiment = bopt.Experiment.deserialize()
+        experiment.collect_results()
 
         # TODO: unify naming run_params vs model_params
         model_params = vars(args).copy()

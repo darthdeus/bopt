@@ -12,6 +12,7 @@ def run(args) -> None:
 
     with acquire_lock():
         experiment = Experiment.deserialize()
+        experiment.collect_results()
 
         print("Hyperparameters:")
         for param in experiment.hyperparameters:

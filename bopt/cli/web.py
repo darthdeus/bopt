@@ -38,6 +38,7 @@ def run(args) -> None:
     def index():
         with handle_cd_revertible(args), acquire_lock():
             experiment = bopt.Experiment.deserialize()
+            experiment.collect_results()
 
         sample_results = [s.result for s in experiment.samples if s.result]
         sample_results_cummax = np.maximum.accumulate(sample_results).tolist()

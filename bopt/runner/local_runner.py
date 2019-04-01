@@ -44,9 +44,7 @@ class LocalRunner(Runner):
 
         temp_fname = tempfile.mktemp(dir=output_dir)
         with open(temp_fname, "w") as f:
-            process = psutil.Popen(cmd, stdout=f)
-            # TODO: stderr?
-            # , stderr=subprocess.STDOUT)
+            process = psutil.Popen(cmd, stdout=f, stderr=subprocess.STDOUT)
 
             job_id = process.pid
             job_fname = os.path.join(output_dir, f"job.o{job_id}")

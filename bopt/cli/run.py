@@ -30,16 +30,17 @@ def run(args) -> None:
                     experiment.collect_results()
 
                     sample = experiment.run_single(model_config)
-                    logging.info("[{}/{}] Started a new evaluation".format(n_started, args.n_iter))
+                    logging.info("[{}/{}] Started a new evaluation"\
+                           .format(n_started, args.n_iter))
 
                     n_started += 1
 
                     experiment.serialize()
 
-                    if not sample.job:
-                        if sample.collect_flag != bopt.CollectFlag.WAITING_FOR_JOB \
-                                or sample.collect_flag != bopt.CollectFlag.WAITING_FOR_SIMILAR:
-                            logging.error("Run loop created a sample without job.")
+                    if not sample.job and \
+                            sample.collect_flag != bopt.CollectFlag.WAITING_FOR_SIMILAR:
+                        logging.error("Created invalid sample without a job "
+                            "(should have WAITING_FOR_SIMILAR).")
 
             psutil.wait_procs(psutil.Process().children(), timeout=0.01)
             time.sleep(args.sleep)

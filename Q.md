@@ -2,18 +2,27 @@
 
 - proc softmax v posledni vrstve s 1 outputem vadi misto sigmoidu?
 
+- bopt delete job_id
+- bopt resubmit job_id
+
+- web
+  - interpolace mezi 2 body hyperparam + plot slicu v lib. 0d, 1d, 2d ose
+  - burty!
+  - okraje v plotech
+
+  - graf acq fn
+  - grafy v dalsim bode
+
+- expected improvement per second
+
 - [x] moznost nadefinovat qsub param (a nebo obecne spoustejici param co se pridaji u runneru)
 - collect nejak dlouho trva
 - [x] logscale int je spatne, protoze dava jenom 2^n a zadne mezi?
 
-- logovat jak dlouho uz job bezi v bopt exp
-
+- [x] logovat jak dlouho uz job bezi v bopt exp
 - log timings
 
-- graf acq fn
-- grafy v dalsim bode
-- expected improvement per second
-- parsovat bash -c time pokud tam je, pokud ne tak beru finished_at jako ted
+- [x] parsovat bash -c time pokud tam je, pokud ne tak beru finished_at jako ted
 - [x] videt jak se meni hyperparam v case (s kazdym novym bodem + konvergence hyperparam)
   - porovnat s optmizer_restarts()
 - [x] konvergencni graf
@@ -40,10 +49,10 @@
   - [x] manual_run - vyberu hyperparam rucne
   - [x] manual_sample - reknu kolik to vyslo "rucne"
 
-- zkontrolovat, ze se mu_pred + sigma_pred pouziva ve spravnych mistech
-  - u bezicich jobu bych mel brat mu_pred misto result (jeste ho nemam)
+- [x] zkontrolovat, ze se mu_pred + sigma_pred pouziva ve spravnych mistech
+  - [x] u bezicich jobu bych mel brat mu_pred misto result (jeste ho nemam)
 
-- collect na vsech spravnych mistech
+- [x] collect na vsech spravnych mistech
   - [x] nikde nepouzivat meta_dir (neni potreba, delame cd)
 
 - [x] replace print with logging
@@ -64,17 +73,9 @@
 - [x] davat mean kdyz delam znovu stejny bod
 - [x] ignorovat underflow dokud nedelaj problem :)
 
-- web
-  - interpolace mezi 2 body hyperparam + plot slicu v lib. 0d, 1d, 2d ose
-  - burty!
-  - okraje v plotech
-
 - zdetekovat duplicitni ID a spadnout
 
 - smazat benchmarks/ az bude cas udelat to poradne
-
-- bopt delete job_id
-- bopt resubmit job_id
 
 -----------------------------------
 

@@ -97,7 +97,8 @@ class Experiment:
                     picked_similar = finished_similar_samples[0]
 
                     sample.result = picked_similar.result
-                    sample.collected_at = datetime.datetime.now()
+                    sample.finished_at = datetime.datetime.now()
+                    sample.collected_at = sample.finished_at
                     sample.collect_flag = CollectFlag.COLLECT_OK
 
             elif sample.collect_flag == CollectFlag.WAITING_FOR_JOB:
@@ -115,7 +116,21 @@ class Experiment:
                             found = False
 
                             for line in contents.split("\n"):
+                                bash_time_regex = r"real\t(\d+)m(\d+.\d+)s"
+
+                                time_matches = re.match(bash_time_regex, line)
+
+                                if time_matches:
+                                    g = time_matches.groups()
+                                    sample.run_time = int(g[0]) * 60 + float(g[1])
+                                    sample.finished_at = sample.created_at + \
+                                        datetime.timedelta(seconds=sample.run_time)
+
+                                    logging.info("Collect parsed runtime of {}s"\
+                                            .format(sample.run_time))
+
                                 matches = re.match(self.result_regex, line)
+
                                 if matches:
                                     sample.result = float(matches.groups()[0])
                                     sample.collected_at = datetime.datetime.now()
