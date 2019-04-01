@@ -8,8 +8,23 @@ def handle_cd(args):
         print(f"Changing directory to {args.dir}", file=sys.stderr)
         os.chdir(args.dir)
 
+
 def acquire_lock():
     return filelock.FileLock(".lockfile")
+
+
+class handle_cd_revertible:
+    def __init__(self, args) -> None:
+        assert args.dir
+        self.args = args
+
+    def __enter__(self):
+        self.old = os.getcwd()
+        os.chdir(self.args.dir)
+
+    def __exit__(self, type, value, traceback):
+        os.chdir(self.old)
+
 
 class ensure_meta_yml:
     def __enter__(self):

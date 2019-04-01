@@ -9,7 +9,7 @@ from flask import Flask
 from flask import render_template
 
 import bopt
-from bopt.cli.util import handle_cd, acquire_lock
+from bopt.cli.util import handle_cd_revertible, acquire_lock
 
 class PosteriorSlice(NamedTuple):
     param: bopt.Hyperparameter
@@ -22,8 +22,6 @@ class PosteriorSlice(NamedTuple):
 
 
 def run(args) -> None:
-    handle_cd(args)
-
     import inspect
     import os
     script_dir = os.path.dirname(os.path.abspath(inspect.stack()[0][1]))
@@ -37,7 +35,7 @@ def run(args) -> None:
 
     @app.route("/")
     def index():
-        with acquire_lock():
+        with handle_cd_revertible(args), acquire_lock():
             experiment = bopt.Experiment.deserialize()
 
         sample_results = [s.result for s in experiment.samples if s.result]

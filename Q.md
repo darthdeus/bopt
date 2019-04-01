@@ -14,7 +14,7 @@
 - grafy v dalsim bode
 - expected improvement per second
 - parsovat bash -c time pokud tam je, pokud ne tak beru finished_at jako ted
-- videt jak se meni hyperparam v case (s kazdym novym bodem + konvergence hyperparam)
+- [x] videt jak se meni hyperparam v case (s kazdym novym bodem + konvergence hyperparam)
   - porovnat s optmizer_restarts()
 - [x] konvergencni graf
 

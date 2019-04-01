@@ -23,7 +23,10 @@
 
     <script type="text/javascript">
       $(document).ready( function () {
-        $("table").DataTable();
+        $("table").DataTable({
+          "pageLength": 200,
+          "order": [[2, "desc"]]
+        });
       });
 
     </script>

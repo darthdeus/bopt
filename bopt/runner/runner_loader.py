@@ -15,7 +15,7 @@ class RunnerLoader:
         if runner_type == "local_runner":
             return LocalRunner(data["script_path"], data["arguments"])
         elif runner_type == "sge_runner":
-            qsub_arguments = data.get("qsub_arguments", [])
+            qsub_arguments = data.get("qsub_arguments", []) or []
             return SGERunner(data["script_path"], data["arguments"], qsub_arguments)
         else:
             raise NotImplemented()
