@@ -37,30 +37,9 @@ def run(args) -> None:
                     experiment.serialize()
 
                     if not sample.job:
-                        # TODO: Checking for comment is ugly, but we don't have a flag.
-                        # TODO: tohle uz vubec neexistuje
-                        if not sample.waiting_for_similar and not sample.comment:
+                        if sample.collect_flag != bopt.CollectFlag.WAITING_FOR_JOB \
+                                or sample.collect_flag != bopt.CollectFlag.WAITING_FOR_SIMILAR:
                             logging.error("Run loop created a sample without job.")
 
             psutil.wait_procs(psutil.Process().children(), timeout=0.01)
             time.sleep(args.sleep)
-
-        # TODO: delete old code
-
-        # for i in range(n_iter):
-        #     job = self.run_single(model_config, meta_dir)
-        #     logging.info("Started a new job {} with config {}".format(job.job_id, model_config))
-        #
-        #     start_time = time.time()
-        #
-        #     # psutil.wait_procs(psutil.Process().children(), timeout=0.01)
-        #     while not job.is_finished():
-        #         psutil.wait_procs(psutil.Process().children(), timeout=0.01)
-        #         time.sleep(0.2)
-        #
-        #     end_time = time.time()
-        #
-        #     logging.info("Job {} finished after {}".format(job.job_id, end_time - start_time))
-        #
-        #     self.collect_results()
-        #     self.serialize(meta_dir)
