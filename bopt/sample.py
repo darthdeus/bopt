@@ -1,3 +1,4 @@
+import datetime
 import math
 import os
 import logging
@@ -34,20 +35,34 @@ class Sample:
     result: Optional[float]
     comment: Optional[str]
 
+    created_at: datetime.datetime
+    finished_at: Optional[datetime.datetime]
+    collected_at: Optional[datetime.datetime]
+    run_time: Optional[float]   # in seconds
+
     def __init__(self, job: Optional[Job],
             model_params: ModelParameters,
             hyperparam_values: HyperparamValues,
             mu_pred: float,
             sigma_pred: float,
-            collect_flag: CollectFlag) -> None:
+            collect_flag: CollectFlag,
+            created_at: datetime.datetime) -> None:
         self.job = job
         self.model = model_params
+
         self.hyperparam_values = hyperparam_values
+
         self.mu_pred = mu_pred
         self.sigma_pred = sigma_pred
+        self.collect_flag = collect_flag
+
         self.result = None
         self.comment = None
-        self.collect_flag = collect_flag
+
+        self.created_at = created_at
+        self.finished_at = None
+        self.collected_at = None
+        self.run_time = None
 
     def status(self) -> CollectFlag:
         return self.collect_flag
@@ -61,19 +76,22 @@ class Sample:
             "mu_pred": self.mu_pred,
             "sigma_pred": self.sigma_pred,
             "comment": self.comment,
-            "collect_flag": self.collect_flag
+            "collect_flag": self.collect_flag,
+            "created_at": self.created_at,
+            "finished_at": self.finished_at,
+            "collected_at": self.collected_at,
+            "run_time": self.run_time
         }
 
     @staticmethod
     def from_dict(data: dict, hyperparameters: List[Hyperparameter]) -> "Sample":
-        model_dict = None
-
-        if data["model"]:
-            model_dict = ModelParameters.from_dict(data["model"])
+        model_dict = ModelParameters.from_dict(data["model"])
 
         # TODO: 64 or 32 bit?
         x = np.array(data["hyperparam_values"], dtype=np.float64)
         hyperparam_values = HyperparamValues.mapping_from_vector(x, hyperparameters)
+
+        job: Optional[Job]
 
         if "job" in data and data["job"] is not None:
             job = JobLoader.from_dict(data["job"])
@@ -85,10 +103,14 @@ class Sample:
                 hyperparam_values,
                 data["mu_pred"],
                 data["sigma_pred"],
-                data["collect_flag"])
+                data["collect_flag"],
+                data["created_at"])
 
         sample.comment = data.get("comment", None)
         sample.result = data.get("result", None)
+        sample.collected_at = data.get("collected_at", None)
+        sample.finished_at = data.get("finished_at", None)
+        sample.run_time = data.get("run_time", None)
 
         return sample
 

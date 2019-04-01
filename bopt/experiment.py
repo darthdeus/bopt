@@ -83,6 +83,8 @@ class Experiment:
         return experiment
 
     def collect_results(self) -> None:
+        # TODO: collect run time + check collected_at
+
         for sample in self.samples:
             if sample.collect_flag == CollectFlag.WAITING_FOR_SIMILAR:
                 assert sample.result is None
@@ -95,6 +97,7 @@ class Experiment:
                     picked_similar = finished_similar_samples[0]
 
                     sample.result = picked_similar.result
+                    sample.collected_at = datetime.datetime.now()
                     sample.collect_flag = CollectFlag.COLLECT_OK
 
             elif sample.collect_flag == CollectFlag.WAITING_FOR_JOB:
@@ -102,10 +105,8 @@ class Experiment:
                 assert sample.result is None
 
                 if sample.job.is_finished():
-                    sample.job.finished_at = datetime.datetime.now()
-
-                    # Sine we're using `handle_cd` we always assume the working directory
-                    # is where meta.yml is.
+                    # Sine we're using `handle_cd` we always assume the working
+                    # directory is where meta.yml is.
                     fname = os.path.join("output", f"job.o{sample.job.job_id}")
 
                     if os.path.exists(fname):
@@ -117,6 +118,7 @@ class Experiment:
                                 matches = re.match(self.result_regex, line)
                                 if matches:
                                     sample.result = float(matches.groups()[0])
+                                    sample.collected_at = datetime.datetime.now()
                                     sample.collect_flag = CollectFlag.COLLECT_OK
                                     found = True
 
@@ -141,11 +143,15 @@ class Experiment:
         return X_sample, Y_sample
 
     def suggest(self, model_config: ModelConfig) -> Tuple[HyperparamValues, Model]:
+        job_params: HyperparamValues
+        fitted_model: Model
+
         # TODO: overit, ze by to fungovalo i na ok+running a mean_pred
         if len(self.samples_for_prediction()) == 0:
             logging.info("No existing samples found, overloading suggest with RandomSearch.")
 
-            job_params, fitted_model = RandomSearch().predict_next(self.hyperparameters)
+            job_params = RandomSearch.predict_next(self.hyperparameters)
+            fitted_model = RandomSearch()
         else:
             from bopt.models.gpy_model import GPyModel
 
@@ -155,7 +161,8 @@ class Experiment:
                 job_params, fitted_model = GPyModel.predict_next(model_config, self.hyperparameters, X_sample, Y_sample)
             except OptimizationFailed as e:
                 logging.error("Optimization failed, retrying with RandomSearch: {}".format(e))
-                job_params, fitted_model = RandomSearch().predict_next(self.hyperparameters)
+                job_params = RandomSearch.predict_next(self.hyperparameters)
+                fitted_model = RandomSearch()
 
         return job_params, fitted_model
 
@@ -212,9 +219,13 @@ class Experiment:
                 similar_sample = finished_similar_samples[0]
                 assert similar_sample.result
 
+                created_at = datetime.datetime.now()
+
                 next_sample = Sample(None, model_params, hyperparam_values,
                                      similar_sample.mu_pred, similar_sample.sigma_pred,
-                                     CollectFlag.COLLECT_OK)
+                                     CollectFlag.COLLECT_OK, created_at)
+                next_sample.collected_at = created_at
+                next_sample.run_time = 0.0
                 next_sample.result = similar_sample.result
                 next_sample.comment = "created as similar of {}".format(similar_sample)
             else:
@@ -225,7 +236,7 @@ class Experiment:
 
                 next_sample = Sample(None, model_params, hyperparam_values,
                                      similar_sample.mu_pred, similar_sample.sigma_pred,
-                                     CollectFlag.WAITING_FOR_SIMILAR)
+                                     CollectFlag.WAITING_FOR_SIMILAR, datetime.datetime.now())
                 next_sample.comment = "created as similar of {}".format(similar_sample)
         else:
             job = self.runner.start(output_dir, hyperparam_values)
@@ -258,7 +269,8 @@ class Experiment:
                 sigma = 1.0 # TODO: lol :)
 
             next_sample = Sample(job, model_params, hyperparam_values,
-                    float(mu), float(sigma), CollectFlag.WAITING_FOR_JOB)
+                    float(mu), float(sigma), CollectFlag.WAITING_FOR_JOB,
+                    datetime.datetime.now())
 
         self.samples.append(next_sample)
 
@@ -297,7 +309,7 @@ class Experiment:
     def deserialize() -> "Experiment":
         with open("meta.yml", "r") as f:
             contents = f.read()
-            obj = yaml.load(contents, Loader=yaml.FullLoader)
+            obj = yaml.load(contents, Loader=yaml.Loader)
 
         experiment = Experiment.from_dict(obj)
         experiment.collect_results()

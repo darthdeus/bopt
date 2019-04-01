@@ -38,6 +38,7 @@ def run(args) -> None:
 
                     if not sample.job:
                         # TODO: Checking for comment is ugly, but we don't have a flag.
+                        # TODO: tohle uz vubec neexistuje
                         if not sample.waiting_for_similar and not sample.comment:
                             logging.error("Run loop created a sample without job.")
 

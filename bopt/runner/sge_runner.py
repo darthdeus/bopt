@@ -67,10 +67,7 @@ class SGERunner(Runner):
         assert matches is not None
         job_id = int(matches.group(1))
 
-        sge_job = SGEJob(job_id)
-        sge_job.started_at = datetime.datetime.now()
-
-        return sge_job
+        return SGEJob(job_id)
 
     def to_dict(self) -> dict:
         return {

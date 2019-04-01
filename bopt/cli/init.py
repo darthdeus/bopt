@@ -60,6 +60,8 @@ def run(args) -> None:
         script_path = args.command
         default_arguments = args.arguments
 
+        runner: bopt.Runner
+
         if args.runner == "local":
             runner = bopt.LocalRunner(script_path, default_arguments)
         elif args.runner == "sge":

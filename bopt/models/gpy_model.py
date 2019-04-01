@@ -74,8 +74,10 @@ class GPyModel(Model):
         else:
             raise NotImplemented(f"Unknown acquisition function '{name}'.")
 
-    def predict_next(self): raise NotImplemented("This should not be called, deprecated")
+    # TODO: remove me
+    # def predict_next(self): raise NotImplemented("This should not be called, deprecated")
 
+    @staticmethod
     def gpy_regression(model_config: ModelConfig,
             X_sample: np.ndarray, Y_sample: np.ndarray) -> GPRegression:
 
@@ -112,7 +114,8 @@ class GPyModel(Model):
         return model
 
     @staticmethod
-    def predict_next(model_config: ModelConfig, hyperparameters: List[Hyperparameter],
+    def predict_next(model_config: ModelConfig,
+            hyperparameters: List[Hyperparameter],
             X_sample: np.ndarray, Y_sample: np.ndarray) -> Tuple[HyperparamValues, "Model"]:
         # TODO: compare NLL with and without normalizer
         assert not np.any(np.isnan(Y_sample))

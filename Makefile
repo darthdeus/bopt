@@ -1,6 +1,6 @@
 BOPT=./.venv/bin/bopt
 
-default: sfntest
+default: mypy
 
 plot:
 	rm -rf results/sfn/plots
@@ -96,7 +96,7 @@ benchmarks:
 	PYTHONPATH=. python -m cProfile -s cumtime "benchmarks/$1.py" 2>&1 > "results/be-$1.txt"
 
 mypy:
-	mypy --ignore-missing-imports bopt
+	mypy bopt
 
 clean-dist:
 	rm -rf bopt.egg-info/ dist/ build/

@@ -8,14 +8,16 @@ from bopt.models.parameters import ModelParameters
 
 
 class RandomSearch(Model):
-    def predict_next(self, hyperparameters: List[Hyperparameter]) -> Tuple[HyperparamValues, "Model"]:
+    @staticmethod
+    def predict_next(hyperparameters: List[Hyperparameter]) -> HyperparamValues:
         mapping = {h: h.range.sample() for h in hyperparameters}
 
-        return HyperparamValues.from_mapping(mapping), self
+        return HyperparamValues.from_mapping(mapping)
 
     def to_model_params(self) -> ModelParameters:
         return ModelParameters("random_search", {}, "", "")
 
+    # TODO: spatne typ
     def to_dict(self) -> Model:
         return { "model_type": "random_search" }
 

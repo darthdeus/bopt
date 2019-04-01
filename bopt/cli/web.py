@@ -26,7 +26,8 @@ def run(args) -> None:
     import os
     script_dir = os.path.dirname(os.path.abspath(inspect.stack()[0][1]))
 
-    app = Flask(__name__, template_folder=os.path.join(script_dir, "..", "templates"))
+    app = Flask(__name__, template_folder=os.path.join(script_dir, "..",
+        "templates"))
     app.debug = True
 
     app.config["port"] = args.port
@@ -52,7 +53,7 @@ def run(args) -> None:
         ]
 
         # TODO: sort by time
-        for sample in experiment.samples:
+        for sample in sorted(experiment.samples, key=lambda x: x.started_at):
             if sample.model.sampled_from_random_search():
                 continue
 

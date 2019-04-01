@@ -25,9 +25,5 @@ class JobLoader:
 
         cls: JobTypes = JOB_MAPPING[data["job_type"]]
 
-        job = cls(data["job_id"])
-        job.started_at = data["started_at"]
-        job.finished_at = data["finished_at"]
-
-        return job
+        return cls(data["job_id"])
 

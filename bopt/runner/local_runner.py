@@ -57,7 +57,4 @@ class LocalRunner(Runner):
 
             os.rename(temp_fname, job_fname)
 
-            local_job = LocalJob(job_id)
-            local_job.started_at = datetime.datetime.now()
-
-            return local_job
+            return LocalJob(job_id)

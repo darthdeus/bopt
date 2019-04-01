@@ -16,20 +16,14 @@ Value = float
 
 class Job(abc.ABC):
     job_id: int
-    started_at: Optional[datetime.datetime]
-    finished_at: Optional[datetime.datetime]
 
     def __init__(self, job_id: int) -> None:
         self.job_id = job_id
-        self.started_at = None
-        self.finished_at = None
 
     def to_dict(self) -> dict:
         return {
             "job_type": self.job_type(),
             "job_id": self.job_id,
-            "started_at": self.started_at,
-            "finished_at": self.finished_at,
         }
 
     @abc.abstractmethod
