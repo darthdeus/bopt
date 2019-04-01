@@ -31,7 +31,7 @@ def main():
         "-C",
         dest="dir",
         type=str,
-        default=None,
+        default=".",
         help="Change directory to the one specified before doing anything else.",
     )
 

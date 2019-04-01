@@ -4,7 +4,7 @@
 
 - [x] moznost nadefinovat qsub param (a nebo obecne spoustejici param co se pridaji u runneru)
 - collect nejak dlouho trva
-- logscale int je spatne, protoze dava jenom 2^n a zadne mezi?
+- [x] logscale int je spatne, protoze dava jenom 2^n a zadne mezi?
 
 - logovat jak dlouho uz job bezi v bopt exp
 
