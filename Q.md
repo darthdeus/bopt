@@ -5,6 +5,8 @@
 - bopt delete job_id
 - bopt resubmit job_id
 
+- seedy
+
 - web
   - interpolace mezi 2 body hyperparam + plot slicu v lib. 0d, 1d, 2d ose
   - burty!
@@ -84,8 +86,6 @@
   neresim
 - [x] int range high
 
-- seedy
-
 - [x] testovat vse na MNISTu a ne RL MC
 - [x] u manual-run kontrolovat, ze hodnota je uvnitr range
   - [x] suggest vraci hodnoty mimo horni range
@@ -101,13 +101,13 @@
 - [x] acq fn v yml
 - [x] parallel evaluace: trivialni, ale neni to :)
   - [x] u nedobehlych jobu predpokladam ze vysledek je jejich mean
-  - moznost pustit run s -j 10
-  - kontrolovat, ze 2x nevyhodnocuju ve stejnym bode
+  - [x] moznost pustit run s -j 10
+  - [x] kontrolovat, ze 2x nevyhodnocuju ve stejnym bode
 - [x] intove hyperparam: GPy?
 - [x] diskretni/categorical parametry
 - [x] SGE Runner:        neni broken, jenom neni updated na novejsi API
 
-- plot convergence
+- [x] plot convergence
 
 # Pozdeji
 
@@ -218,7 +218,7 @@ http://deepbayes.ru
     bopt init --param "gamma:float:0:1" --param "epsilon:float:0:1" --dir results/mc ./.venv/bin/python ./experiments/rl/monte_carlo.py
 
 
-- logging? ploty kdyz failne assert ... soft assert?
+- [x] logging? ploty kdyz failne assert ... soft assert?
 
 
 - do rezu dat jenom max bod (muzem si ho vybrat)
@@ -308,72 +308,3 @@ http://deepbayes.ru
 - seedy pro joby
   - jmeno parametru pres ktery se predava seed
 
-## Kernels (http://crsouza.com/2010/03/17/kernel-functions-for-machine-learning-applications/):
-
-- [ ] Linear
-- [ ] Polynomial
-- [x] Gaussian (RBF)
-- [ ] Matern
-  - at this point it is unclear if we need anything but n/2
-- [ ] Exponential
-- [ ] Laplacian
-- [ ] ANOVA
-- [ ] tanh (sigmoid)
-- [ ] Rational Quadratic
-- [ ] Multiquadratic
-- [ ] Inverse Multiquadratic
-- [ ] Circular
-- [ ] Spherical
-- [ ] Wave
-- [ ] Power
-- [ ] Log
-- [ ] Spline
-- [ ] B-Spline
-- [ ] Bessel
-- [ ] Cauchy
-- [ ] Chi-Square
-- [ ] Histogram intersection
-- [ ] Generalized histogram intersection
-- [ ] Generalized t-student
-- [ ] Bayesian
-- [ ] Wavelet
-
-## Runner notes
-
-```
-- start_script(args)
-- intermediate_results
-- is_finished
-- results
-
-class Hyperparameter:
-  name: str
-  range: Range
-
-class Experiment:
-  def __init__(self,
-    hyperparameters,
-    runner)
-
-  hyperparameters: List[Hyperparameter]
-  runner: Runner
-  evaluations: List[Job]
-
-
-class Runner():
-  def start(args) -> Job
-
-class Job:
-  def state():
-    is_finished: Bool
-    intermediate_results : List[(Timestamp, Value)]
-    final_result: Optional[Value]
-
-  def kill()
-
-  def serialize()
-  def deserialize()
-
-class SGERunner():
-  def __init__(self, script_path, output_type)
-```
