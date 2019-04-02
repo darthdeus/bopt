@@ -48,14 +48,22 @@
             <script>
               Plotly.plot("slice-param-{{loop.index0}}", [
                 {
+                  name: "mean",
                   x: {{diagonal_x[loop.index0]|safe}},
                   y: {{diagonal_mu[loop.index0]|safe}},
                 },
-                // {
-                //   x: {{diagonal_x[loop.index0]|safe}},
-                //   y: {{diagonal_sigma[loop.index0]|safe}},
-                //   fill: "tonexty",
-                // },
+                {
+                  name: "sigma low",
+                  fill: "tonexty",
+                  x: {{diagonal_x[loop.index0]|safe}},
+                  y: {{diagonal_sigma_low[loop.index0]|safe}},
+                },
+                {
+                  name: "sigma high",
+                  fill: "tonexty",
+                  x: {{diagonal_x[loop.index0]|safe}},
+                  y: {{diagonal_sigma_high[loop.index0]|safe}},
+                },
               ], {
                 title: "{{param.name}}={{picked_sample_x[loop.index0]}} ... {{param.range}}",
                 xaxis: {
@@ -73,6 +81,40 @@
                     x1: {{picked_sample_x[loop.index0]}},
                     y0: {{diagonal_mu_bounds[loop.index0][0]}},
                     y1: {{diagonal_mu_bounds[loop.index0][1]}},
+                    line: {
+                      width: 5,
+                      color: "rgb(0, 0, 0)"
+                    }
+                  }
+                ]
+              });
+            </script>
+
+            <div class="col-md-6" id="slice-acq-{{loop.index0}}"></div>
+            <script>
+              Plotly.plot("slice-acq-{{loop.index0}}", [
+                {
+                  name: "acquisition fn",
+                  x: {{diagonal_x[loop.index0]|safe}},
+                  y: {{diagonal_acq[loop.index0]|safe}},
+                },
+              ], {
+                title: "{{param.name}}={{picked_sample_x[loop.index0]}} ... {{param.range}}",
+                xaxis: {
+                  title: "{{param.name}}",
+                  range: [
+                    {{param.range.low}} - {{(param.range.high - param.range.low) * 0.05}},
+                    {{param.range.high}} + {{(param.range.high - param.range.low) * 0.05}},
+                  ]
+                },
+                yaxis: { title: "value" },
+                shapes: [
+                  {
+                    type: "line",
+                    x0: {{picked_sample_x[loop.index0]}},
+                    x1: {{picked_sample_x[loop.index0]}},
+                    y0: {{diagonal_acq_bounds[loop.index0][0]}},
+                    y1: {{diagonal_acq_bounds[loop.index0][1]}},
                     line: {
                       width: 5,
                       color: "rgb(0, 0, 0)"

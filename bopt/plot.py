@@ -228,8 +228,6 @@ def plot_objective(model, x_slice, x_next, plot_limits, vmin, vmax,
 def acq_for_dims(model, acq: AcquisitionFunction, x_slice, hyperparameters, ax,
         dims, plot_limits) -> None:
     # x_frame2D only checks shape[1] and not the data when `plot_limits` is provided
-    from GPy.plotting.gpy_plot.plot_util import x_frame2D
-
     frame_shaped_array = np.zeros((1,2))
 
     resolution = 50

@@ -52,8 +52,12 @@ def run(args) -> None:
             ("sigma", sigma_values)
         ]
 
-        for sample in sorted(experiment.samples, key=lambda x: x.created_at):
+        for i, sample in enumerate(sorted(experiment.samples, key=lambda x: x.created_at)):
             if sample.model.sampled_from_random_search():
+                continue
+
+            # TODO: chci tohle?
+            if i < 10:
                 continue
 
             p = sample.model.params
@@ -73,9 +77,16 @@ def run(args) -> None:
         print("picked sample", sample)
 
         diagonal_x = []
+
         diagonal_mu = []
         diagonal_mu_bounds = []
+
         diagonal_sigma = []
+        diagonal_sigma_low = []
+        diagonal_sigma_high = []
+
+        diagonal_acq = []
+        diagonal_acq_bounds = []
 
         picked_sample_x = None
 
@@ -117,11 +128,19 @@ def run(args) -> None:
                         mu = mu.reshape(-1)
                         sigma = np.sqrt(var).reshape(-1)
 
-
                         diagonal_x.append(grid.tolist())
+
                         diagonal_mu.append(mu.tolist())
-                        diagonal_mu_bounds.append([min(mu), max(mu)])
-                        diagonal_sigma.append(sigma.tolist())
+                        diagonal_mu_bounds.append([min(mu - sigma), max(mu + sigma)])
+
+                        diagonal_sigma.append(mu.tolist())
+                        diagonal_sigma_low.append((mu - sigma).tolist())
+                        diagonal_sigma_high.append((mu + sigma).tolist())
+
+                        ei = bopt.ExpectedImprovement().raw_call(mu, sigma, model.Y.max())
+
+                        diagonal_acq.append(ei.reshape(-1).tolist())
+                        diagonal_acq_bounds.append([min(ei.tolist()), max(ei.tolist())])
 
         return render_template("index.html",
                 experiment=experiment,
@@ -135,9 +154,17 @@ def run(args) -> None:
                 CollectFlag=bopt.CollectFlag,
 
                 diagonal_x=diagonal_x,
+
                 diagonal_mu=diagonal_mu,
                 diagonal_mu_bounds=diagonal_mu_bounds,
-                diagonal_sigma=diagonal_sigma)
+
+                diagonal_sigma=diagonal_sigma,
+                diagonal_sigma_low=diagonal_sigma_low,
+                diagonal_sigma_high=diagonal_sigma_high,
+
+                diagonal_acq=diagonal_acq,
+                diagonal_acq_bounds=diagonal_acq_bounds,
+                )
 
 
     # @app.route("/")
