@@ -44,6 +44,12 @@ class HyperparamValues:
         return all([param.range.compare_values(value, other.mapping[param])
                     for param, value in self.mapping.items()])
 
+    def rescaled_values_for_plot(self, hyperparameters: List[Hyperparameter]) -> List[float]:
+        vals = [2.0**val if p.range.is_logscale() else val
+                for val, p in zip(self.x, hyperparameters)]
+
+        return [round(v, 2) for v in vals]
+
     @staticmethod
     def sample_params(hyperparameters: List[Hyperparameter]) -> np.ndarray:
         mapping = {h: h.range.sample() for h in hyperparameters}
@@ -110,7 +116,6 @@ class HyperparamValues:
             #     x[i] = float(value)
 
         return HyperparamValues(mapping, x)
-
 
     # @property
     # def x(self):

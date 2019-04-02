@@ -77,7 +77,11 @@ def run(args) -> None:
         diagonal_mu_bounds = []
         diagonal_sigma = []
 
+        picked_sample_x = None
+
         if sample:
+            picked_sample_x = sample.hyperparam_values.rescaled_values_for_plot(experiment.hyperparameters)
+
             x_slice = sample.hyperparam_values.x
 
             X_sample, Y_sample = experiment.get_xy()
@@ -126,6 +130,7 @@ def run(args) -> None:
                 kernel_params_list=kernel_params_list,
 
                 picked_sample=sample,
+                picked_sample_x=picked_sample_x,
 
                 CollectFlag=bopt.CollectFlag,
 

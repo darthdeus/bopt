@@ -29,6 +29,10 @@ class Bound(abc.ABC):
     def is_discrete(self) -> bool:
         pass
 
+    @abc.abstractmethod
+    def is_logscale(self) -> bool:
+        pass
+
     # TODO: is this before or after transform?
     @abc.abstractmethod
     def sample(self) -> ParamTypes:
@@ -73,6 +77,9 @@ class Integer(Bound):
     def is_discrete(self) -> bool:
         return True
 
+    def is_logscale(self) -> bool:
+        return False
+
     def should_transform(self) -> bool:
         return False
 
@@ -115,6 +122,9 @@ class Float(Bound):
     def is_discrete(self) -> bool:
         return False
 
+    def is_logscale(self) -> bool:
+        return False
+
     def should_transform(self) -> bool:
         return False
 
@@ -154,6 +164,9 @@ class LogscaleInt(Bound):
     def is_discrete(self) -> bool:
         # TODO: fuj, prejmenovat na neco jako should_round_before_map? :D
         return False
+
+    def is_logscale(self) -> bool:
+        return True
 
     def should_transform(self) -> bool:
         return True
@@ -195,6 +208,9 @@ class LogscaleFloat(Bound):
 
     def is_discrete(self) -> bool:
         return False
+
+    def is_logscale(self) -> bool:
+        return True
 
     def should_transform(self) -> bool:
         return True
@@ -245,6 +261,9 @@ class Discrete(Bound):
 
     def is_discrete(self) -> bool:
         return True
+
+    def is_logscale(self) -> bool:
+        return False
 
     def should_transform(self) -> bool:
         return True

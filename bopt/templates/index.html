@@ -57,7 +57,7 @@
                 //   fill: "tonexty",
                 // },
               ], {
-                title: "{{param.name}} - {{param.range}}",
+                title: "{{param.name}}={{picked_sample_x[loop.index0]}} ... {{param.range}}",
                 xaxis: {
                   title: "{{param.name}}",
                   range: [
@@ -69,8 +69,8 @@
                 shapes: [
                   {
                     type: "line",
-                    x0: {{picked_sample.hyperparam_values.x[loop.index0]}},
-                    x1: {{picked_sample.hyperparam_values.x[loop.index0]}},
+                    x0: {{picked_sample_x[loop.index0]}},
+                    x1: {{picked_sample_x[loop.index0]}},
                     y0: {{diagonal_mu_bounds[loop.index0][0]}},
                     y1: {{diagonal_mu_bounds[loop.index0][1]}},
                     line: {
