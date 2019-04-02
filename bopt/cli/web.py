@@ -64,9 +64,10 @@ def run(args) -> None:
 
         n_dims = len(experiment.hyperparameters)
 
-        sample_id = request.args.get("sample_id")
+        sample_id = request.args.get("sample_id") or -1
 
         sample = next((s for s in experiment.samples if s.job and s.job.job_id == int(sample_id)), None)
+
         # sample = experiment.samples[-1]
 
         print("picked sample", sample)
@@ -125,6 +126,8 @@ def run(args) -> None:
                 kernel_params_list=kernel_params_list,
 
                 picked_sample=sample,
+
+                CollectFlag=bopt.CollectFlag,
 
                 diagonal_x=diagonal_x,
                 diagonal_mu=diagonal_mu,
@@ -220,5 +223,5 @@ def run(args) -> None:
 
 
     server = Server(app.wsgi_app)
-    server.watch("**/*")
+    server.watch("bopt/**/*")
     server.serve(host="0.0.0.0", port=app.config.get("port"))

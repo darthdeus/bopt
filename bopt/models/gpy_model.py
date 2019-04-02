@@ -64,7 +64,7 @@ class GPyModel(Model):
         elif name == "Mat52":
             return GPy.kern.Matern52
         else:
-            raise NotImplemented(f"Unknown kernel name '{name}'.")
+            raise NotImplementedError(f"Unknown kernel name '{name}'.")
 
     @staticmethod
     def parse_acquisition_fn(name):
@@ -73,7 +73,7 @@ class GPyModel(Model):
         elif name == "pi":
             return acq.ProbabilityOfImprovement()
         else:
-            raise NotImplemented(f"Unknown acquisition function '{name}'.")
+            raise NotImplementedError(f"Unknown acquisition function '{name}'.")
 
     # TODO: remove me
     # def predict_next(self): raise NotImplemented("This should not be called, deprecated")

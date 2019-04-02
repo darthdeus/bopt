@@ -126,12 +126,11 @@
         <thead>
           <tr>
             <th>Sample</th>
-            <th>Flags</th>
             <th>Hyperparams</th>
             <th>Result</th>
+            <th>Model params</th>
             <th>Created at</th>
-            <th>Finished at</th>
-            <th>Collected at</th>
+            <th>Done at</th>
             <th>Run time</th>
           </tr>
         </thead>
@@ -139,21 +138,44 @@
         <tbody>
           {% for sample in experiment.samples %}
           <tr>
-            {% if sample.job %}
-              <td>
-                <a href="?sample_id={{sample.job.job_id}}">
-                  {{sample.job.job_id}}
-                </a>
-              </td>
-            {% else %}
-              <td>manual</td>
-            {% endif %}
-            <td>{{sample.short_collect_flag_str()}}</td>
-            <td>{{sample.hyperparam_values}}</td>
-            <td>{{sample.result}}</td>
+            <td>
+              {% if sample.job %}
+                  <a href="?sample_id={{sample.job.job_id}}">
+                    {{sample.job.job_id}}
+                  </a>
+              {% else %}
+                manual
+              {% endif %}
+              <br/>
+
+              {% if sample.collect_flag == CollectFlag.COLLECT_OK %}
+                <span class="badge badge-success">
+              {% elif sample.collect_flag == CollectFlag.COLLECT_FAILED  %}
+                <span class="badge badge-danger">
+              {% else %}
+                <span class="badge badge-secondary">
+              {% endif %}
+                  {{sample.short_collect_flag_str()}}
+                </span>
+            </td>
+            <td>{{sample.hyperparam_values.short_str()}}</td>
+            <td>{{sample.result or -1}}</td>
+            <td>
+              {% if sample.model.sampled_from_random_search() %}
+                <span class="badge badge-dark">random search</span>
+              {% else %}
+                <span class="badge badge-info">
+                  {{sample.model.model_name}}
+                </span>
+                {{sample.model}}
+              {% endif %}
+            </td>
             <td>{{sample.created_at}}</td>
-            <td>{{sample.finished_at}}</td>
-            <td>{{sample.collected_at}}</td>
+            {% if sample.finished_at %}
+              <td>{{sample.finished_at}}</td>
+            {% else %}
+              <td>{{sample.collected_at}}</td>
+            {% endif %}
             <td>{{sample.run_time}}s</td>
           </tr>
           {% endfor %}

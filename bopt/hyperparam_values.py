@@ -21,6 +21,10 @@ class HyperparamValues:
         return str({h.name: (round(v, 2) if isinstance(v, float) else v)
                     for h, v in self.mapping.items()})
 
+    def short_str(self) -> str:
+        return str({h.name[:3]: (round(v, 2) if isinstance(v, float) else v)
+                    for h, v in self.mapping.items()})
+
     def validate(self) -> bool:
         all_valid = True
         for param, value in self.mapping.items():

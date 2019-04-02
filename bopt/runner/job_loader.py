@@ -21,7 +21,7 @@ class JobLoader:
         job_type = data["job_type"]
 
         if job_type not in JOB_MAPPING:
-            raise NotImplemented()
+            raise NotImplementedError()
 
         cls: JobTypes = JOB_MAPPING[data["job_type"]]
 
