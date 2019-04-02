@@ -56,17 +56,17 @@ def run(args) -> None:
             print(run_str)
             print()
 
-            print("Evaluations:")
-            for sample in ok_samples:
-                job = sample.job
+        print("Evaluations:")
+        for sample in ok_samples:
+            job = sample.job
 
-                proc_stats = ""
-                if job and psutil.pid_exists(job.job_id):
-                    process = psutil.Process(job.job_id)
-                    mem = process.memory_info()
-                    proc_stats += f"Process:{process.status()}"
-                    proc_stats += f", cpu={process.cpu_percent()}"
-                    # TODO fix this on osx, shared={mem.shared}"
-                    proc_stats += f", rss={mem.rss}, vms={mem.vms}"
+            proc_stats = ""
+            if job and psutil.pid_exists(job.job_id):
+                process = psutil.Process(job.job_id)
+                mem = process.memory_info()
+                proc_stats += f"Process:{process.status()}"
+                proc_stats += f", cpu={process.cpu_percent()}"
+                # TODO fix this on osx, shared={mem.shared}"
+                proc_stats += f", rss={mem.rss}, vms={mem.vms}"
 
-                print(f"{sample}\t{proc_stats}")
+            print(f"{sample}\t{proc_stats}")
