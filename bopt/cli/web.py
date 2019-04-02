@@ -221,4 +221,4 @@ def run(args) -> None:
 
     server = Server(app.wsgi_app)
     server.watch("**/*")
-    server.serve(port=app.config.get("port"))
+    server.serve(host="0.0.0.0", port=app.config.get("port"))

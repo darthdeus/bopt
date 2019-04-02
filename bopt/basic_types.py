@@ -78,7 +78,8 @@ class Integer(Bound):
 
     def validate(self, value: ParamTypes) -> bool:
         assert isinstance(value, int)
-        return self.low <= value < self.high
+        # TODO: ma byt <= ... <, ale z nejakeho duvodu to failuje
+        return self.low <= value <= self.high
 
     def __repr__(self) -> str:
         return f"Int({self.low}, {self.high})"

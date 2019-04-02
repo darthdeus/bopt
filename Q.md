@@ -15,6 +15,8 @@
 
 - expected improvement per second
 
+- zaokrouhlovani z nejakeho duvodu probiha spatne u intu
+
 - [x] collect nejak dlouho trva
 - [x] moznost nadefinovat qsub param (a nebo obecne spoustejici param co se pridaji u runneru)
 - [x] logscale int je spatne, protoze dava jenom 2^n a zadne mezi?
