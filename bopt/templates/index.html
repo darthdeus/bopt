@@ -35,60 +35,92 @@
     <div class="container">
       <h2>Experiment: {{experiment}}</h2>
 
-      {% for param in experiment.hyperparameters %}
-        <div id="slice-param-{{loop.index0}}"></div>
+      {% if picked_sample %}
+
+        <h1>Mean plots</h1>
+
+        <p>Selected sample: {{picked_sample}}</p>
+        <p>Hyperparams: {{picked_sample.hyperparam_values}}</p>
+
+        <div class="row">
+          {% for param in experiment.hyperparameters %}
+            <div class="col-md-6" id="slice-param-{{loop.index0}}"></div>
+            <script>
+              Plotly.plot("slice-param-{{loop.index0}}", [
+                {
+                  x: {{diagonal_x[loop.index0]|safe}},
+                  y: {{diagonal_mu[loop.index0]|safe}},
+                },
+                // {
+                //   x: {{diagonal_x[loop.index0]|safe}},
+                //   y: {{diagonal_sigma[loop.index0]|safe}},
+                //   fill: "tonexty",
+                // },
+              ], {
+                title: "{{param.name}} - {{param.range}}",
+                xaxis: {
+                  title: "{{param.name}}",
+                  range: [
+                    {{param.range.low}} - {{(param.range.high - param.range.low) * 0.05}},
+                    {{param.range.high}} + {{(param.range.high - param.range.low) * 0.05}},
+                  ]
+                },
+                yaxis: { title: "value" },
+                shapes: [
+                  {
+                    type: "line",
+                    x0: {{picked_sample.hyperparam_values.x[loop.index0]}},
+                    x1: {{picked_sample.hyperparam_values.x[loop.index0]}},
+                    y0: {{diagonal_mu_bounds[loop.index0][0]}},
+                    y1: {{diagonal_mu_bounds[loop.index0][1]}},
+                    line: {
+                      width: 5,
+                      color: "rgb(0, 0, 0)"
+                    }
+                  }
+                ]
+              });
+            </script>
+          {% endfor %}
+        </div>
+      {% endif %}
+
+      <div class="row">
+        <div class="col-md-6" id="kernel-params-plot"></div>
         <script>
-          Plotly.plot("slice-param-{{loop.index0}}", [
-            {
-              x: {{diagonal_x[loop.index0]|safe}},
-              y: {{diagonal_mu[loop.index0]|safe}},
-            },
+          Plotly.plot("kernel-params-plot", [
+            {% for name, kernel_params in kernel_params_list %}
+              {
+                y: {{kernel_params|safe}},
+                name: "{{name}}"
+              },
+            {% endfor %}
           ], {
-            title: "{{param}}",
-            xaxis: {
-              title: "{{param.name}}",
-              range: [{{param.range.low}}, {{param.range.high}}]
-            },
+            title: "Kernel parameters over time",
+            xaxis: { title: "samples" },
             yaxis: { title: "value" }
           });
         </script>
 
-        <hr>
 
-      {% endfor %}
-
-      <div id="kernel-params-plot"></div>
-      <script>
-        Plotly.plot("kernel-params-plot", [
-          {% for name, kernel_params in kernel_params_list %}
+        <div class="col-md-6" id="convergence-plot"></div>
+        <script>
+          Plotly.plot("convergence-plot", [
             {
-              y: {{kernel_params|safe}},
-              name: "{{name}}"
+              y: {{sample_results|safe}},
+              name: "results"
             },
-          {% endfor %}
-        ], {
-          xaxis: { title: "samples" },
-          yaxis: { title: "value" }
-        });
-      </script>
-
-
-      <div id="convergence-plot"></div>
-      <script>
-        Plotly.plot("convergence-plot", [
-          {
-            y: {{sample_results|safe}},
-            name: "results"
-          },
-          {
-            y: {{sample_results_cummax|safe}},
-            name: "maximum"
-          }
-        ], {
-          xaxis: { title: "samples" },
-          yaxis: { title: "result" }
-        });
-      </script>
+            {
+              y: {{sample_results_cummax|safe}},
+              name: "maximum"
+            }
+          ], {
+            title: "Convergence plot",
+            xaxis: { title: "samples" },
+            yaxis: { title: "result" }
+          });
+        </script>
+      </div>
 
       <table data-toggle="table" class="table table-bordered table-striped">
         <thead>
@@ -108,7 +140,11 @@
           {% for sample in experiment.samples %}
           <tr>
             {% if sample.job %}
-              <td>{{sample.job.job_id}}</td>
+              <td>
+                <a href="?sample_id={{sample.job.job_id}}">
+                  {{sample.job.job_id}}
+                </a>
+              </td>
             {% else %}
               <td>manual</td>
             {% endif %}

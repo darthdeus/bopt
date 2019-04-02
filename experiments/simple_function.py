@@ -25,7 +25,7 @@ if __name__ == "__main__":
     else:
         raise NotImplementedError()
 
-    result = act * (args.x + 1/args.y + args.w ** 0.3 \
+    result = act * (args.x + math.log2(args.y) + args.w ** 0.3 \
             + random.random() * 0.05 + 2*args.z)
 
     # result = args.x + 2 * args.y - args.z**2

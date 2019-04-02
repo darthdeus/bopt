@@ -17,7 +17,7 @@ gpy_compare:
 
 sfntest:
 	rm -rf results/sfn
-	$(BOPT) init --param "x:int:0:5" --param "y:logscale_int:1:1024" \
+	$(BOPT) init --param "x:int:0:5" --param "y:logscale_int:1:128" \
 		--param "z:float:0:6" --param "w:logscale_float:1:7" \
 		--param "activation:discrete:relu:sigmoid:tanh" \
 		--qsub=-q \
@@ -96,7 +96,7 @@ benchmarks:
 	PYTHONPATH=. python -m cProfile -s cumtime "benchmarks/$1.py" 2>&1 > "results/be-$1.txt"
 
 mypy:
-	mypy bopt
+	./.venv/bin/mypy bopt
 
 clean-dist:
 	rm -rf bopt.egg-info/ dist/ build/

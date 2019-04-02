@@ -5,8 +5,7 @@ import numpy as np
 
 from typing import NamedTuple, List
 from livereload import Server
-from flask import Flask
-from flask import render_template
+from flask import Flask, render_template, request
 
 import bopt
 from bopt.cli.util import handle_cd_revertible, acquire_lock
@@ -65,51 +64,59 @@ def run(args) -> None:
 
         n_dims = len(experiment.hyperparameters)
 
-        sample = experiment.samples[-1]
+        sample_id = request.args.get("sample_id")
+
+        sample = next((s for s in experiment.samples if s.job and s.job.job_id == int(sample_id)), None)
+        # sample = experiment.samples[-1]
+
+        print("picked sample", sample)
 
         diagonal_x = []
         diagonal_mu = []
+        diagonal_mu_bounds = []
         diagonal_sigma = []
 
-        x_slice = sample.hyperparam_values.x
+        if sample:
+            x_slice = sample.hyperparam_values.x
 
-        X_sample, Y_sample = experiment.get_xy()
-        gpy_model = bopt.GPyModel.from_model_params(sample.model, X_sample, Y_sample)
+            X_sample, Y_sample = experiment.get_xy()
+            gpy_model = bopt.GPyModel.from_model_params(sample.model, X_sample, Y_sample)
 
-        model = gpy_model.model
+            model = gpy_model.model
 
-        for i in range(n_dims):
-            for j in range(n_dims):
-                if i == j:
+            for i in range(n_dims):
+                for j in range(n_dims):
+                    if i == j:
 
-                    param = experiment.hyperparameters[i]
+                        param = experiment.hyperparameters[i]
 
-                    resolution = 50
+                        resolution = 50
 
-                    # if isinstance(param.range, bopt.LogscaleInt) or isinstance(param.range, bopt.LogscaleFloat):
-                        # TODO: logscale
-                        # grid = np.linspace(param.range.low, param.range.high, num=resolution)
-                    # else:
-                    #     grid = np.linspace(param.range.low, param.range.high, num=resolution)
+                        # if isinstance(param.range, bopt.LogscaleInt) or isinstance(param.range, bopt.LogscaleFloat):
+                            # TODO: logscale
+                            # grid = np.linspace(param.range.low, param.range.high, num=resolution)
+                        # else:
+                        #     grid = np.linspace(param.range.low, param.range.high, num=resolution)
 
-                    grid = np.linspace(param.range.low, param.range.high, num=resolution)
+                        grid = np.linspace(param.range.low, param.range.high, num=resolution)
 
-                    X_plot = np.zeros([resolution, n_dims], dtype=np.float32)
+                        X_plot = np.zeros([resolution, n_dims], dtype=np.float32)
 
-                    for dim in range(n_dims):
-                        if dim == i:
-                            X_plot[:, dim] = np.full([resolution], x_slice[dim], dtype=np.float32)
-                        else:
-                            X_plot[:, dim] = grid
+                        for dim in range(n_dims):
+                            if dim == i:
+                                X_plot[:, dim] = np.full([resolution], x_slice[dim], dtype=np.float32)
+                            else:
+                                X_plot[:, dim] = grid
 
-                    mu, var = model.predict(X_plot)
-                    sigma = np.sqrt(var)
+                        mu, var = model.predict(X_plot)
+                        mu = mu.reshape(-1)
+                        sigma = np.sqrt(var).reshape(-1)
 
-                    diagonal_x.append(grid.tolist())
 
-                    print("appended", grid.tolist())
-                    diagonal_mu.append(mu.reshape(-1).tolist())
-                    diagonal_sigma.append(sigma.reshape(-1).tolist())
+                        diagonal_x.append(grid.tolist())
+                        diagonal_mu.append(mu.tolist())
+                        diagonal_mu_bounds.append([min(mu), max(mu)])
+                        diagonal_sigma.append(sigma.tolist())
 
         return render_template("index.html",
                 experiment=experiment,
@@ -117,8 +124,11 @@ def run(args) -> None:
                 sample_results_cummax=sample_results_cummax,
                 kernel_params_list=kernel_params_list,
 
+                picked_sample=sample,
+
                 diagonal_x=diagonal_x,
                 diagonal_mu=diagonal_mu,
+                diagonal_mu_bounds=diagonal_mu_bounds,
                 diagonal_sigma=diagonal_sigma)
 
 
