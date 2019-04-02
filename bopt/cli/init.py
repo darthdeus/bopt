@@ -65,7 +65,7 @@ def run(args) -> None:
         if args.runner == "local":
             runner = bopt.LocalRunner(script_path, default_arguments)
         elif args.runner == "sge":
-            runner = bopt.SGERunner(script_path, default_arguments, args.qsub)
+            runner = bopt.SGERunner(script_path, default_arguments, args.qsub or [])
         else:
             logging.error("Invalid value {} for runner,"
                 "only 'local' and 'sge' are allowed.".format(args.runner))
