@@ -37,24 +37,21 @@ def run(args) -> None:
 
             ok_samples.append(sample)
 
-        if best_sample is None:
-            print("No samples finished evaluating yet.")
-            sys.exit(0)
+        if best_sample:
+            best_job_id = best_sample.job.job_id if best_sample.job else "NO_JOB"
 
-        best_job_id = best_sample.job.job_id if best_sample.job else "NO_JOB"
+            print("\nBEST (id={}): {}".format(best_job_id, best_res))
+            assert best_sample is not None
 
-        print("\nBEST (id={}): {}".format(best_job_id, best_res))
-        assert best_sample is not None
+            if best_sample.job:
+                run_str = experiment.runner.script_path + " \\\n   "
+                for h, v in best_sample.hyperparam_values.mapping.items():
+                    if isinstance(v, float):
+                        v = round(v, 2)
+                    run_str += " --{}={}".format(h.name, v)
 
-        if best_sample.job:
-            run_str = experiment.runner.script_path + " \\\n   "
-            for h, v in best_sample.hyperparam_values.mapping.items():
-                if isinstance(v, float):
-                    v = round(v, 2)
-                run_str += " --{}={}".format(h.name, v)
-
-            print(run_str)
-            print()
+                print(run_str)
+                print()
 
         print("Evaluations:")
         for sample in ok_samples:
