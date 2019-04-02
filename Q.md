@@ -2,12 +2,10 @@
 
 - proc softmax v posledni vrstve s 1 outputem vadi misto sigmoidu?
 
-- bopt delete job_id
-- bopt resubmit job_id
-
-- seedy
-
 - web
+  - NxN grid mean + acq
+    - 1d
+    - 2d
   - interpolace mezi 2 body hyperparam + plot slicu v lib. 0d, 1d, 2d ose
   - burty!
   - okraje v plotech
@@ -17,8 +15,8 @@
 
 - expected improvement per second
 
+- [x] collect nejak dlouho trva
 - [x] moznost nadefinovat qsub param (a nebo obecne spoustejici param co se pridaji u runneru)
-- collect nejak dlouho trva
 - [x] logscale int je spatne, protoze dava jenom 2^n a zadne mezi?
 
 - [x] logovat jak dlouho uz job bezi v bopt exp
@@ -39,6 +37,11 @@
   - diskretni hyperparam - onehot nebo fixni lengthscale na konkretni hyperparam
     - sigmoid vs round?
 - [x] logscale
+
+- bopt delete job_id
+- bopt resubmit job_id
+
+- seedy
 
 - [x] job by mel byt optional
   - [x] manual sample nema job

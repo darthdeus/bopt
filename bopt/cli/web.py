@@ -53,8 +53,7 @@ def run(args) -> None:
             ("sigma", sigma_values)
         ]
 
-        # TODO: sort by time
-        for sample in sorted(experiment.samples, key=lambda x: x.started_at):
+        for sample in sorted(experiment.samples, key=lambda x: x.created_at):
             if sample.model.sampled_from_random_search():
                 continue
 
@@ -64,11 +63,63 @@ def run(args) -> None:
             ls_values.append(p["rbf.lengthscale"])
             sigma_values.append(math.sqrt(p["rbf.variance"]))
 
+        n_dims = len(experiment.hyperparameters)
+
+        sample = experiment.samples[-1]
+
+        diagonal_x = []
+        diagonal_mu = []
+        diagonal_sigma = []
+
+        x_slice = sample.hyperparam_values.x
+
+        X_sample, Y_sample = experiment.get_xy()
+        gpy_model = bopt.GPyModel.from_model_params(sample.model, X_sample, Y_sample)
+
+        model = gpy_model.model
+
+        for i in range(n_dims):
+            for j in range(n_dims):
+                if i == j:
+
+                    param = experiment.hyperparameters[i]
+
+                    resolution = 50
+
+                    # if isinstance(param.range, bopt.LogscaleInt) or isinstance(param.range, bopt.LogscaleFloat):
+                        # TODO: logscale
+                        # grid = np.linspace(param.range.low, param.range.high, num=resolution)
+                    # else:
+                    #     grid = np.linspace(param.range.low, param.range.high, num=resolution)
+
+                    grid = np.linspace(param.range.low, param.range.high, num=resolution)
+
+                    X_plot = np.zeros([resolution, n_dims], dtype=np.float32)
+
+                    for dim in range(n_dims):
+                        if dim == i:
+                            X_plot[:, dim] = np.full([resolution], x_slice[dim], dtype=np.float32)
+                        else:
+                            X_plot[:, dim] = grid
+
+                    mu, var = model.predict(X_plot)
+                    sigma = np.sqrt(var)
+
+                    diagonal_x.append(grid.tolist())
+
+                    print("appended", grid.tolist())
+                    diagonal_mu.append(mu.reshape(-1).tolist())
+                    diagonal_sigma.append(sigma.reshape(-1).tolist())
+
         return render_template("index.html",
                 experiment=experiment,
                 sample_results=sample_results,
                 sample_results_cummax=sample_results_cummax,
-                kernel_params_list=kernel_params_list)
+                kernel_params_list=kernel_params_list,
+
+                diagonal_x=diagonal_x,
+                diagonal_mu=diagonal_mu,
+                diagonal_sigma=diagonal_sigma)
 
 
     # @app.route("/")

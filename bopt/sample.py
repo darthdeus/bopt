@@ -165,6 +165,9 @@ class Sample:
 
         return s
 
+    def short_collect_flag_str(self) -> str:
+        return str(self.collect_flag).replace("CollectFlag.", "")
+
 
 class SampleCollection:
     samples: List[Sample]

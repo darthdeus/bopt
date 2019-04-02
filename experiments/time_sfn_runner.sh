@@ -1,2 +1,7 @@
 #!/bin/bash
-bash -c "time $1/.venv/bin/python $1/experiments/simple_function.py"
+set -ex
+
+wd=$1
+shift
+
+time $wd/.venv/bin/python $wd/experiments/simple_function.py $@

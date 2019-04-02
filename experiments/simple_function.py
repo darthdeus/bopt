@@ -9,24 +9,24 @@ if __name__ == "__main__":
     parser.add_argument("--x", default=1.0, type=float, help="X")
     parser.add_argument("--y", default=1.0, type=float, help="Y")
     parser.add_argument("--z", default=1.0, type=float, help="Z")
-    parser.add_argument("--w", default="sigmoid", type=str, help="W")
+    parser.add_argument("--w", default=1.0, type=float, help="W")
     args = parser.parse_args()
 
     import math
     import random
     import time
 
-    if args.w == "sigmoid":
-        args.w = 1.0
-    elif args.w == "relu":
-        args.w = 0.0
-    elif args.w == "tanh":
-        args.w = -1.0
+    if args.activation == "sigmoid":
+        act = 1.0
+    elif args.activation == "relu":
+        act = 2.0
+    elif args.activation == "tanh":
+        act = -1.0
     else:
-        args.w = 2.0
+        raise NotImplementedError()
 
-    result = math.sin(args.x) * args.y**0.3 \
-            + random.random() * 0.05 + 2*math.cos(args.z) * math.cos(args.w)
+    result = act * (args.x + 1/args.y + args.w ** 0.3 \
+            + random.random() * 0.05 + 2*args.z)
 
     # result = args.x + 2 * args.y - args.z**2
     print("RESULT={}".format(result))

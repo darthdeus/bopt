@@ -42,6 +42,7 @@ class GPyModel(Model):
 
     @staticmethod
     def from_model_params(model_params: ModelParameters, X, Y) -> "GPyModel":
+        # TODO: check that these are actually GPy params
         kernel_cls = GPyModel.parse_kernel_name(model_params.kernel)
         kernel = kernel_cls(input_dim=X.shape[1])
 

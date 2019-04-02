@@ -200,7 +200,7 @@ class LogscaleFloat(Bound):
 
     def validate(self, value: ParamTypes) -> bool:
         assert isinstance(value, float)
-        return self.low <= value < self.high
+        return self.low <= value <= self.high
 
     def __repr__(self) -> str:
         return f"LogscaleFloat({self.low}, {self.high})"
@@ -255,7 +255,7 @@ class Discrete(Bound):
         return self.values[int(value)]
 
     def __repr__(self) -> str:
-        return f"Discrete({self.values})"
+        return f"Discrete({self.values}, {self.low}, {self.high})"
 
     def parse(self, value: str) -> ParamTypes:
         return value

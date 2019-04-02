@@ -35,6 +35,28 @@
     <div class="container">
       <h2>Experiment: {{experiment}}</h2>
 
+      {% for param in experiment.hyperparameters %}
+        <div id="slice-param-{{loop.index0}}"></div>
+        <script>
+          Plotly.plot("slice-param-{{loop.index0}}", [
+            {
+              x: {{diagonal_x[loop.index0]|safe}},
+              y: {{diagonal_mu[loop.index0]|safe}},
+            },
+          ], {
+            title: "{{param}}",
+            xaxis: {
+              title: "{{param.name}}",
+              range: [{{param.range.low}}, {{param.range.high}}]
+            },
+            yaxis: { title: "value" }
+          });
+        </script>
+
+        <hr>
+
+      {% endfor %}
+
       <div id="kernel-params-plot"></div>
       <script>
         Plotly.plot("kernel-params-plot", [
@@ -72,8 +94,13 @@
         <thead>
           <tr>
             <th>Sample</th>
+            <th>Flags</th>
             <th>Hyperparams</th>
             <th>Result</th>
+            <th>Created at</th>
+            <th>Finished at</th>
+            <th>Collected at</th>
+            <th>Run time</th>
           </tr>
         </thead>
 
@@ -85,8 +112,13 @@
             {% else %}
               <td>manual</td>
             {% endif %}
+            <td>{{sample.short_collect_flag_str()}}</td>
             <td>{{sample.hyperparam_values}}</td>
             <td>{{sample.result}}</td>
+            <td>{{sample.created_at}}</td>
+            <td>{{sample.finished_at}}</td>
+            <td>{{sample.collected_at}}</td>
+            <td>{{sample.run_time}}s</td>
           </tr>
           {% endfor %}
         </tbody>
