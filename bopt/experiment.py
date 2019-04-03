@@ -100,6 +100,7 @@ class Experiment:
                     sample.finished_at = datetime.datetime.now()
                     sample.collected_at = sample.finished_at
                     sample.collect_flag = CollectFlag.COLLECT_OK
+                    sample.run_time = (sample.finished_at - sample.created_at).total_seconds()
 
             elif sample.collect_flag == CollectFlag.WAITING_FOR_JOB:
                 assert sample.job
@@ -136,6 +137,10 @@ class Experiment:
                                     sample.collected_at = datetime.datetime.now()
                                     sample.collect_flag = CollectFlag.COLLECT_OK
                                     found = True
+
+                                    if not sample.run_time:
+                                        logging.debug("No TIME parsed from the output, using `collected_at instead`.")
+                                        sample.run_time = (sample.collected_at - sample.created_at).total_seconds()
 
                                     logging.info("Collect got result {}".format(sample.result))
 
@@ -296,17 +301,17 @@ class Experiment:
                 mu, var = model.predict(X_next)
                 sigma = np.sqrt(var)
 
-                assert mu.size == 1
-                assert sigma.size == 1
+                mu = float(mu)
+                sigma = float(sigma)
 
                 assert not math.isnan(float(mu))
                 assert not math.isnan(float(sigma))
             else:
-                mu = 0.0
-                sigma = 1.0 # TODO: lol :)
+                mu = None
+                sigma = None
 
             next_sample = Sample(job, model_params, hyperparam_values,
-                    float(mu), float(sigma), CollectFlag.WAITING_FOR_JOB,
+                    mu, sigma, CollectFlag.WAITING_FOR_JOB,
                     datetime.datetime.now())
 
         self.samples.append(next_sample)

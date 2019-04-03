@@ -28,8 +28,8 @@ class Sample:
 
     hyperparam_values: HyperparamValues
 
-    mu_pred: float
-    sigma_pred: float
+    mu_pred: Optional[float]
+    sigma_pred: Optional[float]
     collect_flag: CollectFlag
 
     result: Optional[float]
@@ -43,8 +43,8 @@ class Sample:
     def __init__(self, job: Optional[Job],
             model_params: ModelParameters,
             hyperparam_values: HyperparamValues,
-            mu_pred: float,
-            sigma_pred: float,
+            mu_pred: Optional[float],
+            sigma_pred: Optional[float],
             collect_flag: CollectFlag,
             created_at: datetime.datetime) -> None:
         self.job = job
@@ -127,8 +127,13 @@ class Sample:
         if status == CollectFlag.COLLECT_OK:
             y = self.result
         elif status == CollectFlag.WAITING_FOR_JOB or status == CollectFlag.WAITING_FOR_SIMILAR:
+            assert self.mu_pred
+
             y = self.mu_pred
         elif status == CollectFlag.COLLECT_FAILED:
+            assert self.mu_pred
+            assert self.sigma_pred
+
             y = self.mu_pred - self.sigma_pred
         else:
             raise ValueError("Tried to get xy for a sample {} which is {}".format(self, status))
