@@ -1,6 +1,6 @@
 # TODO
 
-- proc softmax v posledni vrstve s 1 outputem vadi misto sigmoidu?
+- smazat mu_pred 0/1 u random search
 
 - web
   - NxN grid mean + acq

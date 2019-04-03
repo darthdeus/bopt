@@ -176,7 +176,7 @@ class LogscaleInt(Bound):
         return self.low <= value < self.high
 
     def __repr__(self) -> str:
-        return f"LogscaleFloat({self.low}, {self.high})"
+        return f"LogscaleInt({self.low}, {self.high})"
 
     def map(self, value) -> float:
         return np.log2(value)

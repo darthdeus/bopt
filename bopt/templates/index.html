@@ -51,19 +51,47 @@
                   name: "mean",
                   x: {{diagonal_x[loop.index0]|safe}},
                   y: {{diagonal_mu[loop.index0]|safe}},
+                  mode: "lines",
+
+                  line: {
+                    color: "rgb(0, 0, 255)",
+                    width: 4,
+                  }
                 },
+
+                {
+                  name: "acquisition fn",
+                  x: {{diagonal_x[loop.index0]|safe}},
+                  y: {{diagonal_acq[loop.index0]|safe}},
+                  yaxis: "y2",
+                  mode: "lines",
+
+                  line: {
+                    color: "rgb(200, 0, 0)",
+                    width: 2,
+                  }
+                },
+
                 {
                   name: "sigma low",
                   fill: "tonexty",
                   x: {{diagonal_x[loop.index0]|safe}},
                   y: {{diagonal_sigma_low[loop.index0]|safe}},
+                  marker: {
+                    color: "rgb(0.95, 0.95, 0.95)"
+                  }
                 },
+
                 {
                   name: "sigma high",
                   fill: "tonexty",
                   x: {{diagonal_x[loop.index0]|safe}},
                   y: {{diagonal_sigma_high[loop.index0]|safe}},
+                  marker: {
+                    color: "rgba(0.95, 0.95, 0.95)"
+                  }
                 },
+
               ], {
                 title: "{{param.name}}={{picked_sample_x[loop.index0]}} ... {{param.range}}",
                 xaxis: {
@@ -74,6 +102,11 @@
                   ]
                 },
                 yaxis: { title: "value" },
+                yaxis2: {
+                  overlaying: "y",
+                  side: "right",
+                },
+
                 shapes: [
                   {
                     type: "line",
@@ -90,39 +123,6 @@
               });
             </script>
 
-            <div class="col-md-6" id="slice-acq-{{loop.index0}}"></div>
-            <script>
-              Plotly.plot("slice-acq-{{loop.index0}}", [
-                {
-                  name: "acquisition fn",
-                  x: {{diagonal_x[loop.index0]|safe}},
-                  y: {{diagonal_acq[loop.index0]|safe}},
-                },
-              ], {
-                title: "{{param.name}}={{picked_sample_x[loop.index0]}} ... {{param.range}}",
-                xaxis: {
-                  title: "{{param.name}}",
-                  range: [
-                    {{param.range.low}} - {{(param.range.high - param.range.low) * 0.05}},
-                    {{param.range.high}} + {{(param.range.high - param.range.low) * 0.05}},
-                  ]
-                },
-                yaxis: { title: "value" },
-                shapes: [
-                  {
-                    type: "line",
-                    x0: {{picked_sample_x[loop.index0]}},
-                    x1: {{picked_sample_x[loop.index0]}},
-                    y0: {{diagonal_acq_bounds[loop.index0][0]}},
-                    y1: {{diagonal_acq_bounds[loop.index0][1]}},
-                    line: {
-                      width: 5,
-                      color: "rgb(0, 0, 0)"
-                    }
-                  }
-                ]
-              });
-            </script>
           {% endfor %}
         </div>
       {% endif %}

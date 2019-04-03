@@ -57,14 +57,15 @@ def run(args) -> None:
                 continue
 
             # TODO: chci tohle?
-            if i < 10:
-                continue
+            # if i < 9:
+            #     continue
 
             p = sample.model.params
 
+            # TODO * a ne rbf
             noise_values.append(p["Gaussian_noise.variance"])
-            ls_values.append(p["rbf.lengthscale"])
-            sigma_values.append(math.sqrt(p["rbf.variance"]))
+            ls_values.append(p["Mat52.lengthscale"])
+            sigma_values.append(math.sqrt(p["Mat52.variance"]))
 
         n_dims = len(experiment.hyperparameters)
 

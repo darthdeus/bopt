@@ -42,7 +42,7 @@ def main():
     model_parser.add_argument(
         "--kernel",
         type=str,
-        default="rbf",
+        default="Mat52",
         help=f"Specifies the GP kernel. Allowed values are: {kernel_names}",
     )
     model_parser.add_argument(
