@@ -17,4 +17,4 @@ def run(args) -> None:
 
         for i in range(args.n_parallel):
             logging.info("Starting {}/{}".format(i, args.n_parallel))
-            experiment.run_single(bopt.ModelConfig(args))
+            experiment.run_next(bopt.ModelConfig(args))

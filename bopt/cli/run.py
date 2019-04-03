@@ -29,7 +29,7 @@ def run(args) -> None:
                 if num_running < args.n_parallel:
                     experiment.collect_results()
 
-                    sample = experiment.run_single(model_config)
+                    fitted_model, sample = experiment.run_next(model_config)
                     logging.info("[{}/{}] Started a new evaluation"\
                            .format(n_started, args.n_iter))
 

@@ -316,22 +316,6 @@ class Experiment:
 
         return next_sample, found_similar
 
-    def run_single(self, model_config: ModelConfig) -> Sample:
-        fitted_model, next_sample = self.run_next(model_config)
-
-        # # TODO: nechci radsi JobParams?
-        # logging.debug("Starting to plot")
-        #
-        # try:
-        #     self.plot_current(fitted_model, meta_dir, x_next)
-        # except ValueError as e:
-        #     traceback_str = "".join(traceback.format_tb(e.__traceback__))
-        #     logging.error("Plotting failed, error:\n{}\n\n".format(e, traceback_str))
-        #
-        # logging.debug("Plotting done")
-
-        return next_sample
-
     def serialize(self) -> None:
         dump = yaml.dump(self.to_dict(), default_flow_style=False, Dumper=NoAliasDumper)
 
