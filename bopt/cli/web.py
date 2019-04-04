@@ -92,7 +92,8 @@ def run(args) -> None:
         picked_sample_x = None
 
         if sample:
-            picked_sample_x = sample.hyperparam_values.rescaled_values_for_plot(experiment.hyperparameters)
+            # picked_sample_x = sample.hyperparam_values.rescaled_values_for_plot(experiment.hyperparameters)
+            picked_sample_x = sample.hyperparam_values.x
 
             x_slice = sample.hyperparam_values.x
 
@@ -121,9 +122,9 @@ def run(args) -> None:
 
                         for dim in range(n_dims):
                             if dim == i:
-                                X_plot[:, dim] = np.full([resolution], x_slice[dim], dtype=np.float32)
-                            else:
                                 X_plot[:, dim] = grid
+                            else:
+                                X_plot[:, dim] = np.full([resolution], x_slice[dim], dtype=np.float32)
 
                         mu, var = model.predict(X_plot)
                         mu = mu.reshape(-1)

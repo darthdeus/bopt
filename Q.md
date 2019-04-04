@@ -1,6 +1,6 @@
 # TODO
 
-- smazat mu_pred 0/1 u random search
+- [x] smazat mu_pred 0/1 u random search
 
 - web
   - NxN grid mean + acq
