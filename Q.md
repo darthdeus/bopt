@@ -1,5 +1,6 @@
 # TODO
 
+- ARD=True u kernelu
 - [x] smazat mu_pred 0/1 u random search
 
 - web
