@@ -171,7 +171,10 @@ class Sample:
         return s
 
     def short_collect_flag_str(self) -> str:
-        return str(self.collect_flag).replace("CollectFlag.", "")
+        return str(self.collect_flag)\
+                .replace("CollectFlag.", "")\
+                .replace("COLLECT_", "")\
+                .replace("WAITING_FOR_", "W_")
 
 
 class SampleCollection:

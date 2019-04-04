@@ -1,3 +1,4 @@
+from collections import defaultdict
 import math
 import sys
 import jsonpickle
@@ -9,6 +10,17 @@ from flask import Flask, render_template, request
 
 import bopt
 from bopt.cli.util import handle_cd_revertible, acquire_lock
+
+class Slice1D(NamedTuple):
+    param: bopt.Hyperparameter
+    x: List[float]
+
+    x_slice_at: float
+
+    mu: List[float]
+    sigma: List[float]
+    acq: List[float]
+
 
 class PosteriorSlice(NamedTuple):
     param: bopt.Hyperparameter
@@ -42,30 +54,18 @@ def run(args) -> None:
         sample_results = [s.result for s in experiment.samples if s.result]
         sample_results_cummax = np.maximum.accumulate(sample_results).tolist()
 
-        noise_values = []
-        ls_values = []
-        sigma_values = []
-
-        kernel_params_list = [
-            ("noise", noise_values),
-            ("lengthscale", ls_values),
-            ("sigma", sigma_values)
-        ]
+        kernel_param_timeline = defaultdict(list)
 
         for i, sample in enumerate(sorted(experiment.samples, key=lambda x: x.created_at)):
             if sample.model.sampled_from_random_search():
                 continue
 
+            for key, value in sample.model.params.items():
+                kernel_param_timeline[key].append(value)
+
             # TODO: chci tohle?
             # if i < 9:
             #     continue
-
-            p = sample.model.params
-
-            # TODO * a ne rbf
-            noise_values.append(p["Gaussian_noise.variance"])
-            ls_values.append(p["Mat52.lengthscale"])
-            sigma_values.append(math.sqrt(p["Mat52.variance"]))
 
         n_dims = len(experiment.hyperparameters)
 
@@ -93,7 +93,7 @@ def run(args) -> None:
 
         if sample:
             # picked_sample_x = sample.hyperparam_values.rescaled_values_for_plot(experiment.hyperparameters)
-            picked_sample_x = sample.hyperparam_values.x
+            picked_sample_x = np.round(sample.hyperparam_values.x, 2)
 
             x_slice = sample.hyperparam_values.x
 
@@ -148,7 +148,8 @@ def run(args) -> None:
                 experiment=experiment,
                 sample_results=sample_results,
                 sample_results_cummax=sample_results_cummax,
-                kernel_params_list=kernel_params_list,
+
+                kernel_param_timeline=kernel_param_timeline,
 
                 picked_sample=sample,
                 picked_sample_x=picked_sample_x,
