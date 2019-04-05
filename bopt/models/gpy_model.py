@@ -44,6 +44,8 @@ class GPyModel(Model):
     def from_model_params(model_params: ModelParameters, X, Y) -> "GPyModel":
         # TODO: check that these are actually GPy params
         kernel_cls = GPyModel.parse_kernel_name(model_params.kernel)
+
+        # TODO: vyrabet kernel jenom na jednom miste
         kernel = kernel_cls(input_dim=X.shape[1], ARD=True)
 
         model = GPRegression(X, Y, kernel=kernel, normalizer=len(X) > 1)
