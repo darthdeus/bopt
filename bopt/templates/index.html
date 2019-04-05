@@ -33,11 +33,40 @@
   </head>
   <body>
     <div class="container">
-      <h2>Experiment: {{experiment}}</h2>
+      <h2>Experiment: {{experiment.runner.script_path}}</h2>
+
+			<div class="btn-toolbar" role="toolbar" aria-label="Toolbar with button groups">
+				<div class="btn-group mr-2" role="group" aria-label="First group">
+          {% for sample in sorted_samples %}
+            {% if sample.model.sampled_from_random_search() %}
+              <!-- <button type="button" class="btn btn&#45;dark"> -->
+              <a href="?sample_num={{loop.index0}}" class="btn btn-dark">
+            {% else %}
+              <!-- <button type="button" class="btn btn&#45;info"> -->
+              <a href="?sample_num={{loop.index0}}" class="btn btn-info">
+            {% endif %}
+                  {{loop.index0}}
+              </a>
+            </button>
+          {% endfor %}
+				</div>
+
+				<!-- <div class="btn&#45;group mr&#45;2" role="group" aria&#45;label="Second group"> -->
+				<!-- 	<button type="button" class="btn btn&#45;secondary">5</button> -->
+				<!-- 	<button type="button" class="btn btn&#45;secondary">6</button> -->
+				<!-- 	<button type="button" class="btn btn&#45;secondary">7</button> -->
+				<!-- </div> -->
+				<!-- <div class="btn&#45;group" role="group" aria&#45;label="Third group"> -->
+				<!-- 	<button type="button" class="btn btn&#45;secondary">8</button> -->
+				<!-- </div> -->
+			</div>
+
+      <hr>
+
 
       {% if picked_sample %}
 
-        <h1>Mean plots</h1>
+        <h2>Mean plots</h2>
 
         <p>Selected sample: {{picked_sample}}</p>
         <p>Hyperparams: {{picked_sample.hyperparam_values}}</p>

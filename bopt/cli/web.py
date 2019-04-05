@@ -94,7 +94,9 @@ def run(args) -> None:
 
         kernel_param_timeline = defaultdict(list)
 
-        for i, sample in enumerate(sorted(experiment.samples, key=lambda x: x.created_at)):
+        sorted_samples = sorted(experiment.samples, key=lambda x: x.created_at)
+
+        for i, sample in enumerate(sorted_samples):
             if sample.model.sampled_from_random_search():
                 continue
 
@@ -108,8 +110,12 @@ def run(args) -> None:
         n_dims = len(experiment.hyperparameters)
 
         sample_id = request.args.get("sample_id") or -1
+        sample_num = int(request.args.get("sample_num")) or -1
 
-        sample = next((s for s in experiment.samples if s.job and s.job.job_id == int(sample_id)), None)
+        if sample_num >= 0:
+            sample = experiment.samples[sample_num]
+        else:
+            sample = next((s for s in experiment.samples if s.job and s.job.job_id == int(sample_id)), None)
 
         # sample = experiment.samples[-1]
 
@@ -224,7 +230,9 @@ def run(args) -> None:
 
                 CollectFlag=bopt.CollectFlag,
 
-                slices_1d=slices_1d
+                slices_1d=slices_1d,
+
+                sorted_samples=sorted_samples,
 
                 # diagonal_x=diagonal_x,
                 #
