@@ -29,29 +29,78 @@
         });
       });
 
+      $(function () {
+        $('[data-toggle="tooltip"]').tooltip();
+      });
     </script>
   </head>
   <body>
     <div class="container">
       <h2>Experiment: {{experiment.runner.script_path}}</h2>
 
+      <div class="row">
+        {% for sample in sorted_samples %}
+
+        <div class="col-md-1" style="padding: 0">
+          {% if sample == picked_sample %}
+            {% set card_background = "background: #ccc" %}
+          {% else %}
+            {% set card_background = "" %}
+          {% endif %}
+
+          <div class="card" style="{{card_background}}" data-toggle="tooltip" title="{{sample.hyperparam_values}}">
+            <div class="card-body" style="padding: 0.5rem">
+              <span class="card-title">
+                {% if sample.job %}
+                  {% if sample.model.sampled_from_random_search() %}
+                    <a href="?sample_id={{sample.job.job_id}}" class="badge badge-dark">
+                  {% else %}
+                    <a href="?sample_id={{sample.job.job_id}}" class="badge badge-info">
+                  {% endif %}
+                        {{loop.index0}}.
+                    </a>
+                  </button>
+
+                {% else %}
+                  <span class="badge-badge-dark">
+                    {{loop.index}}.
+                  </span>
+                {% endif %}
+
+                {% if sample.job %}
+                  <a class="badge" href="?sample_id={{sample.job.job_id}}">
+                    {{sample.job.job_id}}
+                  </a>
+                {% else %}
+                  manual
+                {% endif %}
+
+                {% if sample.collect_flag == CollectFlag.COLLECT_OK %}
+                  <span class="badge badge-success">
+                {% elif sample.collect_flag == CollectFlag.COLLECT_FAILED  %}
+                  <span class="badge badge-danger">
+                {% else %}
+                  <span class="badge badge-secondary">
+                {% endif %}
+                    {{sample.short_collect_flag_str()}}: {{sample.result | round(2)}}
+                  </span>
+              </span>
+
+              <!-- <h6 class="card&#45;subtitle mb&#45;2 text&#45;muted"> -->
+              <!--   result={{sample.result | round(2)}} -->
+              <!-- </h6> -->
+              <!-- <p class="card&#45;text">Some quick example text to build on the card title and make up the bulk of the card's content.</p> -->
+              <!-- <a href="#" class="card&#45;link">Card link</a> -->
+              <!-- <a href="#" class="card&#45;link">Another link</a> -->
+            </div>
+          </div>
+        </div>
+
+        {% endfor %}
+      </div>
+
 			<div class="btn-toolbar" role="toolbar" aria-label="Toolbar with button groups">
 				<div class="btn-group mr-2" role="group" aria-label="First group">
-          {% for sample in sorted_samples %}
-            {% if sample.job %}
-              {% if sample.model.sampled_from_random_search() %}
-                <a href="?sample_id={{sample.job.job_id}}" class="btn btn-dark">
-              {% else %}
-                <a href="?sample_id={{sample.job.job_id}}" class="btn btn-info">
-              {% endif %}
-                    {{loop.index0}}
-                </a>
-              </button>
-
-            {% else %}
-              <span class="btn btn-dark">{{loop.index}}</span>
-            {% endif %}
-          {% endfor %}
 				</div>
 
 				<!-- <div class="btn&#45;group mr&#45;2" role="group" aria&#45;label="Second group"> -->
@@ -98,7 +147,7 @@
                   // mode: "markers",
 
                   line: {
-                    color: "rgb(0, 0, 255)",
+                    color: "rgb(0, 120, 255)",
                     width: 4,
                   }
                 },
@@ -141,9 +190,12 @@
                   y: {{slice.other_samples["y"]|safe}},
                   mode: "markers",
 
-                  line: {
-                    color: "rgb(255, 0, 0)",
-                    width: 4,
+                  marker: {
+                    color: "rgb(255, 180, 90)",
+                    size: 10,
+                    line: {
+                      width: 1
+                    }
                   }
                 },
 
@@ -175,7 +227,7 @@
                     y1: {{slice.mu_bounds()[1]}},
                     line: {
                       width: 5,
-                      color: "rgb(0, 0, 0)"
+                      color: "rgba(0, 0, 0, 0.6)"
                     }
                   }
                 ]
@@ -241,9 +293,9 @@
           <tr>
             <td>
               {% if sample.job %}
-                  <a class="badge" href="?sample_id={{sample.job.job_id}}">
-                    {{sample.job.job_id}}
-                  </a>
+                <a class="badge" href="?sample_id={{sample.job.job_id}}">
+                  {{sample.job.job_id}}
+                </a>
               {% else %}
                 manual
               {% endif %}
@@ -260,7 +312,7 @@
             </td>
             <td>
               {% for p, value in sample.hyperparam_values.mapping.items() %}
-                <span class="badge badge-light" title="{{p.name}}">
+                <span class="badge badge-light" data-toggle="tooltip" title="{{p.name}}">
                   {% if value is string %}
                     {{value}}
                   {% else %}
@@ -280,7 +332,7 @@
                 </span>
 
                 {% for name, value in sample.model.params.items() %}
-                  <span class="badge badge-light" title="{{name}}">
+                  <span class="badge badge-light" data-toggle="tooltip" title="{{name}}">
                     {% if value is string %}
                       {{value}}
                     {% else %}

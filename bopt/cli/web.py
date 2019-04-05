@@ -45,7 +45,10 @@ class Slice1D:
         return [m + s for m, s in zip(self.mu, self.sigma)]
 
     def mu_bounds(self) -> Tuple[float, float]:
-        return min(self.sigma_low()), max(self.sigma_high())
+        other_results = self.other_samples["y"]
+
+        return min(self.sigma_low() + self.acq + other_results), \
+               max(self.sigma_high() + self.acq + other_results)
 
     def x_range(self) -> Tuple[float, float]:
         low = self.param.range.low
