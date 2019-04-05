@@ -43,6 +43,18 @@ class Slice1D:
     def mu_bounds(self) -> Tuple[float, float]:
         return min(self.sigma_low()), max(self.sigma_high())
 
+    def x_range(self) -> Tuple[float, float]:
+        low = self.param.range.low
+        high = self.param.range.high
+
+        if self.param.range.is_logscale():
+            low = math.log10(low)
+            high = math.log10(high)
+
+        margin = (high - low) * 0.05
+
+        return low - margin, high + margin
+
 
 class PosteriorSlice(NamedTuple):
     param: bopt.Hyperparameter
@@ -139,7 +151,10 @@ def run(args) -> None:
                         # else:
                         #     grid = np.linspace(param.range.low, param.range.high, num=resolution)
 
-                        grid = np.linspace(param.range.low, param.range.high, num=resolution)
+                        if param.range.is_logscale():
+                            grid = np.linspace(math.log10(param.range.low), math.log10(param.range.high), num=resolution)
+                        else:
+                            grid = np.linspace(param.range.low, param.range.high, num=resolution)
 
                         X_plot = np.zeros([resolution, n_dims], dtype=np.float32)
 
@@ -159,8 +174,14 @@ def run(args) -> None:
                         # TODO: je tohle spravne?
                         x_slice_at = picked_sample_x[i]
 
+                        if param.range.is_logscale():
+                            # x_plot = 2.0 ** grid
+                            x_plot = 10.0 ** grid
+                        else:
+                            x_plot = grid
+
                         slice1d = Slice1D(param,
-                                grid.tolist(),
+                                x_plot.tolist(),
                                 x_slice_at,
                                 mu.tolist(),
                                 sigma.tolist(),

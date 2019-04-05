@@ -51,24 +51,11 @@
                   name: "mean",
                   x: {{slice.x|safe}},
                   y: {{slice.mu|safe}},
-                  mode: "lines",
+                  mode: "markers",
 
                   line: {
                     color: "rgb(0, 0, 255)",
                     width: 4,
-                  }
-                },
-
-                {
-                  name: "acquisition fn",
-                  x: {{slice.x|safe}},
-                  y: {{slice.acq|safe}},
-                  yaxis: "y2",
-                  mode: "lines",
-
-                  line: {
-                    color: "rgb(200, 0, 0)",
-                    width: 2,
                   }
                 },
 
@@ -92,16 +79,31 @@
                   }
                 },
 
+                {
+                  name: "acquisition fn",
+                  x: {{slice.x|safe}},
+                  y: {{slice.acq|safe}},
+                  yaxis: "y2",
+                  mode: "lines",
+
+                  line: {
+                    color: "rgb(200, 0, 0)",
+                    width: 2,
+                  }
+                },
+
+
               ], {
-                title: "{{slice.param.name}}={{slice.x_slice}} ... {{slice.param.range}}",
+                title: "{{slice.param.name}}={{slice.x_slice_at}} ... {{slice.param.range}}",
                 xaxis: {
                   title: "{{slice.param.name}}",
                   range: [
-                    {% set param_range_margin = (slice.param.range.high - slice.param.range.low) * 0.05 %}
-
-                    {{slice.param.range.low}} - {{param_range_margin}},
-                    {{slice.param.range.high}} + {{param_range_margin}},
-                  ]
+                    {{slice.x_range()[0]}}, {{slice.x_range()[1]}}
+                  ],
+                  {% if slice.param.range.is_logscale() %}
+                    type: "log",
+                    autorange: true
+                  {% endif %}
                 },
                 yaxis: { title: "value" },
                 yaxis2: {
