@@ -140,12 +140,7 @@ def run(args) -> None:
         # diagonal_acq = []
         # diagonal_acq_bounds = []
 
-        picked_sample_x = None
-
         if sample and not random_search_picked:
-            # picked_sample_x = sample.hyperparam_values.rescaled_values_for_plot(experiment.hyperparameters)
-            picked_sample_x = np.round(sample.hyperparam_values.x, 2)
-
             x_slice = sample.hyperparam_values.x
 
             X_sample, Y_sample = experiment.get_xy()
@@ -180,10 +175,10 @@ def run(args) -> None:
                         acq = bopt.ExpectedImprovement().raw_call(mu, sigma, model.Y.max())\
                                 .reshape(-1)
 
-                        x_slice_at = picked_sample_x[i]
+                        x_slice_at = sample.hyperparam_values.x[i]
 
                         if param.range.is_logscale():
-                            x_slice_at = 10.0 ** picked_sample_x[i]
+                            x_slice_at = 10.0 ** x_slice_at
                             x_plot = 10.0 ** grid
                         else:
                             x_plot = grid
@@ -194,7 +189,7 @@ def run(args) -> None:
                         }
 
                         for other in experiment.samples:
-                            if other.created_at < sample.created_at:
+                            if other.created_at <= sample.created_at:
                                 other_x, other_y = other.to_xy()
                                 other_x = float(other_x.tolist()[i])
 
@@ -224,7 +219,6 @@ def run(args) -> None:
                 kernel_param_timeline=kernel_param_timeline,
 
                 picked_sample=sample,
-                picked_sample_x=picked_sample_x,
 
                 CollectFlag=bopt.CollectFlag,
 
@@ -233,18 +227,6 @@ def run(args) -> None:
                 sorted_samples=sorted_samples,
 
                 random_search_picked=random_search_picked,
-
-                # diagonal_x=diagonal_x,
-                #
-                # diagonal_mu=diagonal_mu,
-                # diagonal_mu_bounds=diagonal_mu_bounds,
-                #
-                # diagonal_sigma=diagonal_sigma,
-                # diagonal_sigma_low=diagonal_sigma_low,
-                # diagonal_sigma_high=diagonal_sigma_high,
-                #
-                # diagonal_acq=diagonal_acq,
-                # diagonal_acq_bounds=diagonal_acq_bounds,
                 )
 
 
