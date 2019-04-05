@@ -30,7 +30,7 @@ class GPyModel(Model):
 
     def to_model_params(self) -> ModelParameters:
         params = {
-            name: float(self.model[name])
+            name: self.model[name].tolist()
             for name in self.model.parameter_names()
         }
 
@@ -44,7 +44,7 @@ class GPyModel(Model):
     def from_model_params(model_params: ModelParameters, X, Y) -> "GPyModel":
         # TODO: check that these are actually GPy params
         kernel_cls = GPyModel.parse_kernel_name(model_params.kernel)
-        kernel = kernel_cls(input_dim=X.shape[1])
+        kernel = kernel_cls(input_dim=X.shape[1], ARD=True)
 
         model = GPRegression(X, Y, kernel=kernel, normalizer=len(X) > 1)
 
@@ -83,7 +83,7 @@ class GPyModel(Model):
             X_sample: np.ndarray, Y_sample: np.ndarray) -> GPRegression:
 
         # TODO: zkontrolovat, ze se kernely vyrabi jenom na jednom miste
-        kernel = GPyModel.parse_kernel_name(model_config.kernel)(X_sample.shape[1])
+        kernel = GPyModel.parse_kernel_name(model_config.kernel)(X_sample.shape[1], ARD=True)
         # TODO: predava se kernel a acq vsude?
 
         # If there is only one sample, .std() == 0 and Y ends up being NaN.

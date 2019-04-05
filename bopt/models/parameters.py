@@ -1,6 +1,7 @@
 # TODO: difference between this and ModelConfig?
 class ModelParameters:
     model_name: str
+    # TODO: type
     params: dict
     kernel: str
     acquisition_fn: str
