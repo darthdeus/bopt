@@ -172,10 +172,11 @@ def run(args) -> None:
                                 .reshape(-1)
 
                         # TODO: je tohle spravne?
+
                         x_slice_at = picked_sample_x[i]
 
                         if param.range.is_logscale():
-                            # x_plot = 2.0 ** grid
+                            # x_slice_at = 10.0 ** picked_sample_x[i]
                             x_plot = 10.0 ** grid
                         else:
                             x_plot = grid
@@ -189,17 +190,6 @@ def run(args) -> None:
 
                         slices_1d.append(slice1d)
 
-                        # diagonal_x.append(grid.tolist())
-                        #
-                        # diagonal_mu.append(mu.tolist())
-                        # diagonal_mu_bounds.append([min(mu - sigma), max(mu + sigma)])
-                        #
-                        # diagonal_sigma.append(mu.tolist())
-                        # diagonal_sigma_low.append((mu - sigma).tolist())
-                        # diagonal_sigma_high.append((mu + sigma).tolist())
-                        #
-                        # diagonal_acq.append(acq.reshape(-1).tolist())
-                        # diagonal_acq_bounds.append([min(acq.tolist()), max(acq.tolist())])
 
         return render_template("index.html",
                 experiment=experiment,

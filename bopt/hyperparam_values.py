@@ -2,7 +2,7 @@ import logging
 import numpy as np
 from typing import Dict, List, Union
 
-from bopt.basic_types import Hyperparameter, Discrete, ParamTypes, LogscaleFloat
+from bopt.basic_types import Hyperparameter, Discrete, ParamTypes, LogscaleFloat, LOGSCALE_BASE
 
 
 class HyperparamValues:
@@ -41,7 +41,8 @@ class HyperparamValues:
                     for param, value in self.mapping.items()])
 
     def rescaled_values_for_plot(self, hyperparameters: List[Hyperparameter]) -> List[float]:
-        vals = [2.0**val if p.range.is_logscale() else val
+        # TODO: smazat
+        vals = [LOGSCALE_BASE ** val if p.range.is_logscale() else val
                 for val, p in zip(self.x, hyperparameters)]
 
         return [round(v, 2) for v in vals]

@@ -4,6 +4,9 @@ from enum import Enum
 from typing import Union, NamedTuple, List, Tuple, Type
 
 
+LOGSCALE_BASE = 10.0
+
+
 ParamTypes = Union[float, int, str]
 
 
@@ -159,7 +162,7 @@ class LogscaleInt(Bound):
         self.type = "logscale_int"
 
     def sample(self) -> float:
-        return int(2.0 ** np.random.uniform(np.log2(self.low), np.log2(self.high)))
+        return int(LOGSCALE_BASE ** np.random.uniform(np.log2(self.low), np.log2(self.high)))
 
     def is_discrete(self) -> bool:
         # TODO: fuj, prejmenovat na neco jako should_round_before_map? :D
@@ -182,7 +185,7 @@ class LogscaleInt(Bound):
         return np.log2(value)
 
     def inverse_map(self, value) -> int:
-        return round(2.0 ** value)
+        return round(LOGSCALE_BASE ** value)
 
     def parse(self, value: str) -> ParamTypes:
         return float(value)
@@ -204,7 +207,7 @@ class LogscaleFloat(Bound):
         self.type = "logscale_float"
 
     def sample(self) -> float:
-        return 2.0 ** np.random.uniform(np.log2(self.low), np.log2(self.high))
+        return LOGSCALE_BASE ** np.random.uniform(np.log2(self.low), np.log2(self.high))
 
     def is_discrete(self) -> bool:
         return False
@@ -226,7 +229,7 @@ class LogscaleFloat(Bound):
         return np.log2(value)
 
     def inverse_map(self, value) -> float:
-        return 2.0 ** value
+        return LOGSCALE_BASE ** value
 
     def parse(self, value: str) -> ParamTypes:
         return float(value)

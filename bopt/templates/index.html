@@ -51,7 +51,7 @@
                   name: "mean",
                   x: {{slice.x|safe}},
                   y: {{slice.mu|safe}},
-                  mode: "markers",
+                  // mode: "markers",
 
                   line: {
                     color: "rgb(0, 0, 255)",
@@ -61,21 +61,20 @@
 
                 {
                   name: "sigma low",
-                  fill: "tonexty",
                   x: {{slice.x|safe}},
                   y: {{slice.sigma_low()|safe}},
                   marker: {
-                    color: "rgb(0.95, 0.95, 0.95)"
+                    color: "rgb(0.55, 0.55, 0.55)"
                   }
                 },
 
                 {
                   name: "sigma high",
-                  fill: "tonexty",
+                  // fill: "tonexty",
                   x: {{slice.x|safe}},
                   y: {{slice.sigma_high()|safe}},
                   marker: {
-                    color: "rgba(0.95, 0.95, 0.95)"
+                    color: "rgb(0.55, 0.55, 0.55)"
                   }
                 },
 
