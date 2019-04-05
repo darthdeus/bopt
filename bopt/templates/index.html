@@ -336,7 +336,13 @@
                     {% if value is string %}
                       {{value}}
                     {% else %}
-                      {{value | round(2)}}
+                      {% if value is iterable %}
+                        {% for val in value %}
+                          {{val | round(2)}}
+                        {% endfor %}
+                      {% else %}
+                        {{value | round(2)}}
+                      {% endif %}
                     {% endif %}
                   </span>
                 {% endfor %}
