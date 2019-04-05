@@ -30,7 +30,7 @@ class GPyModel(Model):
 
     def to_model_params(self) -> ModelParameters:
         params = {
-            name: self.model[name].tolist()
+            name: (self.model[name].tolist() if self.model[name].size > 1 else float(self.model[name]))
             for name in self.model.parameter_names()
         }
 
@@ -91,26 +91,26 @@ class GPyModel(Model):
         # If there is only one sample, .std() == 0 and Y ends up being NaN.
         model = GPRegression(X_sample, Y_sample, kernel=kernel, normalizer=len(X_sample) > 1)
 
+        logging.debug("GPY hyperparam optimization start")
+
         # TODO: zamyslet se
-        # model.kern.variance.set_prior(GPy.priors.Gamma(1., 0.1))
-        # model.kern.lengthscale.set_prior(GPy.priors.Gamma(1., 0.1))
+        model.kern.variance.set_prior(GPy.priors.Gamma(1., 0.1))
+        model.kern.lengthscale.set_prior(GPy.priors.Gamma(1., 0.1))
 
         min_bound = 1e-2
         max_bound = 1e3
 
-        logging.debug("GPY hyperparam optimization start")
-
-        model.kern.variance.unconstrain()
-        model.kern.variance.constrain_bounded(min_bound, max_bound)
-
-        model.kern.lengthscale.unconstrain()
-        model.kern.lengthscale.constrain_bounded(min_bound, max_bound)
-
-        model.Gaussian_noise.variance.unconstrain()
-        model.Gaussian_noise.variance.constrain_bounded(min_bound, max_bound)
+        # model.kern.variance.unconstrain()
+        # model.kern.variance.constrain_bounded(min_bound, max_bound)
+        #
+        # model.kern.lengthscale.unconstrain()
+        # model.kern.lengthscale.constrain_bounded(min_bound, max_bound)
+        #
+        # model.Gaussian_noise.variance.unconstrain()
+        # model.Gaussian_noise.variance.constrain_bounded(min_bound, max_bound)
 
         # model.Gaussian_noise.set_prior(GPy.priors.Gamma(1., 0.1))
-        model.optimize()
+        model.optimize_restarts(25)
 
         logging.debug("GPY hyperparam optimization DONE, params: {}".format(model.param_array))
 

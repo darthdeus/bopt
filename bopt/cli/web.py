@@ -106,11 +106,11 @@ def run(args) -> None:
                 continue
 
             for key, value in sample.model.params.items():
-                kernel_param_timeline[key].append(value)
-
-            # TODO: chci tohle?
-            # if i < 9:
-            #     continue
+                if isinstance(value, list):
+                    for v, h in zip(value, experiment.hyperparameters):
+                        kernel_param_timeline["{}_{}".format(key, h.name)].append(v)
+                else:
+                    kernel_param_timeline[key].append(value)
 
         n_dims = len(experiment.hyperparameters)
 

@@ -1,11 +1,13 @@
 # TODO
 
+- moznost pouzit bud gamma prior nebo constraint
 - [x] skipnout prvnich num_random + 1 samplu u kernel param plotu
 - moznost poustet jenom random search
 - [x] timeline
 - opravit zaokrouhlovani aby slo jen spravnymi smery :)
 - fitnout mean fci
 - ARD=True u kernelu
+  - moznost to zapnout jako option
 
 - kernel jako param u init
 - [x] nehardcodit jmeno kernelu do webu
