@@ -122,23 +122,9 @@ def run(args) -> None:
         if sample and sample.model.sampled_from_random_search():
             random_search_picked = True
 
-        # sample = experiment.samples[-1]
-
         print("picked sample", sample)
 
         slices_1d = []
-
-        # diagonal_x = []
-        #
-        # diagonal_mu = []
-        # diagonal_mu_bounds = []
-        #
-        # diagonal_sigma = []
-        # diagonal_sigma_low = []
-        # diagonal_sigma_high = []
-        #
-        # diagonal_acq = []
-        # diagonal_acq_bounds = []
 
         if sample and not random_search_picked:
             x_slice = sample.hyperparam_values.x
