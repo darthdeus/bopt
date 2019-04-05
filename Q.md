@@ -1,7 +1,8 @@
 # TODO
 
+- [x] skipnout prvnich num_random + 1 samplu u kernel param plotu
 - moznost poustet jenom random search
-- timeline
+- [x] timeline
 - opravit zaokrouhlovani aby slo jen spravnymi smery :)
 - fitnout mean fci
 - ARD=True u kernelu

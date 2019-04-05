@@ -99,8 +99,10 @@ def run(args) -> None:
 
         sorted_samples = sorted(experiment.samples, key=lambda x: x.created_at)
 
+        num_random = len([s for s in sorted_samples if s.model.sampled_from_random_search()])
+
         for i, sample in enumerate(sorted_samples):
-            if sample.model.sampled_from_random_search():
+            if i < num_random + 1:
                 continue
 
             for key, value in sample.model.params.items():
