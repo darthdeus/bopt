@@ -4,14 +4,14 @@ import sys
 import jsonpickle
 import numpy as np
 
-from typing import NamedTuple, List
+from typing import NamedTuple, List, Tuple
 from livereload import Server
 from flask import Flask, render_template, request
 
 import bopt
 from bopt.cli.util import handle_cd_revertible, acquire_lock
 
-class Slice1D(NamedTuple):
+class Slice1D:
     param: bopt.Hyperparameter
     x: List[float]
 
@@ -20,6 +20,28 @@ class Slice1D(NamedTuple):
     mu: List[float]
     sigma: List[float]
     acq: List[float]
+
+    def __init__(self, param: bopt.Hyperparameter,
+            x: List[float],
+            x_slice_at: float,
+            mu: List[float],
+            sigma: List[float],
+            acq: List[float]) -> None:
+        self.param = param
+        self.x = x
+        self.x_slice_at = x_slice_at
+        self.mu = mu
+        self.sigma = sigma
+        self.acq = acq
+
+    def sigma_low(self) -> List[float]:
+        return [m - s for m, s in zip(self.mu, self.sigma)]
+
+    def sigma_high(self) -> List[float]:
+        return [m + s for m, s in zip(self.mu, self.sigma)]
+
+    def mu_bounds(self) -> Tuple[float, float]:
+        return min(self.sigma_low()), max(self.sigma_high())
 
 
 class PosteriorSlice(NamedTuple):
@@ -77,17 +99,19 @@ def run(args) -> None:
 
         print("picked sample", sample)
 
-        diagonal_x = []
+        slices_1d = []
 
-        diagonal_mu = []
-        diagonal_mu_bounds = []
-
-        diagonal_sigma = []
-        diagonal_sigma_low = []
-        diagonal_sigma_high = []
-
-        diagonal_acq = []
-        diagonal_acq_bounds = []
+        # diagonal_x = []
+        #
+        # diagonal_mu = []
+        # diagonal_mu_bounds = []
+        #
+        # diagonal_sigma = []
+        # diagonal_sigma_low = []
+        # diagonal_sigma_high = []
+        #
+        # diagonal_acq = []
+        # diagonal_acq_bounds = []
 
         picked_sample_x = None
 
@@ -105,7 +129,6 @@ def run(args) -> None:
             for i in range(n_dims):
                 for j in range(n_dims):
                     if i == j:
-
                         param = experiment.hyperparameters[i]
 
                         resolution = 50
@@ -130,19 +153,32 @@ def run(args) -> None:
                         mu = mu.reshape(-1)
                         sigma = np.sqrt(var).reshape(-1)
 
-                        diagonal_x.append(grid.tolist())
+                        acq = bopt.ExpectedImprovement().raw_call(mu, sigma, model.Y.max())\
+                                .reshape(-1)
 
-                        diagonal_mu.append(mu.tolist())
-                        diagonal_mu_bounds.append([min(mu - sigma), max(mu + sigma)])
+                        # TODO: je tohle spravne?
+                        x_slice_at = picked_sample_x[i]
 
-                        diagonal_sigma.append(mu.tolist())
-                        diagonal_sigma_low.append((mu - sigma).tolist())
-                        diagonal_sigma_high.append((mu + sigma).tolist())
+                        slice1d = Slice1D(param,
+                                grid.tolist(),
+                                x_slice_at,
+                                mu.tolist(),
+                                sigma.tolist(),
+                                acq.tolist())
 
-                        ei = bopt.ExpectedImprovement().raw_call(mu, sigma, model.Y.max())
+                        slices_1d.append(slice1d)
 
-                        diagonal_acq.append(ei.reshape(-1).tolist())
-                        diagonal_acq_bounds.append([min(ei.tolist()), max(ei.tolist())])
+                        # diagonal_x.append(grid.tolist())
+                        #
+                        # diagonal_mu.append(mu.tolist())
+                        # diagonal_mu_bounds.append([min(mu - sigma), max(mu + sigma)])
+                        #
+                        # diagonal_sigma.append(mu.tolist())
+                        # diagonal_sigma_low.append((mu - sigma).tolist())
+                        # diagonal_sigma_high.append((mu + sigma).tolist())
+                        #
+                        # diagonal_acq.append(acq.reshape(-1).tolist())
+                        # diagonal_acq_bounds.append([min(acq.tolist()), max(acq.tolist())])
 
         return render_template("index.html",
                 experiment=experiment,
@@ -156,17 +192,19 @@ def run(args) -> None:
 
                 CollectFlag=bopt.CollectFlag,
 
-                diagonal_x=diagonal_x,
+                slices_1d=slices_1d
 
-                diagonal_mu=diagonal_mu,
-                diagonal_mu_bounds=diagonal_mu_bounds,
-
-                diagonal_sigma=diagonal_sigma,
-                diagonal_sigma_low=diagonal_sigma_low,
-                diagonal_sigma_high=diagonal_sigma_high,
-
-                diagonal_acq=diagonal_acq,
-                diagonal_acq_bounds=diagonal_acq_bounds,
+                # diagonal_x=diagonal_x,
+                #
+                # diagonal_mu=diagonal_mu,
+                # diagonal_mu_bounds=diagonal_mu_bounds,
+                #
+                # diagonal_sigma=diagonal_sigma,
+                # diagonal_sigma_low=diagonal_sigma_low,
+                # diagonal_sigma_high=diagonal_sigma_high,
+                #
+                # diagonal_acq=diagonal_acq,
+                # diagonal_acq_bounds=diagonal_acq_bounds,
                 )
 
 

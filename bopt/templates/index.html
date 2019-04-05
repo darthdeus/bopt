@@ -43,14 +43,14 @@
         <p>Hyperparams: {{picked_sample.hyperparam_values}}</p>
 
         <div class="row">
-          {% for param in experiment.hyperparameters %}
+          {% for slice in slices_1d %}
             <div class="col-md-6" id="slice-param-{{loop.index0}}"></div>
             <script>
               Plotly.plot("slice-param-{{loop.index0}}", [
                 {
                   name: "mean",
-                  x: {{diagonal_x[loop.index0]|safe}},
-                  y: {{diagonal_mu[loop.index0]|safe}},
+                  x: {{slice.x|safe}},
+                  y: {{slice.mu|safe}},
                   mode: "lines",
 
                   line: {
@@ -61,8 +61,8 @@
 
                 {
                   name: "acquisition fn",
-                  x: {{diagonal_x[loop.index0]|safe}},
-                  y: {{diagonal_acq[loop.index0]|safe}},
+                  x: {{slice.x|safe}},
+                  y: {{slice.acq|safe}},
                   yaxis: "y2",
                   mode: "lines",
 
@@ -75,8 +75,8 @@
                 {
                   name: "sigma low",
                   fill: "tonexty",
-                  x: {{diagonal_x[loop.index0]|safe}},
-                  y: {{diagonal_sigma_low[loop.index0]|safe}},
+                  x: {{slice.x|safe}},
+                  y: {{slice.sigma_low()|safe}},
                   marker: {
                     color: "rgb(0.95, 0.95, 0.95)"
                   }
@@ -85,20 +85,22 @@
                 {
                   name: "sigma high",
                   fill: "tonexty",
-                  x: {{diagonal_x[loop.index0]|safe}},
-                  y: {{diagonal_sigma_high[loop.index0]|safe}},
+                  x: {{slice.x|safe}},
+                  y: {{slice.sigma_high()|safe}},
                   marker: {
                     color: "rgba(0.95, 0.95, 0.95)"
                   }
                 },
 
               ], {
-                title: "{{param.name}}={{picked_sample_x[loop.index0]}} ... {{param.range}}",
+                title: "{{slice.param.name}}={{slice.x_slice}} ... {{slice.param.range}}",
                 xaxis: {
-                  title: "{{param.name}}",
+                  title: "{{slice.param.name}}",
                   range: [
-                    {{param.range.low}} - {{(param.range.high - param.range.low) * 0.05}},
-                    {{param.range.high}} + {{(param.range.high - param.range.low) * 0.05}},
+                    {% set param_range_margin = (slice.param.range.high - slice.param.range.low) * 0.05 %}
+
+                    {{slice.param.range.low}} - {{param_range_margin}},
+                    {{slice.param.range.high}} + {{param_range_margin}},
                   ]
                 },
                 yaxis: { title: "value" },
@@ -110,10 +112,10 @@
                 shapes: [
                   {
                     type: "line",
-                    x0: {{picked_sample_x[loop.index0]}},
-                    x1: {{picked_sample_x[loop.index0]}},
-                    y0: {{diagonal_mu_bounds[loop.index0][0]}},
-                    y1: {{diagonal_mu_bounds[loop.index0][1]}},
+                    x0: {{slice.x_slice_at}},
+                    x1: {{slice.x_slice_at}},
+                    y0: {{slice.mu_bounds()[0]}},
+                    y1: {{slice.mu_bounds()[1]}},
                     line: {
                       width: 5,
                       color: "rgb(0, 0, 0)"
