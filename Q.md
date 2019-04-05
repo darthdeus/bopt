@@ -6,6 +6,11 @@
 - opravit zaokrouhlovani aby slo jen spravnymi smery :)
 - fitnout mean fci
 - ARD=True u kernelu
+
+- kernel jako param u init
+- [x] nehardcodit jmeno kernelu do webu
+- qstat na vsechny joby najednou pri pocitani running
+
 - [x] smazat mu_pred 0/1 u random search
 
 - web
