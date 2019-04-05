@@ -1,5 +1,8 @@
 # TODO
 
+- timeline
+- opravit zaokrouhlovani aby slo jen spravnymi smery :)
+- fitnout mean fci
 - ARD=True u kernelu
 - [x] smazat mu_pred 0/1 u random search
 

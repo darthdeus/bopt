@@ -162,7 +162,7 @@ class LogscaleInt(Bound):
         self.type = "logscale_int"
 
     def sample(self) -> float:
-        return int(LOGSCALE_BASE ** np.random.uniform(np.log2(self.low), np.log2(self.high)))
+        return int(LOGSCALE_BASE ** np.random.uniform(np.log10(self.low), np.log10(self.high)))
 
     def is_discrete(self) -> bool:
         # TODO: fuj, prejmenovat na neco jako should_round_before_map? :D
@@ -182,7 +182,7 @@ class LogscaleInt(Bound):
         return f"LogscaleInt({self.low}, {self.high})"
 
     def map(self, value) -> float:
-        return np.log2(value)
+        return np.log10(value)
 
     def inverse_map(self, value) -> int:
         return round(LOGSCALE_BASE ** value)
@@ -191,7 +191,7 @@ class LogscaleInt(Bound):
         return float(value)
 
     def scipy_bound_tuple(self) -> Tuple[float, float]:
-        return (np.log2(self.low), np.log2(self.high) - 1e-8)
+        return (np.log10(self.low), np.log10(self.high) - 1e-8)
 
     def compare_values(self, a: ParamTypes, b: ParamTypes) -> bool:
         assert isinstance(a, int)
@@ -207,7 +207,7 @@ class LogscaleFloat(Bound):
         self.type = "logscale_float"
 
     def sample(self) -> float:
-        return LOGSCALE_BASE ** np.random.uniform(np.log2(self.low), np.log2(self.high))
+        return LOGSCALE_BASE ** np.random.uniform(np.log10(self.low), np.log10(self.high))
 
     def is_discrete(self) -> bool:
         return False
@@ -226,7 +226,7 @@ class LogscaleFloat(Bound):
         return f"LogscaleFloat({self.low}, {self.high})"
 
     def map(self, value) -> float:
-        return np.log2(value)
+        return np.log10(value)
 
     def inverse_map(self, value) -> float:
         return LOGSCALE_BASE ** value
@@ -235,7 +235,7 @@ class LogscaleFloat(Bound):
         return float(value)
 
     def scipy_bound_tuple(self) -> Tuple[float, float]:
-        return (np.log2(self.low), np.log2(self.high) - 1e-8)
+        return (np.log10(self.low), np.log10(self.high) - 1e-8)
 
     def compare_values(self, a: ParamTypes, b: ParamTypes) -> bool:
         assert isinstance(a, float)
@@ -244,7 +244,7 @@ class LogscaleFloat(Bound):
         diff = abs(a - b)
         # TODO: logscale will need this adjusted
         # We set the threshold at 1% of the range
-        threshold = (np.log2(self.high) - np.log2(self.low)) * 0.01
+        threshold = (np.log10(self.high) - np.log10(self.low)) * 0.01
         return diff < threshold
 
 

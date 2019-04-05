@@ -91,9 +91,21 @@
                   }
                 },
 
+                {
+                  name: "samples",
+                  x: {{slice.other_samples["x"]|safe}},
+                  y: {{slice.other_samples["y"]|safe}},
+                  mode: "markers",
+
+                  line: {
+                    color: "rgb(255, 0, 0)",
+                    width: 4,
+                  }
+                },
+
 
               ], {
-                title: "{{slice.param.name}}={{slice.x_slice_at}} ... {{slice.param.range}}",
+                title: "{{slice.param.name}}={{slice.x_slice_at | round(2)}} ... {{slice.param.range}}",
                 xaxis: {
                   title: "{{slice.param.name}}",
                   range: [

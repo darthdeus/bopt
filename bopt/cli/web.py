@@ -4,7 +4,7 @@ import sys
 import jsonpickle
 import numpy as np
 
-from typing import NamedTuple, List, Tuple
+from typing import NamedTuple, List, Tuple, Dict
 from livereload import Server
 from flask import Flask, render_template, request
 
@@ -21,18 +21,22 @@ class Slice1D:
     sigma: List[float]
     acq: List[float]
 
+    other_samples: Dict[str, List[float]]
+
     def __init__(self, param: bopt.Hyperparameter,
             x: List[float],
             x_slice_at: float,
             mu: List[float],
             sigma: List[float],
-            acq: List[float]) -> None:
+            acq: List[float],
+            other_samples: Dict[str, List[float]]) -> None:
         self.param = param
         self.x = x
         self.x_slice_at = x_slice_at
         self.mu = mu
         self.sigma = sigma
         self.acq = acq
+        self.other_samples = other_samples
 
     def sigma_low(self) -> List[float]:
         return [m - s for m, s in zip(self.mu, self.sigma)]
@@ -143,7 +147,7 @@ def run(args) -> None:
                     if i == j:
                         param = experiment.hyperparameters[i]
 
-                        resolution = 50
+                        resolution = 80
 
                         # if isinstance(param.range, bopt.LogscaleInt) or isinstance(param.range, bopt.LogscaleFloat):
                             # TODO: logscale
@@ -176,17 +180,34 @@ def run(args) -> None:
                         x_slice_at = picked_sample_x[i]
 
                         if param.range.is_logscale():
-                            # x_slice_at = 10.0 ** picked_sample_x[i]
+                            x_slice_at = 10.0 ** picked_sample_x[i]
                             x_plot = 10.0 ** grid
                         else:
                             x_plot = grid
+
+                        other_samples = {
+                            "x": [],
+                            "y": [],
+                        }
+
+                        for other in experiment.samples:
+                            if other.created_at < sample.created_at:
+                                other_x, other_y = other.to_xy()
+                                other_x = float(other_x.tolist()[i])
+
+                                if param.range.is_logscale():
+                                    other_x = 10.0 ** other_x
+
+                                other_samples["x"].append(other_x)
+                                other_samples["y"].append(other_y)
 
                         slice1d = Slice1D(param,
                                 x_plot.tolist(),
                                 x_slice_at,
                                 mu.tolist(),
                                 sigma.tolist(),
-                                acq.tolist())
+                                acq.tolist(),
+                                other_samples)
 
                         slices_1d.append(slice1d)
 
