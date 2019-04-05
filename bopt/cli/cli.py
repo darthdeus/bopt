@@ -1,6 +1,5 @@
 import sys
 import os
-import psutil
 import inspect
 import argparse
 
@@ -52,7 +51,6 @@ def main():
         help=f"Specifies the acquisition function. Allowed values are: {acq_fn_names}",
     )
 
-    # TODO: specify this properly
     sp = parser.add_subparsers(dest="bopt")
     sp.required = True
 
@@ -60,8 +58,6 @@ def main():
         "init", help="Initializes a new experiment, ready to run.",
         parents=[cd_parser]
     )
-
-    # TODO: parallel evaluation
 
     sp_init.add_argument("--runner", type=str, default="local", help="Runner type.")
     sp_init.add_argument("--param", action="append", help="Hyperparameter")

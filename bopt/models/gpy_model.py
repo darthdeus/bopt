@@ -77,9 +77,6 @@ class GPyModel(Model):
         else:
             raise NotImplementedError(f"Unknown acquisition function '{name}'.")
 
-    # TODO: remove me
-    # def predict_next(self): raise NotImplemented("This should not be called, deprecated")
-
     @staticmethod
     def gpy_regression(model_config: ModelConfig,
             X_sample: np.ndarray, Y_sample: np.ndarray) -> GPRegression:
@@ -128,9 +125,6 @@ class GPyModel(Model):
 
         x_next = GPyModel.propose_location(acquisition_fn, model, Y_sample.max(),
                 hyperparameters)
-
-        # TODO: delete this and use general logging via __str__ instead :)
-        new_point_str = " ".join(map(lambda xx: str(round(xx, 2)), x_next.tolist()))
 
         job_params = HyperparamValues.mapping_from_vector(x_next, hyperparameters)
 

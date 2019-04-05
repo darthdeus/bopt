@@ -35,6 +35,8 @@ def run(args) -> None:
         if not hyperparam_values.validate():
             sys.exit(1)
 
-        # TODO: check return value?
-        experiment.manual_run(bopt.ModelConfig.default(),
-                hyperparam_values, bopt.ModelParameters.for_manual_run())
+        next_sample, _ = experiment.manual_run(bopt.ModelConfig.default(),
+                hyperparam_values,
+                bopt.ModelParameters.for_manual_run())
+
+        print("Started {}".format(next_sample))

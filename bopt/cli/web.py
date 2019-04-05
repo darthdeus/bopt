@@ -160,12 +160,6 @@ def run(args) -> None:
 
                         resolution = 80
 
-                        # if isinstance(param.range, bopt.LogscaleInt) or isinstance(param.range, bopt.LogscaleFloat):
-                            # TODO: logscale
-                            # grid = np.linspace(param.range.low, param.range.high, num=resolution)
-                        # else:
-                        #     grid = np.linspace(param.range.low, param.range.high, num=resolution)
-
                         if param.range.is_logscale():
                             grid = np.linspace(math.log10(param.range.low), math.log10(param.range.high), num=resolution)
                         else:
@@ -185,8 +179,6 @@ def run(args) -> None:
 
                         acq = bopt.ExpectedImprovement().raw_call(mu, sigma, model.Y.max())\
                                 .reshape(-1)
-
-                        # TODO: je tohle spravne?
 
                         x_slice_at = picked_sample_x[i]
 
