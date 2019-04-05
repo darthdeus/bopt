@@ -110,12 +110,12 @@ def run(args) -> None:
         n_dims = len(experiment.hyperparameters)
 
         sample_id = request.args.get("sample_id") or -1
-        sample_num = int(request.args.get("sample_num")) or -1
 
-        if sample_num >= 0:
-            sample = experiment.samples[sample_num]
-        else:
-            sample = next((s for s in experiment.samples if s.job and s.job.job_id == int(sample_id)), None)
+        sample = next((s for s in experiment.samples if s.job and s.job.job_id == int(sample_id)), None)
+
+        random_search_picked = False
+        if sample and sample.model.sampled_from_random_search():
+            random_search_picked = True
 
         # sample = experiment.samples[-1]
 
@@ -137,7 +137,7 @@ def run(args) -> None:
 
         picked_sample_x = None
 
-        if sample:
+        if sample and not random_search_picked:
             # picked_sample_x = sample.hyperparam_values.rescaled_values_for_plot(experiment.hyperparameters)
             picked_sample_x = np.round(sample.hyperparam_values.x, 2)
 
@@ -220,6 +220,7 @@ def run(args) -> None:
 
         return render_template("index.html",
                 experiment=experiment,
+
                 sample_results=sample_results,
                 sample_results_cummax=sample_results_cummax,
 
@@ -233,6 +234,8 @@ def run(args) -> None:
                 slices_1d=slices_1d,
 
                 sorted_samples=sorted_samples,
+
+                random_search_picked=random_search_picked,
 
                 # diagonal_x=diagonal_x,
                 #

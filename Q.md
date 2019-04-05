@@ -1,5 +1,6 @@
 # TODO
 
+- moznost poustet jenom random search
 - timeline
 - opravit zaokrouhlovani aby slo jen spravnymi smery :)
 - fitnout mean fci
