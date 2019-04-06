@@ -47,8 +47,9 @@ def run(args) -> None:
                     continue
                 else:
                     # TODO: pouzit reflexi, nehardcodit to
-                    logging.error("Invalid value {} for hyperparameter type,"
-                        " only 'int', 'float' and 'discrete' are permitted.".format(type))
+                    logging.error("Invalid value {} for hyperparameter type, "
+                        "only 'int', 'float' and 'discrete' "
+                        "are permitted.".format(type))
                     sys.exit(1)
 
                 assert cls is not None
@@ -72,7 +73,11 @@ def run(args) -> None:
             sys.exit(1)
 
         default_result_regex = "RESULT=(.*)"
-        experiment = bopt.Experiment(hyperparameters, runner, default_result_regex)
+
+        gp_config = bopt.GPConfig(args)
+
+        experiment = bopt.Experiment(hyperparameters,
+                runner, default_result_regex, gp_config)
 
         experiment.serialize()
 

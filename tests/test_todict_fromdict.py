@@ -1,6 +1,7 @@
 import datetime
 import unittest
 import warnings
+import argparse
 
 import numpy as np
 import bopt
@@ -18,7 +19,17 @@ def test_exp1():
 
     runner = bopt.LocalRunner("/bin/bash", ["--help", "me"])
 
-    experiment = bopt.Experiment(hyperparameters, runner, r"(\d+)")
+    args = argparse.Namespace()
+    args.kernel = "Mat52"
+    args.acquisition_fn = "ei"
+    args.ard = 1
+    args.fit_mean = 0
+    args.gamma_prior = 0
+    args.num_optimize_restarts = 10
+
+    gp_config = bopt.GPConfig(args)
+
+    experiment = bopt.Experiment(hyperparameters, runner, r"(\d+)", gp_config)
 
     X = np.random.uniform(-3., 3., (20, 1))
     Y = np.sin(X) + np.random.randn(20, 1) * 0.05

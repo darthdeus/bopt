@@ -33,10 +33,10 @@ def run(args) -> None:
         hyperparam_values = bopt.HyperparamValues.from_mapping(mapping)
 
         if not hyperparam_values.validate():
+            print("Some values of hyperparameters were invalid, exiting.")
             sys.exit(1)
 
-        next_sample, _ = experiment.manual_run(bopt.ModelConfig.default(),
-                hyperparam_values,
+        next_sample, _ = experiment.manual_run(hyperparam_values,
                 bopt.ModelParameters.for_manual_run())
 
         print("Started {}".format(next_sample))

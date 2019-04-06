@@ -38,21 +38,12 @@ def main():
     acq_fn_names = ",".join(Experiment.acquisition_fn_names)
 
     model_parser = argparse.ArgumentParser(add_help=None)
-    model_parser.add_argument(
-        "--kernel",
-        type=str,
-        default="Mat52",
-        help=f"Specifies the GP kernel. Allowed values are: {kernel_names}",
-    )
-    model_parser.add_argument(
-        "--acquisition_fn",
-        type=str,
-        default="ei",
-        help=f"Specifies the acquisition function. Allowed values are: {acq_fn_names}",
-    )
 
     sp = parser.add_subparsers(dest="bopt")
     sp.required = True
+
+
+    ### bopt init
 
     sp_init = sp.add_parser(
         "init", help="Initializes a new experiment, ready to run.",
@@ -62,9 +53,33 @@ def main():
     sp_init.add_argument("--runner", type=str, default="local", help="Runner type.")
     sp_init.add_argument("--param", action="append", help="Hyperparameter")
     sp_init.add_argument("--qsub", action="append", help="Arguments for qsub.")
+    sp_init.add_argument("--kernel", type=str, default="Mat52",
+        help=f"Specifies the GP kernel. Allowed values are: {kernel_names}")
+
+    sp_init.add_argument("--acquisition_fn", type=str, default="ei",
+        help=f"Specifies the acquisition function. Allowed values are: {acq_fn_names}")
+
+    sp_init.add_argument("--ard", type=int, default=1,
+        help="Toggles automatic relevance determination (one lengthscale per hyperparameter).")
+
+    sp_init.add_argument("--fit-mean", type=int, default=1,
+        help="When enabled the mean function is fit during kernel optimization. "
+             "Otherwise it is set to zero.")
+
+    sp_init.add_argument("--gamma-prior", type=int, default=1,
+        help="When enabled, kernel parameters will use a Gamma prior "
+             "instead of a hard constraint.")
+
+    sp_init.add_argument("--num-optimize-restarts", type=int, default=10,
+        help="Number of restarts during kernel optimization.")
+
     sp_init.add_argument("command", type=str, help="Command to run.")
     sp_init.add_argument("arguments", type=str, nargs="*", help="Default arguments.")
+
     sp_init.set_defaults(func=init.run)
+
+
+    ### bopt jobstat
 
     sp_jobstat = sp.add_parser("job", help="Retrieve job status.",
             parents=[cd_parser])
@@ -79,10 +94,16 @@ def main():
             help="Job to search for.")
     sp_jobstat.set_defaults(func=jobstat.run)
 
+
+    ### bopt exp
+
     sp_expstat = sp.add_parser(
         "exp", help="Overview status of an experiment.", parents=[cd_parser]
     )
     sp_expstat.set_defaults(func=exp.run)
+
+
+    ### bopt web
 
     sp_web = sp.add_parser("web", help="Starts the web interface.",
             parents=[cd_parser])
@@ -91,9 +112,10 @@ def main():
     )
     sp_web.set_defaults(func=web.run)
 
-    sp_run = sp.add_parser(
-        "run", help="Runs an experiment.", parents=[cd_parser, model_parser]
-    )
+
+    ### bopt web
+
+    sp_run = sp.add_parser("run", help="Runs an experiment.", parents=[cd_parser])
     sp_run.add_argument(
         "--n_iter", type=int, default=20, help="Number of iterations to run."
     )
@@ -108,10 +130,13 @@ def main():
     )
     sp_run.set_defaults(func=run.run)
 
+
+    ### bopt run-single
+
     sp_run_single = sp.add_parser(
         "run-single",
         help="Pick the next point and run it, combines suggest & manual-run.",
-        parents=[cd_parser, model_parser],
+        parents=[cd_parser],
     )
     sp_run_single.add_argument(
         "--n_parallel",
@@ -121,17 +146,26 @@ def main():
     )
     sp_run_single.set_defaults(func=run_single.run)
 
+
+    ### bopt plot
+
     sp_plot = sp.add_parser(
         "plot", help="Generate plots for a given experiment.", parents=[cd_parser]
     )
     sp_plot.set_defaults(func=plot.run)
 
+
+    ### bopt suggest
+
     sp_suggest = sp.add_parser(
         "suggest",
         help="Suggests one next point for evaluation.",
-        parents=[cd_parser, model_parser],
+        parents=[cd_parser],
     )
     sp_suggest.set_defaults(func=suggest.run)
+
+
+    ### bopt manual-run
 
     sp_manual_run = sp.add_parser(
         "manual-run",
@@ -140,10 +174,16 @@ def main():
     )
     sp_manual_run.set_defaults(func=manual_run.run)
 
+
+    ### bopt debug
+
     sp_debug = sp.add_parser(
         "debug", help="Load an experiment and start iPDB", parents=[cd_parser]
     )
     sp_debug.set_defaults(func=debug.run)
+
+
+    ### bopt clean
 
     sp_clean = sp.add_parser(
         "clean", help="Delete all samples, kill all jobs.", parents=[cd_parser]

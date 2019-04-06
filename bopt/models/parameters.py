@@ -23,6 +23,7 @@ class ModelParameters:
     def sampled_from_random_search(self) -> bool:
         return self.model_name == "random_search"
 
+    # TODO: fuj tohle uz nechci?
     def can_predict_mean(self) -> bool:
         # This is simply to avoid cyclic imports
         from bopt.models.gpy_model import GPyModel

@@ -16,13 +16,15 @@ from typing import List, Optional, Tuple
 
 from bopt.basic_types import Hyperparameter, OptimizationFailed
 from bopt.hyperparam_values import HyperparamValues
-from bopt.model_config import ModelConfig
+from bopt.gp_config import GPConfig
 from bopt.models.model import Model
 from bopt.sample import Sample, CollectFlag, SampleCollection
 from bopt.models.parameters import ModelParameters
 from bopt.models.random_search import RandomSearch
 from bopt.runner.abstract import Job, Runner
 from bopt.runner.runner_loader import RunnerLoader
+from bopt.models.gpy_model import GPyModel
+
 
 from bopt.acquisition_functions.acquisition_functions import AcquisitionFunction
 
@@ -49,18 +51,24 @@ class Experiment:
     samples: List[Sample]
     result_regex: str
 
-    def __init__(self, hyperparameters: List[Hyperparameter], runner: Runner, result_regex: str):
+    gp_config: GPConfig
+
+    def __init__(self, hyperparameters: List[Hyperparameter],
+            runner: Runner, result_regex: str,
+            gp_config: GPConfig) -> None:
         self.hyperparameters = hyperparameters
         self.runner = runner
         self.samples = []
         self.result_regex = result_regex
+        self.gp_config = gp_config
 
     def to_dict(self) -> dict:
         return {
             "hyperparameters": {h.name: h.to_dict() for h in self.hyperparameters},
             "samples": [s.to_dict() for s in self.samples],
             "runner": self.runner.to_dict(),
-            "result_regex": self.result_regex
+            "result_regex": self.result_regex,
+            "gp_config": self.gp_config
         }
 
     @staticmethod
@@ -77,7 +85,11 @@ class Experiment:
 
         runner = RunnerLoader.from_dict(data["runner"])
 
-        experiment = Experiment(hyperparameters, runner, data["result_regex"])
+        experiment = Experiment(hyperparameters,
+                runner,
+                data["result_regex"],
+                data["gp_config"])
+
         experiment.samples = samples
 
         return experiment
@@ -168,7 +180,7 @@ class Experiment:
 
         return X_sample, Y_sample
 
-    def suggest(self, model_config: ModelConfig) -> Tuple[HyperparamValues, Model]:
+    def suggest(self) -> Tuple[HyperparamValues, Model]:
         job_params: HyperparamValues
         fitted_model: Model
 
@@ -180,12 +192,11 @@ class Experiment:
             job_params = RandomSearch.predict_next(self.hyperparameters)
             fitted_model = RandomSearch()
         else:
-            from bopt.models.gpy_model import GPyModel
-
             X_sample, Y_sample = self.get_xy()
 
             try:
-                job_params, fitted_model = GPyModel.predict_next(model_config, self.hyperparameters, X_sample, Y_sample)
+                job_params, fitted_model = GPyModel.predict_next(self.gp_config,
+                        self.hyperparameters, X_sample, Y_sample)
             except OptimizationFailed as e:
                 logging.error("Optimization failed, retrying with RandomSearch: "
                     "{}".format(e))
@@ -195,16 +206,16 @@ class Experiment:
 
         return job_params, fitted_model
 
-    def run_next(self, model_config: ModelConfig, num_similar_retries: int = 5) -> Tuple[Model, Sample]:
+    def run_next(self, num_similar_retries: int = 5) -> Tuple[Model, Sample]:
         found_similar = True
 
         # This makes sure we try at least `num_similar_retries` times to re-run the job.
         while found_similar and num_similar_retries > 0:
             num_similar_retries -= 1
 
-            job_params, fitted_model = self.suggest(model_config)
+            job_params, fitted_model = self.suggest()
 
-            next_sample, found_similar = self.manual_run(model_config, job_params,
+            next_sample, found_similar = self.manual_run(job_params,
                     fitted_model.to_model_params())
 
         return fitted_model, next_sample
@@ -221,9 +232,8 @@ class Experiment:
         return [s for s in self.get_similar_samples(hyperparam_values)
                 if s.status() == CollectFlag.COLLECT_OK]
 
-    def manual_run(self, model_config: ModelConfig,
-            hyperparam_values: HyperparamValues,
-            model_params: ModelParameters) -> Tuple[Sample, bool]:
+    def manual_run(self, hyperparam_values: HyperparamValues,
+                         model_params: ModelParameters) -> Tuple[Sample, bool]:
         assert isinstance(hyperparam_values, HyperparamValues)
 
         output_dir_path = pathlib.Path("output")
@@ -288,13 +298,15 @@ class Experiment:
 
                 if model_params.can_predict_mean():
                     # Use the fitted model to predict mu/sigma.
-                    gpy_model = GPyModel.from_model_params(model_params,
-                            X_sample, Y_sample)
+                    gpy_model = GPyModel.from_model_params(self.gp_config,
+                                                           model_params,
+                                                           X_sample, Y_sample)
 
                     model = gpy_model.model
 
                 else:
-                    model = GPyModel.gpy_regression(model_config, X_sample, Y_sample)
+                    # TODO: gpy pouzito na 2 mistech?
+                    model = GPyModel.gpy_regression(self.gp_config, X_sample, Y_sample)
 
                 X_next = np.array([hyperparam_values.x])
 

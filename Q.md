@@ -1,13 +1,19 @@
 # TODO
 
+- mf=8G,amf=8G,h_vmem=12G vs mem_free=8G,act_mem_free=8G,h_data=12G   (/grid vs /gpu)
+
+- jak predavat --threads?
+
 - moznost pouzit bud gamma prior nebo constraint
+- fitnout mean fci
+- ARD=True u kernelu
+  - moznost to zapnout jako option
+- pocet optimize restarts jako param
+
 - [x] skipnout prvnich num_random + 1 samplu u kernel param plotu
 - moznost poustet jenom random search
 - [x] timeline
 - opravit zaokrouhlovani aby slo jen spravnymi smery :)
-- fitnout mean fci
-- ARD=True u kernelu
-  - moznost to zapnout jako option
 
 - kernel jako param u init
 - [x] nehardcodit jmeno kernelu do webu

@@ -12,7 +12,7 @@ from bopt.basic_types import Hyperparameter, Bound, Discrete, OptimizationFailed
 from bopt.models.model import Model
 from bopt.sample import Sample
 from bopt.models.parameters import ModelParameters
-from bopt.model_config import ModelConfig
+from bopt.gp_config import GPConfig
 from bopt.hyperparam_values import HyperparamValues
 
 # TODO: split into multiple, serialization separate?
@@ -41,12 +41,12 @@ class GPyModel(Model):
                 self.acquisition_fn.name())
 
     @staticmethod
-    def from_model_params(model_params: ModelParameters, X, Y) -> "GPyModel":
+    def from_model_params(gp_config: GPConfig, model_params: ModelParameters, X, Y) -> "GPyModel":
         # TODO: check that these are actually GPy params
         kernel_cls = GPyModel.parse_kernel_name(model_params.kernel)
 
         # TODO: vyrabet kernel jenom na jednom miste
-        kernel = kernel_cls(input_dim=X.shape[1], ARD=True)
+        kernel = kernel_cls(input_dim=X.shape[1], ARD=gp_config.ard)
 
         model = GPRegression(X, Y, kernel=kernel, normalizer=len(X) > 1)
 
@@ -58,31 +58,10 @@ class GPyModel(Model):
         return GPyModel(model, acquisition_fn)
 
     @staticmethod
-    def parse_kernel_name(name):
-        if name == "rbf":
-            return GPy.kern.RBF
-        elif name == "Mat32":
-            return GPy.kern.Matern32
-        elif name == "Mat52":
-            return GPy.kern.Matern52
-        else:
-            raise NotImplementedError(f"Unknown kernel name '{name}'.")
-
-    @staticmethod
-    def parse_acquisition_fn(name):
-        if name == "ei":
-            return acq.ExpectedImprovement()
-        elif name == "pi":
-            return acq.ProbabilityOfImprovement()
-        else:
-            raise NotImplementedError(f"Unknown acquisition function '{name}'.")
-
-    @staticmethod
-    def gpy_regression(model_config: ModelConfig,
-            X_sample: np.ndarray, Y_sample: np.ndarray) -> GPRegression:
+    def gpy_regression(gp_config: GPConfig, X_sample: np.ndarray, Y_sample: np.ndarray) -> GPRegression:
 
         # TODO: zkontrolovat, ze se kernely vyrabi jenom na jednom miste
-        kernel = GPyModel.parse_kernel_name(model_config.kernel)(X_sample.shape[1], ARD=True)
+        kernel = GPyModel.parse_kernel_name(gp_config.kernel)(X_sample.shape[1], ARD=gp_config.ard)
         # TODO: predava se kernel a acq vsude?
 
         # If there is only one sample, .std() == 0 and Y ends up being NaN.
@@ -90,38 +69,40 @@ class GPyModel(Model):
 
         logging.debug("GPY hyperparam optimization start")
 
-        # TODO: zamyslet se
-        model.kern.variance.set_prior(GPy.priors.Gamma(1., 0.1))
-        model.kern.lengthscale.set_prior(GPy.priors.Gamma(1., 0.1))
+        if gp_config.gamma_prior:
+            # TODO: noise prior?
+            model.kern.variance.set_prior(GPy.priors.Gamma(1., 0.1))
+            model.kern.lengthscale.set_prior(GPy.priors.Gamma(1., 0.1))
+        else:
+            min_bound = 1e-2
+            max_bound = 1e3
 
-        min_bound = 1e-2
-        max_bound = 1e3
+            model.kern.variance.unconstrain()
+            model.kern.variance.constrain_bounded(min_bound, max_bound)
 
-        # model.kern.variance.unconstrain()
-        # model.kern.variance.constrain_bounded(min_bound, max_bound)
-        #
-        # model.kern.lengthscale.unconstrain()
-        # model.kern.lengthscale.constrain_bounded(min_bound, max_bound)
-        #
-        # model.Gaussian_noise.variance.unconstrain()
-        # model.Gaussian_noise.variance.constrain_bounded(min_bound, max_bound)
+            model.kern.lengthscale.unconstrain()
+            model.kern.lengthscale.constrain_bounded(min_bound, max_bound)
 
-        # model.Gaussian_noise.set_prior(GPy.priors.Gamma(1., 0.1))
-        model.optimize_restarts(25)
+            model.Gaussian_noise.variance.unconstrain()
+            model.Gaussian_noise.variance.constrain_bounded(min_bound, max_bound)
+
+            # model.Gaussian_noise.set_prior(GPy.priors.Gamma(1., 0.1))
+
+        model.optimize_restarts(gp_config.num_optimize_restarts)
 
         logging.debug("GPY hyperparam optimization DONE, params: {}".format(model.param_array))
 
         return model
 
     @staticmethod
-    def predict_next(model_config: ModelConfig,
+    def predict_next(gp_config: GPConfig,
             hyperparameters: List[Hyperparameter],
             X_sample: np.ndarray, Y_sample: np.ndarray) -> Tuple[HyperparamValues, "Model"]:
         # TODO: compare NLL with and without normalizer
         assert not np.any(np.isnan(Y_sample))
 
-        model = GPyModel.gpy_regression(model_config, X_sample, Y_sample)
-        acquisition_fn = GPyModel.parse_acquisition_fn(model_config.acquisition_fn)
+        model = GPyModel.gpy_regression(gp_config, X_sample, Y_sample)
+        acquisition_fn = GPyModel.parse_acquisition_fn(gp_config.acquisition_fn)
 
         x_next = GPyModel.propose_location(acquisition_fn, model, Y_sample.max(),
                 hyperparameters)
@@ -169,3 +150,23 @@ class GPyModel(Model):
         logging.debug("Finished propose_location")
 
         return min_x
+
+    @staticmethod
+    def parse_kernel_name(name):
+        if name == "rbf":
+            return GPy.kern.RBF
+        elif name == "Mat32":
+            return GPy.kern.Matern32
+        elif name == "Mat52":
+            return GPy.kern.Matern52
+        else:
+            raise NotImplementedError(f"Unknown kernel name '{name}'.")
+
+    @staticmethod
+    def parse_acquisition_fn(name):
+        if name == "ei":
+            return acq.ExpectedImprovement()
+        elif name == "pi":
+            return acq.ProbabilityOfImprovement()
+        else:
+            raise NotImplementedError(f"Unknown acquisition function '{name}'.")

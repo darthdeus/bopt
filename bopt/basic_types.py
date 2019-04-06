@@ -175,7 +175,7 @@ class LogscaleInt(Bound):
         return True
 
     def validate(self, value: ParamTypes) -> bool:
-        assert isinstance(value, int)
+        assert isinstance(value, int), "value {} is not int".format(value)
         return self.low <= value < self.high
 
     def __repr__(self) -> str:
@@ -188,7 +188,7 @@ class LogscaleInt(Bound):
         return round(LOGSCALE_BASE ** value)
 
     def parse(self, value: str) -> ParamTypes:
-        return float(value)
+        return int(value)
 
     def scipy_bound_tuple(self) -> Tuple[float, float]:
         return (np.log10(self.low), np.log10(self.high) - 1e-8)

@@ -28,7 +28,8 @@ def run(args) -> None:
                 sample_col = bopt.SampleCollection(processed_samples)
                 X, Y = sample_col.to_xy()
 
-                model = GPyModel.from_model_params(sample.model, X, Y)
+                model = GPyModel.from_model_params(experiment.gp_config,
+                        sample.model, X, Y)
 
                 try:
                     plot_current(experiment, model, sample.to_x())

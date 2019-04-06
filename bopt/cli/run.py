@@ -17,8 +17,6 @@ def run(args) -> None:
 
         n_started = 0
 
-        model_config = bopt.ModelConfig(args)
-
         while n_started < args.n_iter:
             with acquire_lock():
                 experiment = bopt.Experiment.deserialize()
@@ -29,7 +27,7 @@ def run(args) -> None:
                 if num_running < args.n_parallel:
                     experiment.collect_results()
 
-                    fitted_model, sample = experiment.run_next(model_config)
+                    fitted_model, sample = experiment.run_next()
                     logging.info("[{}/{}] Started a new evaluation"\
                            .format(n_started, args.n_iter))
 

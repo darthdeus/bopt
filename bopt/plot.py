@@ -81,8 +81,8 @@ def plot_current(experiment: Experiment, gpy_model: Model,
 
     model = gpy_model.model
 
-    param_str = "ls: {:.3f}, variance: {:.3f}, noise: {:.3f}".format(
-        float(model.kern.lengthscale),
+    param_str = "ls: {}, variance: {:.3f}, noise: {:.3f}".format(
+        model.kern.lengthscale,
         float(model.kern.variance),
         float(model.Gaussian_noise.variance)
     )

@@ -18,7 +18,7 @@ def run(args) -> None:
             experiment = bopt.Experiment.deserialize()
             experiment.collect_results()
 
-            next_params, fitted_model = experiment.suggest(bopt.ModelConfig(args))
+            next_params, fitted_model = experiment.suggest()
 
             param_str = "\n".join([f"{key.name}: {value}"
                 for key, value in next_params.mapping.items()])
