@@ -130,7 +130,7 @@ def run(args) -> None:
             x_slice = sample.hyperparam_values.x
 
             X_sample, Y_sample = experiment.get_xy()
-            gpy_model = bopt.GPyModel.from_model_params(sample.model, X_sample, Y_sample)
+            gpy_model = bopt.GPyModel.from_model_params(experiment.gp_config, sample.model, X_sample, Y_sample)
 
             model = gpy_model.model
 

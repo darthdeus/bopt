@@ -20,7 +20,7 @@ class AcquisitionFunction(abc.ABC):
         return self.raw_call(mu, sigma, f_s, xi)
 
     @abc.abstractmethod
-    def raw_call(self, mu: np.ndarray, sigma: np.ndarray, f_s: float, xi: float=0.01) -> np.ndarray:
+    def raw_call(self, mu: np.ndarray, sigma: np.ndarray, f_s: float, xi: float=0.001) -> np.ndarray:
         pass
 
     @abc.abstractmethod
@@ -29,7 +29,7 @@ class AcquisitionFunction(abc.ABC):
 
 
 class ExpectedImprovement(AcquisitionFunction):
-    def raw_call(self, mu: np.ndarray, sigma: np.ndarray, f_s: float, xi: float=0.01) -> np.ndarray:
+    def raw_call(self, mu: np.ndarray, sigma: np.ndarray, f_s: float, xi: float=0.001) -> np.ndarray:
         # TODO: neni to opacne?
         improvement = mu - f_s - xi
         Z = improvement / sigma
@@ -42,7 +42,7 @@ class ExpectedImprovement(AcquisitionFunction):
 
 
 class ProbabilityOfImprovement(AcquisitionFunction):
-    def raw_call(self, mu: np.ndarray, sigma: np.ndarray, f_s: float, xi: float=0.01) -> np.ndarray:
+    def raw_call(self, mu: np.ndarray, sigma: np.ndarray, f_s: float, xi: float=0.001) -> np.ndarray:
         improvement = mu - f_s - xi
         Z = improvement / sigma
 

@@ -185,7 +185,7 @@ class Experiment:
         fitted_model: Model
 
         # TODO: overit, ze by to fungovalo i na ok+running a mean_pred
-        if len(self.samples_for_prediction()) == 0:
+        if len(self.samples_for_prediction()) < 2:
             logging.info("No existing samples found, overloading suggest "
                 "with RandomSearch.")
 

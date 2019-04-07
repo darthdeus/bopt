@@ -27,7 +27,7 @@ sfntest:
 		--qsub=cpu-troja.q \
 		-C results/sfn \
 		$(PWD)/experiments/time_sfn_runner.sh $(PWD)
-	$(BOPT) run --n_iter=10 -C results/sfn
+	$(BOPT) run --n_iter=10 --n_parallel=1 -C results/sfn
 
 lab02-cartpole:
 	rm -rf results/l2cartpole
