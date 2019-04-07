@@ -1,9 +1,12 @@
 # TODO
 
+- adam vs sgd + momentum vs blabla parametry co se vylucuji
+
 - mf=8G,amf=8G,h_vmem=12G vs mem_free=8G,act_mem_free=8G,h_data=12G   (/grid vs /gpu)
 
 - jak predavat --threads?
 
+- zobrazovat output failnuteho jobu
 - zkontrolovat implementaci EI
 - moznost zadat manualni slice point (predvyplnovat podle selekce)
 - moznost prekliknout jestli slice v max nebo v next nebo tak neco

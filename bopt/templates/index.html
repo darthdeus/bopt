@@ -83,12 +83,17 @@
                 {% else %}
                   <span class="badge badge-secondary">
                 {% endif %}
-                    {{sample.short_collect_flag_str()}}: {{sample.result | round(2)}}
+                    {{sample.short_collect_flag_str()}}:
+                    {% if sample.result %}
+                      {{sample.result | round(2)}}
+                    {% else %}
+                      noresult
+                    {% endif %}
                   </span>
               </span>
 
               <!-- <h6 class="card&#45;subtitle mb&#45;2 text&#45;muted"> -->
-              <!--   result={{sample.result | round(2)}} -->
+              <!--   result= -->
               <!-- </h6> -->
               <!-- <p class="card&#45;text">Some quick example text to build on the card title and make up the bulk of the card's content.</p> -->
               <!-- <a href="#" class="card&#45;link">Card link</a> -->
@@ -372,7 +377,11 @@
             {% endif %}
             <td>
               <span title="{{sample_end_time}}">
-                {{sample_end_time.time()}}
+                {% if sample_end_time %}
+                  {{sample_end_time.time()}}
+                {% else %}
+                  notime
+                {% endif %}
               </span>
             </td>
 

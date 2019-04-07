@@ -109,34 +109,52 @@ def create_slice_1d(i: int, experiment: bopt.Experiment, resolution: int,
 
 def create_slice_2d(i: int, j: int, experiment: bopt.Experiment, resolution: int,
         n_dims: int, x_slice: List[float], model: GPy.models.GPRegression, sample: bopt.Sample) -> Slice1D:
+
+    # x_plot = np.zeros([resolution, n_dims], dtype=np.float32)
+    # y_plot = np.zeros([resolution, n_dims], dtype=np.float32)
+    #
+    # for dim in range(n_dims):
+    #     if dim == i:
+    #         x_plot[:, dim] = gx
+    #     else:
+    #         x_plot[:, dim] = np.full([resolution], x_slice[dim], dtype=np.float32)
+    #
+    # for dim in range(n_dims):
+    #     if dim == j:
+    #         y_plot[:, dim] = gy
+    #     else:
+    #         y_plot[:, dim] = np.full([resolution], x_slice[dim], dtype=np.float32)
+
     px = experiment.hyperparameters[i]
     py = experiment.hyperparameters[j]
 
-    gx = px.range.grid(resolution)
-    gy = py.range.grid(resolution)
+    dx = px.range.grid(resolution)
+    dy = py.range.grid(resolution)
 
-    x_plot = np.zeros([resolution, n_dims], dtype=np.float32)
-    y_plot = np.zeros([resolution, n_dims], dtype=np.float32)
+    gx, gy = np.meshgrid(dx, dy)
 
-    for dim in range(n_dims):
-        if dim == i:
-            x_plot[:, dim] = gx
-        else:
-            x_plot[:, dim] = np.full([resolution], x_slice[dim], dtype=np.float32)
+    gs = [0.0] * len(x_slice)
+    gs[i] = gx
+    gs[j] = gy
 
-    for dim in range(n_dims):
-        if dim == j:
-            y_plot[:, dim] = gy
-        else:
-            y_plot[:, dim] = np.full([resolution], x_slice[dim], dtype=np.float32)
+    for dim in range(len(x_slice)):
+        if dim not in [i, j]:
+            gs[i] = np.full(gx.shape, x_slice[i])
 
+    grid = np.stack(gs, axis=-1)
 
-    mu, var = model.predict(X_plot)
+    X_pred = grid.reshape(resolution * resolution, -1)
+
+    mu, var = model.predict(X_pred)
     mu = mu.reshape(-1)
     sigma = np.sqrt(var).reshape(-1)
 
     acq = bopt.ExpectedImprovement().raw_call(mu, sigma, model.Y.max())\
             .reshape(-1)
+
+    mu    = mu.reshape(resolution, resolution)
+    sigma = sigma.reshape(resolution, resolution)
+    acq   = acq.reshape(resolution, resolution)
 
     other_samples: Dict[str, List[float]] = defaultdict(list)
 
@@ -240,8 +258,8 @@ def run(args) -> None:
                     if i == j:
                         slices_1d.append(create_slice_1d(i, experiment, resolution, n_dims, x_slice, model, sample))
 
-                    elif i < j:
-                        slices_2d.append(create_slice_2d(i, j, experiment, resolution, n_dims, x_slice, model, sample))
+                    # elif i < j:
+                    #     slices_2d.append(create_slice_2d(i, j, experiment, resolution, n_dims, x_slice, model, sample))
 
 
         return render_template("index.html",
