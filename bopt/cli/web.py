@@ -63,15 +63,11 @@ class Slice1D:
 
         return low - margin, high + margin
 
-
 def create_slice_1d(i: int, experiment: bopt.Experiment, resolution: int,
         n_dims: int, x_slice: List[float], model: GPy.models.GPRegression, sample: bopt.Sample) -> Slice1D:
     param = experiment.hyperparameters[i]
 
-    if param.range.is_logscale():
-        grid = np.linspace(math.log10(param.range.low), math.log10(param.range.high), num=resolution)
-    else:
-        grid = np.linspace(param.range.low, param.range.high, num=resolution)
+    grid = param.range.grid(resolution)
 
     X_plot = np.zeros([resolution, n_dims], dtype=np.float32)
 
@@ -108,15 +104,62 @@ def create_slice_1d(i: int, experiment: bopt.Experiment, resolution: int,
         x_slice_dim = x_slice[i]
         x_plot = grid
 
-    slice1d = Slice1D(param,
-            x_plot.tolist(),
-            x_slice_dim,
-            mu.tolist(),
-            sigma.tolist(),
-            acq.tolist(),
-            other_samples)
+    return Slice1D(param, x_plot.tolist(), x_slice_dim, mu.tolist(),
+                   sigma.tolist(), acq.tolist(), other_samples)
 
-    return slice1d
+def create_slice_2d(i: int, j: int, experiment: bopt.Experiment, resolution: int,
+        n_dims: int, x_slice: List[float], model: GPy.models.GPRegression, sample: bopt.Sample) -> Slice1D:
+    px = experiment.hyperparameters[i]
+    py = experiment.hyperparameters[j]
+
+    gx = px.range.grid(resolution)
+    gy = py.range.grid(resolution)
+
+    x_plot = np.zeros([resolution, n_dims], dtype=np.float32)
+    y_plot = np.zeros([resolution, n_dims], dtype=np.float32)
+
+    for dim in range(n_dims):
+        if dim == i:
+            x_plot[:, dim] = gx
+        else:
+            x_plot[:, dim] = np.full([resolution], x_slice[dim], dtype=np.float32)
+
+    for dim in range(n_dims):
+        if dim == j:
+            y_plot[:, dim] = gy
+        else:
+            y_plot[:, dim] = np.full([resolution], x_slice[dim], dtype=np.float32)
+
+
+    mu, var = model.predict(X_plot)
+    mu = mu.reshape(-1)
+    sigma = np.sqrt(var).reshape(-1)
+
+    acq = bopt.ExpectedImprovement().raw_call(mu, sigma, model.Y.max())\
+            .reshape(-1)
+
+    other_samples: Dict[str, List[float]] = defaultdict(list)
+
+    for other in experiment.samples:
+        if other.created_at <= sample.created_at:
+            other_x, other_y = other.to_xy()
+            other_x = float(other_x.tolist()[i])
+
+            if param.range.is_logscale():
+                other_x = 10.0 ** other_x
+
+            other_samples["x"].append(other_x)
+            other_samples["y"].append(other_y)
+
+    if param.range.is_logscale():
+        x_slice_dim = 10.0 ** x_slice[i]
+        x_plot = 10.0 ** grid
+    else:
+        x_slice_dim = x_slice[i]
+        x_plot = grid
+
+    return Slice1D(param, x_plot.tolist(), x_slice_dim, mu.tolist(),
+                   sigma.tolist(), acq.tolist(), other_samples)
 
 
 class PosteriorSlice(NamedTuple):
@@ -181,6 +224,7 @@ def run(args) -> None:
         print("picked sample", sample)
 
         slices_1d = []
+        slices_2d = []
         resolution = 80
 
         if sample and not random_search_picked:
@@ -194,10 +238,10 @@ def run(args) -> None:
             for i in range(n_dims):
                 for j in range(n_dims):
                     if i == j:
-                        slice1d = create_slice_1d(i)
+                        slices_1d.append(create_slice_1d(i, experiment, resolution, n_dims, x_slice, model, sample))
 
-
-                        slices_1d.append(slice1d)
+                    elif i < j:
+                        slices_2d.append(create_slice_2d(i, j, experiment, resolution, n_dims, x_slice, model, sample))
 
 
         return render_template("index.html",
@@ -213,6 +257,7 @@ def run(args) -> None:
                 CollectFlag=bopt.CollectFlag,
 
                 slices_1d=slices_1d,
+                slices_2d=slices_2d,
 
                 sorted_samples=sorted_samples,
 

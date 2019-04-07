@@ -1,4 +1,6 @@
 import abc
+import math
+
 import numpy as np
 from enum import Enum
 from typing import Union, NamedTuple, List, Tuple, Type
@@ -60,6 +62,14 @@ class Bound(abc.ABC):
     @abc.abstractmethod
     def compare_values(self, a: ParamTypes, b: ParamTypes) -> bool:
         pass
+
+    def grid(self, resolution: int) -> np.ndarray:
+        if self.is_logscale():
+            grid = np.linspace(math.log10(self.low), math.log10(self.high), num=resolution)
+        else:
+            grid = np.linspace(self.low, self.high, num=resolution)
+
+        return grid
 
 
 class Integer(Bound):
