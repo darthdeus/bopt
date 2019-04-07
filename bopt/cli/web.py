@@ -7,6 +7,7 @@ import numpy as np
 from typing import NamedTuple, List, Tuple, Dict
 from livereload import Server
 from flask import Flask, render_template, request
+import GPy
 
 import bopt
 from bopt.cli.util import handle_cd_revertible, acquire_lock
@@ -61,6 +62,61 @@ class Slice1D:
         margin = (high - low) * 0.05
 
         return low - margin, high + margin
+
+
+def create_slice_1d(i: int, experiment: bopt.Experiment, resolution: int,
+        n_dims: int, x_slice: List[float], model: GPy.models.GPRegression, sample: bopt.Sample) -> Slice1D:
+    param = experiment.hyperparameters[i]
+
+    if param.range.is_logscale():
+        grid = np.linspace(math.log10(param.range.low), math.log10(param.range.high), num=resolution)
+    else:
+        grid = np.linspace(param.range.low, param.range.high, num=resolution)
+
+    X_plot = np.zeros([resolution, n_dims], dtype=np.float32)
+
+    for dim in range(n_dims):
+        if dim == i:
+            X_plot[:, dim] = grid
+        else:
+            X_plot[:, dim] = np.full([resolution], x_slice[dim], dtype=np.float32)
+
+    mu, var = model.predict(X_plot)
+    mu = mu.reshape(-1)
+    sigma = np.sqrt(var).reshape(-1)
+
+    acq = bopt.ExpectedImprovement().raw_call(mu, sigma, model.Y.max())\
+            .reshape(-1)
+
+    other_samples: Dict[str, List[float]] = defaultdict(list)
+
+    for other in experiment.samples:
+        if other.created_at <= sample.created_at:
+            other_x, other_y = other.to_xy()
+            other_x = float(other_x.tolist()[i])
+
+            if param.range.is_logscale():
+                other_x = 10.0 ** other_x
+
+            other_samples["x"].append(other_x)
+            other_samples["y"].append(other_y)
+
+    if param.range.is_logscale():
+        x_slice_dim = 10.0 ** x_slice[i]
+        x_plot = 10.0 ** grid
+    else:
+        x_slice_dim = x_slice[i]
+        x_plot = grid
+
+    slice1d = Slice1D(param,
+            x_plot.tolist(),
+            x_slice_dim,
+            mu.tolist(),
+            sigma.tolist(),
+            acq.tolist(),
+            other_samples)
+
+    return slice1d
 
 
 class PosteriorSlice(NamedTuple):
@@ -125,6 +181,7 @@ def run(args) -> None:
         print("picked sample", sample)
 
         slices_1d = []
+        resolution = 80
 
         if sample and not random_search_picked:
             x_slice = sample.hyperparam_values.x
@@ -137,61 +194,8 @@ def run(args) -> None:
             for i in range(n_dims):
                 for j in range(n_dims):
                     if i == j:
-                        param = experiment.hyperparameters[i]
+                        slice1d = create_slice_1d(i)
 
-                        resolution = 80
-
-                        if param.range.is_logscale():
-                            grid = np.linspace(math.log10(param.range.low), math.log10(param.range.high), num=resolution)
-                        else:
-                            grid = np.linspace(param.range.low, param.range.high, num=resolution)
-
-                        X_plot = np.zeros([resolution, n_dims], dtype=np.float32)
-
-                        for dim in range(n_dims):
-                            if dim == i:
-                                X_plot[:, dim] = grid
-                            else:
-                                X_plot[:, dim] = np.full([resolution], x_slice[dim], dtype=np.float32)
-
-                        mu, var = model.predict(X_plot)
-                        mu = mu.reshape(-1)
-                        sigma = np.sqrt(var).reshape(-1)
-
-                        acq = bopt.ExpectedImprovement().raw_call(mu, sigma, model.Y.max())\
-                                .reshape(-1)
-
-                        x_slice_at = sample.hyperparam_values.x[i]
-
-                        if param.range.is_logscale():
-                            x_slice_at = 10.0 ** x_slice_at
-                            x_plot = 10.0 ** grid
-                        else:
-                            x_plot = grid
-
-                        other_samples = {
-                            "x": [],
-                            "y": [],
-                        }
-
-                        for other in experiment.samples:
-                            if other.created_at <= sample.created_at:
-                                other_x, other_y = other.to_xy()
-                                other_x = float(other_x.tolist()[i])
-
-                                if param.range.is_logscale():
-                                    other_x = 10.0 ** other_x
-
-                                other_samples["x"].append(other_x)
-                                other_samples["y"].append(other_y)
-
-                        slice1d = Slice1D(param,
-                                x_plot.tolist(),
-                                x_slice_at,
-                                mu.tolist(),
-                                sigma.tolist(),
-                                acq.tolist(),
-                                other_samples)
 
                         slices_1d.append(slice1d)
 

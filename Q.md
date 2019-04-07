@@ -4,11 +4,17 @@
 
 - jak predavat --threads?
 
-- moznost pouzit bud gamma prior nebo constraint
+- zkontrolovat implementaci EI
+- moznost zadat manualni slice point (predvyplnovat podle selekce)
+- moznost prekliknout jestli slice v max nebo v next nebo tak neco
+- seedy!
+
+- funguje manual-run?
 - fitnout mean fci
-- ARD=True u kernelu
-  - moznost to zapnout jako option
-- pocet optimize restarts jako param
+- [x] moznost pouzit bud gamma prior nebo constraint
+- [x] ARD=True u kernelu
+  - [x] moznost to zapnout jako option
+- [x] pocet optimize restarts jako param
 
 - [x] skipnout prvnich num_random + 1 samplu u kernel param plotu
 - moznost poustet jenom random search
@@ -23,7 +29,7 @@
 
 - web
   - NxN grid mean + acq
-    - 1d
+    - [x] 1d
     - 2d
   - interpolace mezi 2 body hyperparam + plot slicu v lib. 0d, 1d, 2d ose
   - burty!
