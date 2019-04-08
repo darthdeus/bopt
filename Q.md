@@ -1,5 +1,26 @@
 # TODO
 
+
+tail -F bopt.o5400313
+
+Traceback (most recent call last):
+  File "/home/arnold/.venvs/bopt/bin/bopt", line 11, in <module>
+    load_entry_point('bopt', 'console_scripts', 'bopt')()
+  File "/lnet/spec/work/people/arnold/bopt/bopt/cli/cli.py", line 205, in main
+    args.func(args)
+  File "/lnet/spec/work/people/arnold/bopt/bopt/cli/run.py", line 22, in run
+    experiment = bopt.Experiment.deserialize()
+  File "/lnet/spec/work/people/arnold/bopt/bopt/experiment.py", line 348, in deserialize
+    with open("meta.yml", "r") as f:
+FileExistsError: [Errno 17] File exists: 'meta.yml'
+======= EPILOG: Mon Apr 8 00:54:02 CEST 2019
+== Limits:
+== Usage:    cpu=00:00:00, mem=0.00000 GB s, io=0.00000 GB, vmem=N/A, maxvmem=N/A
+== Duration: 00:00:27 (27 s)
+== Server name: paris4
+
+
+
 - adam vs sgd + momentum vs blabla parametry co se vylucuji
 
 - mf=8G,amf=8G,h_vmem=12G vs mem_free=8G,act_mem_free=8G,h_data=12G   (/grid vs /gpu)
