@@ -1,7 +1,8 @@
 # TODO
 
+- nejde statnice a obhajoba najednou? :O
 
-tail -F bopt.o5400313
+- tail -F bopt.o5400313
 
 Traceback (most recent call last):
   File "/home/arnold/.venvs/bopt/bin/bopt", line 11, in <module>

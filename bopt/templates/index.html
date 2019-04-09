@@ -147,7 +147,6 @@
 
         <h2>1D slices</h2>
 
-        <!-- <p>Selected sample: {{picked_sample}}</p> -->
         <p>Hyperparams: {{picked_sample.hyperparam_values}}</p>
 
         <div class="row">
@@ -157,61 +156,33 @@
               Plotly.plot("slice-param-{{loop.index0}}", [
                 {
                   name: "mean",
-                  x: {{slice.x|safe}},
-                  y: {{slice.mu|safe}},
-                  // mode: "markers",
-
-                  line: {
-                    color: "rgb(0, 120, 255)",
-                    width: 4,
-                  }
+                  x: {{slice.x|safe}}, y: {{slice.mu|safe}},
+                  line: { color: "rgb(0, 120, 255)", width: 4, }
                 },
 
                 {
                   name: "sigma low",
-                  x: {{slice.x|safe}},
-                  y: {{slice.sigma_low()|safe}},
-                  marker: {
-                    color: "rgb(0.55, 0.55, 0.55)"
-                  }
+                  x: {{slice.x|safe}}, y: {{slice.sigma_low()|safe}},
+                  marker: { color: "rgb(0.55, 0.55, 0.55)" }
                 },
 
                 {
                   name: "sigma high",
                   // fill: "tonexty",
-                  x: {{slice.x|safe}},
-                  y: {{slice.sigma_high()|safe}},
-                  marker: {
-                    color: "rgb(0.55, 0.55, 0.55)"
-                  }
+                  x: {{slice.x|safe}}, y: {{slice.sigma_high()|safe}},
+                  marker: { color: "rgb(0.55, 0.55, 0.55)" }
                 },
 
                 {
-                  name: "acquisition fn",
-                  x: {{slice.x|safe}},
-                  y: {{slice.acq|safe}},
-                  yaxis: "y2",
-                  mode: "lines",
-
-                  line: {
-                    color: "rgb(200, 0, 0)",
-                    width: 2,
-                  }
+                  name: "acquisition fn", yaxis: "y2", mode: "lines",
+                  x: {{slice.x|safe}}, y: {{slice.acq|safe}},
+                  line: { color: "rgb(200, 0, 0)", width: 2, }
                 },
 
                 {
-                  name: "samples",
-                  x: {{slice.other_samples["x"]|safe}},
-                  y: {{slice.other_samples["y"]|safe}},
-                  mode: "markers",
-
-                  marker: {
-                    color: "rgb(255, 180, 90)",
-                    size: 10,
-                    line: {
-                      width: 1
-                    }
-                  }
+                  name: "samples", mode: "markers",
+                  x: {{slice.other_samples["x"]|safe}}, y: {{slice.other_samples["y"]|safe}},
+                  marker: { color: "rgb(255, 180, 90)", size: 10, line: { width: 1 } }
                 },
 
 
@@ -219,39 +190,81 @@
                 title: "{{slice.param.name}}={{slice.x_slice_at | round(2)}} ... {{slice.param.range}}",
                 xaxis: {
                   title: "{{slice.param.name}}",
-                  range: [
-                    {{slice.x_range()[0]}}, {{slice.x_range()[1]}}
-                  ],
+                  range: [ {{slice.x_range()[0]}}, {{slice.x_range()[1]}} ],
                   {% if slice.param.range.is_logscale() %}
-                    type: "log",
-                    autorange: true
+                    type: "log", autorange: true
                   {% endif %}
                 },
-                yaxis: { title: "value" },
-                yaxis2: {
-                  overlaying: "y",
-                  side: "right",
-                },
+                yaxis: { title: "value" }, yaxis2: { overlaying: "y", side: "right", },
 
                 shapes: [
                   {
-                    type: "line",
-                    x0: {{slice.x_slice_at}},
-                    x1: {{slice.x_slice_at}},
-                    y0: {{slice.mu_bounds()[0]}},
-                    y1: {{slice.mu_bounds()[1]}},
-                    line: {
-                      width: 5,
-                      color: "rgba(0, 0, 0, 0.6)"
-                    }
+                    type: "line", line: { width: 5, color: "rgba(0, 0, 0, 0.6)" },
+                    x0: {{slice.x_slice_at}},     x1: {{slice.x_slice_at}},
+                    y0: {{slice.mu_bounds()[0]}}, y1: {{slice.mu_bounds()[1]}},
                   }
                 ]
               });
             </script>
-
           {% endfor %}
         </div>
+
+        <hr/>
+
+        <h2>2D slices</h2>
+
+        <div class="row">
+          {% for slice in slices_2d %}
+            <div class="col-md-6" id="slice-2d-param-{{loop.index0}}"></div>
+            <script>
+              Plotly.plot("slice-2d-param-{{loop.index0}}", [
+                {
+                  name: "mean",
+                  x: {{slice.x1|safe}}, y: {{slice.x2|safe}},
+                  z: {{slice.mu|safe}},
+                  type: "heatmap",
+                  line: { color: "rgb(0, 120, 255)", width: 4, }
+                },
+
+                {
+                  name: "samples", mode: "markers",
+                  x: {{slice.other_samples["x1"]|safe}}, y: {{slice.other_samples["x2"]|safe}},
+                  marker: { color: "rgb(255, 180, 90)", size: 10, line: { width: 1 } }
+                },
+              ], {
+                // title: "{{slice.p1.name}}={slice.x_slice_at | round(2)} ... {{slice.p1.range}} {{slice.p2.range}}",
+                title: "{{slice.p1.name}} - {{slice.p2.name}}",
+                xaxis: {
+                  title: "{{slice.p1.name}}",
+                  // range: [ {slice.x_range()[0]}, {slice.x_range()[1]} ],
+                  {% if slice.p1.range.is_logscale() %}
+                    type: "log", autorange: true
+                  {% endif %}
+                },
+                yaxis: {
+                  title: "{{slice.p2.name}}",
+                  {% if slice.p2.range.is_logscale() %}
+                    type: "log", autorange: true
+                  {% endif %}
+                },
+
+                // shapes: [
+                //   {
+                //     type: "line", line: { width: 5, color: "rgba(0, 0, 0, 0.6)" }
+                //     x0: {slice.x_slice_at},     x1: {slice.x_slice_at},
+                //     y0: {slice.mu_bounds()[0]}, y1: {slice.mu_bounds()[1]},
+                //   }
+                // ]
+              });
+            </script>
+          {% endfor %}
+        </div>
+
       {% endif %}
+
+      <hr/>
+
+      <h2>Search overview</h2>
 
       <div class="row">
         <div class="col-md-6" id="kernel-params-plot"></div>
@@ -289,6 +302,8 @@
           });
         </script>
       </div>
+
+      <h2>All samples</h2>
 
       <table data-toggle="table" class="table table-bordered table-striped">
         <thead>
