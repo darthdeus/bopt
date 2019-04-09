@@ -387,7 +387,7 @@
             </td>
             <td>
               <span title="{{sample.created_at}}">
-                {{sample.created_at.time()}}
+                {{sample.created_at.strftime("%H:%M:%S")}}
               </span>
             </td>
 
@@ -399,7 +399,7 @@
             <td>
               <span title="{{sample_end_time}}">
                 {% if sample_end_time %}
-                  {{sample_end_time.time()}}
+                  {{sample_end_time.strftime("%H:%M:%S")}}
                 {% else %}
                   notime
                 {% endif %}
