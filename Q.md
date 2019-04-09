@@ -53,7 +53,7 @@ FileExistsError: [Errno 17] File exists: 'meta.yml'
 - [x] timeline
 - opravit zaokrouhlovani aby slo jen spravnymi smery :)
 
-- kernel jako param u init
+- [x] kernel jako param u init
 - [x] nehardcodit jmeno kernelu do webu
 - qstat na vsechny joby najednou pri pocitani running
 
@@ -64,10 +64,10 @@ FileExistsError: [Errno 17] File exists: 'meta.yml'
     - [x] 1d
     - 2d
   - interpolace mezi 2 body hyperparam + plot slicu v lib. 0d, 1d, 2d ose
-  - burty!
+  - [x] burty!
   - okraje v plotech
 
-  - graf acq fn
+  - [x] graf acq fn
   - grafy v dalsim bode
 
 - expected improvement per second
