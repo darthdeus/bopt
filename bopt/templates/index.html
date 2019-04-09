@@ -57,9 +57,9 @@
                   {% else %}
                     {% set badge_color = "info" %}
                   {% endif %}
-                    <a href="?sample_id={{sample.job.job_id}}" class="badge badge-{{badge_color}}">
-                        {{loop.index0}}.
-                    </a>
+                    <span class="badge badge-{{badge_color}}">
+                      {{loop.index0}}.
+                    </span>
                   </button>
 
                 {% else %}
@@ -69,7 +69,7 @@
                 {% endif %}
 
                 {% if sample.job %}
-                  <a class="badge" href="?sample_id={{sample.job.job_id}}">
+                  <a class="badge" href="?sample_id={{sample.job.job_id}}&show_acq={{show_acq}}">
                     {{sample.job.job_id}}
                   </a>
                 {% else %}
@@ -87,7 +87,7 @@
                     {% if sample.result %}
                       {{sample.result | round(2)}}
                     {% else %}
-                      noresult
+                      X
                     {% endif %}
                   </span>
               </span>
@@ -107,10 +107,19 @@
           <div class="card alert alert-danger" style="padding: 0">
             <div class="card-body" style="padding: 0.5rem">
               <span class="card-title">
-                <a href="/">Deselect</a>
+                <a href="/?show_acq={{show_acq}}">Deselect</a>
               </span>
             </div>
           </div>
+        </div>
+
+        <div class="col-md-1" style="padding: 0">
+          <div class="btn-group" role="group" aria-label="Basic example">
+            <a href="/?sample_id={{sample_id}}&show_acq=1"
+						   class="btn btn-secondary {{'disabled' if show_acq == 1}}">ACQ</a>
+            <a href="/?sample_id={{sample_id}}&show_acq=0"
+						   class="btn btn-secondary {{'disabled' if show_acq == 0}}">NO_ACQ</a>
+					</div>
         </div>
       </div>
 
@@ -173,11 +182,13 @@
                   marker: { color: "rgb(0.55, 0.55, 0.55)" }
                 },
 
-                {
-                  name: "acquisition fn", yaxis: "y2", mode: "lines",
-                  x: {{slice.x|safe}}, y: {{slice.acq|safe}},
-                  line: { color: "rgb(200, 0, 0)", width: 2, }
-                },
+                {% if show_acq == 1 %}
+                  {
+                    name: "acquisition fn", yaxis: "y2", mode: "lines",
+                    x: {{slice.x|safe}}, y: {{slice.acq|safe}},
+                    line: { color: "rgb(200, 0, 0)", width: 2, }
+                  },
+                {% endif %}
 
                 {
                   name: "samples", mode: "markers",
@@ -201,7 +212,7 @@
                   {
                     type: "line", line: { width: 5, color: "rgba(0, 0, 0, 0.6)" },
                     x0: {{slice.x_slice_at}},     x1: {{slice.x_slice_at}},
-                    y0: {{slice.mu_bounds()[0]}}, y1: {{slice.mu_bounds()[1]}},
+                    y0: {{slice.mu_bounds(show_acq)[0]}}, y1: {{slice.mu_bounds(show_acq)[1]}},
                   }
                 ]
               });
@@ -309,6 +320,14 @@
         </script>
       </div>
 
+      {% if picked_sample %}
+        <h2>Job output</h2>
+
+        <pre>
+          {{picked_sample.get_output()}}
+        </pre>
+      {% endif %}
+
       <h2>All samples</h2>
 
       <table data-toggle="table" class="table table-bordered table-striped">
@@ -329,7 +348,7 @@
           <tr>
             <td>
               {% if sample.job %}
-                <a class="badge" href="?sample_id={{sample.job.job_id}}">
+                <a class="badge" href="?sample_id={{sample.job.job_id}}&show_acq={{show_acq}}">
                   {{sample.job.job_id}}
                 </a>
               {% else %}

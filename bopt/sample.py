@@ -145,6 +145,18 @@ class Sample:
 
         return x, y
 
+    def get_output(self):
+        # TODO: duplicitni
+        fname = os.path.join("output", f"job.o{self.job.job_id}")
+        print("Trying to get output of {}".format(os.path.abspath(fname)))
+        if os.path.exists(fname):
+            with open(fname, "r") as f:
+                contents = f.read().strip()[-100000:]
+                return contents
+        else:
+            return None
+
+
     def __str__(self) -> str:
         if self.job:
             s = f"{self.job.job_id}\t"

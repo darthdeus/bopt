@@ -46,11 +46,17 @@ class Slice1D:
     def sigma_high(self) -> List[float]:
         return [m + s for m, s in zip(self.mu, self.sigma)]
 
-    def mu_bounds(self) -> Tuple[float, float]:
+    def mu_bounds(self, show_acq: int) -> Tuple[float, float]:
         other_results = self.other_samples["y"]
 
-        return min(self.sigma_low() + self.acq + other_results), \
-               max(self.sigma_high() + self.acq + other_results)
+        if show_acq == 1:
+            low = min(self.sigma_low() + self.acq + other_results)
+            high = max(self.sigma_high() + self.acq + other_results)
+        else:
+            low = min(self.sigma_low() + other_results)
+            high = max(self.sigma_high() + other_results)
+
+        return low, high
 
     def x_range(self) -> Tuple[float, float]:
         low = self.param.range.low
@@ -268,6 +274,7 @@ def create_slice_2d(i: int, j: int, experiment: bopt.Experiment, resolution:
     return Slice2D(p1, p2, x1, x2, x1_slice_at, x2_slice_at, mu.tolist(), other_samples)
 
 
+# TODO: smazat
 class PosteriorSlice(NamedTuple):
     param: bopt.Hyperparameter
     x: List[float]
@@ -297,78 +304,85 @@ def run(args) -> None:
             experiment = bopt.Experiment.deserialize()
             experiment.collect_results()
 
-        sample_results = [s.result for s in experiment.samples if s.result]
-        sample_results_cummax = np.maximum.accumulate(sample_results).tolist()
+            # TODO: zbytek asi neni potreba mit pod lockem, ale pak nejde
+            #       cist output
 
-        kernel_param_timeline = defaultdict(list)
+            sample_results = [s.result for s in experiment.samples if s.result]
+            sample_results_cummax = np.maximum.accumulate(sample_results).tolist()
 
-        sorted_samples = sorted(experiment.samples, key=lambda x: x.created_at)
+            kernel_param_timeline = defaultdict(list)
 
-        num_random = len([s for s in sorted_samples if s.model.sampled_from_random_search()])
+            sorted_samples = sorted(experiment.samples, key=lambda x: x.created_at)
 
-        for i, sample in enumerate(sorted_samples):
-            if i < num_random + 1:
-                continue
+            num_random = len([s for s in sorted_samples if s.model.sampled_from_random_search()])
 
-            for key, value in sample.model.params.items():
-                if isinstance(value, list):
-                    for v, h in zip(value, experiment.hyperparameters):
-                        kernel_param_timeline["{}_{}".format(key, h.name)].append(v)
-                else:
-                    kernel_param_timeline[key].append(value)
+            for i, sample in enumerate(sorted_samples):
+                if i < num_random + 1:
+                    continue
 
-        n_dims = len(experiment.hyperparameters)
+                for key, value in sample.model.params.items():
+                    if isinstance(value, list):
+                        for v, h in zip(value, experiment.hyperparameters):
+                            kernel_param_timeline["{}_{}".format(key, h.name)].append(v)
+                    else:
+                        kernel_param_timeline[key].append(value)
 
-        sample_id = request.args.get("sample_id") or -1
+            n_dims = len(experiment.hyperparameters)
 
-        sample = next((s for s in experiment.samples if s.job and s.job.job_id == int(sample_id)), None)
+            sample_id = int(request.args.get("sample_id") or -1)
+            show_acq = int(request.args.get("show_acq") or 0)
 
-        random_search_picked = False
-        if sample and sample.model.sampled_from_random_search():
-            random_search_picked = True
+            sample = next((s for s in experiment.samples if s.job and s.job.job_id == sample_id), None)
 
-        print("picked sample", sample)
+            random_search_picked = False
+            if sample and sample.model.sampled_from_random_search():
+                random_search_picked = True
 
-        slices_1d = []
-        slices_2d = []
-        resolution = 80
+            print("picked sample", sample)
 
-        if sample and not random_search_picked:
-            x_slice = sample.hyperparam_values.x
+            slices_1d = []
+            slices_2d = []
+            resolution = 80
 
-            X_sample, Y_sample = experiment.get_xy()
-            gpy_model = bopt.GPyModel.from_model_params(experiment.gp_config, sample.model, X_sample, Y_sample)
+            if sample and not random_search_picked:
+                x_slice = sample.hyperparam_values.x
 
-            model = gpy_model.model
+                X_sample, Y_sample = experiment.get_xy()
+                gpy_model = bopt.GPyModel.from_model_params(experiment.gp_config, sample.model, X_sample, Y_sample)
 
-            for i in range(n_dims):
-                for j in range(n_dims):
-                    if i == j:
-                        slices_1d.append(create_slice_1d(i, experiment, resolution, n_dims, x_slice, model, sample))
+                model = gpy_model.model
 
-                    elif i < j:
-                        slices_2d.append(create_slice_2d(i, j, experiment, resolution, n_dims, x_slice, model, sample))
+                for i in range(n_dims):
+                    for j in range(n_dims):
+                        if i == j:
+                            slices_1d.append(create_slice_1d(i, experiment, resolution, n_dims, x_slice, model, sample))
+
+                        elif i < j:
+                            slices_2d.append(create_slice_2d(i, j, experiment, resolution, n_dims, x_slice, model, sample))
 
 
-        return render_template("index.html",
-                experiment=experiment,
+            return render_template("index.html",
+                    experiment=experiment,
 
-                sample_results=sample_results,
-                sample_results_cummax=sample_results_cummax,
+                    sample_results=sample_results,
+                    sample_results_cummax=sample_results_cummax,
 
-                kernel_param_timeline=kernel_param_timeline,
+                    kernel_param_timeline=kernel_param_timeline,
 
-                picked_sample=sample,
+                    picked_sample=sample,
 
-                CollectFlag=bopt.CollectFlag,
+                    CollectFlag=bopt.CollectFlag,
 
-                slices_1d=slices_1d,
-                slices_2d=slices_2d,
+                    slices_1d=slices_1d,
+                    slices_2d=slices_2d,
 
-                sorted_samples=sorted_samples,
+                    sorted_samples=sorted_samples,
 
-                random_search_picked=random_search_picked,
-                )
+                    random_search_picked=random_search_picked,
+
+                    show_acq=show_acq,
+                    sample_id=sample_id,
+                    )
 
 
     # @app.route("/")
