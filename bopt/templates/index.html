@@ -236,25 +236,31 @@
                 title: "{{slice.p1.name}} - {{slice.p2.name}}",
                 xaxis: {
                   title: "{{slice.p1.name}}",
-                  // range: [ {slice.x_range()[0]}, {slice.x_range()[1]} ],
+                  range: [ {{slice.x1_bounds()[0]}}, {{slice.x1_bounds()[1]}} ],
                   {% if slice.p1.range.is_logscale() %}
                     type: "log", autorange: true
                   {% endif %}
                 },
                 yaxis: {
                   title: "{{slice.p2.name}}",
+                  range: [ {{slice.x2_bounds()[0]}}, {{slice.x2_bounds()[1]}} ],
                   {% if slice.p2.range.is_logscale() %}
                     type: "log", autorange: true
                   {% endif %}
                 },
 
-                // shapes: [
-                //   {
-                //     type: "line", line: { width: 5, color: "rgba(0, 0, 0, 0.6)" }
-                //     x0: {slice.x_slice_at},     x1: {slice.x_slice_at},
-                //     y0: {slice.mu_bounds()[0]}, y1: {slice.mu_bounds()[1]},
-                //   }
-                // ]
+                shapes: [
+                  {
+                    type: "line", line: { width: 5, color: "rgba(0, 0, 0, 0.6)" },
+                    x0: {{slice.x1_slice_at}},    x1: {{slice.x1_slice_at}},
+                    y0: {{slice.x2_bounds()[0]}}, y1: {{slice.x2_bounds()[1]}},
+                  },
+                  {
+                    type: "line", line: { width: 5, color: "rgba(0, 0, 0, 0.6)" },
+                    x0: {{slice.x1_bounds()[0]}}, x1: {{slice.x1_bounds()[1]}},
+                    y0: {{slice.x2_slice_at}},  y1: {{slice.x2_slice_at}},
+                  }
+                ]
               });
             </script>
           {% endfor %}

@@ -72,6 +72,9 @@ class Slice2D:
     x1: List[float]
     x2: List[float]
 
+    x1_slice_at: float
+    x2_slice_at: float
+
     mu: List[float]
     # x_slice_at: float
 
@@ -85,6 +88,8 @@ class Slice2D:
             p2: bopt.Hyperparameter,
             x1: List[float],
             x2: List[float],
+            x1_slice_at: float,
+            x2_slice_at: float,
             mu: List[float],
             other_samples: Dict[str, List[float]],
             ) -> None:
@@ -94,9 +99,18 @@ class Slice2D:
         self.x1 = x1
         self.x2 = x2
 
+        self.x1_slice_at = x1_slice_at
+        self.x2_slice_at = x2_slice_at
+
         self.mu = mu
 
         self.other_samples = other_samples
+
+    def x1_bounds(self) -> Tuple[float, float]:
+        return min(self.x1), max(self.x1)
+
+    def x2_bounds(self) -> Tuple[float, float]:
+        return min(self.x2), max(self.x2)
 
     # def sigma_low(self) -> List[float]:
     #     return [m - s for m, s in zip(self.mu, self.sigma)]
@@ -234,26 +248,24 @@ def create_slice_2d(i: int, j: int, experiment: bopt.Experiment, resolution:
             other_samples["x2"].append(other_x2)
             other_samples["y"].append(other_y)
 
-    # if param.range.is_logscale():
-    #     x_slice_at = 10.0 ** x_slice[i]
-    #     x = 10.0 ** grid
-    # else:
-    #     x_slice_at = x_slice[i]
-    #     x = grid
-
     if p1.range.is_logscale():
         x1 = (10.0 ** d1).tolist()
+        x1_slice_at = 10.0 ** x_slice[i]
     else:
         x1 = d1.tolist()
+        x1_slice_at = x_slice[i]
 
     if p2.range.is_logscale():
         x2 = (10.0 ** d2).tolist()
+        x2_slice_at = 10.0 ** x_slice[j]
     else:
         x2 = d2.tolist()
+        x2_slice_at = x_slice[j]
+
 
     # return Slice2D(param, x.tolist(), x_slice_at, mu.tolist(),
     #                sigma.tolist(), acq.tolist(), other_samples)
-    return Slice2D(p1, p2, x1, x2, mu.tolist(), other_samples)
+    return Slice2D(p1, p2, x1, x2, x1_slice_at, x2_slice_at, mu.tolist(), other_samples)
 
 
 class PosteriorSlice(NamedTuple):
