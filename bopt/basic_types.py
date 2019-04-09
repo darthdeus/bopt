@@ -186,7 +186,8 @@ class LogscaleInt(Bound):
 
     def validate(self, value: ParamTypes) -> bool:
         assert isinstance(value, int), "value {} is not int".format(value)
-        return self.low <= value < self.high
+        # TODO: podobne jako u Integer tady ma byt asi < ?
+        return self.low <= value <= self.high
 
     def __repr__(self) -> str:
         return f"LogscaleInt({self.low}, {self.high})"
