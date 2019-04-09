@@ -108,7 +108,9 @@ class Integer(Bound):
         return int(value)
 
     def scipy_bound_tuple(self) -> Tuple[float, float]:
+        # TODO: pryc s -1?
         return (self.low, (self.high - 1))
+        # return self.low, self.high
 
     def compare_values(self, a: ParamTypes, b: ParamTypes) -> bool:
         assert isinstance(a, int)
