@@ -1,5 +1,12 @@
 # TODO
 
+- cestina, pridat zbytek hyperparam
+- poznamka u sample
+- marginal?
+- zobrazovat cas v rozumnem meritku (hodiny atd)
+
+
+
 - nejde statnice a obhajoba najednou? :O
 
 - tail -F bopt.o5400313
@@ -28,7 +35,7 @@ FileExistsError: [Errno 17] File exists: 'meta.yml'
 
 - jak predavat --threads?
 
-- zobrazovat output failnuteho jobu
+- [x] zobrazovat output failnuteho jobu
 - zkontrolovat implementaci EI
 - moznost zadat manualni slice point (predvyplnovat podle selekce)
 - moznost prekliknout jestli slice v max nebo v next nebo tak neco

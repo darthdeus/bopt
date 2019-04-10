@@ -166,7 +166,11 @@ def create_slice_1d(i: int, experiment: bopt.Experiment, resolution: int,
     other_samples: Dict[str, List[float]] = defaultdict(list)
 
     for other in experiment.samples_for_prediction():
-        if other.created_at <= sample.created_at:
+        other_date = other.finished_at or other.collected_at
+        if not other_date:
+            continue
+
+        if other_date <= sample.created_at or sample == other:
             other_x, other_y = other.to_xy()
             other_x = float(other_x.tolist()[i])
 

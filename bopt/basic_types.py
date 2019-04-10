@@ -79,7 +79,7 @@ class Integer(Bound):
         self.type = "int"
 
     def sample(self) -> float:
-        return np.random.randint(self.low, self.high)
+        return np.random.randint(self.low, self.high + 1)
 
     def map(self, value) -> ParamTypes:
         return value
@@ -109,8 +109,8 @@ class Integer(Bound):
 
     def scipy_bound_tuple(self) -> Tuple[float, float]:
         # TODO: pryc s -1?
-        return (self.low, (self.high - 1))
-        # return self.low, self.high
+        # return (self.low, (self.high - 1))
+        return self.low, self.high
 
     def compare_values(self, a: ParamTypes, b: ParamTypes) -> bool:
         assert isinstance(a, int)
@@ -154,7 +154,7 @@ class Float(Bound):
         return float(value)
 
     def scipy_bound_tuple(self) -> Tuple[float, float]:
-        return (self.low, self.high - 1e-8)
+        return self.low, self.high
 
     def compare_values(self, a: ParamTypes, b: ParamTypes) -> bool:
         assert isinstance(a, float)
@@ -204,7 +204,7 @@ class LogscaleInt(Bound):
         return int(value)
 
     def scipy_bound_tuple(self) -> Tuple[float, float]:
-        return (np.log10(self.low), np.log10(self.high) - 1e-8)
+        return np.log10(self.low), np.log10(self.high)
 
     def compare_values(self, a: ParamTypes, b: ParamTypes) -> bool:
         assert isinstance(a, int)
@@ -248,7 +248,7 @@ class LogscaleFloat(Bound):
         return float(value)
 
     def scipy_bound_tuple(self) -> Tuple[float, float]:
-        return (np.log10(self.low), np.log10(self.high) - 1e-8)
+        return np.log10(self.low), np.log10(self.high)
 
     def compare_values(self, a: ParamTypes, b: ParamTypes) -> bool:
         assert isinstance(a, float)

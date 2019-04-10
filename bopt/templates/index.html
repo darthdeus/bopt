@@ -137,6 +137,7 @@
         <h2>1D slices</h2>
 
         <p>Hyperparams: {{picked_sample.hyperparam_values}}</p>
+        <p>Model params: {{picked_sample.model}}</p>
 
         <div class="row">
           {% for slice in slices_1d %}
@@ -270,7 +271,7 @@
             {% for name, values in kernel_param_timeline.items() %}
               {
                 y: {{values|safe}},
-                name: "{{name}}"
+                name: "{{name.replace('Mat52.', '')[-25:]}}"
               },
             {% endfor %}
           ], {
@@ -386,7 +387,7 @@
             </td>
             <td>
               <span title="{{sample.created_at}}">
-                {{sample.created_at.strftime("%H:%M:%S")}}
+                {{sample.created_at.strftime("%m.%d %H:%M")}}
               </span>
             </td>
 
@@ -398,7 +399,7 @@
             <td>
               <span title="{{sample_end_time}}">
                 {% if sample_end_time %}
-                  {{sample_end_time.strftime("%H:%M:%S")}}
+                  {{sample_end_time.strftime("%m.%d %H:%M")}}
                 {% else %}
                   notime
                 {% endif %}

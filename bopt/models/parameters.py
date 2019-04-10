@@ -31,7 +31,7 @@ class ModelParameters:
         return self.model_name == GPyModel.model_name
 
     def __str__(self) -> str:
-        param_str = " ".join("{}={}".format(n[:2], round(v, 2)) for n, v in self.params.items())
+        param_str = " ".join("{}={}".format(n, (round(v, 2) if not isinstance(v, list) else list(map(lambda x: round(x, 2), v)))) for n, v in self.params.items())
         return "k:{}, acq:{}, p:{}".format(
                 self.kernel,
                 self.acquisition_fn,
