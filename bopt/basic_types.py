@@ -145,7 +145,7 @@ class Float(Bound):
 
     def validate(self, value: ParamTypes) -> bool:
         assert isinstance(value, float)
-        return self.low <= value < self.high
+        return self.low <= value <= self.high
 
     def __repr__(self) -> str:
         return f"Float({self.low}, {self.high})"

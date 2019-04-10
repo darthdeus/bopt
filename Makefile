@@ -25,10 +25,11 @@ sfntest:
 		--param "activation:discrete:relu:sigmoid:tanh" \
 		--qsub=-q \
 		--qsub=cpu-troja.q \
-		--gamma-a=3.0 --gamma-b=0.001 \
+		--gamma-a=1.0 --gamma-b=0.001 \
+		--acq-xi=0.01 \
 		-C results/sfn \
 		$(PWD)/experiments/time_sfn_runner.sh $(PWD)
-	$(BOPT) run --n_iter=10 --n_parallel=1 -C results/sfn
+	$(BOPT) run --n_iter=20 --n_parallel=1 -C results/sfn
 
 lab02-cartpole:
 	rm -rf results/l2cartpole

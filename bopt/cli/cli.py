@@ -74,6 +74,11 @@ def main():
     sp_init.add_argument("--gamma-b", type=float, default=0.1,
         help="The inverse rate parameter of the Gamma prior.")
 
+    sp_init.add_argument("--acq-xi", type=float, default=0.001,
+        help="The xi parameter of the acquisition functions")
+    sp_init.add_argument("--acq-n-restarts", type=int, default=25,
+        help="Number of restarts when optimizing the acquisition function.")
+
     sp_init.add_argument("--num-optimize-restarts", type=int, default=10,
         help="Number of restarts during kernel optimization.")
 

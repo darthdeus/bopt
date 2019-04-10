@@ -105,7 +105,7 @@ class GPyModel(Model):
         acquisition_fn = GPyModel.parse_acquisition_fn(gp_config.acquisition_fn)
 
         x_next = GPyModel.propose_location(acquisition_fn, model, Y_sample.max(),
-                hyperparameters)
+                hyperparameters, gp_config)
 
         job_params = HyperparamValues.mapping_from_vector(x_next, hyperparameters)
 
@@ -114,18 +114,18 @@ class GPyModel(Model):
         return job_params, fitted_model
 
     @staticmethod
-    def propose_location( acquisition_fn: acq.AcquisitionFunction, gp:
+    def propose_location(acquisition_fn: acq.AcquisitionFunction, gp:
             GPRegression, y_max: float, hyperparameters: List[Hyperparameter],
-            n_restarts: int = 25,) -> np.ndarray:
+            gp_config: GPConfig) -> np.ndarray:
 
         def min_obj(X):
-            return -acquisition_fn(gp, X.reshape(1, -1), y_max)
+            return -acquisition_fn(gp, X.reshape(1, -1), y_max, gp_config.acq_xi)
 
         scipy_bounds = [h.range.scipy_bound_tuple() for h in
                 hyperparameters]
 
         starting_points = []
-        for _ in range(n_restarts):
+        for _ in range(gp_config.acq_n_restarts):
             starting_points.append(HyperparamValues.sample_params(hyperparameters))
 
         min_val = 1e9

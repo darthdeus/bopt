@@ -11,6 +11,9 @@ class GPConfig:
     gamma_a: float
     gamma_b: float
 
+    acq_xi: float
+    acq_n_restarts: int
+
     num_optimize_restarts: int
 
     def __init__(self, args):
@@ -22,6 +25,8 @@ class GPConfig:
         self.gamma_prior = args.gamma_prior == 1
         self.gamma_a = args.gamma_a
         self.gamma_b = args.gamma_b
+        self.acq_xi = args.acq_xi
+        self.acq_n_restarts = args.acq_n_restarts
 
         self.num_optimize_restarts = args.num_optimize_restarts
 

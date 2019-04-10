@@ -5,7 +5,8 @@
 - marginal?
 - zobrazovat cas v rozumnem meritku (hodiny atd)
 
-- do args pridat parametry gamma prioru
+- [x] do args pridat parametry gamma prioru
+- [x] do args pridat parametry EI (xi)
 - nejde statnice a obhajoba najednou? :O
 
 - tail -F bopt.o5400313
