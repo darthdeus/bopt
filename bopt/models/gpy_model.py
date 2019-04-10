@@ -71,8 +71,8 @@ class GPyModel(Model):
 
         if gp_config.gamma_prior:
             # TODO: noise prior?
-            model.kern.variance.set_prior(GPy.priors.Gamma(1., 0.1))
-            model.kern.lengthscale.set_prior(GPy.priors.Gamma(1., 0.1))
+            model.kern.variance.set_prior(GPy.priors.Gamma(gp_config.gamma_a, gp_config.gamma_b))
+            model.kern.lengthscale.set_prior(GPy.priors.Gamma(gp_config.gamma_a, gp_config.gamma_b))
         else:
             min_bound = 1e-2
             max_bound = 1e3

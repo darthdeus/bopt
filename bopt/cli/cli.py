@@ -69,6 +69,10 @@ def main():
     sp_init.add_argument("--gamma-prior", type=int, default=1,
         help="When enabled, kernel parameters will use a Gamma prior "
              "instead of a hard constraint.")
+    sp_init.add_argument("--gamma-a", type=float, default=1.0,
+        help="The shape parameter of the Gamma prior.")
+    sp_init.add_argument("--gamma-b", type=float, default=0.1,
+        help="The inverse rate parameter of the Gamma prior.")
 
     sp_init.add_argument("--num-optimize-restarts", type=int, default=10,
         help="Number of restarts during kernel optimization.")

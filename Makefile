@@ -25,6 +25,7 @@ sfntest:
 		--param "activation:discrete:relu:sigmoid:tanh" \
 		--qsub=-q \
 		--qsub=cpu-troja.q \
+		--gamma-a=3.0 --gamma-b=0.001 \
 		-C results/sfn \
 		$(PWD)/experiments/time_sfn_runner.sh $(PWD)
 	$(BOPT) run --n_iter=10 --n_parallel=1 -C results/sfn
