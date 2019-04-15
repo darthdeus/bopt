@@ -195,7 +195,7 @@ class Sample:
 
             if time > 3600:
                 hours = time // 3600
-                return "{}:{}".format(hours, (time - hours * 3600) / 60)
+                return "{}:{}".format(hours, (time - hours * 3600) // 60)
             elif time > 60:
                 minutes = time // 60
                 return "{}min".format(minutes)
