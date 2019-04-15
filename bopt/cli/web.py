@@ -242,7 +242,7 @@ def create_slice_2d(i: int, j: int, experiment: bopt.Experiment, resolution:
 
     other_samples: Dict[str, List[float]] = defaultdict(list)
 
-    for other in experiment.samples:
+    for other in experiment.samples_for_prediction():
         if other.created_at <= sample.created_at:
             other_x, other_y = other.to_xy()
             other_x1 = float(other_x.tolist()[i])
