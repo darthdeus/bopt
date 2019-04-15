@@ -289,7 +289,8 @@ class Experiment:
                         .format(similar_sample)
 
         else:
-            job = self.runner.start(output_dir, hyperparam_values)
+            manual_file_args = self.runner.fetch_and_shift_manual_file_args()
+            job = self.runner.start(output_dir, hyperparam_values, manual_file_args)
 
             X_sample, Y_sample = self.get_xy()
 
@@ -325,6 +326,8 @@ class Experiment:
             next_sample = Sample(job, model_params, hyperparam_values,
                     mu, sigma, CollectFlag.WAITING_FOR_JOB,
                     datetime.datetime.now())
+
+            next_sample.comment = " ".join(manual_file_args)
 
         self.samples.append(next_sample)
 

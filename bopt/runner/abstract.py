@@ -50,7 +50,8 @@ class Runner(abc.ABC):
     # TODO: start by nemelo brat output_dir
     @abc.abstractmethod
     def start(self, output_dir: str,
-            hyperparam_values: HyperparamValues) -> Job: pass
+              hyperparam_values: HyperparamValues,
+              manual_file_args: List[str]) -> Job: pass
 
     @abc.abstractmethod
     def runner_type(self) -> str: pass

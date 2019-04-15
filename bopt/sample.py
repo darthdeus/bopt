@@ -128,7 +128,7 @@ class Sample:
             y = self.result
         elif status == CollectFlag.WAITING_FOR_JOB \
                 or status == CollectFlag.WAITING_FOR_SIMILAR:
-            assert self.mu_pred
+            assert self.mu_pred, "No mu_pred for {}".format(self)
 
             y = self.mu_pred
         elif status == CollectFlag.COLLECT_FAILED:
@@ -166,6 +166,8 @@ class Sample:
 
         s += "s: {}\tf: {}\tc: {}\tr: {}\t".format(self.created_at,
                 self.finished_at, self.collected_at, self.run_time)
+
+        s += "RS: {}".format(self.model.sampled_from_random_search())
 
         is_finished = self.status() == CollectFlag.COLLECT_OK
 

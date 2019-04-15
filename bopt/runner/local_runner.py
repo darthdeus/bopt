@@ -32,14 +32,14 @@ class LocalRunner(Runner):
     def runner_type(self) -> str:
         return "local_runner"
 
-    def start(self, output_dir: str, hyperparam_values: HyperparamValues) -> Job:
+    def start(self, output_dir: str, hyperparam_values: HyperparamValues, manual_file_args: List[str]) -> Job:
         cmdline_run_params = [f"--{h.name}={value}"
                 for h, value in hyperparam_values.mapping.items()]
 
         cmd = list(map(lambda x: os.path.expanduser(x), [
             self.script_path,
             *self.arguments,
-            *self.fetch_and_shift_manual_file_args(),
+            *manual_file_args,
             *cmdline_run_params
         ]))
 
