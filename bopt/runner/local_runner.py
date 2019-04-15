@@ -39,6 +39,7 @@ class LocalRunner(Runner):
         cmd = list(map(lambda x: os.path.expanduser(x), [
             self.script_path,
             *self.arguments,
+            *self.fetch_and_shift_manual_file_args(),
             *cmdline_run_params
         ]))
 

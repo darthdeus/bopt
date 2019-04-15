@@ -4,6 +4,7 @@ import sys
 import inspect
 import pathlib
 import logging
+import shutil
 from typing import Type, Callable, List
 
 import bopt
@@ -63,7 +64,14 @@ def run(args) -> None:
 
         runner: bopt.Runner
 
-        manual_arg_fnames: List[str] = args.manual_arg_fname
+        manual_arg_fnames: List[str] = []
+
+        for fname in args.manual_arg_fname:
+            base_fname = os.path.basename(fname)
+            shutil.copy(fname, "./{}".format(base_fname))
+
+            manual_arg_fnames.append(base_fname)
+
 
         if args.runner == "local":
             runner = bopt.LocalRunner(script_path, default_arguments,

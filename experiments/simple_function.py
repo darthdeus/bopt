@@ -10,6 +10,12 @@ if __name__ == "__main__":
     parser.add_argument("--y", default=1.0, type=float, help="Y")
     parser.add_argument("--z", default=1.0, type=float, help="Z")
     parser.add_argument("--w", default=1.0, type=float, help="W")
+
+    parser.add_argument("--foo", type=str,
+            help="Only used for manual params testing.")
+    parser.add_argument("--bar", type=str,
+            help="Only used for manual params testing.")
+
     args = parser.parse_args()
 
     import math

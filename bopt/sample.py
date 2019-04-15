@@ -126,7 +126,8 @@ class Sample:
 
         if status == CollectFlag.COLLECT_OK:
             y = self.result
-        elif status == CollectFlag.WAITING_FOR_JOB or status == CollectFlag.WAITING_FOR_SIMILAR:
+        elif status == CollectFlag.WAITING_FOR_JOB \
+                or status == CollectFlag.WAITING_FOR_SIMILAR:
             assert self.mu_pred
 
             y = self.mu_pred

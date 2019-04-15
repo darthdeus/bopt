@@ -49,7 +49,8 @@ class Runner(abc.ABC):
 
     # TODO: start by nemelo brat output_dir
     @abc.abstractmethod
-    def start(self, output_dir: str, hyperparam_values: HyperparamValues) -> Job: pass
+    def start(self, output_dir: str,
+            hyperparam_values: HyperparamValues) -> Job: pass
 
     @abc.abstractmethod
     def runner_type(self) -> str: pass
@@ -62,3 +63,18 @@ class Runner(abc.ABC):
             "manual_arg_fnames": self.manual_arg_fnames,
         }
 
+    def fetch_and_shift_manual_file_args(self) -> List[str]:
+        result = []
+
+        for fname in self.manual_arg_fnames:
+            with open(fname, "r") as fin:
+                data = fin.read().splitlines(True)
+            with open(fname, "w") as fout:
+                fout.writelines(data[1:])
+
+            value = data[0].strip()
+            param_name = os.path.splitext(os.path.basename(fname))[0]
+
+            result.append("--{}={}".format(param_name, value))
+
+        return result
