@@ -63,10 +63,14 @@ def run(args) -> None:
 
         runner: bopt.Runner
 
+        manual_arg_fnames: List[str] = args.manual_arg_fname
+
         if args.runner == "local":
-            runner = bopt.LocalRunner(script_path, default_arguments)
+            runner = bopt.LocalRunner(script_path, default_arguments,
+                    manual_arg_fnames)
         elif args.runner == "sge":
-            runner = bopt.SGERunner(script_path, default_arguments, args.qsub or [])
+            runner = bopt.SGERunner(script_path, default_arguments,
+                    args.qsub or [], manual_arg_fnames)
         else:
             logging.error("Invalid value {} for runner,"
                 "only 'local' and 'sge' are allowed.".format(args.runner))

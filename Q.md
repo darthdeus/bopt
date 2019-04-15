@@ -1,7 +1,7 @@
 # TODO
 
 - cestina, pridat zbytek hyperparam
-- poznamka u sample
+- [x] poznamka u sample (uz vlastne bylo, comment :)
 - marginal?
 - zobrazovat cas v rozumnem meritku (hodiny atd)
 

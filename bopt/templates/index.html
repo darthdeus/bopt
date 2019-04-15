@@ -321,6 +321,7 @@
             <th>Created at</th>
             <th>Done at</th>
             <th>Run time</th>
+            <th>Comment</th>
           </tr>
         </thead>
 
@@ -406,7 +407,8 @@
               </span>
             </td>
 
-            <td>{{sample.run_time}}s</td>
+            <td>{{sample.run_time_str()}}</td>
+            <td>{{sample.comment}}</td>
           </tr>
           {% endfor %}
         </tbody>

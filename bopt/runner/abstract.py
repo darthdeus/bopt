@@ -39,10 +39,13 @@ class Job(abc.ABC):
 class Runner(abc.ABC):
     script_path: str
     arguments: List[str]
+    manual_arg_fnames: List[str]
 
-    def __init__(self, script_path: str, arguments: List[str]) -> None:
+    def __init__(self, script_path: str, arguments: List[str],
+            manual_arg_fnames: List[str]) -> None:
         self.script_path = script_path
         self.arguments = arguments
+        self.manual_arg_fnames = manual_arg_fnames
 
     # TODO: start by nemelo brat output_dir
     @abc.abstractmethod
@@ -56,5 +59,6 @@ class Runner(abc.ABC):
             "runner_type": self.runner_type(),
             "script_path": self.script_path,
             "arguments": self.arguments,
+            "manual_arg_fnames": self.manual_arg_fnames,
         }
 

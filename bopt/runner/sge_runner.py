@@ -39,9 +39,10 @@ class SGEJob(Job):
 class SGERunner(Runner):
     qsub_arguments: List[str]
 
-    def __init__(self, script_path: str, arguments: List[str], qsub_arguments: List[str]) \
+    def __init__(self, script_path: str, arguments: List[str],
+            qsub_arguments: List[str], manual_arg_fnames: List[str]) \
             -> None:
-        super().__init__(script_path, arguments)
+        super().__init__(script_path, arguments, manual_arg_fnames)
         self.qsub_arguments = qsub_arguments
 
     def runner_type(self) -> str:
@@ -75,5 +76,6 @@ class SGERunner(Runner):
             "script_path": self.script_path,
             "arguments": self.arguments,
             "qsub_arguments": self.qsub_arguments,
+            "manual_arg_fnames": self.manual_arg_fnames,
         }
 

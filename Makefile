@@ -26,6 +26,8 @@ sfntest:
 		--qsub=-q \
 		--qsub=cpu-troja.q \
 		--gamma-a=1.0 --gamma-b=0.001 \
+		--manual-arg-fname=$(PWD)/experiments/foo.txt \
+		--manual-arg-fname=$(PWD)/experiments/bar.txt \
 		--acq-xi=0.01 \
 		-C results/sfn \
 		$(PWD)/experiments/time_sfn_runner.sh $(PWD)

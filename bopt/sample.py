@@ -188,6 +188,21 @@ class Sample:
                 .replace("COLLECT_", "")\
                 .replace("WAITING_FOR_", "W_")
 
+    def run_time_str(self) -> str:
+        if self.run_time:
+            time = int(self.run_time)
+
+            if time > 3600:
+                hours = time // 3600
+                return "{}:{}".format(hours, (time - hours * 3600) / 60)
+            elif time > 60:
+                minutes = time // 60
+                return "{}min".format(minutes)
+            else:
+                return "{}.s".format(time)
+        else:
+            return ""
+
 
 class SampleCollection:
     samples: List[Sample]

@@ -11,12 +11,15 @@ class RunnerLoader:
         runner_type = data["runner_type"]
 
         cls: Union[Type[LocalRunner], Type[SGERunner]]
+        manual_arg_fnames = data.get("manual_arg_fnames", []) or []
 
         if runner_type == "local_runner":
-            return LocalRunner(data["script_path"], data["arguments"])
+            return LocalRunner(data["script_path"], data["arguments"],
+                    manual_arg_fnames)
         elif runner_type == "sge_runner":
             qsub_arguments = data.get("qsub_arguments", []) or []
-            return SGERunner(data["script_path"], data["arguments"], qsub_arguments)
+            return SGERunner(data["script_path"], data["arguments"],
+                    qsub_arguments, manual_arg_fnames)
         else:
             raise NotImplementedError()
 
