@@ -25,13 +25,9 @@ class Slice1D:
 
     other_samples: Dict[str, List[float]]
 
-    def __init__(self, param: bopt.Hyperparameter,
-            x: List[float],
-            x_slice_at: float,
-            mu: List[float],
-            sigma: List[float],
-            acq: List[float],
-            other_samples: Dict[str, List[float]]) -> None:
+    def __init__(self, param: bopt.Hyperparameter, x: List[float],
+            x_slice_at: float, mu: List[float], sigma: List[float],
+            acq: List[float], other_samples: Dict[str, List[float]]) -> None:
         self.param = param
         self.x = x
         self.x_slice_at = x_slice_at
@@ -82,10 +78,6 @@ class Slice2D:
     x2_slice_at: float
 
     mu: List[float]
-    # x_slice_at: float
-
-    # sigma: List[float]
-    # acq: List[float]
 
     other_samples: Dict[str, List[float]]
 
@@ -118,29 +110,6 @@ class Slice2D:
     def x2_bounds(self) -> Tuple[float, float]:
         return min(self.x2), max(self.x2)
 
-    # def sigma_low(self) -> List[float]:
-    #     return [m - s for m, s in zip(self.mu, self.sigma)]
-    #
-    # def sigma_high(self) -> List[float]:
-    #     return [m + s for m, s in zip(self.mu, self.sigma)]
-    #
-    # def mu_bounds(self) -> Tuple[float, float]:
-    #     other_results = self.other_samples["y"]
-    #
-    #     return min(self.sigma_low() + self.acq + other_results), \
-    #            max(self.sigma_high() + self.acq + other_results)
-
-    # def x_range(self) -> Tuple[float, float]:
-    #     low = self.param.range.low
-    #     high = self.param.range.high
-    #
-    #     if self.param.range.is_logscale():
-    #         low = math.log10(low)
-    #         high = math.log10(high)
-    #
-    #     margin = (high - low) * 0.05
-    #
-    #     return low - margin, high + margin
 
 def create_slice_1d(i: int, experiment: bopt.Experiment, resolution: int,
         n_dims: int, x_slice: List[float], model: GPy.models.GPRegression, sample: bopt.Sample) -> Slice1D:
@@ -193,21 +162,6 @@ def create_slice_1d(i: int, experiment: bopt.Experiment, resolution: int,
 def create_slice_2d(i: int, j: int, experiment: bopt.Experiment, resolution:
         int, n_dims: int, x_slice: List[float], model: GPy.models.GPRegression,
         sample: bopt.Sample) -> Slice2D:
-
-    # x_plot = np.zeros([resolution, n_dims], dtype=np.float32)
-    # y_plot = np.zeros([resolution, n_dims], dtype=np.float32)
-    #
-    # for dim in range(n_dims):
-    #     if dim == i:
-    #         x_plot[:, dim] = gx
-    #     else:
-    #         x_plot[:, dim] = np.full([resolution], x_slice[dim], dtype=np.float32)
-    #
-    # for dim in range(n_dims):
-    #     if dim == j:
-    #         y_plot[:, dim] = gy
-    #     else:
-    #         y_plot[:, dim] = np.full([resolution], x_slice[dim], dtype=np.float32)
 
     p1 = experiment.hyperparameters[i]
     p2 = experiment.hyperparameters[j]
@@ -272,9 +226,6 @@ def create_slice_2d(i: int, j: int, experiment: bopt.Experiment, resolution:
         x2 = d2.tolist()
         x2_slice_at = x_slice[j]
 
-
-    # return Slice2D(param, x.tolist(), x_slice_at, mu.tolist(),
-    #                sigma.tolist(), acq.tolist(), other_samples)
     return Slice2D(p1, p2, x1, x2, x1_slice_at, x2_slice_at, mu.tolist(), other_samples)
 
 
