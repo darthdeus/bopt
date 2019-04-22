@@ -1,5 +1,20 @@
 # TODO
 
+- uvod u gp kapitoly
+- dopsat teorii k gp celou
+- popsat rozdily hyperparam vs arch search
+- podivat se na diskretni a kategoricke (nando)
+
+- popsat sw kapitolu
+
+- moznost poustet jenom random search
+- spustit toy experimenty
+- spustit RL ktery uz mam
+- marginaly
+
+
+
+
 - cestina, pridat zbytek hyperparam
 - [x] poznamka u sample (uz vlastne bylo, comment :)
 - marginal?
