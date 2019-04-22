@@ -31,7 +31,17 @@ sfntest:
 		--acq-xi=0.01 \
 		-C results/sfn \
 		$(PWD)/experiments/time_sfn_runner.sh $(PWD)
-	$(BOPT) run --n_iter=20 --n_parallel=1 -C results/sfn
+	$(BOPT) run --n_iter=20 --n_parallel=1 --sleep=0.1 -C results/sfn
+
+sfntest2d:
+	rm -rf results/sfn2d
+	$(BOPT) init \
+		--param "x:float:-5:5" \
+		--param "y:float:-5:5" \
+		--num-optimize-restarts=1 \
+		-C results/sfn2d \
+		$(PWD)/.venv/bin/python $(PWD)/experiments/simple_function2d.py
+	$(BOPT) run --n_iter=100 -C results/sfn2d
 
 lab02-cartpole:
 	rm -rf results/l2cartpole
@@ -53,13 +63,6 @@ sfntest-sge:
 		-C results/sfn \
 		$(PWD)/.venv/bin/python $(PWD)/experiments/simple_function.py
 	# $(BOPT) run --n_iter=10 -C results/sfn
-
-sfntest2d:
-	rm -rf results/sfn2d
-	$(BOPT) init --param "x:float:0:5" --param "y:float:0:5" \
-		-C results/sfn2d \
-		$(PWD)/.venv/bin/python $(PWD)/experiments/simple_function2d.py
-	$(BOPT) run -C results/sfn2d
 
 mctest:
 	rm -f tmp/*

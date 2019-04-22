@@ -13,6 +13,27 @@ import bopt
 from bopt.cli.util import handle_cd_revertible, acquire_lock
 
 
+def create_gp_for_data(X, Y):
+    assert X.ndim == 2
+    assert 1 <= X.shape[1] <= 2
+
+    marginal_model = GPy.models.GPRegression(X, Y, kernel=GPy.kern.Matern52(input_dim=X.shape[1]))
+
+    min_bound = 1e-2
+    max_bound = 1e3
+
+    marginal_model.Gaussian_noise.variance.unconstrain()
+    marginal_model.Gaussian_noise.variance.constrain_bounded(min_bound, max_bound)
+    marginal_model.kern.variance.unconstrain()
+    marginal_model.kern.variance.constrain_bounded(min_bound, max_bound)
+    marginal_model.kern.lengthscale.unconstrain()
+    marginal_model.kern.lengthscale.constrain_bounded(min_bound, max_bound)
+
+    marginal_model.optimize()
+
+    return marginal_model
+
+
 class Slice1D:
     param: bopt.Hyperparameter
     x: List[float]
@@ -112,7 +133,8 @@ class Slice2D:
 
 
 def create_slice_1d(i: int, experiment: bopt.Experiment, resolution: int,
-        n_dims: int, x_slice: List[float], model: GPy.models.GPRegression, sample: bopt.Sample) -> Slice1D:
+        n_dims: int, x_slice: List[float], model: GPy.models.GPRegression, sample: bopt.Sample,
+        show_marginal: int) -> Slice1D:
     param = experiment.hyperparameters[i]
 
     grid = param.range.grid(resolution)
@@ -125,7 +147,17 @@ def create_slice_1d(i: int, experiment: bopt.Experiment, resolution: int,
         else:
             X_plot[:, dim] = np.full([resolution], x_slice[dim], dtype=np.float32)
 
-    mu, var = model.predict(X_plot)
+    X_plot_marginal = grid.reshape(-1, 1)
+
+    X_marginal = model.X[:, i].reshape(-1, 1)
+
+    if show_marginal == 1:
+        marginal_model = create_gp_for_data(X_marginal, model.Y)
+
+        mu, var = marginal_model.predict(X_plot_marginal)
+    else:
+        mu, var = model.predict(X_plot)
+
     mu = mu.reshape(-1)
     sigma = np.sqrt(var).reshape(-1)
 
@@ -161,7 +193,7 @@ def create_slice_1d(i: int, experiment: bopt.Experiment, resolution: int,
 
 def create_slice_2d(i: int, j: int, experiment: bopt.Experiment, resolution:
         int, n_dims: int, x_slice: List[float], model: GPy.models.GPRegression,
-        sample: bopt.Sample) -> Slice2D:
+        sample: bopt.Sample, show_marginal: int) -> Slice2D:
 
     p1 = experiment.hyperparameters[i]
     p2 = experiment.hyperparameters[j]
@@ -183,7 +215,12 @@ def create_slice_2d(i: int, j: int, experiment: bopt.Experiment, resolution:
 
     X_pred = grid.reshape(resolution * resolution, -1)
 
-    mu, var = model.predict(X_pred)
+    if show_marginal == 1:
+        marginal_model = create_gp_for_data(model.X[:, [i, j]], model.Y)
+        mu, var = marginal_model.predict(X_pred[:, [i, j]])
+    else:
+        mu, var = model.predict(X_pred)
+
     mu = mu.reshape(-1)
     sigma = np.sqrt(var).reshape(-1)
 
@@ -227,17 +264,6 @@ def create_slice_2d(i: int, j: int, experiment: bopt.Experiment, resolution:
         x2_slice_at = x_slice[j]
 
     return Slice2D(p1, p2, x1, x2, x1_slice_at, x2_slice_at, mu.tolist(), other_samples)
-
-
-# TODO: smazat
-class PosteriorSlice(NamedTuple):
-    param: bopt.Hyperparameter
-    x: List[float]
-    y: List[float]
-    std: List[float]
-    points_x: List[float]
-    points_y: List[float]
-    gp: object # TODO: missing typing: bopt.GaussianProcessRegressor
 
 
 def run(args) -> None:
@@ -286,6 +312,7 @@ def run(args) -> None:
 
             sample_id = int(request.args.get("sample_id") or -1)
             show_acq = int(request.args.get("show_acq") or 0)
+            show_marginal = int(request.args.get("show_marginal") or 0)
 
             sample = next((s for s in experiment.samples if s.job and s.job.job_id == sample_id), None)
 
@@ -310,10 +337,12 @@ def run(args) -> None:
                 for i in range(n_dims):
                     for j in range(n_dims):
                         if i == j:
-                            slices_1d.append(create_slice_1d(i, experiment, resolution, n_dims, x_slice, model, sample))
+                            slices_1d.append(create_slice_1d(i, experiment,
+                                resolution, n_dims, x_slice, model, sample, show_marginal))
 
                         elif i < j:
-                            slices_2d.append(create_slice_2d(i, j, experiment, resolution, n_dims, x_slice, model, sample))
+                            slices_2d.append(create_slice_2d(i, j, experiment,
+                                resolution, n_dims, x_slice, model, sample, show_marginal))
 
 
             return render_template("index.html",
@@ -336,95 +365,10 @@ def run(args) -> None:
                     random_search_picked=random_search_picked,
 
                     show_acq=show_acq,
+                    show_marginal=show_marginal,
+
                     sample_id=sample_id,
                     )
-
-
-    # @app.route("/")
-    # def index():
-    #     experiment = bopt.Experiment.deserialize()
-    #     optim_result = experiment.current_optim_result()
-    #
-    #     sample_col = bopt.SampleCollection(experiment.samples)
-    #
-    #     gp = optim_result.fit_gp()
-    #
-    #     dimensions = []
-    #
-    #     slices = []
-    #
-    #     for i, param in enumerate(optim_result.params):
-    #         dimensions.append({
-    #             "values": optim_result.X_sample[:, i].tolist(),
-    #             "range": [param.range.low, param.range.high],
-    #             "label": param.name,
-    #         })
-    #
-    #         x, y, std = optim_result.slice_at(i, gp)
-    #
-    #         points_x = optim_result.X_sample[:, i].tolist()
-    #         points_y = optim_result.y_sample.tolist()
-    #
-    #         posterior_slice = PosteriorSlice(
-    #             param,
-    #             x.tolist(),
-    #             y.tolist(),
-    #             std.tolist(),
-    #             points_x,
-    #             points_y,
-    #             gp
-    #         )
-    #
-    #         slices.append(posterior_slice)
-    #
-    #     mu_mat, extent, gx, gy = bopt.plot_2d_optim_result(optim_result, gp=gp)
-    #
-    #     heatmap = []
-    #     for i in range(len(mu_mat)):
-    #         heatmap.append(mu_mat[i, :].tolist())
-    #
-    #     minval = min(np.min(heatmap).item(), np.min(optim_result.y_sample).item())
-    #     maxval = max(np.max(heatmap).item(), np.max(optim_result.y_sample).item())
-    #
-    #     minval = min(optim_result.y_sample)
-    #     maxval = max(optim_result.y_sample)
-    #
-    #     y_range = maxval - minval
-    #
-    #     minval -= y_range * 0.2
-    #     maxval += y_range * 0.2
-    #
-    #     data = {
-    #         "posterior_slices": slices,
-    #         "best_x": optim_result.best_x.tolist(),
-    #         "best_y": optim_result.best_y,
-    #         "minval": minval,
-    #         "maxval": maxval,
-    #         "colors": optim_result.y_sample.tolist(),
-    #         "dimensions": dimensions,
-    #         "heatmap": {
-    #             "z": heatmap,
-    #             "x": gx.tolist(),
-    #             "y": gy.tolist(),
-    #             "sx": optim_result.X_sample[:, 0].tolist(),
-    #             "sy": optim_result.X_sample[:, 1].tolist(),
-    #             "sz": optim_result.y_sample.tolist(),
-    #         }
-    #     }
-    #     json_data = jsonpickle.dumps(data)
-    #
-    #     param_traces = bopt.kernel_opt.get_param_traces()
-    #
-    #     nll_trace = param_traces["nll"]
-    #     param_traces.pop("nll")
-    #
-    #     return render_template("index.html", data=data,
-    #             json_data=json_data,
-    #             experiment=experiment,
-    #             sample_col=sample_col,
-    #             param_traces=param_traces,
-    #             nll_trace=nll_trace,
-    #             result_gp=gp)
 
 
     server = Server(app.wsgi_app)

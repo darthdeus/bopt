@@ -69,7 +69,7 @@
                 {% endif %}
 
                 {% if sample.job %}
-                  <a class="badge" href="?sample_id={{sample.job.job_id}}&show_acq={{show_acq}}">
+                <a class="badge" href="?sample_id={{sample.job.job_id}}&show_acq={{show_acq}}&show_marginal={{show_marginal}}">
                     {{sample.job.job_id}}
                   </a>
                 {% else %}
@@ -101,17 +101,21 @@
           <div class="card alert alert-danger" style="padding: 0">
             <div class="card-body" style="padding: 0.5rem">
               <span class="card-title">
-                <a href="/?show_acq={{show_acq}}">Deselect</a>
+                <a href="/?show_acq={{show_acq}}&show_marginal={{show_marginal}}">Deselect</a>
               </span>
             </div>
           </div>
         </div>
 
-        <div class="col-md-1" style="padding: 0">
-          <div class="btn-group" role="group" aria-label="Basic example">
-            <a href="/?sample_id={{sample_id}}&show_acq=1"
+        <div class="col-md-2" style="padding: 0">
+          <div class="btn-group" role="group">
+            <a href="/?sample_id={{sample_id}}&show_acq={{show_acq}}&show_marginal=1"
+						   class="btn btn-secondary {{'disabled' if show_marginal == 1}}">MARGINAL</a>
+            <a href="/?sample_id={{sample_id}}&show_acq={{show_acq}}&show_marginal=0"
+						   class="btn btn-secondary {{'disabled' if show_marginal == 0}}">NO MARGINAL</a>
+            <a href="/?sample_id={{sample_id}}&show_acq=1&show_marginal={{show_marginal}}"
 						   class="btn btn-secondary {{'disabled' if show_acq == 1}}">ACQ</a>
-            <a href="/?sample_id={{sample_id}}&show_acq=0"
+            <a href="/?sample_id={{sample_id}}&show_acq=0&show_marginal={{show_marginal}}"
 						   class="btn btn-secondary {{'disabled' if show_acq == 0}}">NO_ACQ</a>
 					</div>
         </div>
@@ -330,7 +334,7 @@
           <tr>
             <td>
               {% if sample.job %}
-                <a class="badge" href="?sample_id={{sample.job.job_id}}&show_acq={{show_acq}}">
+                <a class="badge" href="?sample_id={{sample.job.job_id}}&show_acq={{show_acq}}&show_marginal={{show_marginal}}">
                   {{sample.job.job_id}}
                 </a>
               {% else %}

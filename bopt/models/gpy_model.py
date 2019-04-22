@@ -69,24 +69,22 @@ class GPyModel(Model):
 
         logging.debug("GPY hyperparam optimization start")
 
+        min_bound = 1e-2
+        max_bound = 1e3
+
+        model.Gaussian_noise.variance.unconstrain()
+        model.Gaussian_noise.variance.constrain_bounded(min_bound, max_bound)
+
         if gp_config.gamma_prior:
             # TODO: noise prior?
             model.kern.variance.set_prior(GPy.priors.Gamma(gp_config.gamma_a, gp_config.gamma_b))
             model.kern.lengthscale.set_prior(GPy.priors.Gamma(gp_config.gamma_a, gp_config.gamma_b))
         else:
-            min_bound = 1e-2
-            max_bound = 1e3
-
             model.kern.variance.unconstrain()
             model.kern.variance.constrain_bounded(min_bound, max_bound)
 
             model.kern.lengthscale.unconstrain()
             model.kern.lengthscale.constrain_bounded(min_bound, max_bound)
-
-            model.Gaussian_noise.variance.unconstrain()
-            model.Gaussian_noise.variance.constrain_bounded(min_bound, max_bound)
-
-            # model.Gaussian_noise.set_prior(GPy.priors.Gamma(1., 0.1))
 
         model.optimize_restarts(gp_config.num_optimize_restarts)
 

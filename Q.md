@@ -10,7 +10,7 @@
 - moznost poustet jenom random search
 - spustit toy experimenty
 - spustit RL ktery uz mam
-- marginaly
+- [x] marginaly
 
 
 
