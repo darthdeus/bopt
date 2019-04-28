@@ -85,6 +85,9 @@ def main():
     sp_init.add_argument("--num-optimize-restarts", type=int, default=10,
         help="Number of restarts during kernel optimization.")
 
+    sp_init.add_argument("--random-search-only", action="store_true", default=False,
+            help="Only use random search when picking new hyperparameters.", required=False)
+
     sp_init.add_argument("command", type=str, help="Command to run.")
     sp_init.add_argument("arguments", type=str, nargs="*", help="Default arguments.")
 
@@ -112,6 +115,7 @@ def main():
     sp_expstat = sp.add_parser(
         "exp", help="Overview status of an experiment.", parents=[cd_parser]
     )
+    sp_expstat.add_argument("-r", action="store_true", default=False, help="Print only results.", required=False)
     sp_expstat.set_defaults(func=exp.run)
 
 

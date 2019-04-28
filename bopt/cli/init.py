@@ -14,6 +14,7 @@ from bopt.cli.util import handle_cd, acquire_lock
 
 def run(args) -> None:
     pathlib.Path(args.dir).mkdir(parents=True, exist_ok=True)
+    pathlib.Path(os.path.join(args.dir, "output")).mkdir(parents=True, exist_ok=True)
     handle_cd(args)
 
     with acquire_lock():
@@ -47,10 +48,9 @@ def run(args) -> None:
                 elif type == "discrete":
                     continue
                 else:
-                    # TODO: pouzit reflexi, nehardcodit to
                     logging.error("Invalid value {} for hyperparameter type, "
-                        "only 'int', 'float' and 'discrete' "
-                        "are permitted.".format(type))
+                        "only 'int', 'float', 'logscale_int', 'logscale_float' "
+                        "and 'discrete' are permitted.".format(type))
                     sys.exit(1)
 
                 assert cls is not None

@@ -65,8 +65,11 @@ class SGERunner(Runner):
         ]
 
         logging.info(f"SGE_JOB_START: {' '.join(cmd)}")
-        output = subprocess.check_output(cmd,
-                stderr=subprocess.STDOUT).decode("ascii")
+        try:
+            output = subprocess.check_output(cmd, stderr=subprocess.STDOUT).decode("ascii")
+        except subprocess.CalledProcessError as e:
+            print("Command failed, output:\n{}".format(e.output))
+            raise e
 
         matches = re.match(
                 pattern=r"Your job (\d+) \(\".*\"\) has been submitted",

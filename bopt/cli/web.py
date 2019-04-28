@@ -3,6 +3,7 @@ import math
 import sys
 import jsonpickle
 import numpy as np
+import logging
 
 from typing import NamedTuple, List, Tuple, Dict
 from livereload import Server
@@ -17,21 +18,29 @@ def create_gp_for_data(X, Y):
     assert X.ndim == 2
     assert 1 <= X.shape[1] <= 2
 
-    marginal_model = GPy.models.GPRegression(X, Y, kernel=GPy.kern.Matern52(input_dim=X.shape[1]))
+    model = GPy.models.GPRegression(X, Y, kernel=GPy.kern.Matern52(input_dim=X.shape[1]))
 
-    min_bound = 1e-2
+    min_bound = 1e-1
     max_bound = 1e3
 
-    marginal_model.Gaussian_noise.variance.unconstrain()
-    marginal_model.Gaussian_noise.variance.constrain_bounded(min_bound, max_bound)
-    marginal_model.kern.variance.unconstrain()
-    marginal_model.kern.variance.constrain_bounded(min_bound, max_bound)
-    marginal_model.kern.lengthscale.unconstrain()
-    marginal_model.kern.lengthscale.constrain_bounded(min_bound, max_bound)
+    # model.Gaussian_noise.variance.unconstrain()
+    # model.Gaussian_noise.variance.constrain_bounded(min_bound, max_bound)
+    # model.kern.variance.unconstrain()
+    # model.kern.variance.constrain_bounded(min_bound, max_bound)
+    # model.kern.lengthscale.unconstrain()
+    # model.kern.lengthscale.constrain_bounded(min_bound, max_bound)
 
-    marginal_model.optimize()
+    gamma_a = 1.0
+    gamma_b = 0.01
 
-    return marginal_model
+    model.kern.variance.set_prior(GPy.priors.Gamma(gamma_a, gamma_b))
+    model.kern.variance.set_prior(GPy.priors.Gamma(gamma_a, gamma_b))
+    model.kern.lengthscale.set_prior(GPy.priors.Gamma(gamma_a, gamma_b))
+
+    model.optimize()
+    logging.info("GP hyperparams: {}".format(model.param_array.tolist()))
+
+    return model
 
 
 class Slice1D:
@@ -46,9 +55,12 @@ class Slice1D:
 
     other_samples: Dict[str, List[float]]
 
+    model: GPy.models.GPRegression
+
     def __init__(self, param: bopt.Hyperparameter, x: List[float],
             x_slice_at: float, mu: List[float], sigma: List[float],
-            acq: List[float], other_samples: Dict[str, List[float]]) -> None:
+            acq: List[float], other_samples: Dict[str, List[float]],
+            model: GPy.models.GPRegression) -> None:
         self.param = param
         self.x = x
         self.x_slice_at = x_slice_at
@@ -56,6 +68,7 @@ class Slice1D:
         self.sigma = sigma
         self.acq = acq
         self.other_samples = other_samples
+        self.model = model
 
     def sigma_low(self) -> List[float]:
         return [m - s for m, s in zip(self.mu, self.sigma)]
@@ -102,6 +115,8 @@ class Slice2D:
 
     other_samples: Dict[str, List[float]]
 
+    model: GPy.models.GPRegression
+
     def __init__(self,
             p1: bopt.Hyperparameter,
             p2: bopt.Hyperparameter,
@@ -111,6 +126,7 @@ class Slice2D:
             x2_slice_at: float,
             mu: List[float],
             other_samples: Dict[str, List[float]],
+            model: GPy.models.GPRegression
             ) -> None:
         self.p1 = p1
         self.p2 = p2
@@ -124,6 +140,8 @@ class Slice2D:
         self.mu = mu
 
         self.other_samples = other_samples
+
+        self.model = model
 
     def x1_bounds(self) -> Tuple[float, float]:
         return min(self.x1), max(self.x1)
@@ -152,9 +170,9 @@ def create_slice_1d(i: int, experiment: bopt.Experiment, resolution: int,
     X_marginal = model.X[:, i].reshape(-1, 1)
 
     if show_marginal == 1:
-        marginal_model = create_gp_for_data(X_marginal, model.Y)
+        model = create_gp_for_data(X_marginal, model.Y)
 
-        mu, var = marginal_model.predict(X_plot_marginal)
+        mu, var = model.predict(X_plot_marginal)
     else:
         mu, var = model.predict(X_plot)
 
@@ -189,7 +207,8 @@ def create_slice_1d(i: int, experiment: bopt.Experiment, resolution: int,
         x = grid
 
     return Slice1D(param, x.tolist(), x_slice_at, mu.tolist(),
-                   sigma.tolist(), acq.tolist(), other_samples)
+                   sigma.tolist(), acq.tolist(), other_samples,
+                   model)
 
 def create_slice_2d(i: int, j: int, experiment: bopt.Experiment, resolution:
         int, n_dims: int, x_slice: List[float], model: GPy.models.GPRegression,
@@ -216,8 +235,8 @@ def create_slice_2d(i: int, j: int, experiment: bopt.Experiment, resolution:
     X_pred = grid.reshape(resolution * resolution, -1)
 
     if show_marginal == 1:
-        marginal_model = create_gp_for_data(model.X[:, [i, j]], model.Y)
-        mu, var = marginal_model.predict(X_pred[:, [i, j]])
+        model = create_gp_for_data(model.X[:, [i, j]], model.Y)
+        mu, var = model.predict(X_pred[:, [i, j]])
     else:
         mu, var = model.predict(X_pred)
 
@@ -263,7 +282,8 @@ def create_slice_2d(i: int, j: int, experiment: bopt.Experiment, resolution:
         x2 = d2.tolist()
         x2_slice_at = x_slice[j]
 
-    return Slice2D(p1, p2, x1, x2, x1_slice_at, x2_slice_at, mu.tolist(), other_samples)
+    return Slice2D(p1, p2, x1, x2, x1_slice_at, x2_slice_at,
+                   mu.tolist(), other_samples, model)
 
 
 def run(args) -> None:

@@ -35,7 +35,7 @@
     </script>
   </head>
   <body>
-    <div class="container">
+    <div class="container-fluid">
       <h2>Experiment: {{experiment.runner.script_path}}</h2>
 
       <div class="row">
@@ -145,7 +145,10 @@
 
         <div class="row">
           {% for slice in slices_1d %}
-            <div class="col-md-6" id="slice-param-{{loop.index0}}"></div>
+            <div class="col-md-6">
+              <div id="slice-param-{{loop.index0}}"></div>
+              <p>{{slice.model.param_array}}</p>
+            </div>
             <script>
               Plotly.plot("slice-param-{{loop.index0}}", [
                 {
@@ -191,14 +194,16 @@
                     type: "log", autorange: true
                   {% endif %}
                 },
-                yaxis: { title: "value" }, yaxis2: { overlaying: "y", side: "right", },
+                yaxis: { title: "objective" }, yaxis2: { overlaying: "y", side: "right", },
 
                 shapes: [
-                  {
-                    type: "line", line: { width: 5, color: "rgba(0, 0, 0, 0.6)" },
-                    x0: {{slice.x_slice_at}},     x1: {{slice.x_slice_at}},
-                    y0: {{slice.mu_bounds(show_acq)[0]}}, y1: {{slice.mu_bounds(show_acq)[1]}},
-                  }
+                  {% if show_marginal == 0 %}
+                    {
+                      type: "line", line: { width: 5, color: "rgba(0, 0, 0, 0.6)" },
+                      x0: {{slice.x_slice_at}},     x1: {{slice.x_slice_at}},
+                      y0: {{slice.mu_bounds(show_acq)[0]}}, y1: {{slice.mu_bounds(show_acq)[1]}},
+                    }
+                  {% endif %}
                 ]
               });
             </script>
@@ -246,16 +251,18 @@
                 },
 
                 shapes: [
-                  {
-                    type: "line", line: { width: 5, color: "rgba(0, 0, 0, 0.6)" },
-                    x0: {{slice.x1_slice_at}},    x1: {{slice.x1_slice_at}},
-                    y0: {{slice.x2_bounds()[0]}}, y1: {{slice.x2_bounds()[1]}},
-                  },
-                  {
-                    type: "line", line: { width: 5, color: "rgba(0, 0, 0, 0.6)" },
-                    x0: {{slice.x1_bounds()[0]}}, x1: {{slice.x1_bounds()[1]}},
-                    y0: {{slice.x2_slice_at}},  y1: {{slice.x2_slice_at}},
-                  }
+                  {% if show_marginal == 0 %}
+                    {
+                      type: "line", line: { width: 5, color: "rgba(0, 0, 0, 0.6)" },
+                      x0: {{slice.x1_slice_at}},    x1: {{slice.x1_slice_at}},
+                      y0: {{slice.x2_bounds()[0]}}, y1: {{slice.x2_bounds()[1]}},
+                    },
+                    {
+                      type: "line", line: { width: 5, color: "rgba(0, 0, 0, 0.6)" },
+                      x0: {{slice.x1_bounds()[0]}}, x1: {{slice.x1_bounds()[1]}},
+                      y0: {{slice.x2_slice_at}},  y1: {{slice.x2_slice_at}},
+                    }
+                  {% endif %}
                 ]
               });
             </script>
@@ -319,7 +326,7 @@
         <thead>
           <tr>
             <th>Sample</th>
-            <th>Hyperparams</th>
+            <th>Hyperparameters</th>
             <th>Result</th>
             <th>Model params</th>
             <th>Created at</th>
@@ -353,11 +360,11 @@
             </td>
             <td>
               {% for p, value in sample.hyperparam_values.mapping.items() %}
-                <span class="badge badge-light" data-toggle="tooltip" title="{{p.name}}">
+              <span class="badge badge-light" data-toggle="tooltip" title="{{p.name}}={{value}}">
                   {% if value is string %}
                     {{value}}
                   {% else %}
-                    {{value | round(2)}}
+                    {{value | round(1)}}
                   {% endif %}
                 </span>
               {% endfor %}
@@ -379,10 +386,14 @@
                     {% else %}
                       {% if value is iterable %}
                         {% for val in value %}
-                          {{val | round(2)}}
+                          {% if val > 1 %}
+                            {{val | round | int}}
+                          {% else %}
+                            {{val | round(1)}}
+                          {% endif %}
                         {% endfor %}
                       {% else %}
-                        {{value | round(2)}}
+                        {{value | round(1)}}
                       {% endif %}
                     {% endif %}
                   </span>

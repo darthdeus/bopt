@@ -14,6 +14,14 @@ def run(args) -> None:
         experiment = Experiment.deserialize()
         experiment.collect_results()
 
+        if args.r:
+            for sample in experiment.samples:
+                if sample.result:
+                    print(sample.result)
+
+            return
+
+
         print("Hyperparameters:")
         for param in experiment.hyperparameters:
             print(f"\t{param}")

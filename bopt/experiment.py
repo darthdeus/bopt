@@ -185,9 +185,8 @@ class Experiment:
         fitted_model: Model
 
         # TODO: overit, ze by to fungovalo i na ok+running a mean_pred
-        if len(self.samples_for_prediction()) < 2:
-            logging.info("No existing samples found, overloading suggest "
-                "with RandomSearch.")
+        if (len(self.samples_for_prediction()) < 2) or self.gp_config.random_search_only:
+            logging.info("Sampling with random search.")
 
             job_params = RandomSearch.predict_next(self.hyperparameters)
             fitted_model = RandomSearch()

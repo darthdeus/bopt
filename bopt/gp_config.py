@@ -16,6 +16,8 @@ class GPConfig:
 
     num_optimize_restarts: int
 
+    random_search_only: bool
+
     def __init__(self, args):
         self.kernel = args.kernel
         self.acquisition_fn = args.acquisition_fn
@@ -29,6 +31,8 @@ class GPConfig:
         self.acq_n_restarts = args.acq_n_restarts
 
         self.num_optimize_restarts = args.num_optimize_restarts
+
+        self.random_search_only = args.random_search_only
 
     def __str__(self) -> str:
         # TODO: pridat co chybi

@@ -122,7 +122,8 @@ class Sample:
 
         status = self.status()
 
-        assert self.result or self.job
+        assert self.result or self.job or status == CollectFlag.WAITING_FOR_SIMILAR, \
+            "status was: {}".format(status)
 
         if status == CollectFlag.COLLECT_OK:
             y = self.result
