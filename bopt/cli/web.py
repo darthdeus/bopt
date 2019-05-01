@@ -184,20 +184,15 @@ def create_slice_1d(i: int, experiment: bopt.Experiment, resolution: int,
 
     other_samples: Dict[str, List[float]] = defaultdict(list)
 
-    for other in experiment.samples_for_prediction():
-        other_date = other.finished_at or other.collected_at
-        if not other_date:
-            continue
+    for other in experiment.predictive_samples_before(sample):
+        other_x, other_y = other.to_xy()
+        other_x = float(other_x.tolist()[i])
 
-        if other_date <= sample.created_at or sample == other:
-            other_x, other_y = other.to_xy()
-            other_x = float(other_x.tolist()[i])
+        if param.range.is_logscale():
+            other_x = 10.0 ** other_x
 
-            if param.range.is_logscale():
-                other_x = 10.0 ** other_x
-
-            other_samples["x"].append(other_x)
-            other_samples["y"].append(other_y)
+        other_samples["x"].append(other_x)
+        other_samples["y"].append(other_y)
 
     if param.range.is_logscale():
         x_slice_at = 10.0 ** x_slice[i]
@@ -252,25 +247,20 @@ def create_slice_2d(i: int, j: int, experiment: bopt.Experiment, resolution:
 
     other_samples: Dict[str, List[float]] = defaultdict(list)
 
-    for other in experiment.samples_for_prediction():
-        other_date = other.finished_at or other.collected_at
-        if not other_date:
-            continue
+    for other in experiment.predictive_samples_before(sample):
+        other_x, other_y = other.to_xy()
+        other_x1 = float(other_x.tolist()[i])
+        other_x2 = float(other_x.tolist()[j])
 
-        if other_date <= sample.created_at or sample == other:
-            other_x, other_y = other.to_xy()
-            other_x1 = float(other_x.tolist()[i])
-            other_x2 = float(other_x.tolist()[j])
+        if p1.range.is_logscale():
+            other_x1 = 10.0 ** other_x1
 
-            if p1.range.is_logscale():
-                other_x1 = 10.0 ** other_x1
+        if p2.range.is_logscale():
+            other_x2 = 10.0 ** other_x2
 
-            if p2.range.is_logscale():
-                other_x2 = 10.0 ** other_x2
-
-            other_samples["x1"].append(other_x1)
-            other_samples["x2"].append(other_x2)
-            other_samples["y"].append(other_y)
+        other_samples["x1"].append(other_x1)
+        other_samples["x2"].append(other_x2)
+        other_samples["y"].append(other_y)
 
     if p1.range.is_logscale():
         x1 = (10.0 ** d1).tolist()

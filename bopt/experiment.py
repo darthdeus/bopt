@@ -172,6 +172,19 @@ class Experiment:
     def samples_for_prediction(self) -> List[Sample]:
         return [s for s in self.samples if s.result or not s.model.sampled_from_random_search()]
 
+    def predictive_samples_before(self, sample: Sample) -> List[Sample]:
+        result = []
+
+        for other in self.samples_for_prediction():
+            other_date = other.finished_at or other.collected_at
+            if not other_date:
+                continue
+
+            if other_date <= sample.created_at or sample == other:
+                result.append(other)
+
+        return result
+
     def get_xy(self):
         samples = self.samples_for_prediction()
 
