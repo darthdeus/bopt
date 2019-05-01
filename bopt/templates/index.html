@@ -298,7 +298,7 @@
           Plotly.plot("convergence-plot", [
             {
               y: {{sample_results|safe}},
-              name: "results"
+              name: "objective"
             },
             {
               y: {{sample_results_cummax|safe}},
@@ -307,7 +307,7 @@
           ], {
             title: "Convergence plot",
             xaxis: { title: "samples" },
-            yaxis: { title: "result" }
+            yaxis: { title: "objective" }
           });
         </script>
       </div>
