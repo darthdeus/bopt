@@ -1,5 +1,15 @@
 # TODO
 
+- filesystem :((
+  - reinforce-18/broken-job
+  - skoro u vsech zkopirovanych /lnet/depot scriptu porad ta sama issue
+  - :(
+
+- jak moc mam cistit kod?
+- experimenty
+
+
+
 - uvod u gp kapitoly
 - dopsat teorii k gp celou
 - popsat rozdily hyperparam vs arch search
