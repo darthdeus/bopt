@@ -9,7 +9,6 @@ pyyaml==5.1
 flask
 psutil
 ipdb
-gym
 livereload==2.5.1
 jsonpickle
 deepdiff

@@ -5,7 +5,7 @@ with open("README.md", "r") as f:
 
 setuptools.setup(
     name="bopt",
-    version="0.0.1a4",
+    version="0.1.0a0",
     author="Jakub Arnold",
     author_email="darthdeus@gmail.com",
     description="Bayesian Optimization",
