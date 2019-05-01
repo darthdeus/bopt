@@ -167,10 +167,11 @@ def create_slice_1d(i: int, experiment: bopt.Experiment, resolution: int,
 
     X_plot_marginal = grid.reshape(-1, 1)
 
-    X_marginal = model.X[:, i].reshape(-1, 1)
-
     if show_marginal == 1:
-        model = create_gp_for_data(X_marginal, model.Y)
+        others = experiment.predictive_samples_before(sample)
+        X_m, Y_m = bopt.SampleCollection(others).to_xy()
+        X_m = X_m[:, i].reshape(-1, 1)
+        model = create_gp_for_data(X_m, Y_m)
 
         mu, var = model.predict(X_plot_marginal)
     else:
@@ -230,7 +231,11 @@ def create_slice_2d(i: int, j: int, experiment: bopt.Experiment, resolution:
     X_pred = grid.reshape(resolution * resolution, -1)
 
     if show_marginal == 1:
-        model = create_gp_for_data(model.X[:, [i, j]], model.Y)
+        others = experiment.predictive_samples_before(sample)
+        X_m, Y_m = bopt.SampleCollection(others).to_xy()
+        X_m = X_m[:, [i, j]].reshape(-1, 2)
+        model = create_gp_for_data(X_m, Y_m)
+
         mu, var = model.predict(X_pred[:, [i, j]])
     else:
         mu, var = model.predict(X_pred)
