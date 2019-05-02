@@ -15,6 +15,7 @@ from bopt.models.parameters import ModelParameters
 from bopt.gp_config import GPConfig
 from bopt.hyperparam_values import HyperparamValues
 
+
 # TODO: split into multiple, serialization separate?
 # TODO: round indexes
 # https://arxiv.org/abs/1706.03673
@@ -168,3 +169,15 @@ class GPyModel(Model):
             return acq.ProbabilityOfImprovement()
         else:
             raise NotImplementedError(f"Unknown acquisition function '{name}'.")
+
+    @staticmethod
+    def prior_for_hyperparam(gp_config: GPConfig, param: Hyperparameter) -> GPy.priors.Prior:
+        d = param.range.high - param.range.low
+        mid = (d / 2.0) + param.range.low
+
+        if d > 1:
+            return GPy.priors.Gamma.from_EV(mid, (d/4.0)**2.0)
+        else:
+            return GPy.priors.Gamma(gp_config.gamma_a, gp_config.gamma_b)
+
+

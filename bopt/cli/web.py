@@ -14,11 +14,11 @@ import bopt
 from bopt.cli.util import handle_cd_revertible, acquire_lock
 
 
-def create_gp_for_data(X, Y):
+def create_gp_for_data(experiment, hyperparameters, X, Y):
     assert X.ndim == 2
     assert 1 <= X.shape[1] <= 2
 
-    model = GPy.models.GPRegression(X, Y, kernel=GPy.kern.Matern52(input_dim=X.shape[1]))
+    model = GPy.models.GPRegression(X, Y, kernel=GPy.kern.Matern52(input_dim=X.shape[1], ARD=True))
 
     min_bound = 1e-1
     max_bound = 1e3
@@ -33,11 +33,22 @@ def create_gp_for_data(X, Y):
     gamma_a = 1.0
     gamma_b = 0.01
 
-    model.kern.variance.set_prior(GPy.priors.Gamma(gamma_a, gamma_b))
-    model.kern.variance.set_prior(GPy.priors.Gamma(gamma_a, gamma_b))
-    model.kern.lengthscale.set_prior(GPy.priors.Gamma(gamma_a, gamma_b))
+    model.Gaussian_noise.variance.unconstrain()
+    model.Gaussian_noise.variance.constrain_bounded(min_bound, max_bound)
+
+    model.kern.lengthscale.unconstrain()
+
+    for i, param in enumerate(hyperparameters):
+        prior = bopt.GPyModel.prior_for_hyperparam(experiment.gp_config, param)
+        model.kern.lengthscale[[i]].set_prior(prior)
+
+    variance_prior = GPy.priors.Gamma(experiment.gp_config.gamma_a, experiment.gp_config.gamma_b)
+
+    model.kern.variance.unconstrain()
+    model.kern.variance.set_prior(variance_prior)
 
     model.optimize()
+
     logging.info("GP hyperparams: {}".format(model.param_array.tolist()))
 
     return model
@@ -118,16 +129,11 @@ class Slice2D:
     model: GPy.models.GPRegression
 
     def __init__(self,
-            p1: bopt.Hyperparameter,
-            p2: bopt.Hyperparameter,
-            x1: List[float],
-            x2: List[float],
-            x1_slice_at: float,
-            x2_slice_at: float,
-            mu: List[float],
-            other_samples: Dict[str, List[float]],
-            model: GPy.models.GPRegression
-            ) -> None:
+            p1: bopt.Hyperparameter, p2: bopt.Hyperparameter,
+            x1: List[float], x2: List[float],
+            x1_slice_at: float, x2_slice_at: float,
+            mu: List[float], other_samples: Dict[str, List[float]],
+            model: GPy.models.GPRegression) -> None:
         self.p1 = p1
         self.p2 = p2
 
@@ -171,7 +177,7 @@ def create_slice_1d(i: int, experiment: bopt.Experiment, resolution: int,
         others = experiment.predictive_samples_before(sample)
         X_m, Y_m = bopt.SampleCollection(others).to_xy()
         X_m = X_m[:, i].reshape(-1, 1)
-        model = create_gp_for_data(X_m, Y_m)
+        model = create_gp_for_data(experiment, [param], X_m, Y_m)
 
         mu, var = model.predict(X_plot_marginal)
     else:
@@ -206,8 +212,8 @@ def create_slice_1d(i: int, experiment: bopt.Experiment, resolution: int,
                    sigma.tolist(), acq.tolist(), other_samples,
                    model)
 
-def create_slice_2d(i: int, j: int, experiment: bopt.Experiment, resolution:
-        int, n_dims: int, x_slice: List[float], model: GPy.models.GPRegression,
+def create_slice_2d(i: int, j: int, experiment: bopt.Experiment,
+        resolution: int, n_dims: int, x_slice: List[float], model: GPy.models.GPRegression,
         sample: bopt.Sample, show_marginal: int) -> Slice2D:
 
     p1 = experiment.hyperparameters[i]
@@ -234,7 +240,7 @@ def create_slice_2d(i: int, j: int, experiment: bopt.Experiment, resolution:
         others = experiment.predictive_samples_before(sample)
         X_m, Y_m = bopt.SampleCollection(others).to_xy()
         X_m = X_m[:, [i, j]].reshape(-1, 2)
-        model = create_gp_for_data(X_m, Y_m)
+        model = create_gp_for_data(experiment, [p1, p2], X_m, Y_m)
 
         mu, var = model.predict(X_pred[:, [i, j]])
     else:

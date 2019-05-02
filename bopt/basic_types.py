@@ -326,6 +326,7 @@ class Hyperparameter(NamedTuple):
     def validate(self, value) -> bool:
         return self.range.validate(value)
 
+
     @staticmethod
     def from_dict(name, data: dict) -> "Hyperparameter":
         if data["type"] == "discrete":
