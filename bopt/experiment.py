@@ -319,7 +319,8 @@ class Experiment:
 
                 else:
                     # TODO: gpy pouzito na 2 mistech?
-                    model = GPyModel.gpy_regression(self.gp_config, X_sample, Y_sample)
+                    model = GPyModel.gpy_regression(self.hyperparameters,
+                            self.gp_config, X_sample, Y_sample)
 
                 X_next = np.array([hyperparam_values.x])
 

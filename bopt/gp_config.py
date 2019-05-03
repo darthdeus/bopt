@@ -10,6 +10,7 @@ class GPConfig:
     gamma_prior: bool
     gamma_a: float
     gamma_b: float
+    informative_prior: bool
 
     acq_xi: float
     acq_n_restarts: int
@@ -24,9 +25,12 @@ class GPConfig:
 
         self.ard = args.ard == 1
         self.fit_mean = args.fit_mean == 1
+
         self.gamma_prior = args.gamma_prior == 1
         self.gamma_a = args.gamma_a
         self.gamma_b = args.gamma_b
+        self.informative_prior = args.informative_prior == 1
+
         self.acq_xi = args.acq_xi
         self.acq_n_restarts = args.acq_n_restarts
 

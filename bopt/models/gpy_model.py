@@ -59,7 +59,8 @@ class GPyModel(Model):
         return GPyModel(model, acquisition_fn)
 
     @staticmethod
-    def gpy_regression(gp_config: GPConfig, X_sample: np.ndarray, Y_sample: np.ndarray) -> GPRegression:
+    def gpy_regression(hyperparameters: List[Hyperparameter],
+            gp_config: GPConfig, X_sample: np.ndarray, Y_sample: np.ndarray) -> GPRegression:
 
         # TODO: zkontrolovat, ze se kernely vyrabi jenom na jednom miste
         kernel = GPyModel.parse_kernel_name(gp_config.kernel)(X_sample.shape[1], ARD=gp_config.ard)
@@ -73,19 +74,28 @@ class GPyModel(Model):
         min_bound = 1e-2
         max_bound = 1e3
 
-        model.Gaussian_noise.variance.unconstrain()
-        model.Gaussian_noise.variance.constrain_bounded(min_bound, max_bound)
+        if gp_config.informative_prior:
+            for i, param in enumerate(hyperparameters):
+                prior = GPyModel.prior_for_hyperparam(gp_config, param)
+                model.kern.lengthscale[[i]].set_prior(prior)
 
-        if gp_config.gamma_prior:
-            # TODO: noise prior?
-            model.kern.variance.set_prior(GPy.priors.Gamma(gp_config.gamma_a, gp_config.gamma_b))
-            model.kern.lengthscale.set_prior(GPy.priors.Gamma(gp_config.gamma_a, gp_config.gamma_b))
-        else:
+            variance_prior = GPy.priors.Gamma(gp_config.gamma_a, gp_config.gamma_b)
+
             model.kern.variance.unconstrain()
-            model.kern.variance.constrain_bounded(min_bound, max_bound)
+            model.kern.variance.set_prior(variance_prior)
+        else:
+            model.Gaussian_noise.variance.unconstrain()
+            model.Gaussian_noise.variance.constrain_bounded(min_bound, max_bound)
 
-            model.kern.lengthscale.unconstrain()
-            model.kern.lengthscale.constrain_bounded(min_bound, max_bound)
+            if gp_config.gamma_prior:
+                model.kern.variance.set_prior(GPy.priors.Gamma(gp_config.gamma_a, gp_config.gamma_b))
+                model.kern.lengthscale.set_prior(GPy.priors.Gamma(gp_config.gamma_a, gp_config.gamma_b))
+            else:
+                model.kern.variance.unconstrain()
+                model.kern.variance.constrain_bounded(min_bound, max_bound)
+
+                model.kern.lengthscale.unconstrain()
+                model.kern.lengthscale.constrain_bounded(min_bound, max_bound)
 
         model.optimize_restarts(gp_config.num_optimize_restarts)
 
@@ -100,7 +110,7 @@ class GPyModel(Model):
         # TODO: compare NLL with and without normalizer
         assert not np.any(np.isnan(Y_sample))
 
-        model = GPyModel.gpy_regression(gp_config, X_sample, Y_sample)
+        model = GPyModel.gpy_regression(hyperparameters, gp_config, X_sample, Y_sample)
         acquisition_fn = GPyModel.parse_acquisition_fn(gp_config.acquisition_fn)
 
         x_next = GPyModel.propose_location(acquisition_fn, model, Y_sample.max(),

@@ -33,8 +33,8 @@ def create_gp_for_data(experiment, hyperparameters, X, Y):
     gamma_a = 1.0
     gamma_b = 0.01
 
-    model.Gaussian_noise.variance.unconstrain()
-    model.Gaussian_noise.variance.constrain_bounded(min_bound, max_bound)
+    # model.Gaussian_noise.variance.unconstrain()
+    # model.Gaussian_noise.variance.constrain_bounded(min_bound, max_bound)
 
     model.kern.lengthscale.unconstrain()
 

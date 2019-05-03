@@ -74,6 +74,9 @@ def main():
     sp_init.add_argument("--gamma-b", type=float, default=0.1,
         help="The inverse rate parameter of the Gamma prior.")
 
+    sp_init.add_argument("--informative-prior", type=int, default=1,
+        help="When enabled, kernel parameters use an informative Gamma prior on lengthscale.")
+
     sp_init.add_argument("--acq-xi", type=float, default=0.001,
         help="The xi parameter of the acquisition functions")
     sp_init.add_argument("--acq-n-restarts", type=int, default=25,
