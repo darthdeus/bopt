@@ -337,7 +337,7 @@ def run(args) -> None:
 
             sample_id = int(request.args.get("sample_id") or -1)
             show_acq = int(request.args.get("show_acq") or 0)
-            show_marginal = int(request.args.get("show_marginal") or 0)
+            show_marginal = int(request.args.get("show_marginal") or 1)
 
             sample = next((s for s in experiment.samples if s.job and s.job.job_id == sample_id), None)
 
