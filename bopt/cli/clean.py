@@ -14,7 +14,7 @@ def run(args) -> None:
         experiment = Experiment.deserialize()
 
         for sample in experiment.samples:
-            if sample.job:
+            if sample.job and not sample.job.is_finished():
                 sample.job.kill()
 
         experiment.samples = []
