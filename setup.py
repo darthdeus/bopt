@@ -5,7 +5,7 @@ with open("README.md", "r") as f:
 
 setuptools.setup(
     name="bopt",
-    version="0.1.0a0",
+    version="0.1.0",
     author="Jakub Arnold",
     author_email="darthdeus@gmail.com",
     description="Bayesian Optimization",
@@ -31,7 +31,7 @@ setuptools.setup(
         "GPy[plotting]~=1.9.6",
         "filelock~=3.0.10",
         "ipdb~=0.11",
-        "livereload==2.5.1"   # TODO: this is only temporary
+        "livereload==2.5.1"
     ],
 
     extras_require={
@@ -47,7 +47,7 @@ setuptools.setup(
     },
 
     classifiers=[
-        "Development Status :: 2 - Pre-Alpha",
+        "Development Status :: 4 - Beta",
         "Intended Audience :: Science/Research",
         "Intended Audience :: Developers",
         "License :: OSI Approved :: MIT License",
