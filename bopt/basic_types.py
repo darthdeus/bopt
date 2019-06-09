@@ -164,7 +164,8 @@ class Float(Bound):
         # TODO: logscale will need this adjusted
         # We set the threshold at 1% of the range
         threshold = (self.high - self.low) * 0.01
-        return diff < threshold
+        # return diff < threshold
+        return False
 
 
 class LogscaleInt(Bound):

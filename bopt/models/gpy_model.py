@@ -74,6 +74,7 @@ class GPyModel(Model):
         min_bound = 1e-2
         max_bound = 1e3
 
+        # print("IP:", gp_config.informative_prior)
         if gp_config.informative_prior:
             for i, param in enumerate(hyperparameters):
                 prior = GPyModel.prior_for_hyperparam(gp_config, param)
@@ -98,6 +99,10 @@ class GPyModel(Model):
                 model.kern.lengthscale.constrain_bounded(min_bound, max_bound)
 
         model.optimize_restarts(gp_config.num_optimize_restarts)
+
+        # print(X_sample, Y_sample)
+        # print(model)
+
 
         logging.debug("GPY hyperparam optimization DONE, params: {}".format(model.param_array))
 
@@ -128,10 +133,14 @@ class GPyModel(Model):
             gp_config: GPConfig) -> np.ndarray:
 
         def min_obj(X):
-            return -acquisition_fn(gp, X.reshape(1, -1), y_max, gp_config.acq_xi)
+            y = -acquisition_fn(gp, X.reshape(1, -1), y_max, gp_config.acq_xi)
+            return y
 
         scipy_bounds = [h.range.scipy_bound_tuple() for h in
                 hyperparameters]
+
+        # for x in np.linspace(scipy_bounds[0][0], scipy_bounds[0][1]):
+        #     print(x, -acquisition_fn(gp, np.array([[x]], dtype=np.float32), y_max, gp_config.acq_xi))
 
         starting_points = []
         for _ in range(gp_config.acq_n_restarts):
@@ -143,7 +152,9 @@ class GPyModel(Model):
         logging.debug("Starting propose_location")
 
         for i, x0 in enumerate(starting_points):
-            res = minimize(min_obj, x0=x0, bounds=scipy_bounds, method="L-BFGS-B")
+            # print("*********************")
+            res = minimize(min_obj, x0=x0, bounds=scipy_bounds, method="L-BFGS-B",
+                    tol=0, options={"maxiter":20})
 
             if np.any(np.isnan(res.fun[0])):
                 logging.error("Ran into NAN during {}/{} acq fn optimization, got {}".format(i, len(starting_points), res.fun))

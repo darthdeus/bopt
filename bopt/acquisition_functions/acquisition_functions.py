@@ -12,15 +12,19 @@ from scipy.stats import norm
 
 class AcquisitionFunction(abc.ABC):
     # TODO: xi default value 0.01 or tweak it?
-    def __call__(self, gp: GPRegression, X: np.ndarray, f_s: float, xi: float=0.001) -> np.ndarray:
+    def __call__(self, gp: GPRegression, X: np.ndarray, f_s: float, xi: float=0.01) -> np.ndarray:
         assert X is not None
 
-        mu, sigma = gp.predict(X)
+        mu, var = gp.predict(X)
+        sigma = np.sqrt(var)
 
-        return self.raw_call(mu, sigma, f_s, xi)
+        ei = self.raw_call(mu, sigma, f_s, xi)
+        # print("call ...", X, mu, ei)
+
+        return ei
 
     @abc.abstractmethod
-    def raw_call(self, mu: np.ndarray, sigma: np.ndarray, f_s: float, xi: float=0.001) -> np.ndarray:
+    def raw_call(self, mu: np.ndarray, sigma: np.ndarray, f_s: float, xi: float=0.01) -> np.ndarray:
         pass
 
     @abc.abstractmethod
@@ -29,11 +33,13 @@ class AcquisitionFunction(abc.ABC):
 
 
 class ExpectedImprovement(AcquisitionFunction):
-    def raw_call(self, mu: np.ndarray, sigma: np.ndarray, f_s: float, xi: float=0.001) -> np.ndarray:
-        # TODO: neni to opacne?
+    def raw_call(self, mu: np.ndarray, sigma: np.ndarray, f_s: float, xi: float=0.01) -> np.ndarray:
+
         improvement = mu - f_s - xi
         Z = improvement / sigma
         ei = improvement * norm.cdf(Z) + sigma * norm.pdf(Z)
+
+        # print("raw_call ...", mu, sigma, f_s, ei)
 
         return ei
 
@@ -42,7 +48,7 @@ class ExpectedImprovement(AcquisitionFunction):
 
 
 class ProbabilityOfImprovement(AcquisitionFunction):
-    def raw_call(self, mu: np.ndarray, sigma: np.ndarray, f_s: float, xi: float=0.001) -> np.ndarray:
+    def raw_call(self, mu: np.ndarray, sigma: np.ndarray, f_s: float, xi: float=0.01) -> np.ndarray:
         improvement = mu - f_s - xi
         Z = improvement / sigma
 

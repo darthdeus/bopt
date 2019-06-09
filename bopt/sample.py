@@ -122,7 +122,7 @@ class Sample:
 
         status = self.status()
 
-        assert self.result or self.job or status == CollectFlag.WAITING_FOR_SIMILAR, \
+        assert self.result is not None or self.job or status == CollectFlag.WAITING_FOR_SIMILAR, \
             "status was: {}".format(status)
 
         if status == CollectFlag.COLLECT_OK:
@@ -168,7 +168,7 @@ class Sample:
         s += "s: {}\tf: {}\tc: {}\tr: {}\t".format(self.created_at,
                 self.finished_at, self.collected_at, self.run_time)
 
-        s += "RS: {}".format(self.model.sampled_from_random_search())
+        s += "RS: {}\t".format(self.model.sampled_from_random_search())
 
         is_finished = self.status() == CollectFlag.COLLECT_OK
 

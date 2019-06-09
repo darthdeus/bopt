@@ -1,5 +1,9 @@
 BOPT=./.venv/bin/bopt
 
+a:
+	cp meta2.yml meta.yml
+	bopt run --n_iter=1
+
 default: mypy
 
 plot:
@@ -15,23 +19,25 @@ test_serialization_ipdb:
 gpy_compare:
 	PYTHONPATH=. python tests/test_gpy_comparison.py
 
+		# --param "x:int:0:5" \
+		# --param "z:float:0:6" \
+		# --param "w:logscale_float:1:7" \
+		# --param "activation:discrete:relu:sigmoid:tanh" \
+
 sfntest:
 	rm -rf results/sfn
 	$(BOPT) init \
-		--param "x:int:0:5" \
-		--param "y:logscale_int:1:128" \
-		--param "z:float:0:6" \
-		--param "w:logscale_float:1:7" \
-		--param "activation:discrete:relu:sigmoid:tanh" \
+		--param "y:float:1:3" \
 		--qsub=-q \
 		--qsub=cpu-troja.q \
 		--gamma-a=1.0 --gamma-b=0.001 \
+		--informative-prior=1 \
 		--manual-arg-fname=$(PWD)/experiments/foo.txt \
 		--manual-arg-fname=$(PWD)/experiments/bar.txt \
 		--acq-xi=0.01 \
 		-C results/sfn \
 		$(PWD)/experiments/time_sfn_runner.sh $(PWD)
-	$(BOPT) run --n_iter=20 --n_parallel=1 --sleep=0.1 -C results/sfn
+	$(BOPT) run --n_iter=10 --n_parallel=1 --sleep=0.1 -C results/sfn
 
 sfntest2d:
 	rm -rf results/sfn2d

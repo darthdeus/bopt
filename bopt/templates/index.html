@@ -184,8 +184,10 @@
                   marker: { color: "rgb(255, 180, 90)", size: 10, line: { width: 1 } }
                 },
 
+                // TODO: zobrazovat posledni (aktualni) sample jinou barvickou
 
               ], {
+                showlegend: false,
                 title: "{{slice.param.name}}={{slice.x_slice_at | round(2)}} ... {{slice.param.range}}",
                 xaxis: {
                   title: "{{slice.param.name}}",

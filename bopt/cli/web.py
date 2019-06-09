@@ -18,7 +18,7 @@ def create_gp_for_data(experiment, hyperparameters, X, Y):
     assert X.ndim == 2
     assert 1 <= X.shape[1] <= 2
 
-    model = GPy.models.GPRegression(X, Y, kernel=GPy.kern.Matern52(input_dim=X.shape[1], ARD=True))
+    model = GPy.models.GPRegression(X, Y, kernel=GPy.kern.Matern52(input_dim=X.shape[1], ARD=True), normalizer=len(X) > 1)
 
     min_bound = 1e-1
     max_bound = 1e3
@@ -47,6 +47,8 @@ def create_gp_for_data(experiment, hyperparameters, X, Y):
     model.kern.variance.unconstrain()
     model.kern.variance.set_prior(variance_prior)
 
+    # model.optimize_restarts(25)
+    # print("xxx", flush=True)
     model.optimize()
 
     logging.info("GP hyperparams: {}".format(model.param_array.tolist()))
@@ -177,11 +179,16 @@ def create_slice_1d(i: int, experiment: bopt.Experiment, resolution: int,
         others = experiment.predictive_samples_before(sample)
         X_m, Y_m = bopt.SampleCollection(others).to_xy()
         X_m = X_m[:, i].reshape(-1, 1)
+
         model = create_gp_for_data(experiment, [param], X_m, Y_m)
+
+        # print("Marginal body: ", X_m, Y_m, model)
 
         mu, var = model.predict(X_plot_marginal)
     else:
         mu, var = model.predict(X_plot)
+
+    # print(model, model.X, model.Y, model.predict(np.array([[1.0]])))
 
     mu = mu.reshape(-1)
     sigma = np.sqrt(var).reshape(-1)
@@ -191,7 +198,7 @@ def create_slice_1d(i: int, experiment: bopt.Experiment, resolution: int,
 
     other_samples: Dict[str, List[float]] = defaultdict(list)
 
-    for other in experiment.predictive_samples_before(sample):
+    for other in experiment.predictive_samples_before(sample) + [sample]:
         other_x, other_y = other.to_xy()
         other_x = float(other_x.tolist()[i])
 
@@ -258,7 +265,7 @@ def create_slice_2d(i: int, j: int, experiment: bopt.Experiment,
 
     other_samples: Dict[str, List[float]] = defaultdict(list)
 
-    for other in experiment.predictive_samples_before(sample):
+    for other in experiment.predictive_samples_before(sample) + [sample]:
         other_x, other_y = other.to_xy()
         other_x1 = float(other_x.tolist()[i])
         other_x2 = float(other_x.tolist()[j])
@@ -354,8 +361,11 @@ def run(args) -> None:
             if sample and not random_search_picked:
                 x_slice = sample.hyperparam_values.x
 
-                X_sample, Y_sample = experiment.get_xy()
+                others = experiment.predictive_samples_before(sample)
+                X_sample, Y_sample = bopt.SampleCollection(others).to_xy()
+
                 gpy_model = bopt.GPyModel.from_model_params(experiment.gp_config, sample.model, X_sample, Y_sample)
+                # print("Ne-marginal", X_sample, Y_sample, gpy_model.model)
 
                 model = gpy_model.model
 

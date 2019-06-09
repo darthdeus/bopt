@@ -180,7 +180,7 @@ class Experiment:
             if not other_date:
                 continue
 
-            if other_date <= sample.created_at or sample == other:
+            if other_date < sample.created_at: #  or sample == other:
                 result.append(other)
 
         return result
@@ -272,7 +272,8 @@ class Experiment:
                 logging.warning(warning_str)
 
                 similar_sample = finished_similar_samples[0]
-                assert similar_sample.result
+                # print("ss", similar_sample)
+                assert similar_sample.result is not None
 
                 created_at = datetime.datetime.now()
 
