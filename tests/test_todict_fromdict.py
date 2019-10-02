@@ -17,7 +17,7 @@ def test_exp1():
         bopt.Hyperparameter("pi", bopt.Integer(24, 42))
     ]
 
-    runner = bopt.LocalRunner("/bin/bash", ["--help", "me"])
+    runner = bopt.LocalRunner("/bin/bash", ["--help", "me"], [])
 
     args = argparse.Namespace()
     args.kernel = "Mat52"
@@ -26,6 +26,13 @@ def test_exp1():
     args.fit_mean = 0
     args.gamma_prior = 0
     args.num_optimize_restarts = 10
+    args.gamma_a = 1.0
+    args.gamma_b = 0.001
+    args.informative_prior = True
+    args.acq_xi = 0.01
+    args.acq_n_restarts = 25
+    args.random_search_only = False
+    # TODO: represent this properly
 
     gp_config = bopt.GPConfig(args)
 

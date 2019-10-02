@@ -1,8 +1,7 @@
 BOPT=./.venv/bin/bopt
 
-a:
-	cp meta2.yml meta.yml
-	bopt run --n_iter=1
+test:
+	pytest
 
 default: mypy
 

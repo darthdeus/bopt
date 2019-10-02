@@ -56,10 +56,7 @@ class Easom(OptFunction):
 class Eggholder(OptFunction):
     def __init__(self) -> None:
         self.name = "Eggholder"
-        self.bounds = [
-            Hyperparameter("x", Float(-512, 512)),
-            Hyperparameter("y", Float(-512, 512))
-        ]
+        self.bounds = [Float(-512, 512), Float(-512, 512)]
 
     def f(self, x: np.ndarray) -> float:
         """
