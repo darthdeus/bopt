@@ -3,7 +3,7 @@ mypy==0.641
 pytest==5.2.0
 numpy==1.15.4
 Cython
-GPy[plotting]
+GPy[plotting]==1.9.8
 tqdm
 pyyaml==5.1
 flask

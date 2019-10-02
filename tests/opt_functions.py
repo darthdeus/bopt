@@ -20,8 +20,9 @@ class OptFunction(abc.ABC):
 
 
 class Beale(OptFunction):
+    name = "Beale"
+
     def __init__(self) -> None:
-        self.name = "Beale"
         self.bounds = [Float(-4.5, 4.5), Float(-4.5, 4.5)]
 
     def f(self, x: np.ndarray) -> float:
@@ -37,8 +38,9 @@ class Beale(OptFunction):
 
 
 class Easom(OptFunction):
+    name = "Easom"
+
     def __init__(self) -> None:
-        self.name = "Easom"
         self.bounds = [Float(-100, 100), Float(-100, 100)]
 
     def f(self, x: np.ndarray) -> float:
@@ -54,8 +56,9 @@ class Easom(OptFunction):
 
 
 class Eggholder(OptFunction):
+    name = "Eggholder"
+
     def __init__(self) -> None:
-        self.name = "Eggholder"
         self.bounds = [Float(-512, 512), Float(-512, 512)]
 
     def f(self, x: np.ndarray) -> float:
@@ -74,8 +77,9 @@ class Eggholder(OptFunction):
 
 
 class McCormick(OptFunction):
+    name = "McCormick"
+
     def __init__(self) -> None:
-        self.name = "McCormick"
         self.bounds = [Float(-1.5, 4), Float(-3, 4)]
 
     def f(self, x: np.ndarray) -> float:

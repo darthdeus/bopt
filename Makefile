@@ -1,9 +1,9 @@
 BOPT=./.venv/bin/bopt
 
-test:
-	pytest
+default:
+	pytest -s
 
-default: mypy
+# default: mypy
 
 plot:
 	rm -rf results/sfn/plots

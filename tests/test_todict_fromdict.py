@@ -19,6 +19,7 @@ def test_exp1():
 
     runner = bopt.LocalRunner("/bin/bash", ["--help", "me"], [])
 
+    # TODO: represent this properly
     args = argparse.Namespace()
     args.kernel = "Mat52"
     args.acquisition_fn = "ei"
@@ -32,7 +33,6 @@ def test_exp1():
     args.acq_xi = 0.01
     args.acq_n_restarts = 25
     args.random_search_only = False
-    # TODO: represent this properly
 
     gp_config = bopt.GPConfig(args)
 

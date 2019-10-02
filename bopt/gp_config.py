@@ -1,6 +1,7 @@
 from argparse import Namespace
 
 
+# TODO: generate CLI from this or generate this from CLI
 class GPConfig:
     kernel: str
     acquisition_fn: str
