@@ -5,34 +5,13 @@
   - skoro u vsech zkopirovanych /lnet/depot scriptu porad ta sama issue
   - :(
 
-- jak moc mam cistit kod?
-- experimenty
-
-
-
-- uvod u gp kapitoly
-- dopsat teorii k gp celou
-- popsat rozdily hyperparam vs arch search
-- podivat se na diskretni a kategoricke (nando)
-
-- popsat sw kapitolu
 
 - moznost poustet jenom random search
-- spustit toy experimenty
-- spustit RL ktery uz mam
-- [x] marginaly
 
-
-
-
-- cestina, pridat zbytek hyperparam
-- [x] poznamka u sample (uz vlastne bylo, comment :)
-- marginal?
 - zobrazovat cas v rozumnem meritku (hodiny atd)
 
 - [x] do args pridat parametry gamma prioru
 - [x] do args pridat parametry EI (xi)
-- nejde statnice a obhajoba najednou? :O
 
 - tail -F bopt.o5400313
 
@@ -53,8 +32,6 @@ FileExistsError: [Errno 17] File exists: 'meta.yml'
 == Server name: paris4
 
 
-
-- [x] adam vs sgd + momentum vs blabla parametry co se vylucuji
 
 - mf=8G,amf=8G,h_vmem=12G vs mem_free=8G,act_mem_free=8G,h_data=12G   (/grid vs /gpu)
 
