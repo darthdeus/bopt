@@ -1,8 +1,8 @@
 import logging
 import numpy as np
-from typing import Dict, List, Union
+from typing import Dict, List
 
-from bopt.basic_types import Hyperparameter, Discrete, ParamTypes, LogscaleFloat, LOGSCALE_BASE
+from bopt.basic_types import Hyperparameter, ParamTypes
 
 
 class HyperparamValues:
@@ -72,8 +72,7 @@ class HyperparamValues:
         # TODO: unify naming
         # params_dict -> EvaluationArgs
         # ...
-        mapping: Dict[Hyperparameter, ParamTypes] = dict(zip(hyperparameters,
-            typed_vals))
+        mapping: Dict[Hyperparameter, ParamTypes] = dict(zip(hyperparameters, typed_vals))
 
         for p in hyperparameters:
             # TODO: properly check for map/inverse_map

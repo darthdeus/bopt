@@ -1,11 +1,8 @@
-import sys
 import os
-import inspect
 import argparse
 
 from bopt.experiment import Experiment
 from bopt.cli import (
-    cli,
     exp,
     init,
     jobstat,
@@ -14,7 +11,6 @@ from bopt.cli import (
     run,
     run_single,
     suggest,
-    util,
     web,
     debug,
     clean
@@ -57,49 +53,49 @@ def main():
         import bopt.gp_config as gp_config
         for config_param in gp_config.config_params:
             sp_init.add_argument("--{}".format(config_param.name),
-                    type    = config_param.type,
-                    default = config_param.default,
-                    action  = config_param.action,
-                    help    = config_param.help)
+                                 type=config_param.type,
+                                 default=config_param.default,
+                                 action=config_param.action,
+                                 help=config_param.help)
 
     else:
         sp_init.add_argument("--kernel", type=str, default="Mat52",
-            help=f"Specifies the GP kernel. Allowed values are: {kernel_names}")
+                             help=f"Specifies the GP kernel. Allowed values are: {kernel_names}")
 
         sp_init.add_argument("--acquisition_fn", type=str, default="ei",
-            help=f"Specifies the acquisition function. Allowed values are: {acq_fn_names}")
+                             help=f"Specifies the acquisition function. Allowed values are: {acq_fn_names}")
 
         sp_init.add_argument("--ard", type=int, default=1,
-            help="Toggles automatic relevance determination (one lengthscale per hyperparameter).")
+                             help="Toggles automatic relevance determination (one lengthscale per hyperparameter).")
 
         sp_init.add_argument("--fit-mean", type=int, default=1,
-            help="When enabled the mean function is fit during kernel optimization. "
-                 "Otherwise it is set to zero.")
+                             help="When enabled the mean function is fit during kernel optimization. "
+                             "Otherwise it is set to zero.")
 
         sp_init.add_argument("--gamma-prior", type=int, default=1,
-            help="When enabled, kernel parameters will use a Gamma prior "
-                 "instead of a hard constraint.")
+                             help="When enabled, kernel parameters will use a Gamma prior "
+                             "instead of a hard constraint.")
         sp_init.add_argument("--gamma-a", type=float, default=1.0,
-            help="The shape parameter of the Gamma prior.")
+                             help="The shape parameter of the Gamma prior.")
         sp_init.add_argument("--gamma-b", type=float, default=0.1,
-            help="The inverse rate parameter of the Gamma prior.")
+                             help="The inverse rate parameter of the Gamma prior.")
 
         sp_init.add_argument("--informative-prior", type=int, default=1,
-            help="When enabled, kernel parameters use an informative Gamma prior on lengthscale.")
+                             help="When enabled, kernel parameters use an informative Gamma prior on lengthscale.")
 
         sp_init.add_argument("--acq-xi", type=float, default=0.001,
-            help="The xi parameter of the acquisition functions")
+                             help="The xi parameter of the acquisition functions")
         sp_init.add_argument("--acq-n-restarts", type=int, default=25,
-            help="Number of restarts when optimizing the acquisition function.")
+                             help="Number of restarts when optimizing the acquisition function.")
 
     sp_init.add_argument("--manual-arg-fname", action="append", default=[],
-            help="Path to a file containing values for the manual argument.")
+                         help="Path to a file containing values for the manual argument.")
 
     sp_init.add_argument("--num-optimize-restarts", type=int, default=10,
-        help="Number of restarts during kernel optimization.")
+                         help="Number of restarts during kernel optimization.")
 
     sp_init.add_argument("--random-search-only", action="store_true", default=False,
-            help="Only use random search when picking new hyperparameters.", required=False)
+                         help="Only use random search when picking new hyperparameters.", required=False)
 
     sp_init.add_argument("command", type=str, help="Command to run.")
     sp_init.add_argument("arguments", type=str, nargs="*", help="Default arguments.")
@@ -110,7 +106,7 @@ def main():
     ### bopt jobstat
 
     sp_jobstat = sp.add_parser("job", help="Retrieve job status.",
-            parents=[cd_parser])
+                               parents=[cd_parser])
     sp_jobstat.add_argument(
         "--recursive",
         type=bool,
@@ -119,7 +115,7 @@ def main():
         required=False,
     )
     sp_jobstat.add_argument("JOB_ID", type=int, default=".",
-            help="Job to search for.")
+                            help="Job to search for.")
     sp_jobstat.set_defaults(func=jobstat.run)
 
 
@@ -135,7 +131,7 @@ def main():
     ### bopt web
 
     sp_web = sp.add_parser("web", help="Starts the web interface.",
-            parents=[cd_parser])
+                           parents=[cd_parser])
     sp_web.add_argument(
         "--port", type=int, default=5500, help="Port to run the web interface on."
     )

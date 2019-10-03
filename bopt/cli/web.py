@@ -1,11 +1,9 @@
 from collections import defaultdict
 import math
-import sys
-import jsonpickle
 import numpy as np
 import logging
 
-from typing import NamedTuple, List, Tuple, Dict
+from typing import List, Tuple, Dict
 from livereload import Server
 from flask import Flask, render_template, request
 import GPy
@@ -18,7 +16,8 @@ def create_gp_for_data(experiment, hyperparameters, X, Y):
     assert X.ndim == 2
     assert 1 <= X.shape[1] <= 2
 
-    model = GPy.models.GPRegression(X, Y, kernel=GPy.kern.Matern52(input_dim=X.shape[1], ARD=True), normalizer=len(X) > 1)
+    kern = GPy.kern.Matern52(input_dim=X.shape[1], ARD=True)
+    model = GPy.models.GPRegression(X, Y, kernel=kern, normalizer=len(X) > 1)
 
     min_bound = 1e-1
     max_bound = 1e3
@@ -71,9 +70,9 @@ class Slice1D:
     model: GPy.models.GPRegression
 
     def __init__(self, param: bopt.Hyperparameter, x: List[float],
-            x_slice_at: float, mu: List[float], sigma: List[float],
-            acq: List[float], other_samples: Dict[str, List[float]],
-            model: GPy.models.GPRegression) -> None:
+                 x_slice_at: float, mu: List[float], sigma: List[float],
+                 acq: List[float], other_samples: Dict[str, List[float]],
+                 model: GPy.models.GPRegression) -> None:
         self.param = param
         self.x = x
         self.x_slice_at = x_slice_at
@@ -131,11 +130,11 @@ class Slice2D:
     model: GPy.models.GPRegression
 
     def __init__(self,
-            p1: bopt.Hyperparameter, p2: bopt.Hyperparameter,
-            x1: List[float], x2: List[float],
-            x1_slice_at: float, x2_slice_at: float,
-            mu: List[float], other_samples: Dict[str, List[float]],
-            model: GPy.models.GPRegression) -> None:
+                 p1: bopt.Hyperparameter, p2: bopt.Hyperparameter,
+                 x1: List[float], x2: List[float],
+                 x1_slice_at: float, x2_slice_at: float,
+                 mu: List[float], other_samples: Dict[str, List[float]],
+                 model: GPy.models.GPRegression) -> None:
         self.p1 = p1
         self.p2 = p2
 
@@ -159,8 +158,8 @@ class Slice2D:
 
 
 def create_slice_1d(i: int, experiment: bopt.Experiment, resolution: int,
-        n_dims: int, x_slice: List[float], model: GPy.models.GPRegression, sample: bopt.Sample,
-        show_marginal: int) -> Slice1D:
+                    n_dims: int, x_slice: List[float], model: GPy.models.GPRegression, sample: bopt.Sample,
+                    show_marginal: int) -> Slice1D:
     param = experiment.hyperparameters[i]
 
     grid = param.range.grid(resolution)
@@ -219,9 +218,10 @@ def create_slice_1d(i: int, experiment: bopt.Experiment, resolution: int,
                    sigma.tolist(), acq.tolist(), other_samples,
                    model)
 
+
 def create_slice_2d(i: int, j: int, experiment: bopt.Experiment,
-        resolution: int, n_dims: int, x_slice: List[float], model: GPy.models.GPRegression,
-        sample: bopt.Sample, show_marginal: int) -> Slice2D:
+                    resolution: int, n_dims: int, x_slice: List[float], model: GPy.models.GPRegression,
+                    sample: bopt.Sample, show_marginal: int) -> Slice2D:
 
     p1 = experiment.hyperparameters[i]
     p2 = experiment.hyperparameters[j]
@@ -303,8 +303,7 @@ def run(args) -> None:
     import os
     script_dir = os.path.dirname(os.path.abspath(inspect.stack()[0][1]))
 
-    app = Flask(__name__, template_folder=os.path.join(script_dir, "..",
-        "templates"))
+    app = Flask(__name__, template_folder=os.path.join(script_dir, "..", "templates"))
     app.debug = True
 
     app.config["port"] = args.port
