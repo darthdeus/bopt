@@ -36,7 +36,7 @@ setuptools.setup(
 
     extras_require={
         "plotting": [
-            "matplotlib~=3.0.2"
+            "matplotlib>=3.0.2,<3.2.0"
         ]
     },
 
