@@ -8,3 +8,5 @@ venv/
 
 results/
 bopt.egg-info/
+
+.coverage*

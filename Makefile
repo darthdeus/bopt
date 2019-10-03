@@ -1,7 +1,9 @@
 BOPT=./.venv/bin/bopt
 
-default:
-	./.venv/bin/pytest -s
+default: test
+
+# default:
+# 	./.venv/bin/pytest -s
 
 # default: mypy
 
@@ -117,4 +119,4 @@ clean-dist:
 	rm -rf bopt.egg-info/ dist/ build/
 
 test:
-	bash -c "source ./.venv/bin/activate && pytest && ./tests/test_cli.sh && make mypy"
+	bash -c "source ./.venv/bin/activate && ./tests/test_cli.sh && pytest && make mypy"

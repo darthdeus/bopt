@@ -15,3 +15,4 @@ deepdiff
 filelock
 ipdb
 pylint
+coverage
