@@ -251,8 +251,7 @@ class Experiment:
         output_dir_path = pathlib.Path("output")
         output_dir_path.mkdir(parents=True, exist_ok=True)
 
-        logging.debug("Output set to: {}".format(output_dir_path,
-            output_dir_path.absolute()))
+        logging.debug("Output set to: {}\t{}".format(output_dir_path, output_dir_path.absolute()))
 
         hyperparam_values.validate()
 

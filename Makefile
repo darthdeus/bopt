@@ -1,7 +1,7 @@
 BOPT=./.venv/bin/bopt
 
 default:
-	pytest -s
+	./.venv/bin/pytest -s
 
 # default: mypy
 

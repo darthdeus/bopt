@@ -37,14 +37,11 @@ def main():
     kernel_names = ",".join(Experiment.kernel_names)
     acq_fn_names = ",".join(Experiment.acquisition_fn_names)
 
-    model_parser = argparse.ArgumentParser(add_help=None)
-
     sp = parser.add_subparsers(dest="bopt")
     sp.required = True
 
 
     ### bopt init
-
     sp_init = sp.add_parser(
         "init", help="Initializes a new experiment, ready to run.",
         parents=[cd_parser]
@@ -209,7 +206,7 @@ def main():
     )
     sp_clean.set_defaults(func=clean.run)
 
-    parsed, unknown = parser.parse_known_args()
+    _, unknown = parser.parse_known_args()
     # this is an 'internal' method which returns 'parsed', the same as what
     # parse_args() would return and 'unknown', the remainder of that the
     # difference to parse_args() is that it does not exit when it finds

@@ -1,5 +1,5 @@
 jupyter==1.0.0
-mypy==0.641
+mypy==0.730
 pytest==5.2.0
 numpy==1.15.4
 Cython
@@ -14,3 +14,4 @@ jsonpickle
 deepdiff
 filelock
 ipdb
+pylint
