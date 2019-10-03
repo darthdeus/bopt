@@ -2,17 +2,14 @@ import math
 import yaml
 import os
 import re
-import psutil
-import time
 import pathlib
 import datetime
 import logging
-import traceback
 import tempfile
 
 import numpy as np
 
-from typing import List, Optional, Tuple
+from typing import List, Tuple
 
 from bopt.basic_types import Hyperparameter, OptimizationFailed
 from bopt.hyperparam_values import HyperparamValues
@@ -21,12 +18,10 @@ from bopt.models.model import Model
 from bopt.sample import Sample, CollectFlag, SampleCollection
 from bopt.models.parameters import ModelParameters
 from bopt.models.random_search import RandomSearch
-from bopt.runner.abstract import Job, Runner
+from bopt.runner.abstract import Runner
 from bopt.runner.runner_loader import RunnerLoader
 from bopt.models.gpy_model import GPyModel
 
-
-from bopt.acquisition_functions.acquisition_functions import AcquisitionFunction
 
 # TODO: set this at a proper global place
 logging.getLogger().setLevel(logging.INFO)
@@ -34,7 +29,6 @@ logging.getLogger("GP").setLevel(logging.WARNING)
 logging.getLogger("filelock").setLevel(logging.WARNING)
 # logging.getLogger().setLevel(logging.DEBUG)
 # logging.getLogger("matplotlib").setLevel(logging.INFO)
-
 
 
 class NoAliasDumper(yaml.Dumper):
@@ -54,8 +48,8 @@ class Experiment:
     gp_config: GPConfig
 
     def __init__(self, hyperparameters: List[Hyperparameter],
-            runner: Runner, result_regex: str,
-            gp_config: GPConfig) -> None:
+                 runner: Runner, result_regex: str,
+                 gp_config: GPConfig) -> None:
         self.hyperparameters = hyperparameters
         self.runner = runner
         self.samples = []
@@ -75,20 +69,18 @@ class Experiment:
     def from_dict(data: dict) -> "Experiment":
         hyperparameters = \
             [Hyperparameter.from_dict(key, data["hyperparameters"][key])
-            for key in data["hyperparameters"].keys()]
+             for key in data["hyperparameters"].keys()]
 
         if data["samples"] and len(data["samples"]) > 0:
             samples = [Sample.from_dict(s, hyperparameters)
-                    for s in data["samples"]]
+                       for s in data["samples"]]
         else:
             samples = []
 
         runner = RunnerLoader.from_dict(data["runner"])
 
-        experiment = Experiment(hyperparameters,
-                runner,
-                data["result_regex"],
-                data["gp_config"])
+        experiment = Experiment(hyperparameters, runner, data["result_regex"],
+                                data["gp_config"])
 
         experiment.samples = samples
 
