@@ -1,3 +1,4 @@
+sudo: false
 language: python
 python:
   - "3.6"
@@ -13,4 +14,6 @@ script:
   - ./.venv/bin/pytest
   - source ./.venv/bin/activate && ./tests/test_cli.sh
   - make mypy
+
+after_success:
   - codecov
