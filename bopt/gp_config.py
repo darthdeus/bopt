@@ -37,10 +37,9 @@ config_params: List[GPParam[Any]] = [
     GPParam[float]("gamma-b", float, 0.1, None, "The inverse rate parameter of the Gamma prior."),
 
     GPParam[int]("informative-prior", int, 1, None,
-        "When enabled, kernel parameters use an informative Gamma prior on lengthscale."
-        ),
+        "When enabled, kernel parameters use an informative Gamma prior on lengthscale."),
 
-    GPParam[float]("acq-xi", float, 0.001, None, "The xi parameter of the acquisition functions"),
+    GPParam[float]("acq-xi", float, 0.001, None, "The xi parameter of the acquisition functions."),
     GPParam[int]("acq-n-restarts", int, 25, None, "Number of restarts when optimizing the acquisition function."),
 
     # GPParam[int]("fit-mean", int, 1, None, ),

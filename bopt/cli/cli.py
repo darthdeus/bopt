@@ -51,34 +51,46 @@ def main():
     sp_init.add_argument("--param", action="append", help="Hyperparameter")
     sp_init.add_argument("--qsub", action="append", help="Arguments for qsub.")
 
-    sp_init.add_argument("--kernel", type=str, default="Mat52",
-        help=f"Specifies the GP kernel. Allowed values are: {kernel_names}")
+    use_new_cli = os.getenv("USE_NEW_CLI", False)
 
-    sp_init.add_argument("--acquisition_fn", type=str, default="ei",
-        help=f"Specifies the acquisition function. Allowed values are: {acq_fn_names}")
+    if use_new_cli:
+        import bopt.gp_config as gp_config
+        for config_param in gp_config.config_params:
+            sp_init.add_argument("--{}".format(config_param.name),
+                    type    = config_param.type,
+                    default = config_param.default,
+                    action  = config_param.action,
+                    help    = config_param.help)
 
-    sp_init.add_argument("--ard", type=int, default=1,
-        help="Toggles automatic relevance determination (one lengthscale per hyperparameter).")
+    else:
+        sp_init.add_argument("--kernel", type=str, default="Mat52",
+            help=f"Specifies the GP kernel. Allowed values are: {kernel_names}")
 
-    sp_init.add_argument("--fit-mean", type=int, default=1,
-        help="When enabled the mean function is fit during kernel optimization. "
-             "Otherwise it is set to zero.")
+        sp_init.add_argument("--acquisition_fn", type=str, default="ei",
+            help=f"Specifies the acquisition function. Allowed values are: {acq_fn_names}")
 
-    sp_init.add_argument("--gamma-prior", type=int, default=1,
-        help="When enabled, kernel parameters will use a Gamma prior "
-             "instead of a hard constraint.")
-    sp_init.add_argument("--gamma-a", type=float, default=1.0,
-        help="The shape parameter of the Gamma prior.")
-    sp_init.add_argument("--gamma-b", type=float, default=0.1,
-        help="The inverse rate parameter of the Gamma prior.")
+        sp_init.add_argument("--ard", type=int, default=1,
+            help="Toggles automatic relevance determination (one lengthscale per hyperparameter).")
 
-    sp_init.add_argument("--informative-prior", type=int, default=1,
-        help="When enabled, kernel parameters use an informative Gamma prior on lengthscale.")
+        sp_init.add_argument("--fit-mean", type=int, default=1,
+            help="When enabled the mean function is fit during kernel optimization. "
+                 "Otherwise it is set to zero.")
 
-    sp_init.add_argument("--acq-xi", type=float, default=0.001,
-        help="The xi parameter of the acquisition functions")
-    sp_init.add_argument("--acq-n-restarts", type=int, default=25,
-        help="Number of restarts when optimizing the acquisition function.")
+        sp_init.add_argument("--gamma-prior", type=int, default=1,
+            help="When enabled, kernel parameters will use a Gamma prior "
+                 "instead of a hard constraint.")
+        sp_init.add_argument("--gamma-a", type=float, default=1.0,
+            help="The shape parameter of the Gamma prior.")
+        sp_init.add_argument("--gamma-b", type=float, default=0.1,
+            help="The inverse rate parameter of the Gamma prior.")
+
+        sp_init.add_argument("--informative-prior", type=int, default=1,
+            help="When enabled, kernel parameters use an informative Gamma prior on lengthscale.")
+
+        sp_init.add_argument("--acq-xi", type=float, default=0.001,
+            help="The xi parameter of the acquisition functions")
+        sp_init.add_argument("--acq-n-restarts", type=int, default=25,
+            help="Number of restarts when optimizing the acquisition function.")
 
     sp_init.add_argument("--manual-arg-fname", action="append", default=[],
             help="Path to a file containing values for the manual argument.")
