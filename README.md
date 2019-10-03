@@ -1,4 +1,4 @@
-# Bayesian Optimization of HyperParameters - `bopt` [![Build Status](https://travis-ci.org/darthdeus/bopt.svg?branch=master)](https://travis-ci.org/darthdeus/bopt)
+# Bayesian Optimization of HyperParameters - `bopt` [![Build Status](https://travis-ci.org/darthdeus/bopt.svg?branch=master)](https://travis-ci.org/darthdeus/bopt) [![Maintainability](https://api.codeclimate.com/v1/badges/4831ed4e6b279f4a3441/maintainability)](https://codeclimate.com/github/darthdeus/bopt/maintainability) [![Test Coverage](https://api.codeclimate.com/v1/badges/4831ed4e6b279f4a3441/test_coverage)](https://codeclimate.com/github/darthdeus/bopt/test_coverage)
 
 Available commands:
 
