@@ -96,7 +96,8 @@ class Experiment:
                 finished_similar_samples = self.get_finished_similar_samples(sample.hyperparam_values)
 
                 if len(finished_similar_samples) > 0:
-                    logging.info("Waiting for similar DONE, copying over results at {}".format(sample.hyperparam_values))
+                    logging.info("Waiting for similar DONE, copying over results at {}"
+                                 .format(sample.hyperparam_values))
 
                     picked_similar = finished_similar_samples[0]
 
@@ -131,8 +132,8 @@ class Experiment:
                                     sample.finished_at = sample.created_at + \
                                         datetime.timedelta(seconds=sample.run_time)
 
-                                    logging.info("Collect parsed runtime of {}s"\
-                                            .format(sample.run_time))
+                                    logging.info("Collect parsed runtime of {}s"
+                                                 .format(sample.run_time))
 
                                 matches = re.match(self.result_regex, line)
 
@@ -150,14 +151,14 @@ class Experiment:
 
                             if not found:
                                 logging.error("Job {} seems to have failed, "
-                                    "it finished running and its result cannot "
-                                    "be parsed.".format(sample.job.job_id))
+                                              "it finished running and its result cannot "
+                                              "be parsed.".format(sample.job.job_id))
 
                                 sample.collect_flag = CollectFlag.COLLECT_FAILED
                     else:
                         logging.error("Output file not found for job {} "
-                            "even though it finished. It will be considered "
-                            "as a failed job.".format(sample.job.job_id))
+                                      "even though it finished. It will be considered "
+                                      "as a failed job.".format(sample.job.job_id))
 
                         sample.collect_flag = CollectFlag.COLLECT_FAILED
 
@@ -172,7 +173,7 @@ class Experiment:
             if not other_date:
                 continue
 
-            if other_date < sample.created_at: #  or sample == other:
+            if other_date < sample.created_at:  # or sample == other:
                 result.append(other)
 
         return result
@@ -200,10 +201,10 @@ class Experiment:
 
             try:
                 job_params, fitted_model = GPyModel.predict_next(self.gp_config,
-                        self.hyperparameters, X_sample, Y_sample)
+                                                                 self.hyperparameters, X_sample, Y_sample)
             except OptimizationFailed as e:
-                logging.error("Optimization failed, retrying with RandomSearch: "
-                    "{}".format(e))
+                logging.error("Optimization failed, retrying with "
+                              "RandomSearch: {}".format(e))
 
                 job_params = RandomSearch.predict_next(self.hyperparameters)
                 fitted_model = RandomSearch()
@@ -220,7 +221,7 @@ class Experiment:
             job_params, fitted_model = self.suggest()
 
             next_sample, found_similar = self.manual_run(job_params,
-                    fitted_model.to_model_params())
+                                                         fitted_model.to_model_params())
 
         return fitted_model, next_sample
 
@@ -237,7 +238,7 @@ class Experiment:
                 if s.status() == CollectFlag.COLLECT_OK]
 
     def manual_run(self, hyperparam_values: HyperparamValues,
-                         model_params: ModelParameters) -> Tuple[Sample, bool]:
+                   model_params: ModelParameters) -> Tuple[Sample, bool]:
         assert isinstance(hyperparam_values, HyperparamValues)
 
         output_dir_path = pathlib.Path("output")
@@ -258,7 +259,8 @@ class Experiment:
             if len(finished_similar_samples) > 0:
                 warning_str = "Found finished similar sample, "
                 warning_str += "creating MANUAL_SAMPLE with equal hyperparam values and result"
-                warning_str += "... param values:\n{}\n{}".format(hyperparam_values, finished_similar_samples[0].hyperparam_values)
+                warning_str += "... param values:\n{}\n{}".format(hyperparam_values,
+                                                                  finished_similar_samples[0].hyperparam_values)
 
                 logging.warning(warning_str)
 
@@ -269,14 +271,14 @@ class Experiment:
                 created_at = datetime.datetime.now()
 
                 next_sample = Sample(None, model_params, hyperparam_values,
-                        similar_sample.mu_pred, similar_sample.sigma_pred,
-                        CollectFlag.COLLECT_OK, created_at)
+                                     similar_sample.mu_pred, similar_sample.sigma_pred,
+                                     CollectFlag.COLLECT_OK, created_at)
 
                 next_sample.collected_at = created_at
                 next_sample.run_time = 0.0
                 next_sample.result = similar_sample.result
                 next_sample.comment = "created as similar of {}"\
-                        .format(similar_sample)
+                    .format(similar_sample)
 
             else:
                 # TODO: opravit:
@@ -285,12 +287,12 @@ class Experiment:
                 similar_sample = similar_samples[0]
 
                 next_sample = Sample(None, model_params, hyperparam_values,
-                        similar_sample.mu_pred, similar_sample.sigma_pred,
-                        CollectFlag.WAITING_FOR_SIMILAR,
-                        datetime.datetime.now())
+                                     similar_sample.mu_pred, similar_sample.sigma_pred,
+                                     CollectFlag.WAITING_FOR_SIMILAR,
+                                     datetime.datetime.now())
 
                 next_sample.comment = "created as similar of {}"\
-                        .format(similar_sample)
+                    .format(similar_sample)
 
         else:
             manual_file_args = self.runner.fetch_and_shift_manual_file_args()
@@ -312,7 +314,7 @@ class Experiment:
                 else:
                     # TODO: gpy pouzito na 2 mistech?
                     model = GPyModel.gpy_regression(self.hyperparameters,
-                            self.gp_config, X_sample, Y_sample)
+                                                    self.gp_config, X_sample, Y_sample)
 
                 X_next = np.array([hyperparam_values.x])
 
@@ -329,8 +331,8 @@ class Experiment:
                 sigma = None
 
             next_sample = Sample(job, model_params, hyperparam_values,
-                    mu, sigma, CollectFlag.WAITING_FOR_JOB,
-                    datetime.datetime.now())
+                                 mu, sigma, CollectFlag.WAITING_FOR_JOB,
+                                 datetime.datetime.now())
 
             next_sample.comment = " ".join(manual_file_args)
 
