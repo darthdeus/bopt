@@ -1,6 +1,5 @@
 import abc
 
-from typing import Callable
 from GPy.models import GPRegression
 
 import numpy as np
@@ -12,7 +11,7 @@ from scipy.stats import norm
 
 class AcquisitionFunction(abc.ABC):
     # TODO: xi default value 0.01 or tweak it?
-    def __call__(self, gp: GPRegression, X: np.ndarray, f_s: float, xi: float=0.01) -> np.ndarray:
+    def __call__(self, gp: GPRegression, X: np.ndarray, f_s: float, xi: float = 0.01) -> np.ndarray:
         assert X is not None
 
         mu, var = gp.predict(X)
@@ -24,7 +23,7 @@ class AcquisitionFunction(abc.ABC):
         return ei
 
     @abc.abstractmethod
-    def raw_call(self, mu: np.ndarray, sigma: np.ndarray, f_s: float, xi: float=0.01) -> np.ndarray:
+    def raw_call(self, mu: np.ndarray, sigma: np.ndarray, f_s: float, xi: float = 0.01) -> np.ndarray:
         pass
 
     @abc.abstractmethod
@@ -33,7 +32,7 @@ class AcquisitionFunction(abc.ABC):
 
 
 class ExpectedImprovement(AcquisitionFunction):
-    def raw_call(self, mu: np.ndarray, sigma: np.ndarray, f_s: float, xi: float=0.01) -> np.ndarray:
+    def raw_call(self, mu: np.ndarray, sigma: np.ndarray, f_s: float, xi: float = 0.01) -> np.ndarray:
 
         improvement = mu - f_s - xi
         Z = improvement / sigma
@@ -48,7 +47,7 @@ class ExpectedImprovement(AcquisitionFunction):
 
 
 class ProbabilityOfImprovement(AcquisitionFunction):
-    def raw_call(self, mu: np.ndarray, sigma: np.ndarray, f_s: float, xi: float=0.01) -> np.ndarray:
+    def raw_call(self, mu: np.ndarray, sigma: np.ndarray, f_s: float, xi: float = 0.01) -> np.ndarray:
         improvement = mu - f_s - xi
         Z = improvement / sigma
 
@@ -56,7 +55,6 @@ class ProbabilityOfImprovement(AcquisitionFunction):
 
     def name(self) -> str:
         return "pi"
-
 
 
 # def expected_improvement(gp: GPRegression, X: np.ndarray, f_s: float, xi:

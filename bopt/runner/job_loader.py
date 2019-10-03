@@ -1,7 +1,5 @@
-import numpy as np
-from typing import List, Union, Type, Dict
+from typing import Union, Type, Dict
 
-from bopt.basic_types import Hyperparameter
 from bopt.runner.abstract import Job
 from bopt.runner.local_runner import LocalJob
 from bopt.runner.sge_runner import SGEJob
@@ -26,4 +24,3 @@ class JobLoader:
         cls: JobTypes = JOB_MAPPING[data["job_type"]]
 
         return cls(data["job_id"])
-

@@ -35,8 +35,8 @@ class SGERunner(Runner):
     qsub_arguments: List[str]
 
     def __init__(self, script_path: str, arguments: List[str],
-            qsub_arguments: List[str],
-            manual_arg_fnames: List[str]) -> None:
+                 qsub_arguments: List[str],
+                 manual_arg_fnames: List[str]) -> None:
         super().__init__(script_path, arguments, manual_arg_fnames)
         self.qsub_arguments = qsub_arguments
 
@@ -44,10 +44,10 @@ class SGERunner(Runner):
         return "sge_runner"
 
     def start(self, output_dir: str, hyperparam_values: HyperparamValues,
-            manual_file_args: List[str]) -> Job:
+              manual_file_args: List[str]) -> Job:
         # TODO: lol naming :)
         cmdline_run_params = [f"--{h.name}={value}"
-                for h, value in hyperparam_values.mapping.items()]
+                              for h, value in hyperparam_values.mapping.items()]
 
         qsub_params = ["-N", "job", "-o", output_dir, *self.qsub_arguments]
         cmd = [
@@ -83,4 +83,3 @@ class SGERunner(Runner):
             "qsub_arguments": self.qsub_arguments,
             "manual_arg_fnames": self.manual_arg_fnames,
         }
-

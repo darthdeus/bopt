@@ -1,13 +1,7 @@
 import abc
 import os
-import yaml
-import datetime
-import logging
-import traceback
-import re
 
-import numpy as np
-from typing import Union, List, Optional, Tuple
+from typing import List
 from bopt.hyperparam_values import HyperparamValues
 
 Timestamp = int
@@ -42,7 +36,7 @@ class Runner(abc.ABC):
     manual_arg_fnames: List[str]
 
     def __init__(self, script_path: str, arguments: List[str],
-            manual_arg_fnames: List[str]) -> None:
+                 manual_arg_fnames: List[str]) -> None:
         self.script_path = script_path
         self.arguments = arguments
         self.manual_arg_fnames = manual_arg_fnames

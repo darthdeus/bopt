@@ -1,19 +1,13 @@
-import datetime
-import yaml
-import re
 import os
 import subprocess
-import pathlib
 import psutil
 import tempfile
 import logging
 
-from glob import glob
-from typing import Union, List, Optional, Tuple, Callable
+from typing import List
 
 from bopt.hyperparam_values import HyperparamValues
-from bopt.basic_types import Hyperparameter
-from bopt.runner.abstract import Job, Runner, Timestamp, Value
+from bopt.runner.abstract import Job, Runner
 
 
 class LocalJob(Job):
@@ -34,7 +28,7 @@ class LocalRunner(Runner):
 
     def start(self, output_dir: str, hyperparam_values: HyperparamValues, manual_file_args: List[str]) -> Job:
         cmdline_run_params = [f"--{h.name}={value}"
-                for h, value in hyperparam_values.mapping.items()]
+                              for h, value in hyperparam_values.mapping.items()]
 
         cmd = list(map(lambda x: os.path.expanduser(x), [
             self.script_path,
@@ -52,7 +46,7 @@ class LocalRunner(Runner):
 
             # TODO: zkontrolovat duplicitni job_id, neudelat rename, smazat tempfile
 
-            logging.info(f"JOB_START {job_id}, params:\n{hyperparam_values}") # :\t{' '.join(cmd)}")
+            logging.info(f"JOB_START {job_id}, params:\n{hyperparam_values}")  # :\t{' '.join(cmd)}")
 
             os.rename(temp_fname, job_fname)
 

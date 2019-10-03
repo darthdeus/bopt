@@ -1,6 +1,4 @@
-import os
 import sys
-import yaml
 
 import bopt
 from bopt.cli.util import handle_cd, ensure_meta_yml, acquire_lock
@@ -37,6 +35,6 @@ def run(args) -> None:
             sys.exit(1)
 
         next_sample, _ = experiment.manual_run(hyperparam_values,
-                bopt.ModelParameters.for_manual_run())
+                                               bopt.ModelParameters.for_manual_run())
 
         print("Started {}".format(next_sample))
