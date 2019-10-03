@@ -23,6 +23,10 @@ class Bound(abc.ABC):
     type: str
 
     @abc.abstractmethod
+    def __init__(self, low: float, high: float) -> None:
+        pass
+
+    @abc.abstractmethod
     def map(self, value) -> ParamTypes:
         pass
 
