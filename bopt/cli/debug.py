@@ -12,6 +12,7 @@ def run(args) -> None:
         experiment = Experiment.deserialize()
         experiment.collect_results()
 
-        __import__('ipdb').set_trace()
+        import ipdb
+        ipdb.set_trace()
 
         print("Debug finished")

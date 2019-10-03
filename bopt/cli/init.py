@@ -54,6 +54,7 @@ def run(args) -> None:
                     sys.exit(1)
 
                 assert cls is not None
+                assert isinstance(cls, bopt.Bound)
 
                 hyp = bopt.Hyperparameter(name, cls(parser(low), parser(high)))
 

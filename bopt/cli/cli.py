@@ -50,6 +50,7 @@ def main():
     sp_init.add_argument("--runner", type=str, default="local", help="Runner type.")
     sp_init.add_argument("--param", action="append", help="Hyperparameter")
     sp_init.add_argument("--qsub", action="append", help="Arguments for qsub.")
+
     sp_init.add_argument("--kernel", type=str, default="Mat52",
         help=f"Specifies the GP kernel. Allowed values are: {kernel_names}")
 
