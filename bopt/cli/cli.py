@@ -1,5 +1,6 @@
-import os
 import argparse
+import os
+import sys
 
 from bopt.experiment import Experiment
 from bopt.cli import (
@@ -18,6 +19,10 @@ from bopt.cli import (
 
 
 def main():
+    run_main(sys.argv[1:])
+
+
+def run_main(args):
     parser = argparse.ArgumentParser(prog="bopt")
     parser.set_defaults()
 
@@ -214,7 +219,7 @@ def main():
     )
     sp_clean.set_defaults(func=clean.run)
 
-    _, unknown = parser.parse_known_args()
+    _, unknown = parser.parse_known_args(args)
     # this is an 'internal' method which returns 'parsed', the same as what
     # parse_args() would return and 'unknown', the remainder of that the
     # difference to parse_args() is that it does not exit when it finds
@@ -225,8 +230,8 @@ def main():
             # TODO: fuj
             sp_manual_run.add_argument(arg.split("=")[0], type=str)
 
-    args = parser.parse_args()
-    args.func(args)
+    parsed_args = parser.parse_args(args)
+    parsed_args.func(parsed_args)
 
 
 if __name__ == "__main__":
