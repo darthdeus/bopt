@@ -18,6 +18,8 @@ def run(args) -> None:
     with acquire_lock():
         hyperparameters: List[Hyperparameter] = []
 
+        # TODO: nesmaze se lockfile kdyz to spadne
+
         for param in args.param:
             name, type, *values = param.split(":")
 

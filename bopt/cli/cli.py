@@ -36,7 +36,6 @@ def main():
     sp = parser.add_subparsers(dest="bopt")
     sp.required = True
 
-
     ### bopt init
     sp_init = sp.add_parser(
         "init", help="Initializes a new experiment, ready to run.",
@@ -44,7 +43,8 @@ def main():
     )
 
     sp_init.add_argument("--runner", type=str, default="local", help="Runner type.")
-    sp_init.add_argument("--param", action="append", help="Hyperparameter")
+    sp_init.add_argument("--param", action="append", help="Hyperparameter", default=[])
+    # TODO: default=[]
     sp_init.add_argument("--qsub", action="append", help="Arguments for qsub.")
 
     use_new_cli = os.getenv("USE_NEW_CLI", False)
@@ -92,7 +92,6 @@ def main():
                              help="Number of restarts during kernel optimization.")
         sp_init.add_argument("--random-search-only", action="store_true", default=False,
                              help="Only use random search when picking new hyperparameters.", required=False)
-
 
     sp_init.add_argument("--manual-arg-fname", action="append", default=[],
                          help="Path to a file containing values for the manual argument.")
