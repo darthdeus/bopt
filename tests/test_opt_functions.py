@@ -26,4 +26,15 @@ class TestOptFunctions(unittest.TestCase):
 
         for f in funcs:
             print(f.name)
-            run_main(["init", "-C", "{}/{}".format(base_path, f.name), "ls"])
+            bx, by = f.bounds
+
+            # TODO: this breaks the arg parser
+            # run_main(["init", "-C", "{}/{}".format(base_path, f.name),
+            #           "--param 'x:float:{}:{}'".format(bx.low, bx.high),
+            #           "--param 'y:float:{}:{}'".format(by.low, by.high),
+            #           "ls"])
+
+            run_main(["init", "-C", "{}/{}".format(base_path, f.name),
+                      "--param", "x:float:{}:{}".format(bx.low, bx.high),
+                      "--param", "y:float:{}:{}".format(by.low, by.high),
+                      "ls"])

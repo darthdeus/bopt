@@ -100,5 +100,5 @@ def get_fun_by_name(name: str):
 
 
 def get_opt_test_functions():
-    return [Beale(), Easom(), Eggholder, McCormick]
+    return [Beale(), Easom(), Eggholder(), McCormick()]
 
