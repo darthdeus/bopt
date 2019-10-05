@@ -75,7 +75,8 @@ class GPyModel(Model):
         max_bound = 1e3
 
         # print("IP:", gp_config.informative_prior)
-        if gp_config.informative_prior:
+        # TODO: bugbugbug
+        if gp_config.informative_prior and False:
             for i, param in enumerate(hyperparameters):
                 prior = GPyModel.prior_for_hyperparam(gp_config, param)
                 model.kern.lengthscale[[i]].set_prior(prior)

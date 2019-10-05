@@ -2,6 +2,7 @@ from typing import NamedTuple, Callable, List
 
 import abc
 import numpy as np
+import sys
 from bopt.basic_types import Float, Integer, Bound, Hyperparameter
 
 # TODO: Rewrite all Bounds to Hyperparmeters
@@ -94,11 +95,47 @@ class McCormick(OptFunction):
         return -val.item()
 
 
+class XSquared(OptFunction):
+    name = "XSquared"
+
+    def __init__(self) -> None:
+        self.bounds = [Float(-3, 3), Float(-3, 3)]
+
+    def f(self, x: np.ndarray) -> float:
+        """
+        Max: 2
+        """
+        y = x[1]
+        x = x[0]
+
+        val = -(x*x + y*y - 2)
+        return -val.item()
+
+
 def get_fun_by_name(name: str):
     funs = get_opt_test_functions()
     return [fun for fun in funs if fun.name == name][0]
 
 
 def get_opt_test_functions():
-    return [Beale(), Easom(), Eggholder(), McCormick()]
+    # return [Beale(), Easom(), Eggholder(), McCormick()]
+    return [XSquared()]
 
+
+if __name__ == "__main__":
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--name", type=str, help="Name of the function", required=True)
+    parser.add_argument("--x", type=float, required=True)
+    parser.add_argument("--y", type=float, required=True)
+
+    args = parser.parse_args()
+
+    for fun in get_opt_test_functions():
+        if fun.name == args.name:
+            result = fun.f(np.array([args.x, args.y]))
+            print("RESULT={}".format(result))
+            sys.exit(0)
+
+    print("Invalid function name {}".format(args.name), file=sys.stderr)
+    sys.exit(1)

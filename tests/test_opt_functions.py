@@ -34,7 +34,22 @@ class TestOptFunctions(unittest.TestCase):
             #           "--param 'y:float:{}:{}'".format(by.low, by.high),
             #           "ls"])
 
-            run_main(["init", "-C", "{}/{}".format(base_path, f.name),
-                      "--param", "x:float:{}:{}".format(bx.low, bx.high),
-                      "--param", "y:float:{}:{}".format(by.low, by.high),
-                      "ls"])
+            chdir = ["-C", "{}/{}".format(base_path, f.name)]
+
+            # import ipdb
+            # ipdb.set_trace()
+
+            init_args = ["init", *chdir,
+                         "--param", "x:float:{}:{}".format(bx.low, bx.high),
+                         "--param", "y:float:{}:{}".format(by.low, by.high),
+                         "--random-search-only",
+                         os.path.expanduser("~/projects/bopt/.venv/bin/python"),
+                         os.path.expanduser("~/projects/bopt/tests/opt_functions.py"),
+                         "--", "--name={}".format(f.name)]
+
+            print(init_args)
+
+            run_main(init_args)
+
+            run_main(["run", *chdir, "--n_iter=5", "--n_parallel=1",
+                      "--sleep=0.1"])
