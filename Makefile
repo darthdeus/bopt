@@ -3,7 +3,7 @@ BOPT=./.venv/bin/bopt
 # default: test
 
 default:
-	./.venv/bin/pytest -s
+	./.venv/bin/pytest -s tests/test_opt_functions.py
 
 # default: mypy
 
