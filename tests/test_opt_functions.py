@@ -42,7 +42,7 @@ class TestOptFunctions(unittest.TestCase):
             init_args = ["init", *chdir,
                          "--param", "x:float:{}:{}".format(bx.low, bx.high),
                          "--param", "y:float:{}:{}".format(by.low, by.high),
-                         "--random-search-only",
+                         # TODO: this does not work "--random-search-only",
                          os.path.expanduser("~/projects/bopt/.venv/bin/python"),
                          os.path.expanduser("~/projects/bopt/tests/opt_functions.py"),
                          "--", "--name={}".format(f.name)]
