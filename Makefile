@@ -1,9 +1,9 @@
 BOPT=./.venv/bin/bopt
 
-default: test
+# default: test
 
-# default:
-# 	./.venv/bin/pytest -s
+default:
+	./.venv/bin/pytest -s
 
 # default: mypy
 

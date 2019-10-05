@@ -4,6 +4,7 @@ from argparse import Namespace
 
 T = TypeVar("T")
 
+
 class GPParam(Generic[T]):
     name: str
     type: Type[T]
@@ -18,31 +19,37 @@ class GPParam(Generic[T]):
         self.action = action
         self.help = help
 
+
 # TODO fill this
 kernel_names = "..."
 acq_fn_names = "..."
 
+
 config_params: List[GPParam[Any]] = [
     GPParam[str]("kernel", str, "Mat52", None, f"Specifies the GP kernel. Allowed values are: {kernel_names}"),
-    GPParam[str]("acquisition_fn", str, "ei", None, f"Specifies the acquisition function. Allowed values are: {acq_fn_names}"),
-    GPParam[int]("ard", int, 1, None, "Toggles automatic relevance determination (one lengthscale per hyperparameter)."),
+    GPParam[str]("acquisition_fn", str, "ei", None,
+                 f"Specifies the acquisition function. Allowed values are: {acq_fn_names}"),
+    GPParam[int]("ard", int, 1, None, "Toggles automatic relevance determination (one lengthscale per hyperparameter)"),
     GPParam[int]("fit-mean", int, 1, None,
-        "When enabled the mean function is fit during kernel optimization. "
-        "Otherwise it is set to zero."),
+                 "When enabled the mean function is fit during kernel optimization. "
+                 "Otherwise it is set to zero."),
 
     GPParam[int]("gamma-prior", int, 1, None,
-        "When enabled, kernel parameters will use a Gamma prior "
-        "instead of a hard constraint."),
+                 "When enabled, kernel parameters will use a Gamma prior "
+                 "instead of a hard constraint."),
     GPParam[float]("gamma-a", float, 1.0, None, "The shape parameter of the Gamma prior."),
     GPParam[float]("gamma-b", float, 0.1, None, "The inverse rate parameter of the Gamma prior."),
 
     GPParam[int]("informative-prior", int, 1, None,
-        "When enabled, kernel parameters use an informative Gamma prior on lengthscale."),
+                 "When enabled, kernel parameters use an informative Gamma prior on lengthscale."),
 
     GPParam[float]("acq-xi", float, 0.001, None, "The xi parameter of the acquisition functions."),
     GPParam[int]("acq-n-restarts", int, 25, None, "Number of restarts when optimizing the acquisition function."),
+    GPParam[int]("num-optimize-restarts", int, 10, None, "Number of restarts during kernel optimization."),
 
-    # GPParam[int]("fit-mean", int, 1, None, ),
+    GPParam[bool]("random-search-only", bool, False, "store_true", "Only use random search when picking new hyperparameters."),
+         # , required=False)
+
 ]
 
 
@@ -86,5 +93,4 @@ class GPConfig:
 
     def __str__(self) -> str:
         # TODO: pridat co chybi
-        return "kernel: {}, acq_fn: {}".format(self.kernel,
-                self.acquisition_fn)
+        return "kernel: {}, acq_fn: {}".format(self.kernel, self.acquisition_fn)

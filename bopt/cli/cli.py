@@ -88,14 +88,14 @@ def main():
         sp_init.add_argument("--acq-n-restarts", type=int, default=25,
                              help="Number of restarts when optimizing the acquisition function.")
 
+        sp_init.add_argument("--num-optimize-restarts", type=int, default=10,
+                             help="Number of restarts during kernel optimization.")
+        sp_init.add_argument("--random-search-only", action="store_true", default=False,
+                             help="Only use random search when picking new hyperparameters.", required=False)
+
+
     sp_init.add_argument("--manual-arg-fname", action="append", default=[],
                          help="Path to a file containing values for the manual argument.")
-
-    sp_init.add_argument("--num-optimize-restarts", type=int, default=10,
-                         help="Number of restarts during kernel optimization.")
-
-    sp_init.add_argument("--random-search-only", action="store_true", default=False,
-                         help="Only use random search when picking new hyperparameters.", required=False)
 
     sp_init.add_argument("command", type=str, help="Command to run.")
     sp_init.add_argument("arguments", type=str, nargs="*", help="Default arguments.")
