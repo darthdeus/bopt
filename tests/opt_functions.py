@@ -99,14 +99,14 @@ class XSquared(OptFunction):
     name = "XSquared"
 
     def __init__(self) -> None:
-        self.bounds = [Float(-3, 3), Float(-3, 3)]
+        self.bounds = [Float(0.1, 6), Float(0.1, 6)]
 
     def f(self, x: np.ndarray) -> float:
         """
         Max: 2
         """
-        y = x[1]
-        x = x[0]
+        y = x[1] + 3
+        x = x[0] + 3
 
         val = -(x*x + y*y - 2)
         return -val.item()

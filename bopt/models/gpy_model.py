@@ -76,7 +76,7 @@ class GPyModel(Model):
 
         # print("IP:", gp_config.informative_prior)
         # TODO: bugbugbug
-        if gp_config.informative_prior and False:
+        if gp_config.informative_prior:
             for i, param in enumerate(hyperparameters):
                 prior = GPyModel.prior_for_hyperparam(gp_config, param)
                 model.kern.lengthscale[[i]].set_prior(prior)
