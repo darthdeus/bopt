@@ -1,5 +1,9 @@
 # TODO
 
+- batch -> task -> experiment
+- task a batch do experimentu
+
+
 - filesystem :((
   - reinforce-18/broken-job
   - skoro u vsech zkopirovanych /lnet/depot scriptu porad ta sama issue
