@@ -47,6 +47,8 @@ def run_main(args):
         parents=[cd_parser]
     )
 
+    sp_init.add_argument("--task", type=str, required=True, help="Task name.")
+    sp_init.add_argument("--batch", type=str, required=False, help="Batch name.")
     sp_init.add_argument("--runner", type=str, default="local", help="Runner type.")
     sp_init.add_argument("--param", action="append", help="Hyperparameter", default=[])
     # TODO: default=[]

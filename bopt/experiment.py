@@ -9,7 +9,7 @@ import tempfile
 
 import numpy as np
 
-from typing import List, Tuple
+from typing import List, Tuple, Optional
 
 from bopt.basic_types import Hyperparameter, OptimizationFailed
 from bopt.hyperparam_values import HyperparamValues
@@ -40,6 +40,9 @@ class Experiment:
     kernel_names = ["rbf", "Mat32", "Mat52"]
     acquisition_fn_names = ["ei", "pi"]
 
+    task_name: str
+    batch_name: Optional[str]
+
     hyperparameters: List[Hyperparameter]
     runner: Runner
     samples: List[Sample]
@@ -47,9 +50,12 @@ class Experiment:
 
     gp_config: GPConfig
 
-    def __init__(self, hyperparameters: List[Hyperparameter],
+    def __init__(self, task_name: str, batch_name: Optional[str],
+                 hyperparameters: List[Hyperparameter],
                  runner: Runner, result_regex: str,
-                 gp_config: GPConfig) -> None:
+                 gp_config: GPConfig,) -> None:
+        self.task_name = task_name
+        self.batch_name = batch_name
         self.hyperparameters = hyperparameters
         self.runner = runner
         self.samples = []
@@ -58,6 +64,8 @@ class Experiment:
 
     def to_dict(self) -> dict:
         return {
+            "task_name": self.task_name,
+            "batch_name": self.batch_name,
             "hyperparameters": {h.name: h.to_dict() for h in self.hyperparameters},
             "samples": [s.to_dict() for s in self.samples],
             "runner": self.runner.to_dict(),
@@ -79,7 +87,10 @@ class Experiment:
 
         runner = RunnerLoader.from_dict(data["runner"])
 
-        experiment = Experiment(hyperparameters, runner, data["result_regex"],
+        assert "task_name" in data, "'task_name' is required, but was missing in {}".format(data)
+
+        experiment = Experiment(data["task_name"], data["batch_name"],
+                                hyperparameters, runner, data["result_regex"],
                                 data["gp_config"])
 
         experiment.samples = samples

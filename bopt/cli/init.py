@@ -88,7 +88,7 @@ def run(args) -> None:
 
             gp_config = bopt.GPConfig(args)
 
-            experiment = bopt.Experiment(hyperparameters,
+            experiment = bopt.Experiment(args.task, args.batch, hyperparameters,
                                          runner, default_result_regex, gp_config)
 
             experiment.serialize()

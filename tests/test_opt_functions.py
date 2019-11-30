@@ -40,6 +40,7 @@ class TestOptFunctions(unittest.TestCase):
             # ipdb.set_trace()
 
             init_args = ["init", *chdir,
+                         "--task", "testing",
                          "--param", "x:float:{}:{}".format(bx.low, bx.high),
                          "--param", "y:float:{}:{}".format(by.low, by.high),
                          # TODO: this does not work "--random-search-only",
