@@ -24,6 +24,7 @@ rm -rf "$test_dir"
 mkdir -p "$test_dir"
 
 bopt_bin init -C "$test_dir" \
+  --task "cli_test" \
   --param "x:int:0:5" \
   --param "y:logscale_int:1:128" \
   --param "z:float:0:6" \

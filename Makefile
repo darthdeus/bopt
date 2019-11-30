@@ -10,11 +10,8 @@ plot:
 	rm -rf results/sfn/plots
 	PYTHONPATH=. $(BOPT) plot -C results/sfn
 
-test_serialization:
-	pytest tests/test_todict_fromdict.py
-
-test_serialization_ipdb:
-	PYTHONPATH=. python tests/test_todict_fromdict.py
+venv:
+	./.venv/bin/pip install -e ".[dev]"
 
 sfntest:
 	rm -rf results/sfn
@@ -95,13 +92,6 @@ web:
 
 clean:
 	rm -rf results/rl-monte-carlo
-
-setup-venv:
-	python -m virtualenv venv
-	./venv/bin/pip install -r requirements.txt
-
-plots:
-	PYTHONPATH=. python misc/gp_images.py
 
 benchmarks:
 	PYTHONPATH=. python -m cProfile -s cumtime "benchmarks/$1.py" 2>&1 > "results/be-$1.txt"
