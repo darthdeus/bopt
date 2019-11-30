@@ -23,6 +23,7 @@ gpy_compare:
 sfntest:
 	rm -rf results/sfn
 	$(BOPT) init \
+		--task sfn \
 		--param "y:float:1:3" \
 		--qsub=-q \
 		--qsub=cpu-troja.q \
