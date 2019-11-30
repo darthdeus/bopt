@@ -45,7 +45,6 @@ setuptools.setup(
             "Cython",
             "pytest~=5.3.1",
             "mypy~=0.750",
-            "jupyter~=1.0.0",
         ]
     },
 
