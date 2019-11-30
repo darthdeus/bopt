@@ -40,16 +40,14 @@ bopt_bin run -C "$test_dir" --n_iter=4 --n_parallel=2
 
 bopt_bin plot -C "$test_dir"
 bopt_bin suggest -C "$test_dir"
-bopt_bin web -C "$test_dir" &
-sleep 3
-kill -9 %1
+# bopt_bin web -C "$test_dir" &
+# kill -9 $!
 
 # TODO: test out of bounds
 bopt_bin exp -C "$test_dir"
 
 bopt_bin debug -C "$test_dir" &
-sleep 3
-kill -9 %1
+kill -9 $!
 
 set +e
 
