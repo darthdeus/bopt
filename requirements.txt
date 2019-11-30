@@ -1,5 +1,5 @@
 jupyter==1.0.0
-mypy==0.730
+mypy==0.750
 pytest==5.3.1
 numpy==1.17.4
 Cython
