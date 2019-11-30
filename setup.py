@@ -19,7 +19,7 @@ setuptools.setup(
         "bopt": ["templates/*"]
     },
 
-    python_requires="3.6.*, 3.7.*, 3.8.*",
+    python_requires=">=3.6, <4",
     install_requires=[
         "numpy>=1.17.4",
         "scipy>=1.1.0",
