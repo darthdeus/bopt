@@ -36,9 +36,6 @@ class TestOptFunctions(unittest.TestCase):
 
             chdir = ["-C", "{}/{}".format(base_path, f.name)]
 
-            # import ipdb
-            # ipdb.set_trace()
-
             init_args = ["init", *chdir,
                          "--task", "testing",
                          "--param", "x:float:{}:{}".format(bx.low, bx.high),
