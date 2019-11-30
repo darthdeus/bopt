@@ -94,9 +94,6 @@ simple-exp:
 rl-experiment:
 	PYTHONPATH=. python experiments/bo_rl_experiment.py
 
-web:
-	PYTHONPATH=. python app.py "results/simple-function"
-
 clean:
 	rm -rf bopt.egg-info/ dist/ build/
 
