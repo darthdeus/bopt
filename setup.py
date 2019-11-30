@@ -24,19 +24,28 @@ setuptools.setup(
         "numpy>=1.17.4",
         "scipy>=1.1.0",
         "pyyaml>=5.1",
-        "tqdm~=4.28.1",
+        "tqdm~=4.39.0",
         "flask~=1.0.2",
         "psutil~=5.4.8",
         "jsonpickle~=1.0",
         "GPy[plotting]~=1.9.9",
         "filelock~=3.0.10",
         "ipdb~=0.11",
-        "livereload==2.5.1"
+        "livereload==2.5.1",
     ],
 
     extras_require={
         "plotting": [
-            "matplotlib~=3.0.2"
+            "matplotlib~=3.2.0",
+        ],
+        "dev": [
+            "pylint",
+            "coverage",
+            "deepdiff",
+            "Cython",
+            "pytest~=5.3.1",
+            "mypy~=0.750",
+            "jupyter~=1.0.0",
         ]
     },
 
