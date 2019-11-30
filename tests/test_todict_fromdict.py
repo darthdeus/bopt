@@ -43,7 +43,7 @@ def test_exp1():
 
     gp_config = bopt.GPConfig(args)
 
-    experiment = bopt.Experiment(hyperparameters, runner, r"(\d+)", gp_config)
+    experiment = bopt.Experiment("test", None, hyperparameters, runner, r"(\d+)", gp_config)
 
     X = np.random.uniform(-3., 3., (20, 1))
     Y = np.sin(X) + np.random.randn(20, 1) * 0.05

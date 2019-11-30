@@ -1,11 +1,10 @@
 BOPT=./.venv/bin/bopt
 
 # default: test
+# default: mypy
 
 default:
 	./.venv/bin/pytest -s tests/test_opt_functions.py
-
-# default: mypy
 
 plot:
 	rm -rf results/sfn/plots
@@ -16,9 +15,6 @@ test_serialization:
 
 test_serialization_ipdb:
 	PYTHONPATH=. python tests/test_todict_fromdict.py
-
-gpy_compare:
-	PYTHONPATH=. python tests/test_gpy_comparison.py
 
 sfntest:
 	rm -rf results/sfn
@@ -39,6 +35,7 @@ sfntest:
 sfntest2d:
 	rm -rf results/sfn2d
 	$(BOPT) init \
+		--task sfn \
 		--param "x:float:-5:5" \
 		--param "y:float:-5:5" \
 		--num-optimize-restarts=1 \
@@ -49,6 +46,7 @@ sfntest2d:
 lab02-cartpole:
 	rm -rf results/l2cartpole
 	$(BOPT) init \
+		--task cartpole \
 		--param "batch_size:int:2:100" \
 		--param "epochs:int:1:100" \
 		--param "layers:int:2:10" \
