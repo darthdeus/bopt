@@ -6,6 +6,10 @@ BOPT=./.venv/bin/bopt
 default:
 	./.venv/bin/pytest -s tests/test_opt_functions.py
 
+cc:
+	./.venv/bin/radon cc bopt -a -nc
+	# ./.venv/bin/radon cc -a -nc bopt/sample.py | grep Sample.to_xy
+
 plot:
 	rm -rf results/sfn/plots
 	PYTHONPATH=. $(BOPT) plot -C results/sfn

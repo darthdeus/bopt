@@ -45,6 +45,7 @@ setuptools.setup(
             "Cython",
             "pytest",
             "mypy",
+            "radon",
         ]
     },
 
