@@ -187,7 +187,7 @@
                 {
                   name: "last-sample", mode: "markers",
                   x: {{slice.other_samples["x"][-1:]|safe}}, y: {{slice.other_samples["y"][-1:]|safe}},
-                  marker: { color: "rgb(255, 80, 90)", size: 10, line: { width: 1 } }
+                  marker: { color: "rgb(80, 255, 90)", size: 15, line: { width: 1 } }
                 },
               ], {
                 showlegend: false,
@@ -202,7 +202,8 @@
                 yaxis: { title: "objective" }, yaxis2: { overlaying: "y", side: "right", },
 
                 shapes: [
-                  {% if show_marginal == 0 %}
+                  {# TODO: intentionally 100 to not render #}
+                  {% if show_marginal == 100 %}
                     {
                       type: "line", line: { width: 5, color: "rgba(0, 0, 0, 0.4)" },
                       x0: {{slice.x_slice_at}},     x1: {{slice.x_slice_at}},
@@ -234,8 +235,14 @@
 
                 {
                   name: "samples", mode: "markers",
-                  x: {{slice.other_samples["x1"]|safe}}, y: {{slice.other_samples["x2"]|safe}},
+                  x: {{slice.other_samples["x1"][:-1]|safe}}, y: {{slice.other_samples["x2"][:-1]|safe}},
                   marker: { color: "rgb(255, 180, 90)", size: 10, line: { width: 1 } }
+                },
+
+                {
+                  name: "last-sample", mode: "markers",
+                  x: {{slice.other_samples["x1"][-1:]|safe}}, y: {{slice.other_samples["x2"][-1:]|safe}},
+                  marker: { color: "rgb(80, 255, 90)", size: 15, line: { width: 1 } }
                 },
               ], {
                 // title: "{{slice.p1.name}}={slice.x_slice_at | round(2)} ... {{slice.p1.range}} {{slice.p2.range}}",
@@ -256,7 +263,8 @@
                 },
 
                 shapes: [
-                  {% if show_marginal == 0 %}
+                  {# TODO: intentionally 100 to not render #}
+                  {% if show_marginal == 100 %}
                     {
                       type: "line", line: { width: 5, color: "rgba(0, 0, 0, 0.6)" },
                       x0: {{slice.x1_slice_at}},    x1: {{slice.x1_slice_at}},
