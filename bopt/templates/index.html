@@ -180,9 +180,16 @@
 
                 {
                   name: "samples", mode: "markers",
-                  x: {{slice.other_samples["x"]|safe}}, y: {{slice.other_samples["y"]|safe}},
+                  x: {{slice.other_samples["x"][:-1]|safe}}, y: {{slice.other_samples["y"][:-1]|safe}},
                   marker: { color: "rgb(255, 180, 90)", size: 10, line: { width: 1 } }
                 },
+
+                {
+                  name: "last-sample", mode: "markers",
+                  x: {{slice.other_samples["x"][-1:]|safe}}, y: {{slice.other_samples["y"][-1:]|safe}},
+                  marker: { color: "rgb(255, 80, 90)", size: 10, line: { width: 1 } }
+                },
+
 
                 // TODO: zobrazovat posledni (aktualni) sample jinou barvickou
 
@@ -201,7 +208,7 @@
                 shapes: [
                   {% if show_marginal == 0 %}
                     {
-                      type: "line", line: { width: 5, color: "rgba(0, 0, 0, 0.6)" },
+                      type: "line", line: { width: 5, color: "rgba(0, 0, 0, 0.4)" },
                       x0: {{slice.x_slice_at}},     x1: {{slice.x_slice_at}},
                       y0: {{slice.mu_bounds(show_acq)[0]}}, y1: {{slice.mu_bounds(show_acq)[1]}},
                     }
