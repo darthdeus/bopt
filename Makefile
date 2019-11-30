@@ -20,11 +20,6 @@ test_serialization_ipdb:
 gpy_compare:
 	PYTHONPATH=. python tests/test_gpy_comparison.py
 
-		# --param "x:int:0:5" \
-		# --param "z:float:0:6" \
-		# --param "w:logscale_float:1:7" \
-		# --param "activation:discrete:relu:sigmoid:tanh" \
-
 sfntest:
 	rm -rf results/sfn
 	$(BOPT) init \
