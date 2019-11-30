@@ -21,14 +21,14 @@ setuptools.setup(
 
     python_requires="~=3.6",
     install_requires=[
-        "numpy>=1.15.4",
+        "numpy>=1.17.4",
         "scipy>=1.1.0",
         "pyyaml>=5.1",
         "tqdm~=4.28.1",
         "flask~=1.0.2",
         "psutil~=5.4.8",
         "jsonpickle~=1.0",
-        "GPy[plotting]~=1.9.6",
+        "GPy[plotting]~=1.9.9",
         "filelock~=3.0.10",
         "ipdb~=0.11",
         "livereload==2.5.1"
