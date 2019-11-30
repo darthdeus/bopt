@@ -43,8 +43,8 @@ class TestOptFunctions(unittest.TestCase):
                          "--param", "x:float:{}:{}".format(bx.low, bx.high),
                          "--param", "y:float:{}:{}".format(by.low, by.high),
                          # TODO: this does not work "--random-search-only",
-                         os.path.expanduser("~/projects/bopt/.venv/bin/python"),
-                         os.path.expanduser("~/projects/bopt/tests/opt_functions.py"),
+                         os.path.abspath(".venv/bin/python"),
+                         os.path.abspath("tests/opt_functions.py"),
                          "--", "--name={}".format(f.name)]
 
             print(init_args)
