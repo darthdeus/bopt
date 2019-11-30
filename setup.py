@@ -25,7 +25,7 @@ setuptools.setup(
         "scipy>=1.1.0",
         "pyyaml>=5.1",
         "tqdm~=4.39.0",
-        "flask~=1.0.2",
+        "flask>=1.0.2,<1.2.0",
         "psutil~=5.6.3",
         "jsonpickle~=1.0",
         "GPy[plotting]~=1.9.9",
