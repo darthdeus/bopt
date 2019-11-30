@@ -13,6 +13,9 @@ plot:
 venv:
 	./.venv/bin/pip install -e ".[dev]"
 
+release:
+	python setup.py sdist bdist_wheel
+
 sfntest:
 	rm -rf results/sfn
 	$(BOPT) init \
@@ -91,16 +94,13 @@ web:
 	PYTHONPATH=. python app.py "results/simple-function"
 
 clean:
-	rm -rf results/rl-monte-carlo
+	rm -rf bopt.egg-info/ dist/ build/
 
 benchmarks:
 	PYTHONPATH=. python -m cProfile -s cumtime "benchmarks/$1.py" 2>&1 > "results/be-$1.txt"
 
 mypy:
 	./.venv/bin/mypy bopt
-
-clean-dist:
-	rm -rf bopt.egg-info/ dist/ build/
 
 test:
 	bash -c "source ./.venv/bin/activate && ./tests/test_cli.sh && pytest && make mypy"

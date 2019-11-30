@@ -19,7 +19,7 @@ setuptools.setup(
         "bopt": ["templates/*"]
     },
 
-    python_requires="~=3.6",
+    python_requires="3.6.*, 3.7.*, 3.8.*",
     install_requires=[
         "numpy>=1.17.4",
         "scipy>=1.1.0",
@@ -43,8 +43,8 @@ setuptools.setup(
             "coverage",
             "deepdiff",
             "Cython",
-            "pytest~=5.3.1",
-            "mypy~=0.750",
+            "pytest",
+            "mypy",
         ]
     },
 
@@ -61,5 +61,8 @@ setuptools.setup(
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
         "Programming Language :: Python :: 3",
+        "Programming Language :: Python :: 3.6",
+        "Programming Language :: Python :: 3.7",
+        "Programming Language :: Python :: 3.8",
     ],
 )
