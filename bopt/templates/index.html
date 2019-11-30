@@ -189,10 +189,6 @@
                   x: {{slice.other_samples["x"][-1:]|safe}}, y: {{slice.other_samples["y"][-1:]|safe}},
                   marker: { color: "rgb(255, 80, 90)", size: 10, line: { width: 1 } }
                 },
-
-
-                // TODO: zobrazovat posledni (aktualni) sample jinou barvickou
-
               ], {
                 showlegend: false,
                 title: "{{slice.param.name}}={{slice.x_slice_at | round(2)}} ... {{slice.param.range}}",
