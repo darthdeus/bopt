@@ -24,7 +24,7 @@ setuptools.setup(
         "numpy>=1.17.4",
         "scipy>=1.1.0",
         "pyyaml>=5.1",
-        "tqdm~=4.28.1",
+        "tqdm>=4.28.1,<4.40.0",
         "flask~=1.0.2",
         "psutil~=5.4.8",
         "jsonpickle~=1.0",
