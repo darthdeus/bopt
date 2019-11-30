@@ -26,7 +26,7 @@ setuptools.setup(
         "pyyaml>=5.1",
         "tqdm~=4.39.0",
         "flask~=1.0.2",
-        "psutil~=5.4.8",
+        "psutil>=5.4.8,<5.7.0",
         "jsonpickle~=1.0",
         "GPy[plotting]~=1.9.9",
         "filelock~=3.0.10",
