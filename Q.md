@@ -1,6 +1,8 @@
 # TODO
 
-- batch -> task -> experiment
+- seedy (bopti) k random searchum
+
+- batch -> task -> (multi)experiment -> sample -> (multi)job
 - task a batch do experimentu
 
 
