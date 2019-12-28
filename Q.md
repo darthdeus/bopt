@@ -1,5 +1,16 @@
 # TODO
 
+INFRASTRUKTURA !!
+
+- jednoducha funkce s noise, koukat jak vypada overfitting nez to fitne spravnej noise
+
+- https://arxiv.org/pdf/0912.3995.pdf
+  - https://github.com/keras-team/keras-tuner/blob/master/kerastuner/tuners/bayesian.py
+  - https://arxiv.org/abs/1603.06560
+- cs_fictree + cs_pdt ale s treebankama (.orig)
+- reinfroce znova se 100
+
+
 - seedy (bopti) k random searchum
 
 - batch -> task -> (multi)experiment -> sample -> (multi)job
