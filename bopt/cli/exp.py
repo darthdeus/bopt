@@ -21,10 +21,6 @@ def run(args) -> None:
                 return
 
 
-            print("Hyperparameters:")
-            for param in experiment.hyperparameters:
-                print(f"\t{param}")
-
             best_res = None
             best_sample = None
 
@@ -43,6 +39,14 @@ def run(args) -> None:
                         continue
 
                 ok_samples.append(sample)
+
+            if args.b and best_sample:
+                print(best_res)
+                return
+
+            print("Hyperparameters:")
+            for param in experiment.hyperparameters:
+                print(f"\t{param}")
 
             if best_sample:
                 best_job_id = best_sample.job.job_id if best_sample.job else "NO_JOB"

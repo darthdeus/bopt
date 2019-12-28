@@ -83,6 +83,8 @@ class GPyModel(Model):
 
             variance_prior = GPy.priors.Gamma(gp_config.gamma_a, gp_config.gamma_b)
 
+            # TODO: Gaussian_noise.variance prior?
+
             model.kern.variance.unconstrain()
             model.kern.variance.set_prior(variance_prior)
         else:

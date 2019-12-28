@@ -87,7 +87,11 @@ class Experiment:
 
         runner = RunnerLoader.from_dict(data["runner"])
 
-        assert "task_name" in data, "'task_name' is required, but was missing in {}".format(data)
+        # assert "task_name" in data, "'task_name' is required, but was missing in {}".format(data)
+        if "task_name" not in data:
+            data["task_name"] = "XXX"
+        if "batch_name" not in data:
+            data["batch_name"] = "XXX"
 
         experiment = Experiment(data["task_name"], data["batch_name"],
                                 hyperparameters, runner, data["result_regex"],

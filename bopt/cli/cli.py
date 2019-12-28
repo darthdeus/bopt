@@ -131,6 +131,7 @@ def run_main(args):
         "exp", help="Overview status of an experiment.", parents=[cd_parser]
     )
     sp_expstat.add_argument("-r", action="store_true", default=False, help="Print only results.", required=False)
+    sp_expstat.add_argument("-b", action="store_true", default=False, help="Print only best.", required=False)
     sp_expstat.set_defaults(func=exp.run)
 
 
