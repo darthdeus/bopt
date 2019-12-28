@@ -1,5 +1,9 @@
 # TODO
 
+
+- bopt run -C experiments/1 --continue --n_parallel 5 --n_iter 50
+- bopt-multi experiments/{1..100} 10 5 50
+
 INFRASTRUKTURA !!
 
 - jednoducha funkce s noise, koukat jak vypada overfitting nez to fitne spravnej noise
