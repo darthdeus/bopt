@@ -4,7 +4,7 @@ BOPT=./.venv/bin/bopt
 # default: mypy
 
 default:
-	./.venv/bin/pytest -s tests/test_opt_functions.py
+	PYTHONWARNINGS="ignore::DeprecationWarning::paramz" ./.venv/bin/pytest -s tests/test_opt_functions.py
 
 cc:
 	./.venv/bin/radon cc bopt -a -nc
