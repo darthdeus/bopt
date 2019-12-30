@@ -148,6 +148,7 @@ def run_main(args):
     ### bopt web
 
     sp_run = sp.add_parser("run", help="Runs an experiment.", parents=[cd_parser])
+    sp_run.add_argument("-c", action="store_true", default=False, help="Continue up to maximum n_iter.", required=False)
     sp_run.add_argument(
         "--n_iter", type=int, default=20, help="Number of iterations to run."
     )
