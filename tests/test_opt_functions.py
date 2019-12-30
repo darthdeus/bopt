@@ -51,7 +51,7 @@ class TestOptFunctions(unittest.TestCase):
 
             run_main(init_args)
 
-            run_main(["run", *chdir, "--n_iter=5", "--n_parallel=1",
+            run_main(["run", *chdir, "--n_iter=12", "--n_parallel=3",
                       "--sleep=0.1"])
 
             from io import StringIO

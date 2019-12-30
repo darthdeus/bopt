@@ -1,5 +1,6 @@
 # TODO
 
+- ERROR    root:hyperparam_values.py:30 Invalid hyperparam value 0.09999999999999998 for Hyperparameter(name='y', range=Float(0.1, 6.0))
 
 - bopt run -C experiments/1 --continue --n_parallel 5 --n_iter 50
 - bopt-multi experiments/{1..100} 10 5 50
