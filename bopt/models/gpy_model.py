@@ -101,11 +101,11 @@ class GPyModel(Model):
                 model.kern.lengthscale.unconstrain()
                 model.kern.lengthscale.constrain_bounded(min_bound, max_bound)
 
+        # TODO: parallel=True?
         model.optimize_restarts(gp_config.num_optimize_restarts)
 
         # print(X_sample, Y_sample)
         # print(model)
-
 
         logging.debug("GPY hyperparam optimization DONE, params: {}".format(model.param_array))
 
