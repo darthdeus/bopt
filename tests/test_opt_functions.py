@@ -5,6 +5,7 @@ import datetime
 import unittest
 import warnings
 import argparse
+import logging
 
 import numpy as np
 import bopt
@@ -45,9 +46,20 @@ class TestOptFunctions(unittest.TestCase):
                          os.path.abspath("tests/opt_functions.py"),
                          "--", "--name={}".format(f.name)]
 
-            print(init_args)
+            logging.info("init_args %s", init_args)
+            # print(init_args)
 
             run_main(init_args)
 
             run_main(["run", *chdir, "--n_iter=5", "--n_parallel=1",
                       "--sleep=0.1"])
+
+            from io import StringIO
+            from contextlib import redirect_stdout
+            f = StringIO()
+
+            with redirect_stdout(f):
+                run_main(["exp", *chdir, "-b"])
+
+            best_result = float(f.getvalue())
+            self.assertAlmostEqual(160.0, best_result, 2)
