@@ -31,6 +31,7 @@ def try_start_job(args):
         else:
             return False
 
+
 def run(args) -> None:
     with handle_cd_revertible(args):
         with ensure_meta_yml():

@@ -32,6 +32,7 @@ setuptools.setup(
         "filelock~=3.0.10",
         "ipdb~=0.11",
         "livereload==2.5.1",
+        "colored==1.4.2"
     ],
 
     extras_require={

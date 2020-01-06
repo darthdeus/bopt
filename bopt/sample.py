@@ -160,29 +160,47 @@ class Sample:
 
 
     def __str__(self) -> str:
+        from colored import fg, bg, attr
+
         if self.job:
             s = f"{self.job.job_id}\t"
         else:
             s = "manual\t"
 
-        s += "s: {}\tf: {}\tc: {}\tr: {}\t".format(self.created_at,
-                self.finished_at, self.collected_at, self.run_time)
+        # s += "s: {}\tf: {}\tc: {}\t".format(self.created_at,
+        #         self.finished_at, self.collected_at)
 
-        s += "RS: {}\t".format(self.model.sampled_from_random_search())
+        s += "{}time:{} {:.3f}s\t".format(fg("dark_gray"), attr("reset"),
+                self.run_time)
 
-        is_finished = self.status() == CollectFlag.COLLECT_OK
+        if self.model.sampled_from_random_search():
+            s += bg("dark_gray") + fg("white") + "Rand\t" + attr("reset")
+        else:
+            s += bg("black") + fg("blue") + "Model\t" + attr("reset")
+
+        status = self.status()
+
+        if status == CollectFlag.COLLECT_OK:
+            s += fg("black") + bg("green")
+        elif status == CollectFlag.COLLECT_FAILED:
+            s += fg("black") + bg("red")
+        else:
+            s += fg("black") + bg("yellow")
 
         # TODO: proper status check
 
         # TODO: hyperparam values __str__ a pouzivat to i jinde
         if self.result:
-            rounded_params = {h.name: (round(v, 3) if isinstance(v, float) else v)
-                    for h, v in self.hyperparam_values.mapping.items()}
-
             assert isinstance(self.result, float)
-            s += f"{is_finished}\t{self.result:.3f}\t{rounded_params}"
+            s += f"{self.result:.3f}"
         else:
             s += str(self.status())
+
+        s += attr("reset")
+        rounded_params = {h.name: (round(v, 3) if isinstance(v, float) else v)
+                for h, v in self.hyperparam_values.mapping.items()}
+
+        s += f"\t{rounded_params}\t"
 
         return s
 
