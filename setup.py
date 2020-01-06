@@ -31,7 +31,7 @@ setuptools.setup(
         "GPy[plotting]~=1.9.9",
         "filelock~=3.0.10",
         "ipdb~=0.11",
-        "livereload==2.5.1",
+        "livereload==2.6.1",
         "colored==1.4.2"
     ],
 
