@@ -171,7 +171,7 @@ class Sample:
         #         self.finished_at, self.collected_at)
 
         s += "{}time:{} {:.3f}s\t".format(fg("dark_gray"), attr("reset"),
-                self.run_time)
+                self.run_time or -1)
 
         if self.model.sampled_from_random_search():
             s += bg("dark_gray") + fg("white") + "Rand\t" + attr("reset")
