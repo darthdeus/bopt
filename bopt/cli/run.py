@@ -41,12 +41,11 @@ def run(args) -> None:
                 with acquire_lock():
                     experiment = bopt.Experiment.deserialize()
                     n_started = len([s for s in experiment.samples
-                                       if s.result or (s.job and not s.job.is_finished())])
+                                       if s.result is not None or (s.job and not s.job.is_finished())])
             else:
                 n_started = 0
 
             max_start = args.n_iter
-            print("started: ", n_started)
 
             while n_started < max_start:
                 if try_start_job(args):
