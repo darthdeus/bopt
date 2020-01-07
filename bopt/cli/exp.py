@@ -15,7 +15,7 @@ def run(args) -> None:
 
             if args.r:
                 for sample in experiment.samples:
-                    if sample.result:
+                    if sample.result is not None:
                         print(sample.result)
 
                 return
@@ -27,7 +27,7 @@ def run(args) -> None:
             ok_samples = []
 
             for sample in experiment.samples:
-                if sample.result:
+                if sample.result is not None:
                     try:
                         if best_res is None or (sample.result and sample.result > best_res):
                             best_res = sample.result
@@ -39,6 +39,8 @@ def run(args) -> None:
                         continue
 
                 ok_samples.append(sample)
+
+            bad_samples = list(set(experiment.samples) - set(ok_samples))
 
             if args.b and best_sample:
                 print(best_res)
@@ -64,6 +66,10 @@ def run(args) -> None:
                     print(run_str)
                     print()
 
+            print("STATS:")
+            print(f"OK: {len(ok_samples)}\tBAD: {len(bad_samples)}")
+            print()
+
             print("Evaluations:")
             for sample in ok_samples:
                 job = sample.job
@@ -78,3 +84,10 @@ def run(args) -> None:
                     proc_stats += f", rss={mem.rss}, vms={mem.vms}"
 
                 print(f"{sample}\t{proc_stats}")
+
+            from colored import fg, bg, attr
+            for sample in bad_samples:
+                print(bg("red") + sample)
+
+            print(attr("reset"))
+

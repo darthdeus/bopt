@@ -190,7 +190,7 @@ class Sample:
         # TODO: proper status check
 
         # TODO: hyperparam values __str__ a pouzivat to i jinde
-        if self.result:
+        if self.result is not None:
             assert isinstance(self.result, float)
             s += f"{self.result:.3f}"
         else:

@@ -37,13 +37,22 @@ def run(args) -> None:
         with ensure_meta_yml():
             logging.info("Found existing meta.yml, resuming experiment.")
 
-            n_started = 0
+            if args.c:
+                with acquire_lock():
+                    experiment = bopt.Experiment.deserialize()
+                    n_started = len([s for s in experiment.samples
+                                       if s.result or (s.job and not s.job.is_finished())])
+            else:
+                n_started = 0
 
-            while n_started < args.n_iter:
+            max_start = args.n_iter
+            print("started: ", n_started)
+
+            while n_started < max_start:
                 if try_start_job(args):
                     n_started += 1
                     logging.info("[{}/{}] Started a new evaluation"
-                                 .format(n_started, args.n_iter))
+                                 .format(n_started, max_start))
 
                 psutil.wait_procs(psutil.Process().children(), timeout=0.01)
                 time.sleep(args.sleep)
