@@ -84,7 +84,7 @@
                   <span class="badge badge-secondary">
                 {% endif %}
                     {{sample.short_collect_flag_str()}}:
-                    {% if sample.result %}
+                    {% if sample.result is not None %}
                       {{sample.result | round(2)}}
                     {% else %}
                       X
