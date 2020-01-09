@@ -1,5 +1,15 @@
 # TODO
 
+- zaokrouhlovaci kernely
+
+- bopt-multi submitne array job kterej dostane 10 5 50 v env a adresare v args
+  - bopt-multi-arrayjob -v BOPT_ARGS="10 5 50" foo{1..10}
+
+- banditi
+- paralelni exploit na konci
+- 1 nebo 5 nebo 10 paralelne
+- dopustit 100 u fictree a koukat kde se to fixne
+
 - ERROR    root:hyperparam_values.py:30 Invalid hyperparam value 0.09999999999999998 for Hyperparameter(name='y', range=Float(0.1, 6.0))
 
 - bopt run -C experiments/1 --continue --n_parallel 5 --n_iter 50
