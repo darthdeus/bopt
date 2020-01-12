@@ -13,7 +13,7 @@ from bopt.plot import plot_current
 def run(args) -> None:
     from bopt.models.gpy_model import GPyModel
 
-    with handle_cd_revertible(args):
+    with handle_cd_revertible(args.dir):
         with acquire_lock(), ensure_meta_yml():
             experiment = bopt.Experiment.deserialize()
             experiment.collect_results()

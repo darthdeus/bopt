@@ -14,13 +14,12 @@ def acquire_lock():
 
 
 class handle_cd_revertible:
-    def __init__(self, args) -> None:
-        assert args.dir
-        self.args = args
+    def __init__(self, newdir) -> None:
+        self.newdir = newdir
 
     def __enter__(self):
         self.old = os.getcwd()
-        os.chdir(self.args.dir)
+        os.chdir(self.newdir)
 
     def __exit__(self, type, value, traceback):
         os.chdir(self.old)

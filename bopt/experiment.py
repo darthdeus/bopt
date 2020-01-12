@@ -358,6 +358,10 @@ class Experiment:
 
         return next_sample, found_similar
 
+    def sample_cumulative_results(self) -> List[float]:
+        sample_results = [s.result for s in self.samples if s.result]
+        return np.maximum.accumulate(sample_results).tolist()
+
     def serialize(self) -> None:
         dump = yaml.dump(self.to_dict(), default_flow_style=False, Dumper=NoAliasDumper)
 

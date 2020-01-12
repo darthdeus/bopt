@@ -5,7 +5,7 @@ from bopt.cli.util import handle_cd_revertible, ensure_meta_yml, acquire_lock
 
 
 def run(args) -> None:
-    with handle_cd_revertible(args):
+    with handle_cd_revertible(args.dir):
         with acquire_lock(), ensure_meta_yml():
             experiment = bopt.Experiment.deserialize()
             experiment.collect_results()

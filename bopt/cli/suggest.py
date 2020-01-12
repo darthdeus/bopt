@@ -6,7 +6,7 @@ from bopt.cli.util import handle_cd_revertible, acquire_lock
 
 
 def run(args) -> None:
-    with handle_cd_revertible(args):
+    with handle_cd_revertible(args.dir):
         with acquire_lock():
             if os.path.exists("meta.yml"):
                 print("Found existing meta.yml, resuming experiment.")

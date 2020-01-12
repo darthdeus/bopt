@@ -14,7 +14,7 @@ def run(args) -> None:
     pathlib.Path(args.dir).mkdir(parents=True, exist_ok=True)
     pathlib.Path(os.path.join(args.dir, "output")).mkdir(parents=True, exist_ok=True)
 
-    with handle_cd_revertible(args):
+    with handle_cd_revertible(args.dir):
         with acquire_lock():
             hyperparameters: List[Hyperparameter] = []
 

@@ -33,7 +33,7 @@ def try_start_job(args):
 
 
 def run(args) -> None:
-    with handle_cd_revertible(args):
+    with handle_cd_revertible(args.dir):
         with ensure_meta_yml():
             logging.info("Found existing meta.yml, resuming experiment.")
 

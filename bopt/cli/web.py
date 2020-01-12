@@ -47,7 +47,6 @@ def create_gp_for_data(experiment, hyperparameters, X, Y):
     model.kern.variance.set_prior(variance_prior)
 
     # model.optimize_restarts(25)
-    # print("xxx", flush=True)
     model.optimize()
 
     logging.info("GP hyperparams: {}".format(model.param_array.tolist()))
@@ -298,7 +297,7 @@ def create_slice_2d(i: int, j: int, experiment: bopt.Experiment,
                    mu.tolist(), other_samples, model)
 
 
-def run(args) -> None:
+def run(web_type, args) -> None:
     import inspect
     import os
     script_dir = os.path.dirname(os.path.abspath(inspect.stack()[0][1]))
@@ -310,9 +309,26 @@ def run(args) -> None:
 
     print("web path", app.root_path)
 
+    @app.route("/multi")
+    def multi():
+        experiments = []
+        dirnames = []
+
+        for exp_dir in args.experiments:
+            with handle_cd_revertible(exp_dir), acquire_lock():
+                print(exp_dir)
+                experiment = bopt.Experiment.deserialize()
+                experiments.append(experiment)
+                dirnames.append(exp_dir)
+
+        return render_template("multi.html",
+                experiments=experiments,
+                dirnames=dirnames,
+                zipped_experiments_dirnames=zip(experiments, dirnames))
+
     @app.route("/")
     def index():
-        with handle_cd_revertible(args), acquire_lock():
+        with handle_cd_revertible(args.dir), acquire_lock():
             experiment = bopt.Experiment.deserialize()
             experiment.collect_results()
 

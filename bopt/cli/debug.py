@@ -6,7 +6,7 @@ from bopt.experiment import Experiment
 
 
 def run(args) -> None:
-    with handle_cd_revertible(args):
+    with handle_cd_revertible(args.dir):
         with acquire_lock():
             experiment = Experiment.deserialize()
             experiment.collect_results()

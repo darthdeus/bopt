@@ -142,10 +142,22 @@ def run_main(args):
     sp_web.add_argument(
         "--port", type=int, default=5500, help="Port to run the web interface on."
     )
-    sp_web.set_defaults(func=web.run)
+    sp_web.set_defaults(func=lambda args: web.run("single", args))
 
 
-    ### bopt web
+    ### bopt multiweb
+
+    sp_multiweb = sp.add_parser("multiweb", help="Starts the web interface for multiple experiments",
+                                parents=[cd_parser])
+    # TODO: dupe
+    sp_multiweb.add_argument(
+        "--port", type=int, default=5500, help="Port to run the web interface on."
+    )
+    sp_multiweb.add_argument("experiments", nargs="+")
+    sp_multiweb.set_defaults(func=lambda args: web.run("multi", args))
+
+
+    ### bopt run
 
     sp_run = sp.add_parser("run", help="Runs an experiment.", parents=[cd_parser])
     sp_run.add_argument("-c", action="store_true", default=False, help="Continue up to maximum n_iter.", required=False)

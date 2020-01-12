@@ -12,7 +12,7 @@ def run(args) -> None:
     # TODO: this is completely outdated and broken at this point
     raise NotImplementedError()
 
-    with handle_cd_revertible(args):
+    with handle_cd_revertible(args.dir):
         with acquire_lock():
             job_files = glob.glob(os.path.join("**", "job-*.yml"), recursive=True)
 
