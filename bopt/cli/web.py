@@ -324,7 +324,7 @@ def run(web_type, args) -> None:
         return render_template("multi.html",
                 experiments=experiments,
                 dirnames=dirnames,
-                zipped_experiments_dirnames=zip(experiments, dirnames))
+                zipped_experiments_dirnames=list(zip(experiments, dirnames)))
 
     @app.route("/")
     def index():

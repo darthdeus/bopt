@@ -37,7 +37,24 @@
   <body>
     <div class="container-fluid">
       <div class="row">
+        <div class="col-md-4">
+          <ul>
+            {% for experiment, dirname in zipped_experiments_dirnames %}
+              <li>
+                <a href="/{{dirname}}">{{dirname}}</a>
+              </li>
+              <li>
+                <a href="/{{dirname}}">{{dirname}}</a>
+              </li>
+              <li>
+                <a href="/{{dirname}}">{{dirname}}</a>
+              </li>
+            {% endfor %}
+          </ul>
+        </div>
+
         <div class="col-md-6" id="convergence-plot"></div>
+
         <script>
           Plotly.plot("convergence-plot", [
             {% for experiment, dirname in zipped_experiments_dirnames %}

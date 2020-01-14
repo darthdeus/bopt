@@ -1,5 +1,9 @@
 # TODO
 
+- ZOBRAZOVAT DISTRIBUCI + bootstrap
+
+
+
 - zaokrouhlovaci kernely
 
 - bopt-multi submitne array job kterej dostane 10 5 50 v env a adresare v args
