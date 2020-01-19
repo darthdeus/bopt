@@ -68,6 +68,12 @@ class Sample:
         return self.collect_flag
 
     def to_dict(self) -> dict:
+        def maybe_date_to_json(d):
+            if d:
+                return str(d)
+            else:
+                None
+
         return {
             "job": self.job.to_dict() if self.job else None,
             "model": self.model.to_dict() if self.model else None,
@@ -76,10 +82,10 @@ class Sample:
             "mu_pred": self.mu_pred,
             "sigma_pred": self.sigma_pred,
             "comment": self.comment,
-            "collect_flag": self.collect_flag,
-            "created_at": self.created_at,
-            "finished_at": self.finished_at,
-            "collected_at": self.collected_at,
+            "collect_flag": self.collect_flag.value,
+            "created_at": maybe_date_to_json(self.created_at),
+            "finished_at": maybe_date_to_json(self.finished_at),
+            "collected_at": maybe_date_to_json(self.collected_at),
             "run_time": self.run_time
         }
 
@@ -103,7 +109,7 @@ class Sample:
                 hyperparam_values,
                 data["mu_pred"],
                 data["sigma_pred"],
-                data["collect_flag"],
+                CollectFlag(data["collect_flag"]),
                 data["created_at"])
 
         sample.comment = data.get("comment", None)

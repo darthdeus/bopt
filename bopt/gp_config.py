@@ -94,3 +94,36 @@ class GPConfig:
     def __str__(self) -> str:
         # TODO: pridat co chybi
         return "kernel: {}, acq_fn: {}".format(self.kernel, self.acquisition_fn)
+
+    def to_dict(self) -> dict:
+        return {
+            "kernel": self.kernel,
+            "acquisition_fn": self.acquisition_fn,
+            "ard": self.ard,
+            "fit_mean": self.fit_mean,
+            "gamma_prior": self.gamma_prior,
+            "gamma_a": self.gamma_a,
+            "gamma_b": self.gamma_b,
+            "informative_prior": self.informative_prior,
+            "acq_xi": self.acq_xi,
+            "acq_n_restarts": self.acq_n_restarts,
+            "num_optimize_restarts": self.num_optimize_restarts,
+            "random_search_only": self.random_search_only,
+        }
+
+    @staticmethod
+    def from_dict(data: dict) -> "GPConfig":
+        return GPConfig(
+            data["kernel"],
+            data["acquisition_fn"],
+            data["ard"],
+            data["fit_mean"],
+            data["gamma_prior"],
+            data["gamma_a"],
+            data["gamma_b"],
+            data["informative_prior"],
+            data["acq_xi"],
+            data["acq_n_restarts"],
+            data["num_optimize_restarts"],
+            data["random_search_only"],
+        )

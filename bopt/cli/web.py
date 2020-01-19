@@ -3,7 +3,7 @@ import math
 import numpy as np
 import logging
 
-from typing import List, Tuple, Dict
+from typing import List, Tuple, Dict, Optional
 from livereload import Server
 from flask import Flask, render_template, request
 import GPy
@@ -309,26 +309,32 @@ def run(web_type, args) -> None:
 
     print("web path", app.root_path)
 
-    @app.route("/multi")
-    def multi():
-        experiments = []
-        dirnames = []
+    experiments = []
+    dirnames = []
 
-        for exp_dir in args.experiments:
-            with handle_cd_revertible(exp_dir), acquire_lock():
-                print(exp_dir)
-                experiment = bopt.Experiment.deserialize()
-                experiments.append(experiment)
-                dirnames.append(exp_dir)
+    # from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor
+    #
+    # import yaml
+    # def f(path):
+    #     with open(path, "r") as f:
+    #         return yaml.load(f.read(), loader=yaml.Loader)
+    #
+    # with ProcessPoolExecutor(max_workers=12) as pool:
+    # with ProcessPoolExecutor(max_workers=1) as pool:
+    #     loaded = pool.map(f, args.experiments)
 
-        return render_template("multi.html",
-                experiments=experiments,
-                dirnames=dirnames,
-                zipped_experiments_dirnames=list(zip(experiments, dirnames)))
+    for exp_dir in args.experiments:
+        with handle_cd_revertible(exp_dir), acquire_lock():
+            print(exp_dir)
+            experiment = bopt.Experiment.deserialize()
+            experiments.append(experiment)
+            dirnames.append(exp_dir)
 
-    @app.route("/")
-    def index():
-        with handle_cd_revertible(args.dir), acquire_lock():
+    import sys
+    sys.exit(0)
+
+    def experiment_detail(exp_dir, index: Optional[int]=None):
+        with handle_cd_revertible(exp_dir), acquire_lock():
             experiment = bopt.Experiment.deserialize()
             experiment.collect_results()
 
@@ -396,7 +402,10 @@ def run(web_type, args) -> None:
 
 
             return render_template("index.html",
+                    exp_dir=exp_dir,
                     experiment=experiment,
+                    experiment_index=index,
+                    stats=experiment.stats(),
 
                     sample_results=sample_results,
                     sample_results_cummax=sample_results_cummax,
@@ -419,6 +428,47 @@ def run(web_type, args) -> None:
 
                     sample_id=sample_id,
                     )
+
+    if args.experiments:
+        @app.route("/multi/<int:index>")
+        def multi_detail(index):
+            return experiment_detail(args.experiments[index], index)
+
+        @app.route("/")
+        def multi():
+            experiments = []
+            dirnames = []
+
+            # from concurrent.futures import ProcessPoolExecutor
+            #
+            # def f(d):
+            #     with handle_cd_revertible(d):
+            #         print("Loading", d)
+            #         return bopt.Experiment.deserialize()
+
+            # with ProcessPoolExecutor(max_workers=10) as executor:
+            #     experiments = executor.map(f, args.experiments)
+            #     dirnames = args.experiments
+
+
+            for exp_dir in args.experiments:
+                with handle_cd_revertible(exp_dir), acquire_lock():
+                    print(exp_dir)
+                    experiment = bopt.Experiment.deserialize()
+                    experiments.append(experiment)
+                    dirnames.append(exp_dir)
+
+            return render_template("multi.html",
+                    experiments=experiments,
+                    dirnames=dirnames,
+                    zipped_experiments_dirnames=list(zip(experiments, dirnames)))
+
+    else:
+        @app.route("/")
+        def index():
+            return experiment_detail(args.dir)
+
+
 
 
     server = Server(app.wsgi_app)

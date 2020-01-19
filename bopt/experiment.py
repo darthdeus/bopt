@@ -9,7 +9,7 @@ import tempfile
 
 import numpy as np
 
-from typing import List, Tuple, Optional
+from typing import List, Tuple, Optional, NamedTuple
 
 from bopt.basic_types import Hyperparameter, OptimizationFailed
 from bopt.hyperparam_values import HyperparamValues
@@ -29,6 +29,15 @@ logging.getLogger("GP").setLevel(logging.WARNING)
 logging.getLogger("filelock").setLevel(logging.WARNING)
 # logging.getLogger().setLevel(logging.DEBUG)
 # logging.getLogger("matplotlib").setLevel(logging.INFO)
+
+
+
+class ExperimentStats(NamedTuple):
+    min: float
+    max: float
+    mean: float
+    std: float
+    median: float
 
 
 class NoAliasDumper(yaml.Dumper):
@@ -70,7 +79,7 @@ class Experiment:
             "samples": [s.to_dict() for s in self.samples],
             "runner": self.runner.to_dict(),
             "result_regex": self.result_regex,
-            "gp_config": self.gp_config
+            "gp_config": self.gp_config.to_dict()
         }
 
     @staticmethod
@@ -93,13 +102,31 @@ class Experiment:
         if "batch_name" not in data:
             data["batch_name"] = "XXX"
 
+        if isinstance(data["gp_config"], GPConfig):
+            gp_config = data["gp_config"]
+        else:
+            gp_config = GPConfig.from_dict(data["gp_config"])
+
         experiment = Experiment(data["task_name"], data["batch_name"],
                                 hyperparameters, runner, data["result_regex"],
-                                data["gp_config"])
+                                gp_config)
 
         experiment.samples = samples
 
         return experiment
+
+    def best_result(self) -> float:
+        return self.stats().max
+
+    def stats(self) -> ExperimentStats:
+        results = [sample.result for sample in self.samples
+                if sample.result is not None]
+        return ExperimentStats(
+                min(results),
+                max(results),
+                np.mean(results).item(),
+                np.std(results).item(),
+                np.median(results).item())
 
     def collect_results(self) -> None:
         # TODO: collect run time + check collected_at
@@ -359,6 +386,7 @@ class Experiment:
         return next_sample, found_similar
 
     def sample_cumulative_results(self) -> List[float]:
+        # TODO: finished samples only?
         sample_results = [s.result for s in self.samples if s.result]
         return np.maximum.accumulate(sample_results).tolist()
 

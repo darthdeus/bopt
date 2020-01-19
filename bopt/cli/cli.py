@@ -1,3 +1,22 @@
+# import sys
+# from bopt.experiment import Experiment
+# from bopt.cli.util import handle_cd_revertible, acquire_lock
+#
+# args = sys.argv[2:]
+# experiments = []
+#
+# for exp_dir in args:
+#     with handle_cd_revertible(exp_dir), acquire_lock():
+#         print(exp_dir)
+#         experiment = Experiment.deserialize()
+#         experiments.append(experiment)
+#
+# print(len(experiments))
+#
+# import sys
+# sys.exit(0)
+
+
 import argparse
 import os
 import sys
@@ -14,7 +33,8 @@ from bopt.cli import (
     suggest,
     web,
     debug,
-    clean
+    clean,
+    convert_meta
 )
 
 
@@ -123,6 +143,17 @@ def run_main(args):
     sp_jobstat.add_argument("JOB_ID", type=int, default=".",
                             help="Job to search for.")
     sp_jobstat.set_defaults(func=jobstat.run)
+
+
+    ### bopt convert-meta
+
+    sp_convert = sp.add_parser("convert-meta",
+                               help="Convert between different meta file formats",
+                               parents=[cd_parser])
+    sp_convert.add_argument("--to-json", action="store_true", default=False, help="Convert existing format to JSON.")
+    sp_convert.add_argument("--to-yaml", action="store_true", default=False, help="Convert existing format to YAML.")
+    sp_convert.add_argument("--keep", action="store_true", default=False, help="Keep the old file.")
+    sp_convert.set_defaults(func=convert_meta.run)
 
 
     ### bopt exp

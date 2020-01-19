@@ -1,447 +1,481 @@
-<!DOCTYPE html>
-<html>
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width">
-    <title>BoptBoard</title>
+{% extends "base.html" %}
 
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css" integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS" crossorigin="anonymous">
-    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.6/umd/popper.min.js" integrity="sha384-wHAiFfRlMFy6i5SRaxvfOCifBUQy1xHdJ/yoi7FRNXMRBu5WHdZYu1hA6ZOblgut" crossorigin="anonymous"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/js/bootstrap.min.js" integrity="sha384-B0UglyR+jN6CkvvICOB2joaf5I4l3gm9GU6Hc1og6Ls7i6U/mkkaduKaBhlAXv9k" crossorigin="anonymous"></script>
 
-    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+{% block navbar %}
+  <span class="navbar-brand">
+    <a href="/">multi:</a>
+    <a class="navbar-brand" href="#">{{exp_dir}}</a>
+  </span>
 
-    <link rel="stylesheet" href="//cdn.datatables.net/1.10.19/css/jquery.dataTables.min.css">
-    <script src="//cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js"></script>
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="navbar-toggler-icon"></span>
+  </button>
 
-    <style type="text/css" media="all">
-      /* .modebar{ */
-      /*   display: none !important; */
-      /* } */
-    </style>
+  <div class="collapse navbar-collapse" id="navbarSupportedContent">
+    <ul class="navbar-nav mr-auto">
+      {% if experiment_index %}
+        {% if experiment_index > 0 %}
+          <li class="nav-item">
+            <span class="nav-link">
+              <a href="/multi/{{experiment_index - 1}}">« prev</strong></a>
+            </span>
+          </li>
+        {% endif %}
+        <li class="nav-item nav-link">{{experiment_index}}</li>
 
-    <script type="text/javascript">
-      $(document).ready( function () {
-        $("table").DataTable({
-          "pageLength": 200,
-          "order": [[2, "desc"]]
-        });
-      });
+        <li class="nav-item">
+          <span class="nav-link">
+            <a href="/multi/{{experiment_index + 1}}">next »</strong></a>
+          </span>
+        </li>
+      {% endif %}
 
-      $(function () {
-        $('[data-toggle="tooltip"]').tooltip();
+      <li class="nav-item">
+        <a class="nav-link" href="#">task: <strong>{{experiment.task_name}}</strong></a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="#">batch: <strong>{{experiment.batch_name}}</strong></a>
+      </li>
+
+      <li class="nav-item dropdown">
+        <a id="exp-detail-dropdown" class="nav-link dropdown-toggle" href="#" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+          Details
+        </a>
+
+        <div class="dropdown-menu" aria-labelledby="exp-detail-dropdown">
+          <div class="dropdown-item">
+            min: <strong>{{stats.min | round(3)}}</strong>
+          </div>
+          <div class="dropdown-item">
+            max: <strong>{{stats.max | round(3)}}</strong>
+          </div>
+          <div class="dropdown-item">
+            mean: <strong>{{stats.mean | round(3)}}</strong>
+          </div>
+          <div class="dropdown-item">
+            std: <strong>{{stats.std | round(3)}}</strong>
+          </div>
+          <div class="dropdown-item">
+            median: <strong>{{stats.median | round(3)}}</strong>
+          </div>
+          {# <a class="dropdown-item" href="#">Action</a> #}
+          {# <a class="dropdown-item" href="#">Another Action</a> #}
+        </div>
+      </li>
+    </ul>
+  </div>
+
+  {# <h2>Experiment: {{experiment.runner.script_path}}</h2> #}
+  {# <p>{{exp_dir}}</p> #}
+{% endblock %}
+
+
+{% block content %}
+<div class="container-fluid">
+
+  <div class="row">
+    {% for sample in sorted_samples %}
+
+    <div class="col-md-1" style="padding: 0">
+      {% if sample == picked_sample %}
+        {% set card_background = "background: #ccc" %}
+      {% else %}
+        {% set card_background = "" %}
+      {% endif %}
+
+      <div class="card" style="{{card_background}}" data-toggle="tooltip" title="{{sample.hyperparam_values}}">
+        <div class="card-body" style="padding: 0.5rem">
+          <span class="card-title">
+            {% if sample.job %}
+              {% if sample.model.sampled_from_random_search() %}
+                {% set badge_color = "dark" %}
+              {% else %}
+                {% set badge_color = "info" %}
+              {% endif %}
+                <span class="badge badge-{{badge_color}}">
+                  {{loop.index0}}.
+                </span>
+              </button>
+
+            {% else %}
+              <span class="badge badge-dark">
+                {{loop.index}}.
+              </span>
+            {% endif %}
+
+            {% if sample.job %}
+            <a class="badge" href="?sample_id={{sample.job.job_id}}&show_acq={{show_acq}}&show_marginal={{show_marginal}}">
+                {{sample.job.job_id}}
+              </a>
+            {% else %}
+              <span class="badge">dup</span>
+            {% endif %}
+
+            {% if sample.collect_flag == CollectFlag.COLLECT_OK %}
+              <span class="badge badge-success">
+            {% elif sample.collect_flag == CollectFlag.COLLECT_FAILED  %}
+              <span class="badge badge-danger">
+            {% else %}
+              <span class="badge badge-secondary">
+            {% endif %}
+                {{sample.short_collect_flag_str()}}:
+                {% if sample.result %}
+                  {{sample.result | round(2)}}
+                {% else %}
+                  X
+                {% endif %}
+              </span>
+          </span>
+
+        </div>
+      </div>
+    </div>
+
+    {% endfor %}
+    <div class="col-md-1" style="padding: 0">
+      <div class="card alert alert-danger" style="padding: 0">
+        <div class="card-body" style="padding: 0.5rem">
+          <span class="card-title">
+            <a href="?show_acq={{show_acq}}&show_marginal={{show_marginal}}">Deselect</a>
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-2" style="padding: 0">
+      <div class="btn-group" role="group">
+        <a href="?sample_id={{sample_id}}&show_acq={{show_acq}}&show_marginal=1"
+           class="btn btn-secondary {{'disabled' if show_marginal == 1}}">MARGINAL</a>
+        <a href="?sample_id={{sample_id}}&show_acq={{show_acq}}&show_marginal=0"
+           class="btn btn-secondary {{'disabled' if show_marginal == 0}}">NO MARGINAL</a>
+        <a href="?sample_id={{sample_id}}&show_acq=1&show_marginal={{show_marginal}}"
+           class="btn btn-secondary {{'disabled' if show_acq == 1}}">ACQ</a>
+        <a href="?sample_id={{sample_id}}&show_acq=0&show_marginal={{show_marginal}}"
+           class="btn btn-secondary {{'disabled' if show_acq == 0}}">NO_ACQ</a>
+      </div>
+    </div>
+  </div>
+
+  <hr>
+
+  {% if random_search_picked %}
+    <div class="alert alert-danger">
+      <p>
+        The chosen sample was generated by <strong>random search</strong>.
+        No plots can be generated.
+      </p>
+
+      <p>
+        {{picked_sample}}
+      </p>
+    </div>
+  {% endif %}
+
+  {% if picked_sample %}
+
+    <h2>1D slices</h2>
+
+    <p>Hyperparams: {{picked_sample.hyperparam_values}}</p>
+    <p>Model params: {{picked_sample.model}}</p>
+
+    <div class="row">
+      {% for slice in slices_1d %}
+        <div class="col-md-6">
+          <div id="slice-param-{{loop.index0}}"></div>
+          {# TODO: <p>{{slice.model.param_array}}</p> #}
+        </div>
+        <script>
+          Plotly.plot("slice-param-{{loop.index0}}", [
+            {
+              name: "mean",
+              x: {{slice.x|safe}}, y: {{slice.mu|safe}},
+              line: { color: "rgb(0, 120, 255)", width: 4, }
+            },
+
+            {
+              name: "sigma low",
+              x: {{slice.x|safe}}, y: {{slice.sigma_low()|safe}},
+              marker: { color: "rgb(0.55, 0.55, 0.55)" }
+            },
+
+            {
+              name: "sigma high",
+              // fill: "tonexty",
+              x: {{slice.x|safe}}, y: {{slice.sigma_high()|safe}},
+              marker: { color: "rgb(0.55, 0.55, 0.55)" }
+            },
+
+            {% if show_acq == 1 %}
+              {
+                name: "acquisition fn", yaxis: "y2", mode: "lines",
+                x: {{slice.x|safe}}, y: {{slice.acq|safe}},
+                line: { color: "rgb(200, 0, 0)", width: 2, }
+              },
+            {% endif %}
+
+            {
+              name: "samples", mode: "markers",
+              x: {{slice.other_samples["x"][:-1]|safe}}, y: {{slice.other_samples["y"][:-1]|safe}},
+              marker: { color: "rgb(255, 180, 90)", size: 10, line: { width: 1 } }
+            },
+
+            {
+              name: "last-sample", mode: "markers",
+              x: {{slice.other_samples["x"][-1:]|safe}}, y: {{slice.other_samples["y"][-1:]|safe}},
+              marker: { color: "rgb(80, 255, 90)", size: 15, line: { width: 1 } }
+            },
+          ], {
+            showlegend: false,
+            title: "{{slice.param.name}}={{slice.x_slice_at | round(2)}} ... {{slice.param.range}}",
+            xaxis: {
+              title: "{{slice.param.name}}",
+              range: [ {{slice.x_range()[0]}}, {{slice.x_range()[1]}} ],
+              {% if slice.param.range.is_logscale() %}
+                type: "log", autorange: true
+              {% endif %}
+            },
+            yaxis: { title: "objective" }, yaxis2: { overlaying: "y", side: "right", },
+
+            shapes: [
+              {# TODO: intentionally 100 to not render #}
+              {% if show_marginal == 100 %}
+                {
+                  type: "line", line: { width: 5, color: "rgba(0, 0, 0, 0.4)" },
+                  x0: {{slice.x_slice_at}},     x1: {{slice.x_slice_at}},
+                  y0: {{slice.mu_bounds(show_acq)[0]}}, y1: {{slice.mu_bounds(show_acq)[1]}},
+                }
+              {% endif %}
+            ]
+          });
+        </script>
+      {% endfor %}
+    </div>
+
+    <hr/>
+
+    <h2>2D slices</h2>
+
+    <div class="row">
+      {% for slice in slices_2d %}
+        <div class="col-md-6" id="slice-2d-param-{{loop.index0}}"></div>
+        <script>
+          Plotly.plot("slice-2d-param-{{loop.index0}}", [
+            {
+              name: "mean",
+              x: {{slice.x1|safe}}, y: {{slice.x2|safe}},
+              z: {{slice.mu|safe}},
+              type: "heatmap",
+              line: { color: "rgb(0, 120, 255)", width: 4, }
+            },
+
+            {
+              name: "samples", mode: "markers",
+              x: {{slice.other_samples["x1"][:-1]|safe}}, y: {{slice.other_samples["x2"][:-1]|safe}},
+              marker: { color: "rgb(255, 180, 90)", size: 10, line: { width: 1 } }
+            },
+
+            {
+              name: "last-sample", mode: "markers",
+              x: {{slice.other_samples["x1"][-1:]|safe}}, y: {{slice.other_samples["x2"][-1:]|safe}},
+              marker: { color: "rgb(80, 255, 90)", size: 15, line: { width: 1 } }
+            },
+          ], {
+            // title: "{{slice.p1.name}}={slice.x_slice_at | round(2)} ... {{slice.p1.range}} {{slice.p2.range}}",
+            title: "{{slice.p1.name}} - {{slice.p2.name}}",
+            xaxis: {
+              title: "{{slice.p1.name}}",
+              range: [ {{slice.x1_bounds()[0]}}, {{slice.x1_bounds()[1]}} ],
+              {% if slice.p1.range.is_logscale() %}
+                type: "log", autorange: true
+              {% endif %}
+            },
+            yaxis: {
+              title: "{{slice.p2.name}}",
+              range: [ {{slice.x2_bounds()[0]}}, {{slice.x2_bounds()[1]}} ],
+              {% if slice.p2.range.is_logscale() %}
+                type: "log", autorange: true
+              {% endif %}
+            },
+
+            shapes: [
+              {# TODO: intentionally 100 to not render #}
+              {% if show_marginal == 100 %}
+                {
+                  type: "line", line: { width: 5, color: "rgba(0, 0, 0, 0.6)" },
+                  x0: {{slice.x1_slice_at}},    x1: {{slice.x1_slice_at}},
+                  y0: {{slice.x2_bounds()[0]}}, y1: {{slice.x2_bounds()[1]}},
+                },
+                {
+                  type: "line", line: { width: 5, color: "rgba(0, 0, 0, 0.6)" },
+                  x0: {{slice.x1_bounds()[0]}}, x1: {{slice.x1_bounds()[1]}},
+                  y0: {{slice.x2_slice_at}},  y1: {{slice.x2_slice_at}},
+                }
+              {% endif %}
+            ]
+          });
+        </script>
+      {% endfor %}
+    </div>
+
+  {% endif %}
+
+  <hr/>
+
+  <h2>Search overview</h2>
+
+  <div class="row">
+    <div class="col-md-6" id="kernel-params-plot"></div>
+    <script>
+      Plotly.plot("kernel-params-plot", [
+        {% for name, values in kernel_param_timeline.items() %}
+          {
+            y: {{values|safe}},
+            name: "{{name.replace('Mat52.', '')[-25:]}}"
+          },
+        {% endfor %}
+      ], {
+        title: "Kernel parameters over time",
+        xaxis: { title: "samples" },
+        yaxis: { title: "value" }
       });
     </script>
-  </head>
-  <body>
-    <div class="container-fluid">
-      <h2>Experiment: {{experiment.runner.script_path}}</h2>
 
-      <div class="row">
-        {% for sample in sorted_samples %}
 
-        <div class="col-md-1" style="padding: 0">
-          {% if sample == picked_sample %}
-            {% set card_background = "background: #ccc" %}
+    <div class="col-md-6" id="convergence-plot"></div>
+    <script>
+      Plotly.plot("convergence-plot", [
+        {
+          y: {{sample_results|safe}},
+          name: "objective"
+        },
+        {
+          y: {{sample_results_cummax|safe}},
+          name: "maximum"
+        }
+      ], {
+        title: "Convergence plot",
+        xaxis: { title: "samples" },
+        yaxis: { title: "objective" }
+      });
+    </script>
+  </div>
+
+  {% if picked_sample %}
+    <h2>Job output</h2>
+
+    <pre>
+      {{picked_sample.get_output()}}
+    </pre>
+  {% endif %}
+
+  <h2>All samples</h2>
+
+  <table data-toggle="table" class="table table-bordered table-striped">
+    <thead>
+      <tr>
+        <th>Sample</th>
+        <th>Hyperparameters</th>
+        <th>Result</th>
+        <th>Model params</th>
+        <th>Created at</th>
+        <th>Done at</th>
+        <th>Run time</th>
+        <th>Comment</th>
+      </tr>
+    </thead>
+
+    <tbody>
+      {% for sample in experiment.samples %}
+      <tr>
+        <td>
+          {% if sample.job %}
+            <a class="badge" href="?sample_id={{sample.job.job_id}}&show_acq={{show_acq}}&show_marginal={{show_marginal}}">
+              {{sample.job.job_id}}
+            </a>
           {% else %}
-            {% set card_background = "" %}
+            <span class="badge badge-dark">dup</span>
           {% endif %}
 
-          <div class="card" style="{{card_background}}" data-toggle="tooltip" title="{{sample.hyperparam_values}}">
-            <div class="card-body" style="padding: 0.5rem">
-              <span class="card-title">
-                {% if sample.job %}
-                  {% if sample.model.sampled_from_random_search() %}
-                    {% set badge_color = "dark" %}
-                  {% else %}
-                    {% set badge_color = "info" %}
-                  {% endif %}
-                    <span class="badge badge-{{badge_color}}">
-                      {{loop.index0}}.
-                    </span>
-                  </button>
-
-                {% else %}
-                  <span class="badge badge-dark">
-                    {{loop.index}}.
-                  </span>
-                {% endif %}
-
-                {% if sample.job %}
-                <a class="badge" href="?sample_id={{sample.job.job_id}}&show_acq={{show_acq}}&show_marginal={{show_marginal}}">
-                    {{sample.job.job_id}}
-                  </a>
-                {% else %}
-                  <span class="badge">dup</span>
-                {% endif %}
-
-                {% if sample.collect_flag == CollectFlag.COLLECT_OK %}
-                  <span class="badge badge-success">
-                {% elif sample.collect_flag == CollectFlag.COLLECT_FAILED  %}
-                  <span class="badge badge-danger">
-                {% else %}
-                  <span class="badge badge-secondary">
-                {% endif %}
-                    {{sample.short_collect_flag_str()}}:
-                    {% if sample.result %}
-                      {{sample.result | round(2)}}
-                    {% else %}
-                      X
-                    {% endif %}
-                  </span>
-              </span>
-
-            </div>
-          </div>
-        </div>
-
-        {% endfor %}
-        <div class="col-md-1" style="padding: 0">
-          <div class="card alert alert-danger" style="padding: 0">
-            <div class="card-body" style="padding: 0.5rem">
-              <span class="card-title">
-                <a href="/?show_acq={{show_acq}}&show_marginal={{show_marginal}}">Deselect</a>
-              </span>
-            </div>
-          </div>
-        </div>
-
-        <div class="col-md-2" style="padding: 0">
-          <div class="btn-group" role="group">
-            <a href="/?sample_id={{sample_id}}&show_acq={{show_acq}}&show_marginal=1"
-               class="btn btn-secondary {{'disabled' if show_marginal == 1}}">MARGINAL</a>
-            <a href="/?sample_id={{sample_id}}&show_acq={{show_acq}}&show_marginal=0"
-               class="btn btn-secondary {{'disabled' if show_marginal == 0}}">NO MARGINAL</a>
-            <a href="/?sample_id={{sample_id}}&show_acq=1&show_marginal={{show_marginal}}"
-               class="btn btn-secondary {{'disabled' if show_acq == 1}}">ACQ</a>
-            <a href="/?sample_id={{sample_id}}&show_acq=0&show_marginal={{show_marginal}}"
-               class="btn btn-secondary {{'disabled' if show_acq == 0}}">NO_ACQ</a>
-          </div>
-        </div>
-      </div>
-
-      <hr>
-
-      {% if random_search_picked %}
-        <div class="alert alert-danger">
-          <p>
-            The chosen sample was generated by <strong>random search</strong>.
-            No plots can be generated.
-          </p>
-
-          <p>
-            {{picked_sample}}
-          </p>
-        </div>
-      {% endif %}
-
-      {% if picked_sample %}
-
-        <h2>1D slices</h2>
-
-        <p>Hyperparams: {{picked_sample.hyperparam_values}}</p>
-        <p>Model params: {{picked_sample.model}}</p>
-
-        <div class="row">
-          {% for slice in slices_1d %}
-            <div class="col-md-6">
-              <div id="slice-param-{{loop.index0}}"></div>
-              <p>{{slice.model.param_array}}</p>
-            </div>
-            <script>
-              Plotly.plot("slice-param-{{loop.index0}}", [
-                {
-                  name: "mean",
-                  x: {{slice.x|safe}}, y: {{slice.mu|safe}},
-                  line: { color: "rgb(0, 120, 255)", width: 4, }
-                },
-
-                {
-                  name: "sigma low",
-                  x: {{slice.x|safe}}, y: {{slice.sigma_low()|safe}},
-                  marker: { color: "rgb(0.55, 0.55, 0.55)" }
-                },
-
-                {
-                  name: "sigma high",
-                  // fill: "tonexty",
-                  x: {{slice.x|safe}}, y: {{slice.sigma_high()|safe}},
-                  marker: { color: "rgb(0.55, 0.55, 0.55)" }
-                },
-
-                {% if show_acq == 1 %}
-                  {
-                    name: "acquisition fn", yaxis: "y2", mode: "lines",
-                    x: {{slice.x|safe}}, y: {{slice.acq|safe}},
-                    line: { color: "rgb(200, 0, 0)", width: 2, }
-                  },
-                {% endif %}
-
-                {
-                  name: "samples", mode: "markers",
-                  x: {{slice.other_samples["x"][:-1]|safe}}, y: {{slice.other_samples["y"][:-1]|safe}},
-                  marker: { color: "rgb(255, 180, 90)", size: 10, line: { width: 1 } }
-                },
-
-                {
-                  name: "last-sample", mode: "markers",
-                  x: {{slice.other_samples["x"][-1:]|safe}}, y: {{slice.other_samples["y"][-1:]|safe}},
-                  marker: { color: "rgb(80, 255, 90)", size: 15, line: { width: 1 } }
-                },
-              ], {
-                showlegend: false,
-                title: "{{slice.param.name}}={{slice.x_slice_at | round(2)}} ... {{slice.param.range}}",
-                xaxis: {
-                  title: "{{slice.param.name}}",
-                  range: [ {{slice.x_range()[0]}}, {{slice.x_range()[1]}} ],
-                  {% if slice.param.range.is_logscale() %}
-                    type: "log", autorange: true
-                  {% endif %}
-                },
-                yaxis: { title: "objective" }, yaxis2: { overlaying: "y", side: "right", },
-
-                shapes: [
-                  {# TODO: intentionally 100 to not render #}
-                  {% if show_marginal == 100 %}
-                    {
-                      type: "line", line: { width: 5, color: "rgba(0, 0, 0, 0.4)" },
-                      x0: {{slice.x_slice_at}},     x1: {{slice.x_slice_at}},
-                      y0: {{slice.mu_bounds(show_acq)[0]}}, y1: {{slice.mu_bounds(show_acq)[1]}},
-                    }
-                  {% endif %}
-                ]
-              });
-            </script>
-          {% endfor %}
-        </div>
-
-        <hr/>
-
-        <h2>2D slices</h2>
-
-        <div class="row">
-          {% for slice in slices_2d %}
-            <div class="col-md-6" id="slice-2d-param-{{loop.index0}}"></div>
-            <script>
-              Plotly.plot("slice-2d-param-{{loop.index0}}", [
-                {
-                  name: "mean",
-                  x: {{slice.x1|safe}}, y: {{slice.x2|safe}},
-                  z: {{slice.mu|safe}},
-                  type: "heatmap",
-                  line: { color: "rgb(0, 120, 255)", width: 4, }
-                },
-
-                {
-                  name: "samples", mode: "markers",
-                  x: {{slice.other_samples["x1"][:-1]|safe}}, y: {{slice.other_samples["x2"][:-1]|safe}},
-                  marker: { color: "rgb(255, 180, 90)", size: 10, line: { width: 1 } }
-                },
-
-                {
-                  name: "last-sample", mode: "markers",
-                  x: {{slice.other_samples["x1"][-1:]|safe}}, y: {{slice.other_samples["x2"][-1:]|safe}},
-                  marker: { color: "rgb(80, 255, 90)", size: 15, line: { width: 1 } }
-                },
-              ], {
-                // title: "{{slice.p1.name}}={slice.x_slice_at | round(2)} ... {{slice.p1.range}} {{slice.p2.range}}",
-                title: "{{slice.p1.name}} - {{slice.p2.name}}",
-                xaxis: {
-                  title: "{{slice.p1.name}}",
-                  range: [ {{slice.x1_bounds()[0]}}, {{slice.x1_bounds()[1]}} ],
-                  {% if slice.p1.range.is_logscale() %}
-                    type: "log", autorange: true
-                  {% endif %}
-                },
-                yaxis: {
-                  title: "{{slice.p2.name}}",
-                  range: [ {{slice.x2_bounds()[0]}}, {{slice.x2_bounds()[1]}} ],
-                  {% if slice.p2.range.is_logscale() %}
-                    type: "log", autorange: true
-                  {% endif %}
-                },
-
-                shapes: [
-                  {# TODO: intentionally 100 to not render #}
-                  {% if show_marginal == 100 %}
-                    {
-                      type: "line", line: { width: 5, color: "rgba(0, 0, 0, 0.6)" },
-                      x0: {{slice.x1_slice_at}},    x1: {{slice.x1_slice_at}},
-                      y0: {{slice.x2_bounds()[0]}}, y1: {{slice.x2_bounds()[1]}},
-                    },
-                    {
-                      type: "line", line: { width: 5, color: "rgba(0, 0, 0, 0.6)" },
-                      x0: {{slice.x1_bounds()[0]}}, x1: {{slice.x1_bounds()[1]}},
-                      y0: {{slice.x2_slice_at}},  y1: {{slice.x2_slice_at}},
-                    }
-                  {% endif %}
-                ]
-              });
-            </script>
-          {% endfor %}
-        </div>
-
-      {% endif %}
-
-      <hr/>
-
-      <h2>Search overview</h2>
-
-      <div class="row">
-        <div class="col-md-6" id="kernel-params-plot"></div>
-        <script>
-          Plotly.plot("kernel-params-plot", [
-            {% for name, values in kernel_param_timeline.items() %}
-              {
-                y: {{values|safe}},
-                name: "{{name.replace('Mat52.', '')[-25:]}}"
-              },
-            {% endfor %}
-          ], {
-            title: "Kernel parameters over time",
-            xaxis: { title: "samples" },
-            yaxis: { title: "value" }
-          });
-        </script>
-
-
-        <div class="col-md-6" id="convergence-plot"></div>
-        <script>
-          Plotly.plot("convergence-plot", [
-            {
-              y: {{sample_results|safe}},
-              name: "objective"
-            },
-            {
-              y: {{sample_results_cummax|safe}},
-              name: "maximum"
-            }
-          ], {
-            title: "Convergence plot",
-            xaxis: { title: "samples" },
-            yaxis: { title: "objective" }
-          });
-        </script>
-      </div>
-
-      {% if picked_sample %}
-        <h2>Job output</h2>
-
-        <pre>
-          {{picked_sample.get_output()}}
-        </pre>
-      {% endif %}
-
-      <h2>All samples</h2>
-
-      <table data-toggle="table" class="table table-bordered table-striped">
-        <thead>
-          <tr>
-            <th>Sample</th>
-            <th>Hyperparameters</th>
-            <th>Result</th>
-            <th>Model params</th>
-            <th>Created at</th>
-            <th>Done at</th>
-            <th>Run time</th>
-            <th>Comment</th>
-          </tr>
-        </thead>
-
-        <tbody>
-          {% for sample in experiment.samples %}
-          <tr>
-            <td>
-              {% if sample.job %}
-                <a class="badge" href="?sample_id={{sample.job.job_id}}&show_acq={{show_acq}}&show_marginal={{show_marginal}}">
-                  {{sample.job.job_id}}
-                </a>
+          {% if sample.collect_flag == CollectFlag.COLLECT_OK %}
+            <span class="badge badge-success">
+          {% elif sample.collect_flag == CollectFlag.COLLECT_FAILED  %}
+            <span class="badge badge-danger">
+          {% else %}
+            <span class="badge badge-secondary">
+          {% endif %}
+              {{sample.short_collect_flag_str()}}
+            </span>
+        </td>
+        <td>
+          {% for p, value in sample.hyperparam_values.mapping.items() %}
+          <span class="badge badge-light" data-toggle="tooltip" title="{{p.name}}={{value}}">
+              {% if value is string %}
+                {{value}}
               {% else %}
-                <span class="badge badge-dark">dup</span>
+                {{value | round(1)}}
               {% endif %}
+            </span>
+          {% endfor %}
 
-              {% if sample.collect_flag == CollectFlag.COLLECT_OK %}
-                <span class="badge badge-success">
-              {% elif sample.collect_flag == CollectFlag.COLLECT_FAILED  %}
-                <span class="badge badge-danger">
-              {% else %}
-                <span class="badge badge-secondary">
-              {% endif %}
-                  {{sample.short_collect_flag_str()}}
-                </span>
-            </td>
-            <td>
-              {% for p, value in sample.hyperparam_values.mapping.items() %}
-              <span class="badge badge-light" data-toggle="tooltip" title="{{p.name}}={{value}}">
-                  {% if value is string %}
-                    {{value}}
+        </td>
+        <td>{{(sample.result or -1) | round(2)}}</td>
+        <td>
+          {% if sample.model.sampled_from_random_search() %}
+            <span class="badge badge-dark">random search</span>
+          {% else %}
+            <span class="badge badge-info">
+              {{sample.model.model_name}}
+            </span>
+
+            {% for name, value in sample.model.params.items() %}
+              <span class="badge badge-light" data-toggle="tooltip" title="{{name}}">
+                {% if value is string %}
+                  {{value}}
+                {% else %}
+                  {% if value is iterable %}
+                    {% for val in value %}
+                      {% if val > 1 %}
+                        {{val | round | int}}
+                      {% else %}
+                        {{val | round(1)}}
+                      {% endif %}
+                    {% endfor %}
                   {% else %}
                     {{value | round(1)}}
                   {% endif %}
-                </span>
-              {% endfor %}
-
-            </td>
-            <td>{{(sample.result or -1) | round(2)}}</td>
-            <td>
-              {% if sample.model.sampled_from_random_search() %}
-                <span class="badge badge-dark">random search</span>
-              {% else %}
-                <span class="badge badge-info">
-                  {{sample.model.model_name}}
-                </span>
-
-                {% for name, value in sample.model.params.items() %}
-                  <span class="badge badge-light" data-toggle="tooltip" title="{{name}}">
-                    {% if value is string %}
-                      {{value}}
-                    {% else %}
-                      {% if value is iterable %}
-                        {% for val in value %}
-                          {% if val > 1 %}
-                            {{val | round | int}}
-                          {% else %}
-                            {{val | round(1)}}
-                          {% endif %}
-                        {% endfor %}
-                      {% else %}
-                        {{value | round(1)}}
-                      {% endif %}
-                    {% endif %}
-                  </span>
-                {% endfor %}
-
-              {% endif %}
-            </td>
-            <td>
-              <span title="{{sample.created_at}}">
-                {{sample.created_at.strftime("%m.%d %H:%M")}}
-              </span>
-            </td>
-
-            {% if sample.finished_at %}
-              {% set sample_end_time = sample.finished_at %}
-            {% else %}
-              {% set sample_end_time = sample.collected_at %}
-            {% endif %}
-            <td>
-              <span title="{{sample_end_time}}">
-                {% if sample_end_time %}
-                  {{sample_end_time.strftime("%m.%d %H:%M")}}
-                {% else %}
-                  notime
                 {% endif %}
               </span>
-            </td>
+            {% endfor %}
 
-            <td>{{sample.run_time_str()}}</td>
-            <td>{{sample.comment}}</td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
+          {% endif %}
+        </td>
+        <td>
+          <span title="{{sample.created_at}}">
+            {{sample.created_at.strftime("%m.%d %H:%M")}}
+          </span>
+        </td>
 
-    </div>
-  </body>
-</html>
+        {% if sample.finished_at %}
+          {% set sample_end_time = sample.finished_at %}
+        {% else %}
+          {% set sample_end_time = sample.collected_at %}
+        {% endif %}
+        <td>
+          <span title="{{sample_end_time}}">
+            {% if sample_end_time %}
+              {{sample_end_time.strftime("%m.%d %H:%M")}}
+            {% else %}
+              notime
+            {% endif %}
+          </span>
+        </td>
+
+        <td>{{sample.run_time_str()}}</td>
+        <td>{{sample.comment}}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+</div>
+{% endblock %}
