@@ -14,6 +14,21 @@ from bopt.runner.abstract import Job
 from bopt.runner.job_loader import JobLoader
 from bopt.models.parameters import ModelParameters
 
+def maybe_timestamp_to_datetime(ts):
+    if isinstance(ts, datetime.datetime):
+        return ts
+    if ts:
+        return datetime.datetime.fromtimestamp(ts)
+    else:
+        return None
+
+
+def maybe_datetime_to_timestamp(d):
+    if d:
+        return datetime.datetime.timestamp(d)
+    else:
+        None
+
 
 class CollectFlag(Enum):
     WAITING_FOR_JOB = 1
@@ -68,12 +83,6 @@ class Sample:
         return self.collect_flag
 
     def to_dict(self) -> dict:
-        def maybe_date_to_json(d):
-            if d:
-                return str(d)
-            else:
-                None
-
         return {
             "job": self.job.to_dict() if self.job else None,
             "model": self.model.to_dict() if self.model else None,
@@ -83,9 +92,9 @@ class Sample:
             "sigma_pred": self.sigma_pred,
             "comment": self.comment,
             "collect_flag": self.collect_flag.value,
-            "created_at": maybe_date_to_json(self.created_at),
-            "finished_at": maybe_date_to_json(self.finished_at),
-            "collected_at": maybe_date_to_json(self.collected_at),
+            "created_at": maybe_datetime_to_timestamp(self.created_at),
+            "finished_at": maybe_datetime_to_timestamp(self.finished_at),
+            "collected_at": maybe_datetime_to_timestamp(self.collected_at),
             "run_time": self.run_time
         }
 
@@ -110,12 +119,12 @@ class Sample:
                 data["mu_pred"],
                 data["sigma_pred"],
                 CollectFlag(data["collect_flag"]),
-                data["created_at"])
+                maybe_timestamp_to_datetime(data["created_at"]))
 
         sample.comment = data.get("comment", None)
         sample.result = data.get("result", None)
-        sample.collected_at = data.get("collected_at", None)
-        sample.finished_at = data.get("finished_at", None)
+        sample.collected_at = maybe_timestamp_to_datetime(data.get("collected_at", None))
+        sample.finished_at = maybe_timestamp_to_datetime(data.get("finished_at", None))
         sample.run_time = data.get("run_time", None)
 
         return sample
