@@ -402,12 +402,21 @@ class Experiment:
 
     @staticmethod
     def deserialize() -> "Experiment":
-        with open("meta.yml", "r") as f:
-            contents = f.read()
-            obj = yaml.load(contents, Loader=yaml.Loader)
+        import json
+        # import orjson as json
+        meta_json = "meta.json"
+        meta_yaml = "meta.yml"
+
+        if os.path.exists(meta_json):
+            with open(meta_json, "r") as f:
+                obj = json.loads(f.read())
+        elif os.path.exists(meta_yaml):
+            with open(meta_yaml, "r") as f:
+                contents = f.read()
+                obj = yaml.load(contents, Loader=yaml.Loader)
 
         experiment = Experiment.from_dict(obj)
-        experiment.collect_results()
-        experiment.serialize()
+        # experiment.collect_results()
+        # experiment.serialize()
 
         return experiment

@@ -24,10 +24,13 @@ def maybe_timestamp_to_datetime(ts):
 
 
 def maybe_datetime_to_timestamp(d):
-    if d:
+    if isinstance(d, datetime.datetime):
         return datetime.datetime.timestamp(d)
+    elif d is None:
+        return None
     else:
-        None
+        return d
+
 
 
 class CollectFlag(Enum):
