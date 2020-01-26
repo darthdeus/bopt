@@ -407,16 +407,32 @@ class Experiment:
         meta_json = "meta.json"
         meta_yaml = "meta.yml"
 
-        if os.path.exists(meta_json):
-            with open(meta_json, "r") as f:
-                obj = json.loads(f.read())
-        elif os.path.exists(meta_yaml):
-            with open(meta_yaml, "r") as f:
-                contents = f.read()
-                obj = yaml.load(contents, Loader=yaml.Loader)
+        loaders = [
+            ["meta.json", lambda x: json.loads(x)],
+            ["meta.yml", lambda x: yaml.loads(x, Loader=yaml.Loader)],
+        ]
 
-        experiment = Experiment.from_dict(obj)
-        # experiment.collect_results()
-        # experiment.serialize()
+        for fname, loader in loaders:
+            if os.path.exists(fname):
+                with open(fname, "r") as f:
+                    obj = loader(f.read())
 
-        return experiment
+                    experiment = Experiment.from_dict(obj)
+                    # experiment.collect_results()
+                    # experiment.serialize()
+
+                    return experiment
+
+        tested_fnames = [a[0] for a in loaders]
+        raise RuntimeError("No meta file found, tested {}".format(tested_fnames))
+
+        # TODO: remove once the new implementation is tested
+        # if os.path.exists(meta_json):
+        #     with open(meta_json, "r") as f:
+        #         obj = json.loads(f.read())
+        # elif os.path.exists(meta_yaml):
+        # # if os.path.exists(meta_yaml):
+        #     with open(meta_yaml, "r") as f:
+        #         contents = f.read()
+        #         obj = yaml.load(contents, Loader=yaml.Loader)
+        #
