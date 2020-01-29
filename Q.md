@@ -1,10 +1,11 @@
 # TODO
 
-- ZOBRAZOVAT DISTRIBUCI + bootstrap
-
-
-
-- zaokrouhlovaci kernely
+issues:
+  - ZOBRAZOVAT DISTRIBUCI + bootstrap
+    - bud je to osklive, nebo je to gaussian
+    - https://plot.ly/python/distplot/
+  - zaokrouhlovaci kernely
+    - https://github.com/SheffieldML/GPy/issues/810
 
 - bopt-multi submitne array job kterej dostane 10 5 50 v env a adresare v args
   - bopt-multi-arrayjob -v BOPT_ARGS="10 5 50" foo{1..10}

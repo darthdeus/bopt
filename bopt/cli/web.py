@@ -312,26 +312,15 @@ def run(web_type, args) -> None:
     experiments = []
     dirnames = []
 
-    # from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor
+    # for exp_dir in args.experiments:
+    #     with handle_cd_revertible(exp_dir), acquire_lock():
+    #         print(exp_dir)
+    #         experiment = bopt.Experiment.deserialize()
+    #         experiments.append(experiment)
+    #         dirnames.append(exp_dir)
     #
-    # import yaml
-    # def f(path):
-    #     with open(path, "r") as f:
-    #         return yaml.load(f.read(), loader=yaml.Loader)
-    #
-    # with ProcessPoolExecutor(max_workers=12) as pool:
-    # with ProcessPoolExecutor(max_workers=1) as pool:
-    #     loaded = pool.map(f, args.experiments)
-
-    for exp_dir in args.experiments:
-        with handle_cd_revertible(exp_dir), acquire_lock():
-            print(exp_dir)
-            experiment = bopt.Experiment.deserialize()
-            experiments.append(experiment)
-            dirnames.append(exp_dir)
-
-    import sys
-    sys.exit(0)
+    # import sys
+    # sys.exit(0)
 
     def experiment_detail(exp_dir, index: Optional[int]=None):
         with handle_cd_revertible(exp_dir), acquire_lock():
@@ -458,10 +447,13 @@ def run(web_type, args) -> None:
                     experiments.append(experiment)
                     dirnames.append(exp_dir)
 
+            shortened_dirnames = [s.split("/")[-1] for s in dirnames]
+            zipped = list(zip(experiments, shortened_dirnames))
+
             return render_template("multi.html",
                     experiments=experiments,
                     dirnames=dirnames,
-                    zipped_experiments_dirnames=list(zip(experiments, dirnames)))
+                    zipped_experiments_dirnames=zipped)
 
     else:
         @app.route("/")

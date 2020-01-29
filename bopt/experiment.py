@@ -385,10 +385,27 @@ class Experiment:
 
         return next_sample, found_similar
 
-    def sample_cumulative_results(self) -> List[float]:
+    def sample_results(self) -> List[float]:
         # TODO: finished samples only?
-        sample_results = [s.result for s in self.samples if s.result]
-        return np.maximum.accumulate(sample_results).tolist()
+        return [s.result for s in self.samples if s.result is not None]
+
+    def bootstrapped_sample_results(self, num_bootstrap: int = 1000, size: int = 10000) -> List[float]:
+        results = np.array(self.sample_results())
+
+        MEAN_RESULTS = True
+
+        if MEAN_RESULTS:
+            means = [np.mean(np.random.choice(results, size=size, replace=True))
+                    for i in range(num_bootstrap)]
+        else:
+            means = np.random.choice(results, size=10000, replace=True).tolist()
+
+        # if np.any(np.isnan(means)):
+        #     raise RuntimeError("Received NAN while bootstrapping")
+        return means
+
+    def sample_cumulative_results(self) -> List[float]:
+        return np.maximum.accumulate(self.sample_results()).tolist()
 
     def serialize(self) -> None:
         dump = yaml.dump(self.to_dict(), default_flow_style=False, Dumper=NoAliasDumper)

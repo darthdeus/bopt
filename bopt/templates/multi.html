@@ -1,18 +1,68 @@
 {% extends "base.html" %}
+
+{% block navbar %}
+  <span class="navbar-brand">
+    <a href="/">multi:</a>
+    <a class="navbar-brand" href="#">{{dirnames | length}} directories</a>
+  </span>
+
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+
+  <div class="collapse navbar-collapse" id="navbarSupportedContent">
+    <ul class="navbar-nav mr-auto">
+      {% for experiment, dirname in zipped_experiments_dirnames %}
+        <li class="nav-item">
+          <a class="nav-link" href="/multi/{{loop.index - 1}}">
+            {{loop.index - 1}}: <strong>{{experiment.stats().max | round(2)}}</strong>
+          </a>
+        </li>
+      {% endfor %}
+    </ul>
+  </div>
+
+  {# <h2>Experiment: {{experiment.runner.script_path}}</h2> #}
+  {# <p>{{exp_dir}}</p> #}
+{% endblock %}
+
+
+
 {% block content %}
 <div class="container-fluid">
   <div class="row">
-    <div class="col-md-4">
-      <ul>
-        {% for experiment, dirname in zipped_experiments_dirnames %}
-          <li>
-            <a href="/multi/{{loop.index - 1}}">{{dirname}}</a>
-          </li>
-        {% endfor %}
-      </ul>
-    </div>
+    {% for experiment, dirname in zipped_experiments_dirnames %}
+      <div class="col-md-1" style="padding: 0">
+        <div class="card" data-toggle="tooltip" title="{{dirname}}">
+          <div class="card-body" style="padding: 0.5rem">
+            <span class="card-title">
+              <a href="/multi/{{loop.index - 1}}">{{dirname[-15:]}}</a>
 
-    <div class="col-md-6" id="convergence-plot"></div>
+              {% set stats = experiment.stats() %}
+
+              <table>
+                <tr>
+                  <td>min:</td>
+                  <td><strong>{{stats.min | round(2)}}</strong></td>
+                </tr>
+                <tr>
+                  <td>median:</td>
+                  <td><strong>{{stats.median | round(2)}}</strong></td>
+                </tr>
+                <tr>
+                  <td>max:</td>
+                  <td><strong>{{stats.max | round(2)}}</strong></td>
+                </tr>
+              </table>
+            </span>
+          </div>
+        </div>
+      </div>
+    {% endfor %}
+
+  </div>
+  <div class="row" style="min-height: 600px">
+    <div class="col-md-5" id="convergence-plot"></div>
 
     <script>
       Plotly.plot("convergence-plot", [
@@ -28,10 +78,8 @@
         yaxis: { title: "objective" }
       });
     </script>
-  </div>
 
-  <div class="row">
-    <div class="col-md-12" id="histograms"></div>
+    <div class="col-md-5" id="histograms"></div>
     <script>
       Plotly.plot("histograms", [
         {% for experiment, dirname in zipped_experiments_dirnames %}
@@ -43,21 +91,42 @@
                 {% endif %}
               {% endfor %}
             ],
+            title: "Distribution of results",
             type: "histogram",
             name: "{{dirname}}"
           },
         {% endfor %}
       ], { barmode: "stack" })
     </script>
+  </div>
+
+  <div class="row">
+    {# {% for experiment, dirname in zipped_experiments_dirnames %} #}
+    {# {{experiment.bootstrapped_sample_results()}} #}
+    {# {% endfor %} #}
+  </div>
+
+  <div class="row">
     {% for experiment, dirname in zipped_experiments_dirnames %}
-      <p>
-        {{dirname}} | 
-        {% for sample in experiment.samples %}
-          {% if sample.result %}
-            {{sample.result | round(2) }},
-          {% endif %}
-        {% endfor %}
-      </p>
+    <div class="col-md-5" id="histograms-{{loop.index}}"></div>
+      <script>
+        Plotly.plot("histograms-{{loop.index}}", [
+          {
+            x: {{experiment.bootstrapped_sample_results()}},
+            title: "Distribution of results",
+            type: "histogram",
+            name: "{{dirname}}"
+          },
+        ])
+      </script>
+      {# <p> #}
+      {#   {{dirname}} | #}
+      {#   {% for sample in experiment.samples %} #}
+      {#     {% if sample.result %} #}
+      {#       {{sample.result | round(2) }}, #}
+      {#     {% endif %} #}
+      {#   {% endfor %} #}
+      {# </p> #}
     {% endfor %}
   </div>
 </div>
