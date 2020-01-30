@@ -180,13 +180,9 @@ def create_slice_1d(i: int, experiment: bopt.Experiment, resolution: int,
 
         model = create_gp_for_data(experiment, [param], X_m, Y_m)
 
-        # print("Marginal body: ", X_m, Y_m, model)
-
         mu, var = model.predict(X_plot_marginal)
     else:
         mu, var = model.predict(X_plot)
-
-    # print(model, model.X, model.Y, model.predict(np.array([[1.0]])))
 
     mu = mu.reshape(-1)
     sigma = np.sqrt(var).reshape(-1)
@@ -246,6 +242,7 @@ def create_slice_2d(i: int, j: int, experiment: bopt.Experiment,
         others = experiment.predictive_samples_before(sample)
         X_m, Y_m = bopt.SampleCollection(others).to_xy()
         X_m = X_m[:, [i, j]].reshape(-1, 2)
+
         model = create_gp_for_data(experiment, [p1, p2], X_m, Y_m)
 
         mu, var = model.predict(X_pred[:, [i, j]])
