@@ -62,7 +62,7 @@
 
   </div>
   <div class="row" style="min-height: 600px">
-    <div class="col-md-5" id="convergence-plot"></div>
+    <div class="col-md-6" id="convergence-plot"></div>
 
     <script>
       Plotly.plot("convergence-plot", [
@@ -79,7 +79,7 @@
       });
     </script>
 
-    <div class="col-md-5" id="histograms"></div>
+    <div class="col-md-6" id="histograms"></div>
     <script>
       Plotly.plot("histograms", [
         {% for experiment, dirname in zipped_experiments_dirnames %}
@@ -108,7 +108,7 @@
 
   <div class="row">
     {% for experiment, dirname in zipped_experiments_dirnames %}
-    <div class="col-md-5" id="histograms-{{loop.index}}"></div>
+    <div class="col-md-6" id="histograms-{{loop.index}}"></div>
       <script>
         Plotly.plot("histograms-{{loop.index}}", [
           {
