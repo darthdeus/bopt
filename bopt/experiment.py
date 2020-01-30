@@ -426,7 +426,7 @@ class Experiment:
 
         loaders = [
             ["meta.json", lambda x: json.loads(x)],
-            ["meta.yml", lambda x: yaml.loads(x, Loader=yaml.Loader)],
+            ["meta.yml", lambda x: yaml.load(x, Loader=yaml.Loader)],
         ]
 
         for fname, loader in loaders:
