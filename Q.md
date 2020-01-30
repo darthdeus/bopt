@@ -7,8 +7,11 @@ issues:
   - zaokrouhlovaci kernely
     - https://github.com/SheffieldML/GPy/issues/810
 
-- bopt-multi submitne array job kterej dostane 10 5 50 v env a adresare v args
-  - bopt-multi-arrayjob -v BOPT_ARGS="10 5 50" foo{1..10}
+  - [x] bopt-multi submitne array job kterej dostane 10 5 50 v env a adresare v args
+    - bopt-multi-arrayjob -v BOPT_ARGS="10 5 50" foo{1..10}
+
+  - [x] bopt run -C experiments/1 --continue --n_parallel 5 --n_iter 50
+  - [x] bopt-multi experiments/{1..100} 10 5 50
 
 - banditi
 - paralelni exploit na konci
@@ -16,9 +19,6 @@ issues:
 - dopustit 100 u fictree a koukat kde se to fixne
 
 - ERROR    root:hyperparam_values.py:30 Invalid hyperparam value 0.09999999999999998 for Hyperparameter(name='y', range=Float(0.1, 6.0))
-
-- bopt run -C experiments/1 --continue --n_parallel 5 --n_iter 50
-- bopt-multi experiments/{1..100} 10 5 50
 
 INFRASTRUKTURA !!
 
