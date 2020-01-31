@@ -1,5 +1,21 @@
 # TODO
 
+
+- random search x2
+- random search
+- vzdycky pridat jeden experiment navic ze vsech initial random search co se pustily
+- poustet dalsi na prvnich 50 (vsech) random searchich z predchozich experimentu
+  - alternativne videt vsechny samply ze vsech ostatnich
+
+- priory na hyperparam
+- kapacita modelovana explicitne?
+- 
+
+
+
+- napsat na discrete bopt
+
+
 issues:
   - ZOBRAZOVAT DISTRIBUCI + bootstrap
     - bud je to osklive, nebo je to gaussian
