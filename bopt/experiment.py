@@ -389,13 +389,13 @@ class Experiment:
         # TODO: finished samples only?
         return [s.result for s in self.samples if s.result is not None]
 
-    def bootstrapped_sample_results(self, num_bootstrap: int = 1000, size: int = 10000) -> List[float]:
+    def bootstrapped_sample_results(self, num_bootstrap: int = 1000) -> List[float]:
         results = np.array(self.sample_results())
 
         MEAN_RESULTS = True
 
         if MEAN_RESULTS:
-            means = [np.mean(np.random.choice(results, size=size, replace=True))
+            means = [np.max(np.random.choice(results, size=len(results), replace=True))
                     for i in range(num_bootstrap)]
         else:
             means = np.random.choice(results, size=10000, replace=True).tolist()
