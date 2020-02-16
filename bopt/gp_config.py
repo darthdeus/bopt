@@ -1,4 +1,4 @@
-from typing import Callable, Any, TypeVar, Generic, Optional, NamedTuple, Type, List
+from typing import Any, TypeVar, Generic, Optional, Type, List
 from argparse import Namespace
 
 

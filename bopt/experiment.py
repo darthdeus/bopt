@@ -31,7 +31,6 @@ logging.getLogger("filelock").setLevel(logging.WARNING)
 # logging.getLogger("matplotlib").setLevel(logging.INFO)
 
 
-
 class ExperimentStats(NamedTuple):
     min: float
     max: float
@@ -120,7 +119,8 @@ class Experiment:
 
     def stats(self) -> ExperimentStats:
         results = [sample.result for sample in self.samples
-                if sample.result is not None]
+                   if sample.result is not None]
+
         return ExperimentStats(
                 min(results),
                 max(results),
@@ -421,12 +421,12 @@ class Experiment:
     def deserialize() -> "Experiment":
         import json
         # import orjson as json
-        meta_json = "meta.json"
-        meta_yaml = "meta.yml"
+        # meta_json = "meta.json"
+        # meta_yaml = "meta.yml"
 
         loaders = [
-            ["meta.json", lambda x: json.loads(x)],
-            ["meta.yml", lambda x: yaml.load(x, Loader=yaml.Loader)],
+            ("meta.json", lambda x: json.loads(x)),
+            ("meta.yml", lambda x: yaml.load(x, Loader=yaml.Loader)),
         ]
 
         for fname, loader in loaders:

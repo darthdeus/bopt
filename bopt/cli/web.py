@@ -306,8 +306,8 @@ def run(web_type, args) -> None:
 
     print("web path", app.root_path)
 
-    experiments = []
-    dirnames = []
+    # experiments: List[bopt.Experiment] = []
+    # dirnames = []
 
     # for exp_dir in args.experiments:
     #     with handle_cd_revertible(exp_dir), acquire_lock():
@@ -319,7 +319,7 @@ def run(web_type, args) -> None:
     # import sys
     # sys.exit(0)
 
-    def experiment_detail(exp_dir, index: Optional[int]=None):
+    def experiment_detail(exp_dir, index: Optional[int] = None):
         with handle_cd_revertible(exp_dir), acquire_lock():
             experiment = bopt.Experiment.deserialize()
             experiment.collect_results()
@@ -330,17 +330,17 @@ def run(web_type, args) -> None:
             sample_results = [s.result for s in experiment.samples if s.result]
             sample_results_cummax = np.maximum.accumulate(sample_results).tolist()
 
-            kernel_param_timeline = defaultdict(list)
+            kernel_param_timeline: Dict[str, list] = defaultdict(list)
 
             sorted_samples = sorted(experiment.samples, key=lambda x: x.created_at)
 
             num_random = len([s for s in sorted_samples if s.model.sampled_from_random_search()])
 
-            for i, sample in enumerate(sorted_samples):
+            for i, s in enumerate(sorted_samples):
                 if i < num_random + 1:
                     continue
 
-                for key, value in sample.model.params.items():
+                for key, value in s.model.params.items():
                     if isinstance(value, list):
                         for v, h in zip(value, experiment.hyperparameters):
                             kernel_param_timeline["{}_{}".format(key, h.name)].append(v)
