@@ -1,9 +1,8 @@
 import abc
 import math
+from typing import Union, NamedTuple, List, Tuple
 
 import numpy as np
-from enum import Enum
-from typing import Union, NamedTuple, List, Tuple, Type
 
 
 LOGSCALE_BASE = 10.0
@@ -164,10 +163,10 @@ class Float(Bound):
         assert isinstance(a, float)
         assert isinstance(b, float)
 
-        diff = abs(a - b)
+        # diff = abs(a - b)
         # TODO: logscale will need this adjusted
         # We set the threshold at 1% of the range
-        threshold = (self.high - self.low) * 0.01
+        # threshold = (self.high - self.low) * 0.01
         # return diff < threshold
         return False
 
@@ -330,7 +329,6 @@ class Hyperparameter(NamedTuple):
 
     def validate(self, value) -> bool:
         return self.range.validate(value)
-
 
     @staticmethod
     def from_dict(name, data: dict) -> "Hyperparameter":

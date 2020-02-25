@@ -1,7 +1,10 @@
 [MASTER]
 
-disable=C0116, # docstrings
+disable=C0114, # module docstrings
+        C0115, # class docstrings
+        C0116, # docstrings
         C0103, # variable names
+        W0511, # TODO comments
 
 # A comma-separated list of package or module names from where C extensions may
 # be loaded. Extensions are loading into the active Python interpreter and may
