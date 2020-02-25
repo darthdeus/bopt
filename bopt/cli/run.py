@@ -10,8 +10,7 @@ def try_start_job(args):
     with acquire_lock():
         experiment = bopt.Experiment.deserialize()
 
-        num_running = len([s for s in experiment.samples
-                           if s.job and not s.result and not s.job.is_finished()])
+        num_running = len([s for s in experiment.samples if s.is_running()])
 
         if num_running < args.n_parallel:
             experiment.collect_results()

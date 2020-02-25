@@ -9,13 +9,11 @@ from GPy.models import GPRegression
 from typing import Tuple, List
 
 import bopt.acquisition_functions.acquisition_functions as acq
-from bopt.basic_types import Hyperparameter, Bound, Discrete, OptimizationFailed
+from bopt.basic_types import Hyperparameter, Bound, OptimizationFailed
 from bopt.models.model import Model
-from bopt.sample import Sample
 from bopt.models.parameters import ModelParameters
 from bopt.gp_config import GPConfig
 from bopt.hyperparam_values import HyperparamValues
-
 
 
 # TODO: split into multiple, serialization separate?
@@ -149,7 +147,7 @@ class GPyModel(Model):
             return y
 
         scipy_bounds = [h.range.scipy_bound_tuple() for h in
-                hyperparameters]
+                        hyperparameters]
 
         # for x in np.linspace(scipy_bounds[0][0], scipy_bounds[0][1]):
         #     print(x, -acquisition_fn(gp, np.array([[x]], dtype=np.float32), y_max, gp_config.acq_xi))
@@ -166,7 +164,7 @@ class GPyModel(Model):
         for i, x0 in enumerate(starting_points):
             # print("*********************")
             res = minimize(min_obj, x0=x0, bounds=scipy_bounds, method="L-BFGS-B",
-                    tol=0, options={"maxiter":20})
+                           tol=0, options={"maxiter": 20})
 
             if np.any(np.isnan(res.fun[0])):
                 logging.error("Ran into NAN during {}/{} acq fn optimization, got {}".format(i, len(starting_points), res.fun))

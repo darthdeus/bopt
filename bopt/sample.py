@@ -243,6 +243,11 @@ class Sample:
         else:
             return ""
 
+    def is_pending(self) -> bool:
+        return (self.result is None) \
+               and self.job is not None \
+               and not self.job.is_finished()
+
 
 class SampleCollection:
     samples: List[Sample]

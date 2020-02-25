@@ -29,6 +29,7 @@ sfntest:
 		--qsub=cpu-troja.q \
 		--gamma-a=1.0 --gamma-b=0.001 \
 		--informative-prior=1 \
+		--kernel=Mat52Rounded \
 		--manual-arg-fname=$(PWD)/experiments/foo.txt \
 		--manual-arg-fname=$(PWD)/experiments/bar.txt \
 		--acq-xi=0.01 \
