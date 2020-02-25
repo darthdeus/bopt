@@ -396,7 +396,7 @@ class Experiment:
 
         if MEAN_RESULTS:
             means = [np.max(np.random.choice(results, size=len(results), replace=True))
-                    for i in range(num_bootstrap)]
+                     for i in range(num_bootstrap)]
         else:
             means = np.random.choice(results, size=10000, replace=True).tolist()
 
