@@ -188,7 +188,7 @@ def create_slice_1d(i: int, experiment: bopt.Experiment, resolution: int,
     sigma = np.sqrt(var).reshape(-1)
 
     acq = bopt.ExpectedImprovement().raw_call(mu, sigma, model.Y.max())\
-            .reshape(-1)
+              .reshape(-1)
 
     other_samples: Dict[str, List[float]] = defaultdict(list)
 
@@ -253,11 +253,11 @@ def create_slice_2d(i: int, j: int, experiment: bopt.Experiment,
     sigma = np.sqrt(var).reshape(-1)
 
     acq = bopt.ExpectedImprovement().raw_call(mu, sigma, model.Y.max())\
-            .reshape(-1)
+              .reshape(-1)
 
-    mu    = mu.reshape(resolution, resolution)
+    mu    = mu.reshape(resolution,    resolution)
     sigma = sigma.reshape(resolution, resolution)
-    acq   = acq.reshape(resolution, resolution)
+    acq   = acq.reshape(resolution,   resolution)
 
     other_samples: Dict[str, List[float]] = defaultdict(list)
 
@@ -415,7 +415,7 @@ def run(web_type, args) -> None:
                     sample_id=sample_id,
                     )
 
-    if args.experiments:
+    if args.bopt == "multiweb":
         @app.route("/multi/<int:index>")
         def multi_detail(index):
             return experiment_detail(args.experiments[index], index)
@@ -436,7 +436,6 @@ def run(web_type, args) -> None:
             #     experiments = executor.map(f, args.experiments)
             #     dirnames = args.experiments
 
-
             for exp_dir in args.experiments:
                 with handle_cd_revertible(exp_dir), acquire_lock():
                     print(exp_dir)
@@ -448,17 +447,14 @@ def run(web_type, args) -> None:
             zipped = list(zip(experiments, shortened_dirnames))
 
             return render_template("multi.html",
-                    experiments=experiments,
-                    dirnames=dirnames,
-                    zipped_experiments_dirnames=zipped)
+                                   experiments=experiments,
+                                   dirnames=dirnames,
+                                   zipped_experiments_dirnames=zipped)
 
     else:
         @app.route("/")
         def index():
             return experiment_detail(args.dir)
-
-
-
 
     server = Server(app.wsgi_app)
     server.watch("bopt/**/*")

@@ -9,22 +9,21 @@
 
 - priory na hyperparam
 - kapacita modelovana explicitne?
-- 
 
 
 
-- napsat na discrete bopt
+- [x] napsat na discrete bopt o implementaci
 
 
 issues:
-  - ZOBRAZOVAT DISTRIBUCI + bootstrap
+  - [x] ZOBRAZOVAT DISTRIBUCI + bootstrap
     - bud je to osklive, nebo je to gaussian
     - https://plot.ly/python/distplot/
   - zaokrouhlovaci kernely
     - https://github.com/SheffieldML/GPy/issues/810
 
   - [x] bopt-multi submitne array job kterej dostane 10 5 50 v env a adresare v args
-    - bopt-multi-arrayjob -v BOPT_ARGS="10 5 50" foo{1..10}
+    - [x] bopt-multi-arrayjob -v BOPT_ARGS="10 5 50" foo{1..10}
 
   - [x] bopt run -C experiments/1 --continue --n_parallel 5 --n_iter 50
   - [x] bopt-multi experiments/{1..100} 10 5 50
