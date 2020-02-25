@@ -1,4 +1,3 @@
-import math
 import logging
 import numpy as np
 from scipy.optimize import minimize
@@ -9,7 +8,7 @@ from GPy.models import GPRegression
 from typing import Tuple, List
 
 import bopt.acquisition_functions.acquisition_functions as acq
-from bopt.basic_types import Hyperparameter, Bound, OptimizationFailed
+from bopt.basic_types import Hyperparameter, OptimizationFailed
 from bopt.models.model import Model
 from bopt.models.parameters import ModelParameters
 from bopt.gp_config import GPConfig
@@ -65,8 +64,8 @@ class GPyModel(Model):
 
     @staticmethod
     def gpy_regression(hyperparameters: List[Hyperparameter],
-            gp_config: GPConfig, X_sample: np.ndarray, Y_sample: np.ndarray) -> GPRegression:
-
+                       gp_config: GPConfig, X_sample: np.ndarray,
+                       Y_sample: np.ndarray) -> GPRegression:
         kernel = GPyModel.create_kernel(gp_config.kernel, X_sample.shape[1], ARD=gp_config.ard)
         # kernel_cls = GPyModel.parse_kernel_name(gp_config.kernel)
         # kernel = kernel_cls(X_sample.shape[1], ARD=gp_config.ard)
@@ -120,8 +119,8 @@ class GPyModel(Model):
 
     @staticmethod
     def predict_next(gp_config: GPConfig,
-            hyperparameters: List[Hyperparameter],
-            X_sample: np.ndarray, Y_sample: np.ndarray) -> Tuple[HyperparamValues, "Model"]:
+                     hyperparameters: List[Hyperparameter],
+                     X_sample: np.ndarray, Y_sample: np.ndarray) -> Tuple[HyperparamValues, "Model"]:
         # TODO: compare NLL with and without normalizer
         assert not np.any(np.isnan(Y_sample))
 
@@ -129,7 +128,7 @@ class GPyModel(Model):
         acquisition_fn = GPyModel.parse_acquisition_fn(gp_config.acquisition_fn)
 
         x_next = GPyModel.propose_location(acquisition_fn, model, Y_sample.max(),
-                hyperparameters, gp_config)
+                                           hyperparameters, gp_config)
 
         job_params = HyperparamValues.mapping_from_vector(x_next, hyperparameters)
 
@@ -139,8 +138,8 @@ class GPyModel(Model):
 
     @staticmethod
     def propose_location(acquisition_fn: acq.AcquisitionFunction, gp:
-            GPRegression, y_max: float, hyperparameters: List[Hyperparameter],
-            gp_config: GPConfig) -> np.ndarray:
+                         GPRegression, y_max: float, hyperparameters: List[Hyperparameter],
+                         gp_config: GPConfig) -> np.ndarray:
 
         def min_obj(X):
             y = -acquisition_fn(gp, X.reshape(1, -1), y_max, gp_config.acq_xi)
@@ -167,7 +166,8 @@ class GPyModel(Model):
                            tol=0, options={"maxiter": 20})
 
             if np.any(np.isnan(res.fun[0])):
-                logging.error("Ran into NAN during {}/{} acq fn optimization, got {}".format(i, len(starting_points), res.fun))
+                logging.error("Ran into NAN during {}/{} acq fn optimization, got {}"
+                              .format(i, len(starting_points), res.fun))
 
             if res.fun < min_val:
                 min_val = res.fun[0]
