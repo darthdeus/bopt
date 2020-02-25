@@ -1,7 +1,8 @@
 from collections import defaultdict
 import math
-import numpy as np
 import logging
+
+import numpy as np
 
 from typing import List, Tuple, Dict, Optional
 from livereload import Server
@@ -12,15 +13,15 @@ import bopt
 from bopt.cli.util import handle_cd_revertible, acquire_lock
 
 
-def create_gp_for_data(experiment, hyperparameters, X, Y):
+def create_gp_for_data(experiment: bopt.Experiment, hyperparameters: List[bopt.Hyperparameter], X, Y):
     assert X.ndim == 2
     assert 1 <= X.shape[1] <= 2
 
     kern = GPy.kern.Matern52(input_dim=X.shape[1], ARD=True)
     model = GPy.models.GPRegression(X, Y, kernel=kern, normalizer=len(X) > 1)
 
-    min_bound = 1e-1
-    max_bound = 1e3
+    # min_bound = 1e-1
+    # max_bound = 1e3
 
     # model.Gaussian_noise.variance.unconstrain()
     # model.Gaussian_noise.variance.constrain_bounded(min_bound, max_bound)
@@ -29,8 +30,8 @@ def create_gp_for_data(experiment, hyperparameters, X, Y):
     # model.kern.lengthscale.unconstrain()
     # model.kern.lengthscale.constrain_bounded(min_bound, max_bound)
 
-    gamma_a = 1.0
-    gamma_b = 0.01
+    # gamma_a = 1.0
+    # gamma_b = 0.01
 
     # model.Gaussian_noise.variance.unconstrain()
     # model.Gaussian_noise.variance.constrain_bounded(min_bound, max_bound)
@@ -46,12 +47,11 @@ def create_gp_for_data(experiment, hyperparameters, X, Y):
     model.kern.variance.unconstrain()
     model.kern.variance.set_prior(variance_prior)
 
-    # model.optimize_restarts(25)
     model.optimize()
 
     logging.info("GP hyperparams: {}".format(model.param_array.tolist()))
 
-    return model
+    return bopt.GPyModel.wrap_kernel_with_rounding(model, hyperparameters)
 
 
 class Slice1D:

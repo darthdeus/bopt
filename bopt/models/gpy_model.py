@@ -101,12 +101,14 @@ class GPyModel(Model):
         # TODO: parallel=True?
         model.optimize_restarts(gp_config.num_optimize_restarts)
 
-        rounding_idx = [i for i, h in enumerate(hyperparameters) if h.range.is_discrete()]
-
-        model.kern = RoundingKernelWrapper(model.kern, rounding_idx)
-
         logging.debug("GPY hyperparam optimization DONE, params: {}".format(model.param_array))
 
+        return GPyModel.wrap_kernel_with_rounding(model, hyperparameters)
+
+    @staticmethod
+    def wrap_kernel_with_rounding(model: GPRegression, hyperparameters: List[Hyperparameter]) -> GPRegression:
+        rounding_idx = [i for i, h in enumerate(hyperparameters) if h.range.is_discrete()]
+        model.kern = RoundingKernelWrapper(model.kern, rounding_idx)
         return model
 
     @staticmethod
@@ -212,14 +214,17 @@ class RoundingKernelWrapper:
         self.indexes = indexes
 
     def K(self, X, X2):
-        r = self.kernel._scaled_dist(X, X2)
+        r = self.kernel._scaled_dist(self.rounded(X), self.rounded(X2))
         return self.K_of_r(r)
 
     def Kdiag(self, X):
-        return self.kernel.Kdiag(X)
+        return self.kernel.Kdiag(self.rounded(X))
 
     def K_of_r(self, r):
-        result = self.kernel.K_of_r(r)
+        return self.kernel.K_of_r(r)
+
+    def rounded(self, x):
+        result = x.copy()
         result[:, self.indexes] = np.floor(result[:, self.indexes])
         return result
 

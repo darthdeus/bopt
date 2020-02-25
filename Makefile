@@ -25,7 +25,7 @@ sfntest:
 	$(BOPT) init \
 		--task sfn \
 		--param "x:float:1:3" \
-		--param "y:float:1:3" \
+		--param "y:int:1:3" \
 		--param "activation:discrete:relu:sigmoid:tanh" \
 		--qsub=-q \
 		--qsub=cpu-troja.q \
