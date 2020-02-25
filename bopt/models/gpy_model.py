@@ -34,11 +34,10 @@ class GPyModel(Model):
             for name in self.model.parameter_names()
         }
 
-        return ModelParameters(
-                GPyModel.model_name,
-                params,
-                self.model.kern.name,
-                self.acquisition_fn.name())
+        return ModelParameters(GPyModel.model_name,
+                               params,
+                               self.model.kern.name,
+                               self.acquisition_fn.name())
 
     @staticmethod
     def create_kernel(kernel_name: str, input_dim: int, ARD: bool):
@@ -48,9 +47,6 @@ class GPyModel(Model):
 
     @staticmethod
     def from_model_params(gp_config: GPConfig, model_params: ModelParameters, X, Y) -> "GPyModel":
-        # TODO: check that these are actually GPy params
-        # kernel_cls = GPyModel.parse_kernel_name(model_params.kernel)
-        # kernel = kernel_cls(input_dim=X.shape[1], ARD=gp_config.ard)
         kernel = GPyModel.create_kernel(model_params.kernel, X.shape[1], ARD=gp_config.ard)
 
         model = GPRegression(X, Y, kernel=kernel, normalizer=len(X) > 1)
@@ -67,10 +63,6 @@ class GPyModel(Model):
                        gp_config: GPConfig, X_sample: np.ndarray,
                        Y_sample: np.ndarray) -> GPRegression:
         kernel = GPyModel.create_kernel(gp_config.kernel, X_sample.shape[1], ARD=gp_config.ard)
-        # kernel_cls = GPyModel.parse_kernel_name(gp_config.kernel)
-        # kernel = kernel_cls(X_sample.shape[1], ARD=gp_config.ard)
-
-        # TODO: predava se kernel a acq vsude?
 
         # If there is only one sample, .std() == 0 and Y ends up being NaN.
         model = GPRegression(X_sample, Y_sample, kernel=kernel, normalizer=len(X_sample) > 1)
@@ -80,7 +72,6 @@ class GPyModel(Model):
         min_bound = 1e-2
         max_bound = 1e3
 
-        # print("IP:", gp_config.informative_prior)
         # TODO: bugbugbug
         if gp_config.informative_prior:
             for i, param in enumerate(hyperparameters):
@@ -110,8 +101,9 @@ class GPyModel(Model):
         # TODO: parallel=True?
         model.optimize_restarts(gp_config.num_optimize_restarts)
 
-        # print(X_sample, Y_sample)
-        # print(model)
+        rounding_idx = [i for i, h in enumerate(hyperparameters) if h.range.is_discrete()]
+
+        model.kern = RoundingKernelWrapper(model.kern, rounding_idx)
 
         logging.debug("GPY hyperparam optimization DONE, params: {}".format(model.param_array))
 
@@ -212,6 +204,28 @@ class GPyModel(Model):
             return GPy.priors.Gamma.from_EV(mid, (d/4.0)**2.0)
         else:
             return GPy.priors.Gamma(gp_config.gamma_a, gp_config.gamma_b)
+
+
+class RoundingKernelWrapper:
+    def __init__(self, kernel, indexes: List[int]):
+        self.kernel = kernel
+        self.indexes = indexes
+
+    def K(self, X, X2):
+        r = self.kernel._scaled_dist(X, X2)
+        return self.K_of_r(r)
+
+    def Kdiag(self, X):
+        return self.kernel.Kdiag(X)
+
+    def K_of_r(self, r):
+        result = self.kernel.K_of_r(r)
+        result[:, self.indexes] = np.floor(result[:, self.indexes])
+        return result
+
+    @property
+    def name(self):
+        return self.kernel.name
 
 
 class Matern52Rounded(GPy.kern.Matern52):
