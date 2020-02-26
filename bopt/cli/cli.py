@@ -109,6 +109,8 @@ def run_main(args):
 
         sp_init.add_argument("--informative-prior", type=int, default=1,
                              help="When enabled, kernel parameters use an informative Gamma prior on lengthscale.")
+        sp_init.add_argument("--discrete-rounding", type=int, default=1,
+                             help="Round discrete hyperparameters in the kernel.")
 
         sp_init.add_argument("--acq-xi", type=float, default=0.001,
                              help="The xi parameter of the acquisition functions")

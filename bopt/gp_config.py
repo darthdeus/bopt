@@ -42,6 +42,8 @@ config_params: List[GPParam[Any]] = [
 
     GPParam[int]("informative-prior", int, 1, None,
                  "When enabled, kernel parameters use an informative Gamma prior on lengthscale."),
+    GPParam[int]("discrete-rounding", int, 1, None,
+                 "Round discrete hyperparameters in the kernel"),
 
     GPParam[float]("acq-xi", float, 0.001, None, "The xi parameter of the acquisition functions."),
     GPParam[int]("acq-n-restarts", int, 25, None, "Number of restarts when optimizing the acquisition function."),
@@ -64,6 +66,7 @@ class GPConfig:
     gamma_a: float
     gamma_b: float
     informative_prior: bool
+    discrete_rounding: bool
 
     acq_xi: float
     acq_n_restarts: int
@@ -86,6 +89,7 @@ class GPConfig:
         self.gamma_a = args["gamma_a"]
         self.gamma_b = args["gamma_b"]
         self.informative_prior = args["informative_prior"] == 1
+        self.discrete_rounding = args["discrete_rounding"] == 1
 
         self.acq_xi = args["acq_xi"]
         self.acq_n_restarts = args["acq_n_restarts"]
@@ -108,6 +112,7 @@ class GPConfig:
             "gamma_a": self.gamma_a,
             "gamma_b": self.gamma_b,
             "informative_prior": self.informative_prior,
+            "discrete_rounding": self.discrete_rounding,
             "acq_xi": self.acq_xi,
             "acq_n_restarts": self.acq_n_restarts,
             "num_optimize_restarts": self.num_optimize_restarts,

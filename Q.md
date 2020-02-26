@@ -15,6 +15,7 @@
 - [x] napsat na discrete bopt o implementaci
 
 
+
 issues:
   - [x] ZOBRAZOVAT DISTRIBUCI + bootstrap
     - bud je to osklive, nebo je to gaussian
@@ -397,7 +398,7 @@ http://deepbayes.ru
 - [ ] time slider
 
 - [x] discrete hyperparameters
-  - [ ] https://arxiv.org/pdf/1706.03673.pdf
+  - [x] https://arxiv.org/pdf/1706.03673.pdf
 - [ ] priors
 - [ ] UCB acquisition function
 - [ ] parallel optimization without cmdline target
