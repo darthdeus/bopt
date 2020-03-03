@@ -265,7 +265,7 @@ class LogscaleInt(Bound):
         if self.buckets > 0:
             value = super().round_buckets(value)
 
-        return np.floor(value)
+        return np.floor(value).astype(np.int32)
 
 
 class LogscaleFloat(Bound):

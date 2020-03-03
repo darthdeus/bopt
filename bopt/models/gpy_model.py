@@ -113,7 +113,6 @@ class GPyModel(Model):
 
     @staticmethod
     def wrap_kernel_with_rounding(model: GPRegression, hyperparameters: List[Hyperparameter]) -> GPRegression:
-        # rounding_idx = [i for i, h in enumerate(hyperparameters) if h.range.is_discrete()]
         model.kern = RoundingKernelWrapper(model.kern, hyperparameters)
         return model
 
