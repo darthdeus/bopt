@@ -173,8 +173,7 @@ class Experiment:
                                     sample.finished_at = sample.created_at + \
                                         datetime.timedelta(seconds=sample.run_time)
 
-                                    logging.info("Collect parsed runtime of {}s"
-                                                 .format(sample.run_time))
+                                    logging.info("Collect parsed runtime of %fs", sample.run_time)
 
                                 matches = re.match(self.result_regex, line)
 
@@ -188,18 +187,18 @@ class Experiment:
                                         logging.debug("No TIME parsed from the output, using `collected_at instead`.")
                                         sample.run_time = (sample.collected_at - sample.created_at).total_seconds()
 
-                                    logging.info("Collect got result {}".format(sample.result))
+                                    logging.info("Collect got result %s", sample.result)
 
                             if not found:
-                                logging.error("Job {} seems to have failed, "
+                                logging.error("Job %d seems to have failed, "
                                               "it finished running and its result cannot "
-                                              "be parsed.".format(sample.job.job_id))
+                                              "be parsed.", sample.job.job_id)
 
                                 sample.collect_flag = CollectFlag.COLLECT_FAILED
                     else:
-                        logging.error("Output file not found for job {} "
+                        logging.error("Output file not found for job %d "
                                       "even though it finished. It will be considered "
-                                      "as a failed job.".format(sample.job.job_id))
+                                      "as a failed job.", sample.job.job_id)
 
                         sample.collect_flag = CollectFlag.COLLECT_FAILED
 

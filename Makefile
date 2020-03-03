@@ -24,7 +24,7 @@ sfntest:
 	rm -rf results/sfn
 	$(BOPT) init \
 		--task sfn \
-		--param "x:float:1:3:5" \
+		--param "x:float:1:3:3" \
 		--param "y:int:1:8:5" \
 		--param "activation:discrete:relu:sigmoid:tanh" \
 		--qsub=-q \
