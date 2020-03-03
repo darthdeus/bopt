@@ -4,7 +4,7 @@
 - [x] buckety u zaokrouhlovani
 - multi-output + jak se pocita objective + zobrazovat outputy v tabulkach
 - silnejsi prior na lengthscale kdyz jsou buckety (nechci lengthscale mensi nez bucket)
-
+- [x] parallel coords plot
 
 
 
@@ -46,6 +46,8 @@ issues:
 INFRASTRUKTURA !!
 
 - jednoducha funkce s noise, koukat jak vypada overfitting nez to fitne spravnej noise
+
+- https://arxiv.org/abs/1308.3432
 
 - https://arxiv.org/pdf/0912.3995.pdf
   - https://github.com/keras-team/keras-tuner/blob/master/kerastuner/tuners/bayesian.py

@@ -147,7 +147,7 @@ class Sample:
             y = self.result
         elif status == CollectFlag.WAITING_FOR_JOB \
                 or status == CollectFlag.WAITING_FOR_SIMILAR:
-            assert self.mu_pred, "No mu_pred for {}".format(self)
+            assert self.mu_pred, "No mu_pred for {} with status {} ... model {}".format(self, status, self.model.model_name)
 
             y = self.mu_pred
         elif status == CollectFlag.COLLECT_FAILED:
