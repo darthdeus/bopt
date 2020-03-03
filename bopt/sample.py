@@ -59,12 +59,12 @@ class Sample:
     run_time: Optional[float]   # in seconds
 
     def __init__(self, job: Optional[Job],
-            model_params: ModelParameters,
-            hyperparam_values: HyperparamValues,
-            mu_pred: Optional[float],
-            sigma_pred: Optional[float],
-            collect_flag: CollectFlag,
-            created_at: datetime.datetime) -> None:
+                 model_params: ModelParameters,
+                 hyperparam_values: HyperparamValues,
+                 mu_pred: Optional[float],
+                 sigma_pred: Optional[float],
+                 collect_flag: CollectFlag,
+                 created_at: datetime.datetime) -> None:
         self.job = job
         self.model = model_params
 
@@ -117,12 +117,12 @@ class Sample:
             job = None
 
         sample = Sample(job,
-                model_dict,
-                hyperparam_values,
-                data["mu_pred"],
-                data["sigma_pred"],
-                CollectFlag(data["collect_flag"]),
-                maybe_timestamp_to_datetime(data["created_at"]))
+                        model_dict,
+                        hyperparam_values,
+                        data["mu_pred"],
+                        data["sigma_pred"],
+                        CollectFlag(data["collect_flag"]),
+                        maybe_timestamp_to_datetime(data["created_at"]))
 
         sample.comment = data.get("comment", None)
         sample.result = data.get("result", None)
@@ -176,7 +176,6 @@ class Sample:
         else:
             return None
 
-
     def __str__(self) -> str:
         from colored import fg, bg, attr
 
@@ -216,7 +215,7 @@ class Sample:
 
         s += attr("reset")
         rounded_params = {h.name: (round(v, 3) if isinstance(v, float) else v)
-                for h, v in self.hyperparam_values.mapping.items()}
+                          for h, v in self.hyperparam_values.mapping.items()}
 
         s += f"\t{rounded_params}\t"
 

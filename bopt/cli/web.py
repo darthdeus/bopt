@@ -374,7 +374,8 @@ def run(web_type, args) -> None:
                 gpy_model = bopt.GPyModel.from_model_params(experiment.gp_config, sample.model, X_sample, Y_sample)
                 # print("Ne-marginal", X_sample, Y_sample, gpy_model.model)
 
-                model = gpy_model.model
+                # model = gpy_model.model
+                model = bopt.GPyModel.wrap_kernel_with_rounding(gpy_model.model, experiment.hyperparameters)
 
                 for i in range(n_dims):
                     for j in range(n_dims):

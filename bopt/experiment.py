@@ -121,12 +121,11 @@ class Experiment:
         results = [sample.result for sample in self.samples
                    if sample.result is not None]
 
-        return ExperimentStats(
-                min(results),
-                max(results),
-                np.mean(results).item(),
-                np.std(results).item(),
-                np.median(results).item())
+        return ExperimentStats(min(results),
+                               max(results),
+                               np.mean(results).item(),
+                               np.std(results).item(),
+                               np.median(results).item())
 
     def collect_results(self) -> None:
         # TODO: collect run time + check collected_at
@@ -138,8 +137,8 @@ class Experiment:
                 finished_similar_samples = self.get_finished_similar_samples(sample.hyperparam_values)
 
                 if len(finished_similar_samples) > 0:
-                    logging.info("Waiting for similar DONE, copying over results at {}"
-                                 .format(sample.hyperparam_values))
+                    logging.info("Waiting for similar DONE, copying over results at %s",
+                                 sample.hyperparam_values)
 
                     picked_similar = finished_similar_samples[0]
 

@@ -1,7 +1,7 @@
 # TODO
 
 
-- buckety u zaokrouhlovani
+- [x] buckety u zaokrouhlovani
 - multi-output + jak se pocita objective + zobrazovat outputy v tabulkach
 - silnejsi prior na lengthscale kdyz jsou buckety (nechci lengthscale mensi nez bucket)
 
