@@ -362,7 +362,7 @@ class Discrete(Bound):
         return a == b
 
     def maybe_round(self, value: np.ndarray) -> np.ndarray:
-        return value
+        return np.floor(value)
         # TODO: discrete is not being rounded
         # return np.floor(value)
 
