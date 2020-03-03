@@ -387,12 +387,18 @@ def run(web_type, args) -> None:
                             slices_2d.append(create_slice_2d(i, j, experiment,
                                 resolution, n_dims, x_slice, model, sample, show_marginal))
 
+            X_sample, Y_sample = bopt.SampleCollection(experiment.samples).to_xy()
+
+            parallel_data = {}
+            for i, h in enumerate(experiment.hyperparameters):
+                parallel_data[h] = X_sample[:, i].tolist()
 
             return render_template("index.html",
                     exp_dir=exp_dir,
                     experiment=experiment,
                     experiment_index=index,
                     stats=experiment.stats(),
+                    parallel_data=parallel_data,
 
                     sample_results=sample_results,
                     sample_results_cummax=sample_results_cummax,

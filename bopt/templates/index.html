@@ -323,6 +323,32 @@
   <h2>Search overview</h2>
 
   <div class="row">
+    <div class="col-md-12" id="parallel-plot"></div>
+    <script>
+      Plotly.plot("parallel-plot", [
+        {
+          type: "parcoords",
+          line: {
+            color: {{sample_results}},
+            showscale: true,
+          },
+          dimensions: [
+            {% for h, values in parallel_data.items() %}
+              {
+                range: [{{h.range.low}}, {{h.range.high}}],
+                label: "{{h.name}}",
+                values: {{values}},
+              },
+            {% endfor %}
+          ]
+        }
+      ], {
+        title: "Parallel coords plot",
+      });
+    </script>
+  </div>
+
+  <div class="row">
     <div class="col-md-6" id="kernel-params-plot"></div>
     <script>
       Plotly.plot("kernel-params-plot", [
