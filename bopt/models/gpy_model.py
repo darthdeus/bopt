@@ -1,11 +1,11 @@
 import logging
+from typing import Tuple, List
+
 import numpy as np
 from scipy.optimize import minimize
 
 import GPy
 from GPy.models import GPRegression
-
-from typing import Tuple, List
 
 import bopt.acquisition_functions.acquisition_functions as acq
 from bopt.basic_types import Hyperparameter, OptimizationFailed
@@ -160,15 +160,16 @@ class GPyModel(Model):
                            tol=0, options={"maxiter": 20})
 
             if np.any(np.isnan(res.fun[0])):
-                logging.error("Ran into NAN during {}/{} acq fn optimization, got {}"
-                              .format(i, len(starting_points), res.fun))
+                logging.error("Ran into NAN during %d/%d acq fn optimization, got %f",
+                              i, len(starting_points), res.fun)
 
             if res.fun < min_val:
                 min_val = res.fun[0]
                 min_x = res.x
 
         if min_x is None:
-            logging.error("Optimization failed {}-times with GP params {}".format(len(starting_points), gp.param_array))
+            logging.error("Optimization failed %s-times with GP params %s",
+                          len(starting_points), gp.param_array)
             raise OptimizationFailed(gp.param_array)
 
         logging.debug("Finished propose_location")
@@ -215,11 +216,6 @@ class RoundingKernelWrapper:
         self.hyperparameters = hyperparameters
 
     def K(self, X, X2):
-
-        assert not np.isnan(X).any()
-        if np.isnan(X2).any():
-            import ipdb; ipdb.set_trace()
-
         r = self.kernel._scaled_dist(self.rounded(X), self.rounded(X2))
         return self.K_of_r(r)
 
@@ -230,8 +226,6 @@ class RoundingKernelWrapper:
         return self.kernel.K_of_r(r)
 
     def rounded(self, x):
-        assert not np.isnan(x).any()
-
         result = x.copy()
         for i, h in enumerate(self.hyperparameters):
             result[:, i] = h.maybe_round(result[:, i])

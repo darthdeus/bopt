@@ -79,6 +79,14 @@ class Bound(abc.ABC):
 
         return grid
 
+    def round_buckets(self, value: np.ndarray) -> np.ndarray:
+        assert self.buckets > 0, "Bucket rounding can be done only when num buckets > 0"
+        _, bins = np.histogram([self.low, self.high], bins=self.buckets)
+        bins[-1] += 1e-6
+
+        idx = np.digitize(value, bins)
+        return bins[idx]
+
 
 class Integer(Bound):
     def __init__(self, low: int, high: int, buckets: int):
@@ -128,21 +136,10 @@ class Integer(Bound):
         return a == b
 
     def maybe_round(self, value: np.ndarray) -> np.ndarray:
-        assert not np.isnan(value).any()
-        if self.buckets == -1:
-            return np.floor(value)
-        else:
-            _, bins = np.histogram([self.low, self.high], bins=self.buckets)
-            bins[-1] += 1e-6
+        if self.buckets > 0:
+            value = super().round_buckets(value)
 
-            # diff = self.high - self.low
-            # assert diff > 0, "Bounds must be different, got {}".format(self.low)
-            #
-            # step = diff / self.buckets
-            # bins = np.array([self.low + step * i for i in range(self.buckets)])
-
-            idx = np.digitize(value, bins)
-            return bins[idx]
+        return np.floor(value)
 
 
 class Float(Bound):
@@ -195,7 +192,10 @@ class Float(Bound):
         return False
 
     def maybe_round(self, value: np.ndarray) -> np.ndarray:
-        return value
+        if self.buckets == -1:
+            return value
+        else:
+            return super().round_buckets(value)
 
 
 class LogscaleInt(Bound):
@@ -244,18 +244,21 @@ class LogscaleInt(Bound):
 
         return a == b
 
+    # def maybe_round(self, value: np.ndarray) -> np.ndarray:
+    #     # TODO: round in logspace
+    #     if self.buckets == -1:
+    #         return np.floor(value)
+    #     else:
+    #         _, bins = np.histogram([self.low, self.high], bins=self.buckets)
+    #         bins[-1] += 1e-6
+    #
+    #         idx = np.digitize(value, bins)
+    #         return bins[idx]
     def maybe_round(self, value: np.ndarray) -> np.ndarray:
-        if self.buckets == -1:
-            return np.floor(value)
-        else:
-            diff = self.high - self.low
-            assert diff > 0, "Bounds must be different, got {}".format(self.low)
+        if self.buckets > 0:
+            value = super().round_buckets(value)
 
-            step = diff / self.buckets
-            bins = np.array([self.low + step * i for i in range(self.buckets)])
-
-            idx = np.digitize(value, bins)
-            return bins[idx]
+        return np.floor(value)
 
 
 class LogscaleFloat(Bound):
@@ -307,7 +310,11 @@ class LogscaleFloat(Bound):
         return diff < threshold
 
     def maybe_round(self, value: np.ndarray) -> np.ndarray:
-        return value
+        if self.buckets == -1:
+            return value
+        else:
+            # TODO: logscale rounding
+            return super().round_buckets(value)
 
 
 class Discrete(Bound):
@@ -356,6 +363,8 @@ class Discrete(Bound):
 
     def maybe_round(self, value: np.ndarray) -> np.ndarray:
         return value
+        # TODO: discrete is not being rounded
+        # return np.floor(value)
 
 
 class Hyperparameter(NamedTuple):
