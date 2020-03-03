@@ -107,8 +107,8 @@ class GPyModel(Model):
 
     @staticmethod
     def wrap_kernel_with_rounding(model: GPRegression, hyperparameters: List[Hyperparameter]) -> GPRegression:
-        rounding_idx = [i for i, h in enumerate(hyperparameters) if h.range.is_discrete()]
-        model.kern = RoundingKernelWrapper(model.kern, rounding_idx)
+        # rounding_idx = [i for i, h in enumerate(hyperparameters) if h.range.is_discrete()]
+        model.kern = RoundingKernelWrapper(model.kern, hyperparameters)
         return model
 
     @staticmethod
@@ -207,11 +207,19 @@ class GPyModel(Model):
 
 
 class RoundingKernelWrapper:
-    def __init__(self, kernel, indexes: List[int]):
+    kernel: object
+    hyperparameters: List[Hyperparameter]
+
+    def __init__(self, kernel: object, hyperparameters: List[Hyperparameter]):
         self.kernel = kernel
-        self.indexes = indexes
+        self.hyperparameters = hyperparameters
 
     def K(self, X, X2):
+
+        assert not np.isnan(X).any()
+        if np.isnan(X2).any():
+            import ipdb; ipdb.set_trace()
+
         r = self.kernel._scaled_dist(self.rounded(X), self.rounded(X2))
         return self.K_of_r(r)
 
@@ -222,8 +230,12 @@ class RoundingKernelWrapper:
         return self.kernel.K_of_r(r)
 
     def rounded(self, x):
+        assert not np.isnan(x).any()
+
         result = x.copy()
-        result[:, self.indexes] = np.floor(result[:, self.indexes])
+        for i, h in enumerate(self.hyperparameters):
+            result[:, i] = h.maybe_round(result[:, i])
+
         return result
 
     @property

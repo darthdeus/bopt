@@ -60,7 +60,6 @@ class HyperparamValues:
         # return HyperparamValues(mapping, x)
         ######################
 
-
         # TODO: fuj, use map instead?
 
         # TODO: tady nastava problem, protoze log je aplikovany az potom, a tim ze

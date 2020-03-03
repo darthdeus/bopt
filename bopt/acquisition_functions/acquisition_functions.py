@@ -1,4 +1,5 @@
 import abc
+import logging
 
 from GPy.models import GPRegression
 
@@ -15,6 +16,13 @@ class AcquisitionFunction(abc.ABC):
         assert X is not None
 
         mu, var = gp.predict(X)
+        if var <= 0:
+            logging.debug("""
+GPy predicted negative variance, setting to 0 instead. This is a known issue.
+
+See https://github.com/SheffieldML/GPy/issues/253 for more details""")
+            var = 0
+
         sigma = np.sqrt(var)
 
         ei = self.raw_call(mu, sigma, f_s, xi)

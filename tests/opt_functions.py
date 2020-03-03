@@ -3,7 +3,7 @@ from typing import NamedTuple, Callable, List
 import abc
 import numpy as np
 import sys
-from bopt.basic_types import Float, Integer, Bound, Hyperparameter
+from bopt.basic_types import Float, Integer, Bound
 
 # TODO: Rewrite all Bounds to Hyperparmeters
 
@@ -24,7 +24,7 @@ class Beale(OptFunction):
     name = "Beale"
 
     def __init__(self) -> None:
-        self.bounds = [Float(-4.5, 4.5), Float(-4.5, 4.5)]
+        self.bounds = [Float(-4.5, 4.5, -1), Float(-4.5, 4.5, -1)]
 
     def f(self, x: np.ndarray) -> float:
         """
@@ -42,7 +42,7 @@ class Easom(OptFunction):
     name = "Easom"
 
     def __init__(self) -> None:
-        self.bounds = [Float(-100, 100), Float(-100, 100)]
+        self.bounds = [Float(-100, 100, -1), Float(-100, 100, -1)]
 
     def f(self, x: np.ndarray) -> float:
         """
@@ -60,7 +60,7 @@ class Eggholder(OptFunction):
     name = "Eggholder"
 
     def __init__(self) -> None:
-        self.bounds = [Float(-512, 512), Float(-512, 512)]
+        self.bounds = [Float(-512, 512, -1), Float(-512, 512, -1)]
 
     def f(self, x: np.ndarray) -> float:
         """
@@ -81,7 +81,7 @@ class McCormick(OptFunction):
     name = "McCormick"
 
     def __init__(self) -> None:
-        self.bounds = [Float(-1.5, 4), Float(-3, 4)]
+        self.bounds = [Float(-1.5, 4, -1), Float(-3, 4, -1)]
 
     def f(self, x: np.ndarray) -> float:
         """
@@ -99,7 +99,7 @@ class XSquared(OptFunction):
     name = "XSquared"
 
     def __init__(self) -> None:
-        self.bounds = [Float(0.1, 6), Float(0.1, 6)]
+        self.bounds = [Float(0.1, 6, -1), Float(0.1, 6, -1)]
 
     def f(self, x: np.ndarray) -> float:
         """

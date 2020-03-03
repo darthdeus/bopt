@@ -29,34 +29,32 @@ def run(args) -> None:
                 if type == "discrete":
                     hyp = bopt.Hyperparameter(name, bopt.Discrete(values))
                 else:
-                    if type == "int":
-                        cls = bopt.Integer
-                        parser = int
-                        low, high = values
-                    elif type == "float":
-                        cls = bopt.Float
-                        parser = float
-                        low, high = values
-                    elif type == "logscale_float":
-                        cls = bopt.LogscaleFloat
-                        parser = float
-                        low, high = values
-                    elif type == "logscale_int":
-                        cls = bopt.LogscaleInt
-                        parser = int
-                        low, high = values
-                    elif type == "discrete":
-                        continue
+                    mapping = {
+                        "int": [bopt.Integer, int],
+                        "float": [bopt.Float, float],
+                        "logscale_int": [bopt.LogscaleInt, int],
+                        "logscale_float": [bopt.LogscaleFloat, float],
+                    }
+
+                    if type in mapping:
+                        cls, parser = mapping[type]
                     else:
                         logging.error("Invalid value {} for hyperparameter type, "
                                       "only 'int', 'float', 'logscale_int', 'logscale_float' "
                                       "and 'discrete' are permitted.".format(type))
                         sys.exit(1)
 
-                    assert cls is not None
-                    assert issubclass(cls, bopt.Bound), "Expected bopt.Bound, got {}".format(cls)
+                    if len(values) == 2:
+                        low, high = values
+                        buckets = -1
+                    elif len(values) == 3:
+                        low, high, buckets = values
+                    else:
+                        logging.error("Invalid number of values in '%s', must be 2 or 3.", values)
+                        sys.exit(1)
 
-                    hyp = bopt.Hyperparameter(name, cls(parser(low), parser(high)))
+                    # assert issubclass(cls, bopt.Bound), "Expected bopt.Bound, got {}".format(cls)
+                    hyp = bopt.Hyperparameter(name, cls(parser(low), parser(high), buckets))
 
                 hyperparameters.append(hyp)
 

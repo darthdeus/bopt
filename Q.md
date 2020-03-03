@@ -1,6 +1,13 @@
 # TODO
 
 
+- buckety u zaokrouhlovani
+- multi-output + jak se pocita objective + zobrazovat outputy v tabulkach
+- silnejsi prior na lengthscale kdyz jsou buckety (nechci lengthscale mensi nez bucket)
+
+
+
+
 - random search x2
 - random search
 - vzdycky pridat jeden experiment navic ze vsech initial random search co se pustily

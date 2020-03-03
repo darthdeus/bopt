@@ -19,10 +19,11 @@ class OptimizationFailed(Exception):
 class Bound(abc.ABC):
     low: float
     high: float
+    buckets: int
     type: str
 
     @abc.abstractmethod
-    def __init__(self, low: float, high: float) -> None:
+    def __init__(self, low: float, high: float, buckets: int) -> None:
         pass
 
     @abc.abstractmethod
@@ -66,6 +67,10 @@ class Bound(abc.ABC):
     def compare_values(self, a: ParamTypes, b: ParamTypes) -> bool:
         pass
 
+    @abc.abstractmethod
+    def maybe_round(self, value: np.ndarray) -> np.ndarray:
+        pass
+
     def grid(self, resolution: int) -> np.ndarray:
         if self.is_logscale():
             grid = np.linspace(math.log10(self.low), math.log10(self.high), num=resolution)
@@ -76,9 +81,10 @@ class Bound(abc.ABC):
 
 
 class Integer(Bound):
-    def __init__(self, low: int, high: int):
+    def __init__(self, low: int, high: int, buckets: int):
         self.low = low
         self.high = high
+        self.buckets = buckets
         self.type = "int"
 
     def sample(self) -> float:
@@ -121,11 +127,29 @@ class Integer(Bound):
 
         return a == b
 
+    def maybe_round(self, value: np.ndarray) -> np.ndarray:
+        assert not np.isnan(value).any()
+        if self.buckets == -1:
+            return np.floor(value)
+        else:
+            _, bins = np.histogram([self.low, self.high], bins=self.buckets)
+            bins[-1] += 1e-6
+
+            # diff = self.high - self.low
+            # assert diff > 0, "Bounds must be different, got {}".format(self.low)
+            #
+            # step = diff / self.buckets
+            # bins = np.array([self.low + step * i for i in range(self.buckets)])
+
+            idx = np.digitize(value, bins)
+            return bins[idx]
+
 
 class Float(Bound):
-    def __init__(self, low: float, high: float):
+    def __init__(self, low: float, high: float, buckets: int):
         self.low = low
         self.high = high
+        self.buckets = buckets
         self.type = "float"
 
     def sample(self) -> float:
@@ -170,11 +194,15 @@ class Float(Bound):
         # return diff < threshold
         return False
 
+    def maybe_round(self, value: np.ndarray) -> np.ndarray:
+        return value
+
 
 class LogscaleInt(Bound):
-    def __init__(self, low: float, high: float):
+    def __init__(self, low: float, high: float, buckets: int):
         self.low = low
         self.high = high
+        self.buckets = buckets
         self.type = "logscale_int"
 
     def sample(self) -> float:
@@ -216,11 +244,25 @@ class LogscaleInt(Bound):
 
         return a == b
 
+    def maybe_round(self, value: np.ndarray) -> np.ndarray:
+        if self.buckets == -1:
+            return np.floor(value)
+        else:
+            diff = self.high - self.low
+            assert diff > 0, "Bounds must be different, got {}".format(self.low)
+
+            step = diff / self.buckets
+            bins = np.array([self.low + step * i for i in range(self.buckets)])
+
+            idx = np.digitize(value, bins)
+            return bins[idx]
+
 
 class LogscaleFloat(Bound):
-    def __init__(self, low: float, high: float):
+    def __init__(self, low: float, high: float, buckets: int):
         self.low = low
         self.high = high
+        self.buckets = buckets
         self.type = "logscale_float"
 
     def sample(self) -> float:
@@ -263,6 +305,9 @@ class LogscaleFloat(Bound):
         # We set the threshold at 1% of the range
         threshold = (np.log10(self.high) - np.log10(self.low)) * 0.01
         return diff < threshold
+
+    def maybe_round(self, value: np.ndarray) -> np.ndarray:
+        return value
 
 
 class Discrete(Bound):
@@ -309,6 +354,9 @@ class Discrete(Bound):
 
         return a == b
 
+    def maybe_round(self, value: np.ndarray) -> np.ndarray:
+        return value
+
 
 class Hyperparameter(NamedTuple):
     name: str
@@ -324,28 +372,44 @@ class Hyperparameter(NamedTuple):
             return {
                 "type": self.range.type,
                 "low": self.range.low,
-                "high": self.range.high
+                "high": self.range.high,
+                "buckets": self.range.buckets,
             }
 
     def validate(self, value) -> bool:
         return self.range.validate(value)
 
+    def maybe_round(self, value: np.ndarray) -> np.ndarray:
+        return self.range.maybe_round(value)
+
     @staticmethod
     def from_dict(name, data: dict) -> "Hyperparameter":
         if data["type"] == "discrete":
-            return Hyperparameter(name=name,
-                    range=Discrete(data["values"]))
-        elif data["type"] == "int":
-            return Hyperparameter(name=name,
-                    range=Integer(int(data["low"]), int(data["high"])))
-        elif data["type"] == "logscale_float":
-            return Hyperparameter(name=name,
-                    range=LogscaleFloat(float(data["low"]), float(data["high"])))
-        elif data["type"] == "logscale_int":
-            return Hyperparameter(name=name,
-                    range=LogscaleInt(int(data["low"]), int(data["high"])))
-        elif data["type"] == "float":
-            return Hyperparameter(name=name,
-                    range=Float(float(data["low"]), float(data["high"])))
+            return Hyperparameter(name=name, range=Discrete(data["values"]))
         else:
-            raise NotImplementedError()
+            mapping = {
+                "int": [Integer, int],
+                "logscale_int": [LogscaleInt, int],
+                "float": [Float, float],
+                "logscale_float": [LogscaleFloat, float]
+            }
+
+            if data["type"] in mapping:
+                cls, parser = mapping[data["type"]]
+                range = cls(parser(data["low"]), parser(data["high"]), int(data["buckets"]))
+
+                return Hyperparameter(name=name, range=range)
+            else:
+                raise NotImplementedError()
+        # elif data["type"] == "int":
+        #     return Hyperparameter(name=name,
+        #             range=Integer(int(data["low"]), int(data["high"])))
+        # elif data["type"] == "logscale_float":
+        #     return Hyperparameter(name=name,
+        #             range=LogscaleFloat(float(data["low"]), float(data["high"])))
+        # elif data["type"] == "logscale_int":
+        #     return Hyperparameter(name=name,
+        #             range=LogscaleInt(int(data["low"]), int(data["high"])))
+        # elif data["type"] == "float":
+        #     return Hyperparameter(name=name,
+        #             range=Float(float(data["low"]), float(data["high"])))

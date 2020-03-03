@@ -25,13 +25,14 @@ sfntest:
 	$(BOPT) init \
 		--task sfn \
 		--param "x:float:1:3" \
-		--param "y:int:1:3" \
+		--param "y:int:1:3:10" \
 		--param "activation:discrete:relu:sigmoid:tanh" \
 		--qsub=-q \
 		--qsub=cpu-troja.q \
 		--gamma-a=1.0 --gamma-b=0.001 \
 		--informative-prior=1 \
 		--kernel=Mat52 \
+		--discrete-rounding=1 \
 		--manual-arg-fname=$(PWD)/experiments/foo.txt \
 		--manual-arg-fname=$(PWD)/experiments/bar.txt \
 		--acq-xi=0.01 \

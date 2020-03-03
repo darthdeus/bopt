@@ -13,8 +13,8 @@ def test_exp1():
     import GPy
 
     hyperparameters = [
-        bopt.Hyperparameter("x", bopt.Float(0.1, 0.7)),
-        bopt.Hyperparameter("pi", bopt.Integer(24, 42))
+        bopt.Hyperparameter("x", bopt.Float(0.1, 0.7, -1)),
+        bopt.Hyperparameter("pi", bopt.Integer(24, 42, -1))
     ]
 
     runner = bopt.LocalRunner("/bin/bash", ["--help", "me"], [])
