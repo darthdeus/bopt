@@ -241,10 +241,12 @@ class Experiment:
 
             try:
                 job_params, fitted_model = GPyModel.predict_next(self.gp_config,
-                                                                 self.hyperparameters, X_sample, Y_sample)
+                                                                 self.hyperparameters,
+                                                                 X_sample,
+                                                                 Y_sample)
             except OptimizationFailed as e:
                 logging.error("Optimization failed, retrying with "
-                              "RandomSearch: {}".format(e))
+                              "RandomSearch: %s", e)
 
                 job_params = RandomSearch.predict_next(self.hyperparameters)
                 fitted_model = RandomSearch()

@@ -1,3 +1,5 @@
+import logging
+
 import numpy as np
 from typing import List, Tuple
 
@@ -10,7 +12,14 @@ from bopt.models.parameters import ModelParameters
 class RandomSearch(Model):
     @staticmethod
     def predict_next(hyperparameters: List[Hyperparameter]) -> HyperparamValues:
+        logging.error("TODO: extract this and re-use across RoundingKernelWrapper, RS, GPm")
         mapping = {h: h.range.sample() for h in hyperparameters}
+
+        for h, v in mapping.items():
+            if isinstance(v, int) or isinstance(v, float):
+                mapping[h] = h.maybe_round(np.array([v])).item()
+            else:
+                logging.warning("IGNORING %s during round", h)
 
         return HyperparamValues.from_mapping(mapping)
 

@@ -1,5 +1,6 @@
 import abc
 import math
+import logging
 from typing import Union, NamedTuple, List, Tuple
 
 import numpy as np
@@ -114,7 +115,7 @@ class Integer(Bound):
         return False
 
     def validate(self, value: ParamTypes) -> bool:
-        assert isinstance(value, int)
+        assert isinstance(value, int), "expected int, got {}".format(value)
         # TODO: ma byt <= ... <, ale z nejakeho duvodu to failuje
         return self.low <= value <= self.high
 
@@ -139,7 +140,13 @@ class Integer(Bound):
         if self.buckets > 0:
             value = super().round_buckets(value)
 
-        return np.floor(value)
+        # logging.warn("TODO: why is this ever a numpy thing and not an int?")
+        return np.floor(value).astype(np.int32)
+        # floored = np.floor(value)
+        # if isinstance(value, float):
+        #     return int(floored)
+        # else:
+        #     return floored
 
 
 class Float(Bound):

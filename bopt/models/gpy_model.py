@@ -130,6 +130,18 @@ class GPyModel(Model):
         x_next = GPyModel.propose_location(acquisition_fn, model, Y_sample.max(),
                                            hyperparameters, gp_config)
 
+        # While this isn't completely necessary for the optimizer to work,
+        # it makes reading the results easier since values in the same bucket
+        # will always be exactly the same.
+        x_next = x_next.reshape(-1, 1)
+
+        logging.error("TODO: extract this and re-use across RoundingKernelWrapper, RS, GPm")
+        for i, h in enumerate(hyperparameters):
+            x_next[i] = h.maybe_round(x_next[i])
+
+        x_next = x_next.reshape(-1)
+        ############# end of rounding ############
+
         job_params = HyperparamValues.mapping_from_vector(x_next, hyperparameters)
 
         fitted_model = GPyModel(model, acquisition_fn)
