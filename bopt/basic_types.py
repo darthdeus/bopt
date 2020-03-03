@@ -363,8 +363,6 @@ class Discrete(Bound):
 
     def maybe_round(self, value: np.ndarray) -> np.ndarray:
         return np.floor(value)
-        # TODO: discrete is not being rounded
-        # return np.floor(value)
 
 
 class Hyperparameter(NamedTuple):

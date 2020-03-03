@@ -99,9 +99,15 @@ class GPyModel(Model):
                 model.kern.lengthscale.constrain_bounded(min_bound, max_bound)
 
         # TODO: parallel=True?
-        model.optimize_restarts(gp_config.num_optimize_restarts)
+        # model.optimize_restarts(gp_config.num_optimize_restarts)
+        logging.error("TODO: SET PARALLEL BACK FROM 2")
+        logging.error("TODO: SET PARALLEL BACK FROM 2")
+        logging.error("TODO: SET PARALLEL BACK FROM 2")
+        logging.error("TODO: SET PARALLEL BACK FROM 2")
+        logging.error("TODO: SET PARALLEL BACK FROM 2")
+        model.optimize_restarts(2)
 
-        logging.debug("GPY hyperparam optimization DONE, params: {}".format(model.param_array))
+        logging.debug("GPY hyperparam optimization DONE, params: %s", model.param_array)
 
         return GPyModel.wrap_kernel_with_rounding(model, hyperparameters)
 
