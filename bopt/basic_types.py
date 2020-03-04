@@ -74,9 +74,9 @@ class Bound(abc.ABC):
 
     def grid(self, resolution: int) -> np.ndarray:
         if self.type == "discrete":
-            halfbin = 0.0
+            halfbin = self.step_size(self.high - self.low) / 2
         else:
-            halfbin = self.step_size() / 2
+            halfbin = self.step_size(self.buckets) / 2
 
         if self.is_logscale():
             logging.error("TODO: logspace halfbin pred nebo po?")
@@ -86,8 +86,8 @@ class Bound(abc.ABC):
 
         return grid
 
-    def step_size(self) -> float:
-        mid_buckets = self.buckets - 1
+    def step_size(self, buckets) -> float:
+        mid_buckets = buckets - 1
 
         diff = self.high - self.low
         step = diff / mid_buckets
@@ -95,14 +95,18 @@ class Bound(abc.ABC):
         return step
 
     def round_buckets(self, value: np.ndarray) -> np.ndarray:
-        assert self.buckets > 1, "Bucket rounding can be done only when num buckets > 0"
 
-        bins = [self.low]
+        if self.type == "discrete":
+            logging.info("TODO: buckets must work for ints with buckets = -1 too")
+            bins = list(range(int(self.low), int(self.high)))
+        else:
+            assert self.buckets > 1, "Bucket rounding can be done only when num buckets > 0"
+            bins = [self.low]
 
-        for i in range(self.buckets - 2):
-            bins.append(self.low + (i+1)*self.step_size())
+            for i in range(self.buckets - 2):
+                bins.append(self.low + (i+1)*self.step_size(self.buckets))
 
-        bins.append(self.high)
+            bins.append(self.high)
 
         bins = np.array(bins)
 
@@ -385,7 +389,8 @@ class Discrete(Bound):
         return a == b
 
     def maybe_round(self, value: np.ndarray) -> np.ndarray:
-        return np.floor(value)
+        # return np.floor(value)
+        return self.round_buckets(value)
 
 
 class Hyperparameter(NamedTuple):

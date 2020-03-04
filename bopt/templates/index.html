@@ -228,6 +228,7 @@
             title: "{{slice.param.name}}={{slice.x_slice_at | round(2)}} ... {{slice.param.range}}",
             xaxis: {
               title: "{{slice.param.name}}",
+              zeroline: false,
               range: [ {{slice.x_range()[0]}}, {{slice.x_range()[1]}} ],
               {% if slice.param.range.is_logscale() %}
                 type: "log", autorange: true
