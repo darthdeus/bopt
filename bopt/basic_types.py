@@ -73,20 +73,49 @@ class Bound(abc.ABC):
         pass
 
     def grid(self, resolution: int) -> np.ndarray:
+        if self.type == "discrete":
+            halfbin = 0.0
+        else:
+            halfbin = self.step_size() / 2
+
         if self.is_logscale():
+            logging.error("TODO: logspace halfbin pred nebo po?")
             grid = np.linspace(math.log10(self.low), math.log10(self.high), num=resolution)
         else:
-            grid = np.linspace(self.low, self.high, num=resolution)
+            grid = np.linspace(self.low - halfbin, self.high + halfbin, num=resolution)
 
         return grid
 
-    def round_buckets(self, value: np.ndarray) -> np.ndarray:
-        assert self.buckets > 0, "Bucket rounding can be done only when num buckets > 0"
-        _, bins = np.histogram([self.low, self.high], bins=self.buckets)
-        bins[-1] += 1e-6
+    def step_size(self) -> float:
+        mid_buckets = self.buckets - 1
 
-        idx = np.digitize(value, bins)
+        diff = self.high - self.low
+        step = diff / mid_buckets
+
+        return step
+
+    def round_buckets(self, value: np.ndarray) -> np.ndarray:
+        assert self.buckets > 1, "Bucket rounding can be done only when num buckets > 0"
+
+        bins = [self.low]
+
+        for i in range(self.buckets - 2):
+            bins.append(self.low + (i+1)*self.step_size())
+
+        bins.append(self.high)
+
+        bins = np.array(bins)
+
+        distances = np.abs(value.reshape(-1, 1) - np.array(bins).reshape(1, -1))
+        idx = np.argmin(distances, axis=1)
+
         return bins[idx]
+        # _, bins = np.histogram([self.low, self.high], bins=self.buckets)
+
+        # bins[-1] += 1e-6
+        #
+        # idx = np.digitize(value, bins)
+        # return bins[idx]
 
 
 class Integer(Bound):
@@ -142,11 +171,6 @@ class Integer(Bound):
 
         # logging.warn("TODO: why is this ever a numpy thing and not an int?")
         return np.floor(value).astype(np.int32)
-        # floored = np.floor(value)
-        # if isinstance(value, float):
-        #     return int(floored)
-        # else:
-        #     return floored
 
 
 class Float(Bound):
@@ -251,16 +275,6 @@ class LogscaleInt(Bound):
 
         return a == b
 
-    # def maybe_round(self, value: np.ndarray) -> np.ndarray:
-    #     # TODO: round in logspace
-    #     if self.buckets == -1:
-    #         return np.floor(value)
-    #     else:
-    #         _, bins = np.histogram([self.low, self.high], bins=self.buckets)
-    #         bins[-1] += 1e-6
-    #
-    #         idx = np.digitize(value, bins)
-    #         return bins[idx]
     def maybe_round(self, value: np.ndarray) -> np.ndarray:
         if self.buckets > 0:
             value = super().round_buckets(value)
@@ -330,6 +344,8 @@ class Discrete(Bound):
         self.type = "discrete"
         self.low = 0
         self.high = len(values)
+        logging.error("TODO: buckets -1 je tu divne")
+        self.buckets = -1
 
     def sample(self) -> float:
         return self.values[np.random.randint(self.low, self.high)]

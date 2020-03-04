@@ -43,7 +43,7 @@ config_params: List[GPParam[Any]] = [
     GPParam[int]("informative-prior", int, 1, None,
                  "When enabled, kernel parameters use an informative Gamma prior on lengthscale."),
     GPParam[int]("discrete-rounding", int, 1, None,
-                 "Round discrete hyperparameters in the kernel"),
+                 "Round discrete hyperparameters in the kernel."),
 
     GPParam[float]("acq-xi", float, 0.001, None, "The xi parameter of the acquisition functions."),
     GPParam[int]("acq-n-restarts", int, 25, None, "Number of restarts when optimizing the acquisition function."),

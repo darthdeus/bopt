@@ -1,3 +1,5 @@
+import inspect
+import os
 from collections import defaultdict
 import math
 import logging
@@ -100,16 +102,17 @@ class Slice1D:
         return low, high
 
     def x_range(self) -> Tuple[float, float]:
-        low = self.param.range.low
-        high = self.param.range.high
-
-        if self.param.range.is_logscale():
-            low = math.log10(low)
-            high = math.log10(high)
-
-        margin = (high - low) * 0.05
-
-        return low - margin, high + margin
+        return min(self.x), max(self.x)
+        # low = self.param.range.low
+        # high = self.param.range.high
+        #
+        # if self.param.range.is_logscale():
+        #     low = math.log10(low)
+        #     high = math.log10(high)
+        #
+        # margin = (high - low) * 0.05
+        #
+        # return low - margin, high + margin
 
 
 class Slice2D:
@@ -295,8 +298,6 @@ def create_slice_2d(i: int, j: int, experiment: bopt.Experiment,
 
 
 def run(web_type, args) -> None:
-    import inspect
-    import os
     script_dir = os.path.dirname(os.path.abspath(inspect.stack()[0][1]))
 
     app = Flask(__name__, template_folder=os.path.join(script_dir, "..", "templates"))

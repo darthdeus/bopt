@@ -2,10 +2,14 @@
 
 
 - [x] buckety u zaokrouhlovani
+  - chceme krajni body
+  - zbytek bucketu prepocitat rovnomerne
+  - zaokrouhlovat na stred bucketu
 - multi-output + jak se pocita objective + zobrazovat outputy v tabulkach
+- --criteritum='accuracy/size'
+  - RESULT(_.*)?=(.*)
 - silnejsi prior na lengthscale kdyz jsou buckety (nechci lengthscale mensi nez bucket)
 - [x] parallel coords plot
-
 
 
 - random search x2

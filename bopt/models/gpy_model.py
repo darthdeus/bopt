@@ -172,7 +172,6 @@ class GPyModel(Model):
         logging.debug("Starting propose_location")
 
         for i, x0 in enumerate(starting_points):
-            # print("*********************")
             res = minimize(min_obj, x0=x0, bounds=scipy_bounds, method="L-BFGS-B",
                            tol=0, options={"maxiter": 20})
 

@@ -177,6 +177,8 @@ class Experiment:
 
                                 matches = re.match(self.result_regex, line)
 
+                                # RESULT=1,2,3,4
+
                                 if matches:
                                     sample.result = float(matches.groups()[0])
                                     sample.collected_at = datetime.datetime.now()

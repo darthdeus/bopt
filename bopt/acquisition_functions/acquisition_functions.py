@@ -21,12 +21,11 @@ class AcquisitionFunction(abc.ABC):
 GPy predicted negative variance, setting to 0 instead. This is a known issue.
 
 See https://github.com/SheffieldML/GPy/issues/253 for more details""")
-            var = 0
+            var = 1e-6
 
         sigma = np.sqrt(var)
 
         ei = self.raw_call(mu, sigma, f_s, xi)
-        # print("call ...", X, mu, ei)
 
         return ei
 
@@ -45,8 +44,6 @@ class ExpectedImprovement(AcquisitionFunction):
         improvement = mu - f_s - xi
         Z = improvement / sigma
         ei = improvement * norm.cdf(Z) + sigma * norm.pdf(Z)
-
-        # print("raw_call ...", mu, sigma, f_s, ei)
 
         return ei
 
