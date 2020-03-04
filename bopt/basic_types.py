@@ -82,7 +82,9 @@ class Bound(abc.ABC):
             logging.error("TODO: logspace halfbin pred nebo po?")
             grid = np.linspace(math.log10(self.low), math.log10(self.high), num=resolution)
         else:
-            grid = np.linspace(self.low - halfbin, self.high + halfbin, num=resolution)
+            logging.error("TODO: ugly hack")
+            sub = 1 if self.type == "discrete" else 0
+            grid = np.linspace(self.low - halfbin, self.high + halfbin - sub, num=resolution)
 
         return grid
 
