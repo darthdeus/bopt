@@ -73,44 +73,45 @@ class Bound(abc.ABC):
         pass
 
     def grid(self, resolution: int) -> np.ndarray:
-        if self.type == "discrete":
-            halfbin = self.step_size(self.high - self.low) / 2
-        else:
-            halfbin = self.step_size(self.buckets) / 2
+        halfbin = self.step_size(self.buckets) / 2
 
         if self.is_logscale():
             logging.error("TODO: logspace halfbin pred nebo po?")
             grid = np.linspace(math.log10(self.low), math.log10(self.high), num=resolution)
         else:
-            logging.error("TODO: ugly hack")
-            sub = 1 if self.type == "discrete" else 0
-            grid = np.linspace(self.low - halfbin, self.high + halfbin - sub, num=resolution)
+            grid = np.linspace(self.low - halfbin, self.high + halfbin, num=resolution)
 
         return grid
 
     def step_size(self, buckets) -> float:
-        mid_buckets = buckets - 1
-
         diff = self.high - self.low
-        step = diff / mid_buckets
+        step = diff / (buckets - 1)
 
         return step
 
-    def round_buckets(self, value: np.ndarray) -> np.ndarray:
+    def compute_bins(self) -> List[float]:
+        # [1, 3] ; 3
+        # [1] + [...] + [3]
+
+        # a, b, c, d, e, f
+        # 0, 1, 2, 3, 4, 5
+        # [0] + [...] + [5]
 
         if self.type == "discrete":
-            logging.info("TODO: buckets must work for ints with buckets = -1 too")
-            bins = list(range(int(self.low), int(self.high)))
+            bins = [float(x) for x in range(int(self.low), int(self.high + 1))]
         else:
             assert self.buckets > 1, "Bucket rounding can be done only when num buckets > 0"
-            bins = [self.low]
+            bins = [float(self.low)]
 
             for i in range(self.buckets - 2):
                 bins.append(self.low + (i+1)*self.step_size(self.buckets))
 
-            bins.append(self.high)
+            bins.append(float(self.high))
 
-        bins = np.array(bins)
+        return bins
+
+    def round_buckets(self, value: np.ndarray) -> np.ndarray:
+        bins = np.array(self.compute_bins())
 
         distances = np.abs(value.reshape(-1, 1) - np.array(bins).reshape(1, -1))
         idx = np.argmin(distances, axis=1)
@@ -125,11 +126,15 @@ class Bound(abc.ABC):
 
 
 class Integer(Bound):
-    def __init__(self, low: int, high: int, buckets: int):
+    def __init__(self, low: int, high: int, buckets: int) -> None:
         self.low = low
         self.high = high
-        self.buckets = buckets
         self.type = "int"
+
+        if buckets == -1:
+            self.buckets = high - low + 1
+        else:
+            self.buckets = buckets
 
     def sample(self) -> float:
         return np.random.randint(self.low, self.high + 1)
@@ -349,12 +354,11 @@ class Discrete(Bound):
         self.values = values
         self.type = "discrete"
         self.low = 0
-        self.high = len(values)
-        logging.error("TODO: buckets -1 je tu divne")
-        self.buckets = -1
+        self.high = len(values) - 1
+        self.buckets = len(values)
 
     def sample(self) -> float:
-        return self.values[np.random.randint(self.low, self.high)]
+        return self.values[np.random.randint(self.low, self.high + 1)]
 
     def validate(self, value: ParamTypes) -> bool:
         assert isinstance(value, str)
@@ -382,7 +386,7 @@ class Discrete(Bound):
         return value
 
     def scipy_bound_tuple(self) -> Tuple[float, float]:
-        return (self.low, (self.high - 1))
+        return self.low, self.high
 
     def compare_values(self, a: ParamTypes, b: ParamTypes) -> bool:
         assert isinstance(a, str)
@@ -391,7 +395,6 @@ class Discrete(Bound):
         return a == b
 
     def maybe_round(self, value: np.ndarray) -> np.ndarray:
-        # return np.floor(value)
         return self.round_buckets(value)
 
 
