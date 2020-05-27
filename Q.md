@@ -1,10 +1,20 @@
 # TODO
 
 
+- paralelni vs neparalelni
+- ucb-gp - porovnat acq
+
+
+- prumerovani a prepinani mezi gp a prumerem v 2d
+- random search x2 a vic nez 50
+- bez paralelni evaluace
+- ucb-gp
+
+
 - [x] buckety u zaokrouhlovani
-  - chceme krajni body
-  - zbytek bucketu prepocitat rovnomerne
-  - zaokrouhlovat na stred bucketu
+  - [x] chceme krajni body
+  - [x] zbytek bucketu prepocitat rovnomerne
+  - [x] zaokrouhlovat na stred bucketu
 - multi-output + jak se pocita objective + zobrazovat outputy v tabulkach
 - --criteritum='accuracy/size'
   - RESULT(_.*)?=(.*)
