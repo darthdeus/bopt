@@ -45,26 +45,25 @@ class SGERunner(Runner):
 
     def start(self, output_dir: str, hyperparam_values: HyperparamValues,
               manual_file_args: List[str]) -> Job:
-        # TODO: lol naming :)
-        cmdline_run_params = [f"--{h.name}={value}"
-                              for h, value in hyperparam_values.mapping.items()]
+        cmdline_run_args = [f"--{h.name}={value}"
+                            for h, value in hyperparam_values.mapping.items()]
 
-        override_qsub_params = os.environ.get("QSUB_PARAMS")
+        override_qsub_args = os.environ.get("QSUB_PARAMS")
 
-        if override_qsub_params:
-            additional_params = override_qsub_params.split("|")
-            logging.info("Overriding {} with {}".format(self.qsub_arguments, additional_params))
+        if override_qsub_args:
+            additional_args = override_qsub_args.split("|")
+            logging.info("Overriding {} with {}".format(self.qsub_arguments, additional_args))
         else:
-            additional_params = self.qsub_arguments
+            additional_args = self.qsub_arguments
 
-        qsub_params = ["-N", "job", "-o", output_dir, *additional_params]
+        qsub_params = ["-N", "job", "-o", output_dir, *additional_args]
         cmd = [
             "qsub",
             *qsub_params,
             self.script_path,
             *self.arguments,
             *manual_file_args,
-            *cmdline_run_params
+            *cmdline_run_args
         ]
 
         logging.info(f"SGE_JOB_START: {' '.join(cmd)}")
