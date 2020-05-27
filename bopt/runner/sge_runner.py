@@ -51,7 +51,7 @@ class SGERunner(Runner):
         override_qsub_args = os.environ.get("QSUB_PARAMS")
 
         if override_qsub_args:
-            additional_args = override_qsub_args.split("|")
+            additional_args = override_qsub_args.split(":::")
             logging.info("Overriding {} with {}".format(self.qsub_arguments, additional_args))
         else:
             additional_args = self.qsub_arguments
