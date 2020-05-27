@@ -49,7 +49,15 @@ class SGERunner(Runner):
         cmdline_run_params = [f"--{h.name}={value}"
                               for h, value in hyperparam_values.mapping.items()]
 
-        qsub_params = ["-N", "job", "-o", output_dir, *self.qsub_arguments]
+        override_qsub_params = os.environ.get("QSUB_PARAMS")
+
+        if override_qsub_params:
+            additional_params = override_qsub_params.split("|")
+            logging.info("Overriding {} with {}".format(self.qsub_arguments, additional_params))
+        else:
+            additional_params = self.qsub_arguments
+
+        qsub_params = ["-N", "job", "-o", output_dir, *additional_params]
         cmd = [
             "qsub",
             *qsub_params,
