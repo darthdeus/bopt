@@ -177,11 +177,7 @@ class Integer(Bound):
         return a == b
 
     def maybe_round(self, value: np.ndarray) -> np.ndarray:
-        if self.buckets > 0:
-            value = super().round_buckets(value)
-
-        # logging.warn("TODO: why is this ever a numpy thing and not an int?")
-        return np.floor(value).astype(np.int32)
+        return super().round_buckets(value).astype(np.int32)
 
 
 class Float(Bound):
