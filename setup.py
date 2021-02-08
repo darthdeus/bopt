@@ -27,7 +27,7 @@ setuptools.setup(
         "tqdm~=4.39.0",
         "flask~=1.0.2",
         "psutil~=5.6.3",
-        "jsonpickle~=1.0",
+        "jsonpickle>=1,<3",
         "GPy[plotting]~=1.9.9",
         "filelock~=3.0.10",
         "ipdb~=0.11",
