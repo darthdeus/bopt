@@ -37,7 +37,7 @@ setuptools.setup(
 
     extras_require={
         "plotting": [
-            "matplotlib~=3.2.0",
+            "matplotlib>=3.2,<3.5",
         ],
         "dev": [
             "pylint",
