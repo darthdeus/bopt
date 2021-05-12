@@ -28,7 +28,7 @@ setuptools.setup(
         "flask~=1.0.2",
         "psutil~=5.6.3",
         "jsonpickle~=1.0",
-        "GPy[plotting]~=1.9.9",
+        "GPy[plotting]>=1.9.9,<1.11.0",
         "filelock~=3.0.10",
         "ipdb~=0.11",
         "livereload==2.5.1",
